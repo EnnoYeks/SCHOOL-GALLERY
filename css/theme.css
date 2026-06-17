@@ -1,1 +1,452 @@
 
+/* ============================================
+   THEME CUSTOMIZATION STYLES
+   ============================================ */
+
+/* Theme Manager */
+.theme-manager {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    max-width: 800px;
+}
+
+/* Color Picker Section */
+.color-picker-section {
+    margin-bottom: 2.5rem;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title i {
+    color: var(--primary-color);
+}
+
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+}
+
+.color-picker-item {
+    text-align: center;
+}
+
+.color-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.color-input-wrapper {
+    position: relative;
+    margin-bottom: 0.75rem;
+}
+
+.color-input {
+    width: 100%;
+    height: 60px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.color-value {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    font-family: monospace;
+}
+
+/* Preset Themes */
+.preset-themes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.preset-theme {
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.preset-theme:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.preset-theme.active {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.theme-preview {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    justify-content: center;
+}
+
+.theme-color-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+}
+
+.theme-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Background Settings */
+.background-section {
+    margin-bottom: 2.5rem;
+}
+
+.background-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.bg-option {
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    background: var(--bg-secondary);
+}
+
+.bg-option:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.bg-option.active {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.bg-preview {
+    width: 100%;
+    height: 60px;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    background-size: cover;
+    background-position: center;
+}
+
+.bg-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Font Settings */
+.font-section {
+    margin-bottom: 2.5rem;
+}
+
+.font-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.font-option {
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    background: var(--bg-secondary);
+}
+
+.font-option:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.font-option.active {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.font-preview {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.font-name {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Gradient Settings */
+.gradient-section {
+    margin-bottom: 2.5rem;
+}
+
+.gradient-preview {
+    width: 100%;
+    height: 100px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-md);
+}
+
+.gradient-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.gradient-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* Animation Speed */
+.animation-section {
+    margin-bottom: 2.5rem;
+}
+
+.animation-speed-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-color);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.animation-speed-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+}
+
+.animation-speed-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    border: none;
+}
+
+.speed-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.speed-btn {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.speed-btn:hover,
+.speed-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Opacity Control */
+.opacity-section {
+    margin-bottom: 2.5rem;
+}
+
+.opacity-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-color);
+    outline: none;
+}
+
+.opacity-value {
+    display: inline-block;
+    margin-left: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Preview Area */
+.theme-preview-area {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 2rem;
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.preview-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.preview-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.preview-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.preview-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    background: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Action Buttons */
+.theme-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.action-btn {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-btn.save {
+    background: var(--primary-color);
+    color: white;
+}
+
+.action-btn.save:hover {
+    background: var(--secondary-color);
+}
+
+.action-btn.reset {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+}
+
+.action-btn.reset:hover {
+    background: var(--bg-secondary);
+}
+
+.action-btn.export {
+    background: var(--success-color);
+    color: white;
+}
+
+.action-btn.export:hover {
+    opacity: 0.8;
+}
+
+/* Toast Notification */
+.theme-toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--success-color);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s ease;
+    z-index: 3000;
+}
+
+.theme-toast.error {
+    background: var(--danger-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .theme-manager {
+        padding: 1.5rem;
+    }
+
+    .color-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .preset-themes {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .background-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gradient-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .theme-actions {
+        flex-direction: column;
+    }
+
+    .theme-toast {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+    }
+}
