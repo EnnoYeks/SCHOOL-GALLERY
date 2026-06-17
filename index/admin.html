@@ -1,1 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ENNOYEKS School Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="light-mode">
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="gradient-bg"></div>
+        <div class="particles-container" id="particlesContainer"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+        </div>
+    </div>
 
+    <!-- Admin Container -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-menu">
+                <button class="menu-item active" data-tab="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="menu-item" data-tab="posts">
+                    <i class="fas fa-images"></i>
+                    <span>Manage Posts</span>
+                </button>
+                <button class="menu-item" data-tab="photos">
+                    <i class="fas fa-photo-video"></i>
+                    <span>Manage Photos</span>
+                </button>
+                <button class="menu-item" data-tab="videos">
+                    <i class="fas fa-video"></i>
+                    <span>Manage Videos</span>
+                </button>
+                <button class="menu-item" data-tab="users">
+                    <i class="fas fa-users"></i>
+                    <span>Manage Users</span>
+                </button>
+                <button class="menu-item" data-tab="comments">
+                    <i class="fas fa-comments"></i>
+                    <span>Moderate Comments</span>
+                </button>
+                <button class="menu-item" data-tab="categories">
+                    <i class="fas fa-list"></i>
+                    <span>Categories</span>
+                </button>
+                <button class="menu-item" data-tab="analytics">
+                    <i class="fas fa-bar-chart"></i>
+                    <span>Analytics</span>
+                </button>
+                <button class="menu-item" data-tab="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </button>
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 1rem 0;">
+                <button class="menu-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Header -->
+            <div class="admin-header">
+                <h1 class="admin-title">Admin Dashboard</h1>
+                <div class="admin-actions">
+                    <button class="btn-admin" id="uploadBtn">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload Content
+                    </button>
+                    <button class="btn-admin secondary" id="refreshBtn">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboardTab">
+                <!-- Stats Grid -->
+                <div class="admin-stats-grid">
+                    <div class="admin-stat-card">
+                        <div class="stat-label">Total Posts</div>
+                        <div class="stat-value" id="totalPosts">0</div>
+                        <div class="stat-change">↑ 12% from last month</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-label">Total Photos</div>
+                        <div class="stat-value" id="totalPhotosStat">0</div>
+                        <div class="stat-change">↑ 8% from last month</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-label">Total Videos</div>
+                        <div class="stat-value" id="totalVideosStat">0</div>
+                        <div class="stat-change">↑ 15% from last month</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-label">Total Likes</div>
+                        <div class="stat-value" id="totalLikesStat">0</div>
+                        <div class="stat-change">↑ 25% from last month</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-label">Total Comments</div>
+                        <div class="stat-value" id="totalCommentsStat">0</div>
+                        <div class="stat-change">↑ 18% from last month</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-label">Total Views</div>
+                        <div class="stat-value" id="totalViewsStat">0</div>
+                        <div class="stat-change">↑ 30% from last month</div>
+                    </div>
+                </div>
+
+                <!-- Chart Placeholders -->
+                <div class="chart-container">
+                    <div class="chart-placeholder">
+                        <i class="fas fa-chart-line" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                        <p>Engagement Chart</p>
+                        <small>Chart visualization will appear here</small>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="chart-container">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-pie-chart" style="font-size: 3rem; color: var(--secondary-color); margin-bottom: 1rem;"></i>
+                            <p>Content Distribution</p>
+                            <small>Photos vs Videos</small>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-users" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+                            <p>User Activity</p>
+                            <small>Active users this week</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Posts Tab -->
+            <div class="tab-content" id="postsTab">
+                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">Manage Posts</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Likes</th>
+                            <th>Views</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="postsTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-secondary);">Loading posts...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Photos Tab -->
+            <div class="tab-content" id="photosTab">
+                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">Manage Photos</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Likes</th>
+                            <th>Views</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="photosTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-secondary);">Loading photos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Videos Tab -->
+            <div class="tab-content" id="videosTab">
+                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">Manage Videos</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Video</th>
+                            <th>Title</th>
+                            <th>Duration</th>
+                            <th>Date</th>
+                            <th>Views</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="videosTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-secondary);">Loading videos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settingsTab">
+                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">Site Settings</h2>
+                <div class="admin-form">
+                    <div class="form-group">
+                        <label class="form-label">School Name</label>
+                        <input type="text" class="form-input" value="ENNOYEKS School" placeholder="Enter school name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">School Motto</label>
+                        <input type="text" class="form-input" value="Capture Moments. Share Stories. Celebrate Community." placeholder="Enter school motto">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" value="info@ennoyeks.edu" placeholder="Enter email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-input" value="+1 (555) 123-4567" placeholder="Enter phone">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">School Anniversary Date</label>
+                        <input type="date" class="form-input">
+                    </div>
+                    <button style="width: 100%; padding: 1rem; border: none; border-radius: 10px; background: var(--primary-color); color: white; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="admin-modal" id="adminModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Upload Content</h2>
+                <button class="modal-close-btn" id="modalCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="padding: 1rem;">
+                <div class="admin-form">
+                    <div class="form-group">
+                        <label class="form-label">Content Type</label>
+                        <select class="form-select">
+                            <option>Select Type</option>
+                            <option>Photo</option>
+                            <option>Video</option>
+                            <option>Announcement</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-input" placeholder="Enter title">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select class="form-select">
+                            <option>Select Category</option>
+                            <option>Academics</option>
+                            <option>Sports</option>
+                            <option>Clubs</option>
+                            <option>Events</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" placeholder="Enter description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Upload File</label>
+                        <div class="form-file-upload">
+                            <input type="file" id="fileInput">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">Click to upload or drag and drop</div>
+                            <div class="upload-subtext">PNG, JPG, GIF, MP4 up to 100MB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-admin secondary" id="modalCancelBtn">Cancel</button>
+                <button class="btn-admin">Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>ENNOYEKS Gallery</h4>
+                    <p>The ultimate platform for school memories and community engagement.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">Home</a>
+                    <a href="gallery.html">Gallery</a>
+                    <a href="admin.html">Admin</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 ENNOYEKS School Gallery. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
