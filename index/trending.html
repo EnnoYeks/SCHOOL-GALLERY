@@ -1,1 +1,206 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trending - ENNOYEKS School Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="light-mode">
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="gradient-bg"></div>
+        <div class="particles-container" id="particlesContainer"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>ENNOYEKS</span>
+            </div>
+
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search trending posts..." class="search-input" id="searchInput">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="gallery.html" class="nav-link">
+                    <i class="fas fa-images"></i>
+                    <span>Gallery</span>
+                </a>
+                <a href="trending.html" class="nav-link active">
+                    <i class="fas fa-fire"></i>
+                    <span>Trending</span>
+                </a>
+                <a href="spotlight.html" class="nav-link">
+                    <i class="fas fa-star"></i>
+                    <span>Spotlight</span>
+                </a>
+                <a href="polls.html" class="nav-link">
+                    <i class="fas fa-poll"></i>
+                    <span>Polls</span>
+                </a>
+            </div>
+
+            <div class="nav-actions">
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notifications-list" id="notificationsList">
+                            <p class="empty-state">No notifications</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+
+                <div class="profile-icon">
+                    <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img" id="profileImg">
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="profile.html" class="dropdown-item">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                        <a href="settings.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a href="admin.html" class="dropdown-item">
+                            <i class="fas fa-shield-alt"></i> Admin Dashboard
+                        </a>
+                        <hr>
+                        <a href="#" class="dropdown-item logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container" style="padding: 2rem; position: relative; z-index: 10; margin-top: 60px;">
+        <!-- Time Period Tabs -->
+        <div class="trending-tabs" style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-color);">
+            <button class="tab-btn active" data-period="today" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+                <i class="fas fa-fire"></i> Trending Today
+            </button>
+            <button class="tab-btn" data-period="week" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+                <i class="fas fa-chart-line"></i> This Week
+            </button>
+            <button class="tab-btn" data-period="month" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+                <i class="fas fa-calendar"></i> This Month
+            </button>
+        </div>
+
+        <!-- Trending Content -->
+        <div class="trending-content" id="trendingContent">
+            <div class="featured-grid" id="trendingGrid">
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Top Categories -->
+        <div style="margin-top: 4rem;">
+            <h2 class="section-title">
+                <i class="fas fa-crown"></i> Top Categories
+            </h2>
+            <div class="featured-grid" id="topCategoriesGrid">
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Leaderboards -->
+        <div style="margin-top: 4rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            <!-- Top Liked Posts -->
+            <div class="trending-box" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; backdrop-filter: blur(10px); padding: 2rem; box-shadow: var(--shadow-md);">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-primary);">
+                    <i class="fas fa-heart" style="color: var(--danger-color);"></i> Top Liked Posts
+                </h3>
+                <div class="leaderboard-list" id="topLikedList"></div>
+            </div>
+
+            <!-- Top Viewed Posts -->
+            <div class="trending-box" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; backdrop-filter: blur(10px); padding: 2rem; box-shadow: var(--shadow-md);">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-primary);">
+                    <i class="fas fa-eye" style="color: var(--primary-color);"></i> Top Viewed Posts
+                </h3>
+                <div class="leaderboard-list" id="topViewedList"></div>
+            </div>
+
+            <!-- Top Commented Posts -->
+            <div class="trending-box" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; backdrop-filter: blur(10px); padding: 2rem; box-shadow: var(--shadow-md);">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-primary);">
+                    <i class="fas fa-comments" style="color: var(--secondary-color);"></i> Most Commented
+                </h3>
+                <div class="leaderboard-list" id="topCommentedList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>ENNOYEKS Gallery</h4>
+                    <p>The ultimate platform for school memories and community engagement.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">Home</a>
+                    <a href="trending.html">Trending</a>
+                    <a href="gallery.html">Gallery</a>
+                    <a href="about.html">About</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 ENNOYEKS School Gallery. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/navigation.js"></script>
+</body>
+</html>
