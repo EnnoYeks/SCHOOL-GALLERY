@@ -1,1 +1,232 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photos - ENNOYEKS School Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/photos.css">
+</head>
+<body class="light-mode">
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="gradient-bg"></div>
+        <div class="particles-container" id="particlesContainer"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>ENNOYEKS</span>
+            </div>
+
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search photos..." class="search-input" id="searchInput">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="gallery.html" class="nav-link">
+                    <i class="fas fa-images"></i>
+                    <span>Gallery</span>
+                </a>
+                <a href="photos.html" class="nav-link active">
+                    <i class="fas fa-photo-video"></i>
+                    <span>Photos</span>
+                </a>
+                <a href="videos.html" class="nav-link">
+                    <i class="fas fa-video"></i>
+                    <span>Videos</span>
+                </a>
+                <a href="trending.html" class="nav-link">
+                    <i class="fas fa-fire"></i>
+                    <span>Trending</span>
+                </a>
+            </div>
+
+            <div class="nav-actions">
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notifications-list" id="notificationsList">
+                            <p class="empty-state">No notifications</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+
+                <div class="profile-icon">
+                    <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img" id="profileImg">
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="profile.html" class="dropdown-item">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                        <a href="settings.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a href="admin.html" class="dropdown-item">
+                            <i class="fas fa-shield-alt"></i> Admin Dashboard
+                        </a>
+                        <hr>
+                        <a href="#" class="dropdown-item logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="photos-container">
+        <!-- Search Bar -->
+        <div class="photos-search">
+            <input type="text" class="search-input-field" id="photoSearchInput" placeholder="Search photos by title, category...">
+            <button class="search-submit">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar" id="filterBar">
+            <button class="filter-btn active" data-filter="all">All Photos</button>
+            <button class="filter-btn" data-filter="popular">Most Popular</button>
+            <button class="filter-btn" data-filter="recent">Most Recent</button>
+            <button class="filter-btn" data-filter="trending">Trending</button>
+        </div>
+
+        <!-- Masonry Grid -->
+        <div class="masonry-grid" id="masonryGrid">
+            <!-- Photos will be loaded here -->
+            <div class="loading-skeleton"></div>
+            <div class="loading-skeleton"></div>
+            <div class="loading-skeleton"></div>
+            <div class="loading-skeleton"></div>
+            <div class="loading-skeleton"></div>
+            <div class="loading-skeleton"></div>
+        </div>
+    </div>
+
+    <!-- Photo Modal Lightbox -->
+    <div class="photo-modal" id="photoModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <img src="" alt="Full Photo" class="modal-image" id="modalImage">
+            <div class="modal-info">
+                <div class="modal-title" id="modalTitle">Photo Title</div>
+                <div class="modal-description" id="modalDescription">Photo description goes here</div>
+                <div class="modal-actions">
+                    <button class="modal-action-btn">
+                        <i class="fas fa-heart"></i> Like
+                    </button>
+                    <button class="modal-action-btn secondary">
+                        <i class="fas fa-comment"></i> Comment
+                    </button>
+                    <button class="modal-action-btn secondary">
+                        <i class="fas fa-share"></i> Share
+                    </button>
+                    <button class="modal-action-btn secondary">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Details Panel -->
+    <div class="photo-details" id="photoDetails">
+        <button class="details-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="detail-section">
+            <div class="detail-title">Title</div>
+            <div class="detail-content" id="detailTitle">Loading...</div>
+        </div>
+        <div class="detail-section">
+            <div class="detail-title">Category</div>
+            <div class="detail-content" id="detailCategory">Loading...</div>
+        </div>
+        <div class="detail-section">
+            <div class="detail-title">Uploaded By</div>
+            <div class="detail-content" id="detailAuthor">Loading...</div>
+        </div>
+        <div class="detail-section">
+            <div class="detail-title">Date</div>
+            <div class="detail-content" id="detailDate">Loading...</div>
+        </div>
+        <div class="detail-section">
+            <div class="detail-title">Statistics</div>
+            <div class="detail-content">
+                <div><strong id="detailLikes">0</strong> Likes</div>
+                <div><strong id="detailComments">0</strong> Comments</div>
+                <div><strong id="detailViews">0</strong> Views</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>ENNOYEKS Gallery</h4>
+                    <p>The ultimate platform for school memories and community engagement.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">Home</a>
+                    <a href="photos.html">Photos</a>
+                    <a href="trending.html">Trending</a>
+                    <a href="about.html">About</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 ENNOYEKS School Gallery. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/photos.js"></script>
+</body>
+</html>
