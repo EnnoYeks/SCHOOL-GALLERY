@@ -7,23 +7,24 @@
 const CONFIG = {
     // Firebase Configuration (Replace with your credentials)
     firebase: {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "your-project.firebaseapp.com",
-        projectId: "your-project-id",
-        storageBucket: "your-project.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCoFBtKrk7ZRvV1mZe5hN9tRCPKsuQBlgo",
+    authDomain: "school-gallery-62032.firebaseapp.com",
+    projectId: "school-gallery-62032",
+    storageBucket: "school-gallery-62032.firebasestorage.app",
+    messagingSenderId: "931689210926",
+    appId: "1:931689210926:web:fd2daf8495d6e6f3e42bbf"
+},
     },
 
     // App Settings
     app: {
-        name: "ENNOYEKS School Gallery",
+        name: "HSHS School Gallery",
         version: "1.0.0",
-        school: "ENNOYEKS School",
-        schoolMotto: "Capture Moments. Share Stories. Celebrate Community.",
-        schoolEmail: "info@ennoyeks.edu",
-        schoolPhone: "+1 (555) 123-4567",
-        schoolAddress: "123 School Street, Education City, EC 12345",
+        school: "HAWTHORNE SCRIBNER HIGH SCHOOL",
+        schoolMotto: "Educate Engage Empower.",
+        schoolEmail: "info@hshs.ac.ug",
+        schoolPhone: "+256 200 946933",
+        schoolAddress: "Bududa Kikholo",
         schoolAnniversaryDate: "2026-08-15"
     },
 
