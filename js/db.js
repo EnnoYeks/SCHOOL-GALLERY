@@ -271,9 +271,15 @@ class Database {
 
     // User Methods
     getCurrentUserId() {
-        return localStorage.getItem('currentUserId') || 'user-' + this.generateId();
+     getCurrentUserId() {
+    let id = localStorage.getItem('currentUserId');
+    if (!id) {
+        id = 'user-' + this.generateId();
+        localStorage.setItem('currentUserId', id);
     }
-
+    return id;
+}  
+   
     getCurrentUser() {
         const userId = this.getCurrentUserId();
         return this.users.find(u => u.id === userId);
