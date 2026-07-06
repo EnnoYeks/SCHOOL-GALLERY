@@ -2,39 +2,51 @@
 // ENNOYEKS SCHOOL GALLERY - CONFIGURATION
 // ============================================
 
-// Firebase SDK
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
-import { getAuth } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
+// Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
 
-// Firebase configuration
+// Supabase (Media Storage)
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+// ============================================
+// FIREBASE CONFIGURATION
+// ============================================
+
 const firebaseConfig = {
-  apiKey: "AIzaSyBeAgoeUSwiPcpCsewe8VMqgZgTlSCbn-8",
-  authDomain: "school-gallery-fc36e.firebaseapp.com",
-  projectId: "school-gallery-fc36e",
-  storageBucket: "school-gallery-fc36e.firebasestorage.app",
-  messagingSenderId: "485007862668",
-  appId: "1:485007862668:web:4910e96703730eb2d5c4a9",
-  measurementId: "G-NWW1VES2CX"
+  apiKey: "AIzaSyCoFBtKrk7ZRvV1mZe5hN9tRCPKsuQBlgo",
+  authDomain: "school-gallery-62032.firebaseapp.com",
+  projectId: "school-gallery-62032",
+  storageBucket: "school-gallery-62032.firebasestorage.app",
+  messagingSenderId: "931689210926",
+  appId: "1:931689210926:web:fd2daf8495d6e6f3e42bbf",
+  measurementId: "G-5W89YVBV6J"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Firebase services
 export const db = getFirestore(app);
-export const storage = getStorage(app);
 export const auth = getAuth(app);
+export const analytics = getAnalytics(app);
 
-// Analytics (optional)
-export const analytics =
-  typeof window !== "undefined"
-    ? getAnalytics(app)
-    : null;
+// ============================================
+// SUPABASE CONFIGURATION (MEDIA STORAGE)
+// ============================================
 
-// App configuration object
+const supabaseUrl = "https://hhlogdqpgjiajeufwnop.supabase.co";
+const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+
+export const supabase = createClient(
+  supabaseUrl,
+  supabaseKey
+);
+
+// ============================================
+// APP CONFIGURATION
+// ============================================
+
 export const CONFIG = {
   app: {
     name: "HSHS School Gallery",
