@@ -1,16 +1,38 @@
-
 // ============================================
 // ENNOYEKS SCHOOL GALLERY - CONFIGURATION
 // ============================================
 
-// API Configuration
-import { createClient } from "@supabase/supabase-js";
+// Firebase SDK
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
+import { getAnalytics } from "firebase/analytics";
 
-// Supabase setup
-const supabaseUrl = "https://hhlogdqpgjiajeufwnop.supabase.co";
-const supabaseKey = "sb_publishable_RVPCBfzNQ5OvdPp96MUqVA_AG5wazGk";
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBeAgoeUSwiPcpCsewe8VMqgZgTlSCbn-8",
+  authDomain: "school-gallery-fc36e.firebaseapp.com",
+  projectId: "school-gallery-fc36e",
+  storageBucket: "school-gallery-fc36e.firebasestorage.app",
+  messagingSenderId: "485007862668",
+  appId: "1:485007862668:web:4910e96703730eb2d5c4a9",
+  measurementId: "G-NWW1VES2CX"
+};
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Firebase services
+export const db = getFirestore(app);
+export const storage = getStorage(app);
+export const auth = getAuth(app);
+
+// Analytics (optional)
+export const analytics =
+  typeof window !== "undefined"
+    ? getAnalytics(app)
+    : null;
 
 // App configuration object
 export const CONFIG = {
