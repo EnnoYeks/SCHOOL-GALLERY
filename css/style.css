@@ -32,16 +32,31 @@
 
 /* Dark Mode */
 body.dark-mode {
-    --bg-primary: #1a1a2e;
-    --bg-secondary: #16213e;
-    --bg-tertiary: #0f3460;
-    --text-primary: #e0e0e0;
-    --text-secondary: #a0a0a0;
-    --text-tertiary: #707070;
-    --border-color: #2d3e50;
-    
-    --glass-bg: rgba(26, 26, 46, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    /* Dark Mode Colors */
+    --primary-color: #818cf8;
+    --secondary-color: #f472b6;
+    --accent-color: #fbbf24;
+    --success-color: #34d399;
+    --danger-color: #f87171;
+    --warning-color: #fbbf24;
+
+    --bg-primary: #050816;
+    --bg-secondary: #111827;
+    --bg-tertiary: #1f2937;
+
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-tertiary: #9ca3af;
+
+    --border-color: rgba(255,255,255,0.12);
+
+    --glass-bg: rgba(15,23,42,0.75);
+    --glass-border: rgba(255,255,255,0.15);
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+    --shadow-lg: 0 20px 25px rgba(0,0,0,0.5);
+    --shadow-xl: 0 25px 50px rgba(0,0,0,0.6);
 }
 
 /* ============================================
