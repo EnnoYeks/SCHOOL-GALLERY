@@ -48,8 +48,7 @@ class ParticleSystem {
     "59,130,246",    // Blue
     "14,165,233",    // Cyan
     "236,72,153"     // Pink
-];
-      box-shadow: 0 0 15px rgba(${color}, ${opacity});  
+];  
 
 const color = colors[Math.floor(Math.random() * colors.length)];
 
