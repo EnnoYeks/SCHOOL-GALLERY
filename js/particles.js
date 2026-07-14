@@ -42,16 +42,28 @@ class ParticleSystem {
         const duration = Math.random() * (this.config.maxDuration - this.config.minDuration) + this.config.minDuration;
         const opacity = Math.random() * (this.config.maxOpacity - this.config.minOpacity) + this.config.minOpacity;
 
-        const particle = {
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
-            size,
-            opacity,
-            duration,
-            startTime: Date.now(),
-            vx: (Math.random() - 0.5) * 2,
-            vy: (Math.random() - 0.5) * 2
-        };
+        const colors = [
+    "99, 102, 241",  // Indigo
+    "236, 72, 153",  // Pink
+    "34, 197, 94",   // Green
+    "250, 204, 21",  // Yellow
+    "14, 165, 233",  // Blue
+    "255, 255, 255"  // White
+];
+
+const color = colors[Math.floor(Math.random() * colors.length)];
+
+const particle = {
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    size,
+    opacity,
+    color,
+    duration,
+    startTime: Date.now(),
+    vx: (Math.random() - 0.5) * 2,
+    vy: (Math.random() - 0.5) * 2
+};
 
         // Create DOM element
         const element = document.createElement('div');
