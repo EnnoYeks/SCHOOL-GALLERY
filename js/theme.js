@@ -207,7 +207,9 @@ class ThemeManager {
 }
 
 // Initialize theme manager
-const themeManager = new ThemeManager();
+document.addEventListener("DOMContentLoaded", () => {
+    window.themeManager = new ThemeManager();
+});
 
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
