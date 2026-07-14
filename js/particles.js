@@ -12,8 +12,8 @@ class ParticleSystem {
             count: 50,
             minSize: 2,
             maxSize: 10,
-            minOpacity: 0.1,
-            maxOpacity: 0.3,
+            minOpacity: 0.3,
+            maxOpacity: 0.8,
             minDuration: 10,
             maxDuration: 30,
             ...config
