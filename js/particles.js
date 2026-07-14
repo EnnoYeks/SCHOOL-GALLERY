@@ -43,13 +43,13 @@ class ParticleSystem {
         const opacity = Math.random() * (this.config.maxOpacity - this.config.minOpacity) + this.config.minOpacity;
 
         const colors = [
-    "99, 102, 241",  // Indigo
-    "236, 72, 153",  // Pink
-    "34, 197, 94",   // Green
-    "250, 204, 21",  // Yellow
-    "14, 165, 233",  // Blue
-    "255, 255, 255"  // White
+    "99,102,241",   // Purple
+    "168,85,247",    // Violet
+    "59,130,246",    // Blue
+    "14,165,233",    // Cyan
+    "236,72,153"     // Pink
 ];
+      box-shadow: 0 0 15px rgba(${color}, ${opacity});  
 
 const color = colors[Math.floor(Math.random() * colors.length)];
 
