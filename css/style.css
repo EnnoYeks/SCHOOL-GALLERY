@@ -155,13 +155,14 @@ body {
 
 }
        .animated-bg {
-    background: linear-gradient(
-        120deg,
-        #0f172a,
-        #312e81,
-        #1e40af,
-        #831843
-    );
+   background: linear-gradient(
+    120deg,
+    #ff0066,
+    #6a00ff,
+    #00c6ff,
+    #00ff88,
+    #ffcc00
+);
 
     background-size: 400% 400%;
     animation: colorShift 20s ease infinite;
