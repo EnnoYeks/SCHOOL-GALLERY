@@ -7,7 +7,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/fireba
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
 
 // Supabase (Media Storage)
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
@@ -31,14 +30,14 @@ const app = initializeApp(firebaseConfig);
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
 export const analytics = getAnalytics(app);
-export const storage = getStorage(app);
 
 // ============================================
 // SUPABASE CONFIGURATION (MEDIA STORAGE)
 // ============================================
 
 const supabaseUrl = "https://hhlogdqpgjiajeufwnop.supabase.co";
-const supabaseKey = const supabaseKey =
+
+const supabaseKey =
   window.SUPABASE_ANON_KEY || "sb_publishable_RVPCBfzNQ5OvdPp96MUqVA_AG5wazGk";
 
 export const supabase = createClient(
@@ -94,7 +93,6 @@ window.firebaseApp = app;
 window.firestore = firestore;
 window.auth = auth;
 window.analytics = analytics;
-window.storage = storage;
 window.supabase = supabase;
 window.CONFIG = CONFIG;
 window.firebaseConfig = firebaseConfig;
