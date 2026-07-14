@@ -172,11 +172,27 @@ class ParticleSystem {
 let particleSystem;
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (CONFIG.theme.enableParticles && document.getElementById('particlesContainer')) {
+
+    const container = document.getElementById('particlesContainer');
+
+    if (!container) return;
+
+    const particleCount = 
+        (typeof CONFIG !== "undefined" && CONFIG.theme)
+        ? CONFIG.theme.particleCount
+        : 80;
+
+    const enabled =
+        (typeof CONFIG !== "undefined" && CONFIG.theme)
+        ? CONFIG.theme.enableParticles
+        : true;
+
+    if (enabled) {
         particleSystem = new ParticleSystem('particlesContainer', {
-            count: CONFIG.theme.particleCount
+            count: particleCount
         });
     }
+
 });
 
 // Export for use in other files
