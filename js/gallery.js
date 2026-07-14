@@ -8,12 +8,14 @@ class GalleryPage {
         this.currentCategory = 'all';
         this.currentPage = 0;
         this.postsPerPage = CONFIG.pagination.postsPerPage;
+        this.observer = null;
+        this.currentlyLoading = false;
         this.init();
     }
 
-    init() {
+    async init() {
         this.setupCategoryFilter();
-        this.loadPosts();
+        await this.loadPosts();
         this.setupInfiniteScroll();
         this.setupSwipeNavigation();
         this.setupDoubleClick();
@@ -22,29 +24,32 @@ class GalleryPage {
     setupCategoryFilter() {
         const buttons = document.querySelectorAll('.category-btn');
         buttons.forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
                 buttons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.currentCategory = btn.getAttribute('data-category');
                 this.currentPage = 0;
-                this.loadPosts();
+                if (this.observer) {
+                    this.observer.disconnect();
+                }
+                await this.loadPosts();
             });
         });
     }
 
-    loadPosts() {
+    async loadPosts() {
         const feed = document.getElementById('galleryFeed');
-        if (!feed) return;
+        if (!feed || this.currentlyLoading) return;
 
-        let posts = db.getPosts();
-
-        if (this.currentCategory !== 'all') {
-            posts = posts.filter(p => p.category === this.currentCategory);
-        }
+        this.currentlyLoading = true;
+        const allPosts = await db.getPosts(this.postsPerPage * (this.currentPage + 1), 0);
+        const filteredPosts = this.currentCategory === 'all'
+            ? allPosts
+            : allPosts.filter(p => p.category === this.currentCategory);
 
         const startIndex = this.currentPage * this.postsPerPage;
         const endIndex = startIndex + this.postsPerPage;
-        const pagePosts = posts.slice(startIndex, endIndex);
+        const pagePosts = filteredPosts.slice(startIndex, endIndex);
 
         if (this.currentPage === 0) {
             feed.innerHTML = '';
@@ -56,6 +61,8 @@ class GalleryPage {
         });
 
         this.currentPage++;
+        this.currentlyLoading = false;
+        this.updateObserver();
     }
 
     createPostCard(post, index) {
@@ -116,15 +123,21 @@ class GalleryPage {
         }, { threshold: 0.1 });
 
         // Observe last element
-        const callback = () => {
+        this.observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                this.loadPosts();
+            }
+        }, { threshold: 0.1 });
+
+        this.updateObserver = () => {
             const lastElement = feed.lastElementChild;
             if (lastElement) {
-                observer.observe(lastElement);
+                this.observer.disconnect();
+                this.observer.observe(lastElement);
             }
         };
 
-        callback();
-        feed.addEventListener('DOMNodeInserted', callback);
+        this.updateObserver();
     }
 
     setupSwipeNavigation() {

@@ -1,8 +1,9 @@
 /*
  * ENNOYEKS School Gallery - Trending Page
- * Requires an existing Firebase setup from ./db.js that exports `db` and optionally `storage`.
+ * Requires an existing Firebase setup from ./config.js that exports Firestore and Storage.
  */
-import { db, storage } from './db.js';
+import db from './db.js';
+import { firestore, storage } from './config.js';
 import {
   collection,
   doc,
@@ -14,8 +15,8 @@ import {
   serverTimestamp,
   updateDoc,
   where,
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+} from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
+import { ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js';
 
 const TRENDING_WEIGHTS = Object.freeze({ likes: 5, comments: 10, views: 1, shares: 7 });
 const PAGE_SIZE = 9;
@@ -172,7 +173,7 @@ export async function getTrendingPosts(period = state.period) {
   const key = `trending:${period}`;
   const cached = cacheGet(key);
   if (cached) return cached;
-  const q = query(collection(db, 'posts'), where('timestamp', '>=', getPeriodStart(period)), orderBy('timestamp', 'desc'), limit(60));
+  const q = query(collection(firestore, 'posts'), where('timestamp', '>=', getPeriodStart(period)), orderBy('timestamp', 'desc'), limit(60));
   const snap = await getDocs(q);
   const posts = withScores(await Promise.all(snap.docs.map(normalizePost)));
   cacheSet(key, posts);
@@ -264,7 +265,7 @@ function setupInfiniteScroll() {
 }
 function setupNotifications() {
   if (!els.notificationBadge && !els.notificationsList) return;
-  const q = query(collection(db, 'notifications'), orderBy('timestamp', 'desc'), limit(10));
+  const q = query(collection(firestore, 'notifications'), orderBy('timestamp', 'desc'), limit(10));
   state.notificationUnsubscribe = onSnapshot(q, (snap) => {
     const notifications = snap.docs.map((item) => ({ id: item.id, ...item.data() }));
     const unread = notifications.filter((item) => !item.read).length;
@@ -278,7 +279,7 @@ function setupNotifications() {
   });
   els.notificationsList?.addEventListener('click', async (event) => {
     const item = event.target.closest('[data-notification-id]');
-    if (item) await updateDoc(doc(db, 'notifications', item.dataset.notificationId), { read: true, readAt: serverTimestamp() });
+    if (item) await updateDoc(doc(firestore, 'notifications', item.dataset.notificationId), { read: true, readAt: serverTimestamp() });
   });
 }
 

@@ -8,17 +8,17 @@ class NotificationManager {
         this.init();
     }
 
-    init() {
-        this.loadNotifications();
+    async init() {
+        await this.loadNotifications();
         this.updateBadge();
     }
 
-    loadNotifications() {
-        this.notifications = db.getNotifications(20);
+    async loadNotifications() {
+        this.notifications = await db.getNotifications(20);
     }
 
     // Create notification
-    notify(type, title, message, data = {}) {
+    async notify(type, title, message, data = {}) {
         const notification = {
             id: Utils.generateId(),
             type,
@@ -29,12 +29,14 @@ class NotificationManager {
             read: false
         };
 
-        db.createNotification(notification);
-        this.notifications.unshift(notification);
-        this.updateBadge();
-        this.showToastNotification(title, message);
+        const created = await db.createNotification(notification);
+        if (created) {
+            this.notifications.unshift(created);
+            this.updateBadge();
+            this.showToastNotification(title, message);
+        }
 
-        return notification;
+        return created;
     }
 
     // Like notification
@@ -144,23 +146,29 @@ class NotificationManager {
     }
 
     // Mark as read
-    markAsRead(notificationId) {
-        db.markNotificationAsRead(notificationId);
-        const notification = this.notifications.find(n => n.id === notificationId);
-        if (notification) {
-            notification.read = true;
-            this.updateBadge();
+    async markAsRead(notificationId) {
+        const success = await db.markNotificationAsRead(notificationId);
+        if (success) {
+            const notification = this.notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.read = true;
+                this.updateBadge();
+            }
         }
     }
 
     // Mark all as read
-    markAllAsRead() {
-        this.notifications.forEach(n => {
-            if (!n.read) {
-                db.markNotificationAsRead(n.id);
-                n.read = true;
-            }
-        });
+    async markAllAsRead() {
+        const promises = this.notifications
+            .filter(n => !n.read)
+            .map(async (n) => {
+                const success = await db.markNotificationAsRead(n.id);
+                if (success) {
+                    n.read = true;
+                }
+            });
+
+        await Promise.all(promises);
         this.updateBadge();
     }
 

@@ -10,9 +10,9 @@ class PhotosPage {
         this.init();
     }
 
-    init() {
+    async init() {
         this.setupFilters();
-        this.loadPhotos();
+        await this.loadPhotos();
         this.setupSearch();
         this.setupModal();
     }
@@ -20,21 +20,21 @@ class PhotosPage {
     setupFilters() {
         const buttons = document.querySelectorAll('.filter-btn');
         buttons.forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
                 buttons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.currentFilter = btn.getAttribute('data-filter');
                 this.currentPage = 0;
-                this.loadPhotos();
+                await this.loadPhotos();
             });
         });
     }
 
-    loadPhotos() {
+    async loadPhotos() {
         const grid = document.getElementById('masonryGrid');
         if (!grid) return;
 
-        let photos = db.getPhotos();
+        let photos = await db.getPhotos(this.photosPerPage * (this.currentPage + 1), 0);
 
         // Apply filter
         if (this.currentFilter === 'popular') {
@@ -102,15 +102,15 @@ class PhotosPage {
     setupSearch() {
         const searchBtn = document.querySelector('.search-submit');
         if (searchBtn) {
-            searchBtn.addEventListener('click', () => {
+            searchBtn.addEventListener('click', async () => {
                 const query = document.getElementById('photoSearchInput').value;
-                this.search(query);
+                await this.search(query);
             });
         }
     }
 
-    search(query) {
-        const results = db.search(query, 'photos');
+    async search(query) {
+        const results = await db.search(query, 'photos');
         const grid = document.getElementById('masonryGrid');
         grid.innerHTML = results.map(photo => {
             const card = document.createElement('div');

@@ -22,15 +22,15 @@ class AdminDashboard {
         window.location.href = 'index.html';
     }
 
-    init() {
-        this.loadDashboard();
+    async init() {
+        await this.loadDashboard();
         this.setupTabs();
-        this.loadStats();
+        await this.loadStats();
         this.setupEventListeners();
     }
 
-    loadDashboard() {
-        const analytics = db.getAnalytics();
+    async loadDashboard() {
+        const analytics = await db.getAnalytics();
         
         // Update stat cards
         const statElements = {
@@ -50,8 +50,8 @@ class AdminDashboard {
         });
     }
 
-    loadStats() {
-        const analytics = db.getAnalytics();
+    async loadStats() {
+        const analytics = await db.getAnalytics();
         console.log('Analytics:', analytics);
     }
 
@@ -60,7 +60,7 @@ class AdminDashboard {
         const tabs = document.querySelectorAll('.tab-content');
 
         tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
                 const tabName = btn.getAttribute('data-tab');
                 
                 // Remove active class
@@ -75,22 +75,22 @@ class AdminDashboard {
                     
                     // Load content based on tab
                     if (tabName === 'posts') {
-                        this.loadPostsTable();
+                        await this.loadPostsTable();
                     } else if (tabName === 'photos') {
-                        this.loadPhotosTable();
+                        await this.loadPhotosTable();
                     } else if (tabName === 'videos') {
-                        this.loadVideosTable();
+                        await this.loadVideosTable();
                     }
                 }
             });
         });
     }
 
-    loadPostsTable() {
+    async loadPostsTable() {
         const tbody = document.getElementById('postsTableBody');
         if (!tbody) return;
 
-        const posts = db.posts;
+        const posts = await db.getPosts(100, 0);
         
         if (posts.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No posts found</td></tr>';
@@ -123,11 +123,11 @@ class AdminDashboard {
         `).join('');
     }
 
-    loadPhotosTable() {
+    async loadPhotosTable() {
         const tbody = document.getElementById('photosTableBody');
         if (!tbody) return;
 
-        const photos = db.photos;
+        const photos = await db.getPhotos(100, 0);
 
         if (photos.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No photos found</td></tr>';
@@ -162,11 +162,11 @@ class AdminDashboard {
         `).join('');
     }
 
-    loadVideosTable() {
+    async loadVideosTable() {
         const tbody = document.getElementById('videosTableBody');
         if (!tbody) return;
 
-        const videos = db.videos;
+        const videos = await db.getVideos(100, 0);
 
         if (videos.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No videos found</td></tr>';
@@ -246,12 +246,11 @@ class AdminDashboard {
         Utils.showToast('Edit feature coming soon!', 'info');
     }
 
-    approvePost(postId) {
-        const post = db.getPostById(postId);
+    async approvePost(postId) {
+        const post = await db.getPostById(postId);
         if (post) {
-            post.approved = true;
-            db.saveToStorage();
-            this.loadPostsTable();
+            await db.updatePost(postId, { approved: true });
+            await this.loadPostsTable();
             Utils.showToast('Post approved', 'success');
         }
     }
@@ -268,11 +267,10 @@ class AdminDashboard {
         Utils.showToast('Edit feature coming soon!', 'info');
     }
 
-    deletePhoto(photoId) {
+    async deletePhoto(photoId) {
         if (confirm('Are you sure you want to delete this photo?')) {
-            db.photos = db.photos.filter(p => p.id !== photoId);
-            db.saveToStorage();
-            this.loadPhotosTable();
+            await db.deletePhoto(photoId);
+            await this.loadPhotosTable();
             Utils.showToast('Photo deleted', 'success');
         }
     }
@@ -281,27 +279,26 @@ class AdminDashboard {
         Utils.showToast('Edit feature coming soon!', 'info');
     }
 
-    deleteVideo(videoId) {
+    async deleteVideo(videoId) {
         if (confirm('Are you sure you want to delete this video?')) {
-            db.videos = db.videos.filter(v => v.id !== videoId);
-            db.saveToStorage();
-            this.loadVideosTable();
+            await db.deleteVideo(videoId);
+            await this.loadVideosTable();
             Utils.showToast('Video deleted', 'success');
         }
     }
 
     // Export Data
-    exportData(type = 'all') {
+    async exportData(type = 'all') {
         let data = {};
 
         if (type === 'all' || type === 'posts') {
-            data.posts = db.posts;
+            data.posts = await db.getPosts(100, 0);
         }
         if (type === 'all' || type === 'photos') {
-            data.photos = db.photos;
+            data.photos = await db.getPhotos(100, 0);
         }
         if (type === 'all' || type === 'videos') {
-            data.videos = db.videos;
+            data.videos = await db.getVideos(100, 0);
         }
 
         const dataStr = JSON.stringify(data, null, 2);
@@ -343,8 +340,8 @@ class AdminDashboard {
     }
 
     // Generate Report
-    generateReport() {
-        const analytics = db.getAnalytics();
+    async generateReport() {
+        const analytics = await db.getAnalytics();
         const report = {
             generatedAt: new Date().toISOString(),
             school: CONFIG.app.school,

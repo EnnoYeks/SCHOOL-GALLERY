@@ -46,8 +46,8 @@ class SearchManager {
         }, 300);
     }
 
-    performSearch(query) {
-        const results = db.search(query, 'all');
+    async performSearch(query) {
+        const results = await db.search(query, 'all');
 
         if (results.length === 0) {
             this.displayNoResults(query);
@@ -113,8 +113,8 @@ class AdvancedSearch {
         this.filters[filterName] = value;
     }
 
-    search(query) {
-        let results = db.search(query, 'all');
+    async search(query) {
+        let results = await db.search(query, 'all');
 
         // Apply filters
         if (this.filters.category && this.filters.category !== 'all') {

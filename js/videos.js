@@ -7,20 +7,22 @@ class VideosPage {
     constructor() {
         this.currentVideo = null;
         this.videoIndex = 0;
-        this.videos = db.getVideos();
+        this.videos = [];
         this.init();
     }
 
-    init() {
-        this.loadVideoCards();
+    async init() {
+        await this.loadVideoCards();
         this.setupVideoPlayer();
         this.setupVideoControls();
         this.setupSwipeNavigation();
     }
 
-    loadVideoCards() {
+    async loadVideoCards() {
         const container = document.getElementById('videosContainer');
         if (!container) return;
+
+        this.videos = await db.getVideos(12, 0);
 
         container.innerHTML = this.videos.map((video, index) => `
             <div class="video-card" data-video-id="${video.id}" data-video-index="${index}">

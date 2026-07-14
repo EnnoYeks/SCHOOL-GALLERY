@@ -18,19 +18,20 @@ class ReactionManager {
     }
 
     // Like/Unlike
-    toggleLike(itemId, itemType = 'post') {
+    async toggleLike(itemId, itemType = 'post') {
         const key = `${itemType}-${itemId}`;
+        const liked = await db.hasLiked(itemId, itemType);
 
-        if (db.hasLiked(itemId)) {
-            db.removeLike(itemId);
+        if (liked) {
+            await db.removeLike(itemId, itemType);
             delete this.userReactions[key];
         } else {
-            db.addLike(itemId, itemType);
+            await db.addLike(itemId, itemType);
             this.userReactions[key] = 'like';
         }
 
         this.saveReactions();
-        return !db.hasLiked(itemId);
+        return !liked;
     }
 
     // Add reaction (emoji)
@@ -164,10 +165,10 @@ class ReactionManager {
     }
 
     // Render reaction buttons
-    renderReactionButtons(itemId, container) {
+    async renderReactionButtons(itemId, container) {
         if (!container) return;
 
-        const isLiked = db.hasLiked(itemId);
+        const isLiked = await db.hasLiked(itemId);
         const isSaved = this.getSavedPosts().includes(itemId);
 
         container.innerHTML = `

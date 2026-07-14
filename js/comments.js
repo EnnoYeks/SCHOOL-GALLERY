@@ -10,28 +10,30 @@ class CommentManager {
         this.loadComments();
     }
 
-    loadComments() {
-        this.comments = db.getComments(this.postId);
+    async loadComments() {
+        this.comments = await db.getComments(this.postId);
     }
 
     // Create comment
-    createComment(text, authorName = 'Anonymous') {
+    async createComment(text, authorName = 'Anonymous') {
         if (text.trim().length === 0) {
             Utils.showToast('Comment cannot be empty', 'error');
             return null;
         }
 
-        const comment = db.createComment(this.postId, {
+        const comment = await db.createComment(this.postId, {
             text,
             author: authorName,
             authorAvatar: 'https://via.placeholder.com/40',
-            userId: db.getCurrentUserId(),
+            userId: await db.getCurrentUserId(),
             likes: 0,
             replies: []
         });
 
-        this.comments.push(comment);
-        notificationManager.notifyComment(this.postId, authorName, text);
+        if (comment) {
+            this.comments.unshift(comment);
+            notificationManager.notifyComment(this.postId, authorName, text);
+        }
 
         return comment;
     }
