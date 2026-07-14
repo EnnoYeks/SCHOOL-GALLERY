@@ -22,14 +22,25 @@ class VideosPage {
         const container = document.getElementById('videosContainer');
         if (!container) return;
 
-        this.videos = await db.getVideos(12, 0);
+        this.videos = await db.getVideos(12,0);
 
-        container.innerHTML = this.videos.map((video, index) => `
-            <div class="video-card" data-video-id="${video.id}" data-video-index="${index}">
-                <div class="video-thumbnail">
-                    <img src="${video.thumbnail}" alt="${video.title}" class="thumbnail-image">
-                    <div class="play-button-overlay">
-                        <i class="fas fa-play"></i>
+if(this.videos.length === 0){
+    container.innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-video"></i>
+            <h3>No videos yet</h3>
+            <p>Upload the first school memory!</p>
+        </div>
+    `;
+    return;
+}
+
+container.innerHTML = this.videos.map((video, index) => `
+    <div class="video-card" data-video-id="${video.id}" data-video-index="${index}">
+        <div class="video-thumbnail">
+            <img src="${video.thumbnailUrl}" alt="${video.title}" class="thumbnail-image">
+            <div class="play-button-overlay">
+                <i class="fas fa-play"></i>
                     </div>
                     <div class="video-duration">${video.duration}</div>
                 </div>
@@ -74,8 +85,8 @@ class VideosPage {
         const player = document.getElementById('videoPlayer');
         const thumbnail = document.querySelector(`[data-video-index="${index}"] .thumbnail-image`);
 
-        if (player && thumbnail) {
-            player.src = 'https://via.placeholder.com/video.mp4'; // Replace with actual video
+        if (player) {
+            player.src = video.videoUrl;// Replace with actual video
             player.poster = thumbnail.src;
         }
 
@@ -195,10 +206,15 @@ class VideosPage {
         }
     }
 
-    updateVideoStats(video) {
-        video.views = (video.views || 0) + 1;
-        db.saveToStorage();
-    }
+    async updateVideoStats(video) {
+    video.views = (video.views || 0) + 1;
+
+    await updateDoc(
+        doc(firestore, "videos", video.id),
+        {
+            viewsCount: increment(1)
+        }
+    );
 }
 
 // Initialize videos page when DOM is ready
