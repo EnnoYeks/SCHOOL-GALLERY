@@ -82,14 +82,15 @@ body {
 
     background: linear-gradient(
         120deg,
-        #0f172a,
-        #312e81,
-        #1e40af,
-        #831843
+        #ff0066,
+        #6a00ff,
+        #00c6ff,
+        #00ff88,
+        #ffcc00
     );
 
     background-size: 400% 400%;
-    animation: colorShift 20s ease infinite;
+    animation: colorShift 8s ease infinite;
 }
     @keyframes colorShift {
 
@@ -97,15 +98,23 @@ body {
         background-position: 0% 50%;
     }
 
+    25% {
+        background-position: 50% 100%;
+    }
+
     50% {
         background-position: 100% 50%;
+    }
+
+    75% {
+        background-position: 50% 0%;
     }
 
     100% {
         background-position: 0% 50%;
     }
 
-}      
+}
 
 .gradient-bg {
     position: absolute;
