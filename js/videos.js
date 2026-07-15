@@ -2,7 +2,15 @@
 // ============================================
 // VIDEOS PAGE LOGIC
 // ============================================
+import { db } from "./db.js";
 
+import {
+    updateDoc,
+    doc,
+    increment
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+import { firestore } from "./config.js";
 class VideosPage {
     constructor() {
         this.currentVideo = null;
@@ -19,10 +27,44 @@ class VideosPage {
     }
 
     async loadVideoCards() {
+    const container = document.getElementById('videosContainer');
+
+    if (!container) return;
+
+    try {
+
+        this.videos = await db.getVideos(12,0) || [];
+
+        if(this.videos.length === 0){
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-video"></i>
+                    <h3>No videos yet</h3>
+                    <p>Upload the first school memory!</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = this.videos.map((video,index)=>`
+            YOUR CARD CODE HERE
+        `).join("");
+
+    } catch(error){
+
+        console.error("Loading videos failed:", error);
+
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>Unable to load videos</h3>
+                <p>${error.message}</p>
+            </div>
+        `;
+}
         const container = document.getElementById('videosContainer');
         if (!container) return;
 
-        this.videos = await db.getVideos(12,0);
+   this.videos = await db.getVideos(12,0) || [];     
 
 if(this.videos.length === 0){
     container.innerHTML = `
@@ -207,14 +249,25 @@ container.innerHTML = this.videos.map((video, index) => `
     }
 
     async updateVideoStats(video) {
-    video.views = (video.views || 0) + 1;
 
-    await updateDoc(
-        doc(firestore, "videos", video.id),
-        {
-            viewsCount: increment(1)
-        }
-    );
+    try {
+
+        await updateDoc(
+            doc(firestore,"videos",video.id),
+            {
+                views: increment(1)
+            }
+        );
+
+    } catch(error){
+
+        console.error(
+            "Could not update views:",
+            error
+        );
+
+    }
+
 }
 
 // Initialize videos page when DOM is ready
