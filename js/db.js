@@ -26,6 +26,10 @@ class Database {
       const collectionRef = collection(firestore, collectionName);
       const q = query(collectionRef, orderBy(orderField, "desc"), limit(limitValue + offset));
       const snapshot = await getDocs(q);
+      if (snapshot.empty) {
+    console.log(`No documents found in "${collectionName}"`);
+    return [];
+}
       const allItems = snapshot.docs.map((docSnap) => this.normalizeItem({ id: docSnap.id, ...docSnap.data() }));
       return allItems.slice(offset, offset + limitValue);
     } catch (error) {
