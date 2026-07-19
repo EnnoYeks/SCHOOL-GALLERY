@@ -497,3 +497,51 @@
 .dropdown-item:hover {
     background: var(--bg-secondary);
 }
+
+/* ============================================
+   SWIPABLE TABS (Category Filters & Tab Bars)
+   ============================================ */
+
+/* Make all filter/category tab containers swipable */
+.category-filter,
+.filter-bar,
+.categories-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;   /* Smooth touch scrolling on iOS */
+    scroll-behavior: smooth;
+    gap: 0.6rem;
+    padding: 0.5rem 0;
+    scrollbar-width: none;               /* Hide scrollbar (Firefox) */
+}
+
+/* Hide scrollbar completely (Chrome, Safari, Edge) */
+.category-filter::-webkit-scrollbar,
+.filter-bar::-webkit-scrollbar,
+.categories-grid::-webkit-scrollbar {
+    display: none;
+}
+
+/* Optional: Style the tabs inside swipable containers nicely */
+.category-btn,
+.filter-btn {
+    flex-shrink: 0;           /* Prevent tabs from shrinking */
+    white-space: nowrap;      /* Keep text in one line */
+}
+
+/* Improve touch feel on mobile */
+@media (max-width: 768px) {
+    .category-filter,
+    .filter-bar {
+        padding: 0.5rem 1rem;
+        gap: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .category-btn,
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+}
