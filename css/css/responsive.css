@@ -8,50 +8,39 @@
         gap: 1rem;
         padding: 0 1.5rem;
     }
-
     .search-container {
         max-width: 300px;
     }
-
     .nav-links {
         display: none;
     }
-
     .logo span {
         display: none;
     }
-
     .hero-content {
         grid-template-columns: 1fr;
         gap: 2rem;
     }
-
     .hero-title {
         font-size: 2.5rem;
     }
-
     .hero-visual {
         display: none;
     }
-
     .trending-row {
         grid-template-columns: 1fr;
     }
-
     .featured-grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 1.5rem;
     }
-
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1.5rem;
     }
-
     .cta-section h2 {
         font-size: 1.8rem;
     }
-
     .footer-content {
         grid-template-columns: 1fr 1fr;
     }
@@ -62,33 +51,26 @@
     :root {
         font-size: 14px;
     }
-
     body {
         overflow-x: hidden;
     }
-
     .navbar {
         padding: 0.75rem 0;
     }
-
     .navbar-container {
         gap: 0.5rem;
         padding: 0 1rem;
     }
-
     .logo {
         font-size: 1.2rem;
     }
-
     .logo i {
         font-size: 1.4rem;
     }
-
     .search-container {
         max-width: 200px;
         display: none;
     }
-
     .search-container.mobile-visible {
         display: block;
         max-width: 100%;
@@ -99,7 +81,6 @@
         border-radius: 0;
         margin-top: 0;
     }
-
     .nav-links {
         display: none;
         position: absolute;
@@ -115,161 +96,124 @@
         overflow-y: auto;
         z-index: 1000;
     }
-
     .nav-links.mobile-visible {
         display: flex;
     }
-
     .nav-link {
         padding: 1rem;
         border-radius: 0;
         border-bottom: 1px solid var(--border-color);
         justify-content: flex-start;
     }
-
     .nav-actions {
         gap: 0.75rem;
     }
-
     .mobile-menu-toggle {
         display: block;
     }
-
     .hero {
         min-height: 400px;
         padding: 2rem 1rem;
     }
-
     .hero-text {
         animation: slideInLeft 0.6s ease;
     }
-
     .hero-title {
         font-size: 1.8rem;
     }
-
     .hero-subtitle {
         font-size: 1rem;
     }
-
     .hero-buttons {
         flex-direction: column;
     }
-
     .btn {
         width: 100%;
         justify-content: center;
     }
-
     .parallax-shapes {
         display: none;
     }
-
     .featured-section {
         padding: 2rem 1rem;
     }
-
     .featured-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
-
     .section-title {
         font-size: 1.5rem;
     }
-
     .quick-stats {
         padding: 2rem 1rem;
     }
-
     .stats-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
-
     .stat-card {
         padding: 1.5rem;
         gap: 1rem;
     }
-
     .stat-icon {
         width: 50px;
         height: 50px;
         font-size: 1.2rem;
     }
-
     .stat-number {
         font-size: 1.5rem;
     }
-
     .trending-sections {
         padding: 2rem 1rem;
     }
-
     .trending-row {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-
     .trending-box {
         padding: 1.5rem;
     }
-
     .trending-box h3 {
         font-size: 1rem;
     }
-
     .daily-quote-box {
         padding: 1.5rem;
     }
-
     .quote-text {
         font-size: 1rem;
     }
-
     .cta-section {
         margin: 1rem;
         padding: 2rem 1.5rem;
         border-radius: 15px;
     }
-
     .cta-section h2 {
         font-size: 1.5rem;
         margin-bottom: 0.75rem;
     }
-
     .cta-section p {
         font-size: 1rem;
         margin-bottom: 1.5rem;
     }
-
     .footer {
         padding: 2rem 1rem 1rem;
     }
-
     .footer-content {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-
     .notification-dropdown,
     .profile-dropdown {
         min-width: 200px;
         right: -50%;
         transform: translateX(50%);
     }
-
-    /* Hide parallax items on mobile */
     .parallax-item {
         display: none;
     }
-
-    /* Adjust featured card image height */
     .featured-card-image {
         height: 150px;
     }
-
-    /* Adjust layout for smaller screens */
     .container {
         padding: 0 1rem;
     }
@@ -280,75 +224,58 @@
     :root {
         font-size: 13px;
     }
-
     .logo {
         font-size: 1rem;
     }
-
     .hero-title {
         font-size: 1.5rem;
     }
-
     .hero-subtitle {
         font-size: 0.9rem;
     }
-
     .btn {
         padding: 0.75rem 1.5rem;
         font-size: 0.9rem;
     }
-
     .section-title {
         font-size: 1.3rem;
     }
-
     .featured-card-content {
         padding: 1rem;
     }
-
     .featured-card-title {
         font-size: 1rem;
     }
-
     .trending-box h3 {
         font-size: 0.95rem;
     }
-
     .trending-item {
         padding: 0.75rem;
     }
-
     .daily-quote-box {
         padding: 1.25rem;
     }
-
     .quote-text {
         font-size: 0.95rem;
     }
-
     .quote-author {
         font-size: 0.85rem;
     }
-
     .cta-section {
         margin: 0.5rem;
         padding: 1.5rem 1rem;
     }
-
     .cta-section h2 {
         font-size: 1.3rem;
     }
-
     .cta-section p {
         font-size: 0.9rem;
     }
-
     .stat-card {
         flex-direction: column;
         text-align: center;
         padding: 1.25rem;
     }
-
     .stat-icon {
         width: 45px;
         height: 45px;
@@ -360,16 +287,13 @@
     .hero-title {
         font-size: 4rem;
     }
-
     .featured-grid {
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 2.5rem;
     }
-
     .stats-grid {
         grid-template-columns: repeat(4, 1fr);
     }
-
     .section-title {
         font-size: 2.2rem;
     }
@@ -384,12 +308,10 @@
     .footer {
         display: none;
     }
-
     body {
         background: white;
         color: black;
     }
-
     .featured-card,
     .stat-card,
     .trending-box {
@@ -407,13 +329,11 @@
     .stat-card {
         padding: 1.2rem 2rem;
     }
-
     .btn:active,
     .nav-link:active {
         background: var(--primary-color);
         color: white;
     }
-
     .featured-card:active {
         transform: scale(0.98);
     }
@@ -425,11 +345,9 @@
         min-height: 300px;
         padding: 2rem 1rem;
     }
-
     .hero-title {
         font-size: 1.5rem;
     }
-
     .navbar {
         padding: 0.5rem 0;
     }
@@ -453,15 +371,12 @@
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
-
     .animated-bg {
         animation: none;
     }
-
     .gradient-bg {
         animation: none;
     }
-
     .floating-shapes .shape {
         animation: none;
     }
@@ -472,11 +387,9 @@
     :root {
         --border-color: #000;
     }
-
     body.dark-mode {
         --border-color: #fff;
     }
-
     .btn-primary,
     .btn-secondary,
     .featured-card,
@@ -497,7 +410,6 @@
     white-space: nowrap;
     border-width: 0;
 }
-
 .sr-only-focusable:active,
 .sr-only-focusable:focus {
     position: static;
@@ -509,7 +421,7 @@
 }
 
 /* ============================================
-   FINAL FIX: Navbar - Show Polls & Memories
+   FINAL FIX: Navbar - Compact + Dropdown Support
    ============================================ */
 
 @media (min-width: 1025px) {
@@ -519,7 +431,6 @@
         overflow-x: auto;
         padding-bottom: 4px;
     }
-
     .nav-link {
         padding: 0.5rem 0.65rem;
         font-size: 0.82rem;
@@ -535,4 +446,54 @@
         padding: 0.4rem 0.5rem;
         font-size: 0.78rem;
     }
+}
+
+/* ============================================
+   MORE DROPDOWN STYLING
+   ============================================ */
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    min-width: 160px;
+    z-index: 1000;
+    padding: 0.5rem 0;
+}
+
+.nav-dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-secondary);
 }
