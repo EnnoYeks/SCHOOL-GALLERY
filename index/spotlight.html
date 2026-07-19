@@ -1,30 +1,30 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- CRITICAL: Add this meta tag FIRST in head -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
-<meta name="description" content="ENNOYEKS School Gallery - Share moments, connect community">
-<meta name="theme-color" content="#6366f1">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<!-- Prevent zoom on input focus (iOS) -->
-<style>
-    input[type="text"],
-    input[type="email"],
-    textarea,
-    select {
-        font-size: 16px !important;
-    }
-</style>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+    <meta name="description" content="ENNOYEKS Student Spotlight - Celebrating achievements">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Prevent zoom on input focus (iOS) -->
+    <style>
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            font-size: 16px !important;
+        }
+    </style>
+
     <title>Student Spotlight - ENNOYEKS School Gallery</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/spotlight.css">
 </head>
 <body class="light-mode">
     <!-- Animated Background -->
@@ -62,17 +62,21 @@
                     <i class="fas fa-images"></i>
                     <span>Gallery</span>
                 </a>
+                <a href="photos.html" class="nav-link">
+                    <i class="fas fa-photo-video"></i>
+                    <span>Photos</span>
+                </a>
+                <a href="videos.html" class="nav-link">
+                    <i class="fas fa-video"></i>
+                    <span>Videos</span>
+                </a>
+                <a href="trending.html" class="nav-link">
+                    <i class="fas fa-fire"></i>
+                    <span>Trending</span>
+                </a>
                 <a href="spotlight.html" class="nav-link active">
                     <i class="fas fa-star"></i>
                     <span>Spotlight</span>
-                </a>
-                <a href="memories.html" class="nav-link">
-                    <i class="fas fa-history"></i>
-                    <span>Memories</span>
-                </a>
-                <a href="polls.html" class="nav-link">
-                    <i class="fas fa-poll"></i>
-                    <span>Polls</span>
                 </a>
             </div>
 
@@ -118,56 +122,217 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container" style="padding: 2rem; position: relative; z-index: 10; margin-top: 60px;">
+    <main class="spotlight-main">
         <!-- Hero Banner -->
-        <div style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 20px; padding: 3rem; color: white; margin-bottom: 3rem; text-align: center;">
-            <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">Student Spotlight</h1>
-            <p style="font-size: 1.1rem; opacity: 0.95;">Celebrating the achievements and talents of our students</p>
-        </div>
+        <section class="spotlight-hero">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <i class="fas fa-star"></i> Student Spotlight
+                </h1>
+                <p class="hero-subtitle">
+                    Celebrating the achievements and talents of our amazing students
+                </p>
+            </div>
+            <div class="hero-background"></div>
+        </section>
 
-        <!-- Student Grid -->
-        <div class="featured-grid" id="spotlightGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem;">
-            <div class="loading-skeleton"></div>
-            <div class="loading-skeleton"></div>
-            <div class="loading-skeleton"></div>
-            <div class="loading-skeleton"></div>
-            <div class="loading-skeleton"></div>
-            <div class="loading-skeleton"></div>
-        </div>
-
-        <!-- Featured Students Section -->
-        <div style="margin-top: 4rem;">
-            <h2 class="section-title">
-                <i class="fas fa-award"></i> Featured Students
-            </h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-                <div id="featuredStudent1" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; backdrop-filter: blur(10px); padding: 2rem; box-shadow: var(--shadow-md); text-align: center;">
-                    <div style="width: 100px; height: 100px; margin: 0 auto 1rem; border-radius: 50%; overflow: hidden; box-shadow: var(--shadow-lg);">
-                        <img src="https://via.placeholder.com/100" alt="Student" style="width: 100%; height: 100%; object-fit: cover;">
+        <!-- Filter & Sort Section -->
+        <section class="spotlight-filters">
+            <div class="container">
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="categoryFilter">Category:</label>
+                        <select id="categoryFilter" class="filter-select">
+                            <option value="">All Categories</option>
+                            <option value="academic">Academic Excellence</option>
+                            <option value="sports">Sports</option>
+                            <option value="arts">Arts & Culture</option>
+                            <option value="community">Community Service</option>
+                            <option value="leadership">Leadership</option>
+                        </select>
                     </div>
-                    <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem;">Featured Student</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Loading...</p>
+
+                    <div class="filter-group">
+                        <label for="gradeFilter">Grade:</label>
+                        <select id="gradeFilter" class="filter-select">
+                            <option value="">All Grades</option>
+                            <option value="9">Grade 9</option>
+                            <option value="10">Grade 10</option>
+                            <option value="11">Grade 11</option>
+                            <option value="12">Grade 12</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="sortFilter">Sort By:</label>
+                        <select id="sortFilter" class="filter-select">
+                            <option value="recent">Most Recent</option>
+                            <option value="popular">Most Popular</option>
+                            <option value="achievements">Most Achievements</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-reset" id="resetFilters">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Hall of Fame -->
-        <div style="margin-top: 4rem;">
-            <h2 class="section-title">
-                <i class="fas fa-trophy"></i> Hall of Fame
-            </h2>
-            <div style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; backdrop-filter: blur(10px); padding: 2rem; box-shadow: var(--shadow-md); overflow-x: auto;">
-                <div id="hallOfFameList"></div>
+        <!-- Featured Student Section -->
+        <section class="featured-spotlight">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-award"></i> Featured Student of the Week
+                </h2>
+                <div class="featured-student-card" id="featuredStudent">
+                    <div class="featured-loading">
+                        <div class="loading-skeleton"></div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Achievements -->
-        <div style="margin-top: 4rem;">
-            <h2 class="section-title">
-                <i class="fas fa-medal"></i> Top Achievements
-            </h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                <div id="achievementsList"></div>
+        <!-- Students Grid -->
+        <section class="students-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-users"></i> Spotlight Gallery
+                </h2>
+                <div class="spotlightGrid" id="spotlightGrid">
+                    <div class="loading-skeleton"></div>
+                    <div class="loading-skeleton"></div>
+                    <div class="loading-skeleton"></div>
+                    <div class="loading-skeleton"></div>
+                    <div class="loading-skeleton"></div>
+                    <div class="loading-skeleton"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hall of Fame Section -->
+        <section class="hall-of-fame-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-trophy"></i> Hall of Fame
+                </h2>
+                <div class="hall-of-fame-container">
+                    <div class="leaderboard-wrapper">
+                        <div class="leaderboard-header">
+                            <span class="rank-col">Rank</span>
+                            <span class="name-col">Student</span>
+                            <span class="points-col">Points</span>
+                        </div>
+                        <div id="hallOfFameList" class="leaderboard-list">
+                            <div class="leaderboard-skeleton"></div>
+                            <div class="leaderboard-skeleton"></div>
+                            <div class="leaderboard-skeleton"></div>
+                            <div class="leaderboard-skeleton"></div>
+                            <div class="leaderboard-skeleton"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievements Section -->
+        <section class="achievements-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-medal"></i> Top Achievements
+                </h2>
+                <div id="achievementsList" class="achievements-grid">
+                    <div class="achievement-skeleton"></div>
+                    <div class="achievement-skeleton"></div>
+                    <div class="achievement-skeleton"></div>
+                    <div class="achievement-skeleton"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Section -->
+        <section class="categories-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-th"></i> Categories
+                </h2>
+                <div class="categories-grid">
+                    <div class="category-card" data-category="academic">
+                        <div class="category-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3>Academic Excellence</h3>
+                        <p id="count-academic">0</p>
+                    </div>
+                    <div class="category-card" data-category="sports">
+                        <div class="category-icon">
+                            <i class="fas fa-basketball-ball"></i>
+                        </div>
+                        <h3>Sports</h3>
+                        <p id="count-sports">0</p>
+                    </div>
+                    <div class="category-card" data-category="arts">
+                        <div class="category-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <h3>Arts & Culture</h3>
+                        <p id="count-arts">0</p>
+                    </div>
+                    <div class="category-card" data-category="community">
+                        <div class="category-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Community Service</h3>
+                        <p id="count-community">0</p>
+                    </div>
+                    <div class="category-card" data-category="leadership">
+                        <div class="category-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <h3>Leadership</h3>
+                        <p id="count-leadership">0</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="testimonials-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <i class="fas fa-quote-left"></i> Student Testimonials
+                </h2>
+                <div class="testimonials-grid" id="testimonialsList">
+                    <div class="testimonial-skeleton"></div>
+                    <div class="testimonial-skeleton"></div>
+                    <div class="testimonial-skeleton"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="spotlight-cta">
+            <div class="container">
+                <div class="cta-content">
+                    <h2>Be Featured in the Spotlight!</h2>
+                    <p>Share your achievements and inspire your peers</p>
+                    <button class="btn btn-primary" id="nomineateBtn">
+                        <i class="fas fa-star"></i> Nominate a Student
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Student Modal -->
+    <div class="student-modal" id="studentModal">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-body" id="modalBody">
+                <!-- Content loaded dynamically -->
             </div>
         </div>
     </div>
@@ -179,12 +344,18 @@
                 <div class="footer-section">
                     <h4>ENNOYEKS Gallery</h4>
                     <p>The ultimate platform for school memories and community engagement.</p>
+                    <div class="social-links">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <a href="index.html">Home</a>
-                    <a href="spotlight.html">Spotlight</a>
                     <a href="gallery.html">Gallery</a>
+                    <a href="trending.html">Trending</a>
                     <a href="about.html">About</a>
                 </div>
                 <div class="footer-section">
@@ -192,21 +363,44 @@
                     <a href="#">Privacy Policy</a>
                     <a href="#">Terms of Service</a>
                     <a href="#">Contact</a>
-                    <a href="#">Support</a>
+                    <a href="contact.html">Support</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <p>Email: info@ennoyeks.edu</p>
+                    <p>Phone: +1 (555) 123-4567</p>
+                    <p>Address: 123 School Street</p>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 ENNOYEKS School Gallery. All rights reserved.</p>
+                <p>Made with <i class="fas fa-heart"></i> by the ENNOYEKS Community</p>
             </div>
         </div>
     </footer>
 
-    <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/db.js"></script>
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js"></script>
+
+    <!-- Core Scripts -->
+    <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
     <script src="js/particles.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/navigation.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/supabase-init.js"></script>
+
+    <!-- Spotlight Logic -->
+    <script src="js/spotlight.js"></script>
+
+    <!-- Mobile Navigation -->
     <script src="js/mobile-navigation.js"></script>
 </body>
 </html>
