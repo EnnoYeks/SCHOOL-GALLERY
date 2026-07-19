@@ -1,30 +1,32 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- CRITICAL: Add this meta tag FIRST in head -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
-<meta name="description" content="ENNOYEKS School Gallery - Share moments, connect community">
-<meta name="theme-color" content="#6366f1">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+    <meta name="description" content="ENNOYEKS School Gallery - Share moments, connect community">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<!-- Prevent zoom on input focus (iOS) -->
-<style>
-    input[type="text"],
-    input[type="email"],
-    textarea,
-    select {
-        font-size: 16px !important;
-    }
-</style>
+    <!-- Prevent zoom on input focus (iOS) -->
+    <style>
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            font-size: 16px !important;
+        }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trending - ENNOYEKS School Gallery</title>
+    
+    <!-- ✅ FIXED PATHS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/trending.css">
 </head>
 <body class="light-mode">
     <!-- Animated Background -->
@@ -49,18 +51,22 @@
 
             <div class="search-container">
                 <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search trending posts..." class="search-input" id="searchInput">
+                <input type="text" placeholder="Search trending..." class="search-input" id="searchInput">
                 <div class="search-results" id="searchResults"></div>
             </div>
 
             <div class="nav-links">
-                <a href="index.html" class="nav-link">
+                <a href="../index.html" class="nav-link">
                     <i class="fas fa-home"></i>
                     <span>Home</span>
                 </a>
                 <a href="gallery.html" class="nav-link">
                     <i class="fas fa-images"></i>
                     <span>Gallery</span>
+                </a>
+                <a href="videos.html" class="nav-link">
+                    <i class="fas fa-video"></i>
+                    <span>Videos</span>
                 </a>
                 <a href="trending.html" class="nav-link active">
                     <i class="fas fa-fire"></i>
@@ -69,10 +75,6 @@
                 <a href="spotlight.html" class="nav-link">
                     <i class="fas fa-star"></i>
                     <span>Spotlight</span>
-                </a>
-                <a href="polls.html" class="nav-link">
-                    <i class="fas fa-poll"></i>
-                    <span>Polls</span>
                 </a>
             </div>
 
@@ -118,68 +120,73 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container" style="padding: 2rem; position: relative; z-index: 10; margin-top: 60px;">
-        <!-- Time Period Tabs -->
-        <div class="trending-tabs" style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-color);">
-            <button class="tab-btn active" data-period="today" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease;">
-                <i class="fas fa-fire"></i> Trending Today
+    <div class="videos-container" id="videosContainer">
+        <!-- Trending content will be loaded here -->
+        <div class="loading-skeleton"></div>
+        <div class="loading-skeleton"></div>
+        <div class="loading-skeleton"></div>
+        <div class="loading-skeleton"></div>
+        <div class="loading-skeleton"></div>
+        <div class="loading-skeleton"></div>
+    </div>
+
+    <!-- Video Player Modal (reuse for trending videos) -->
+    <div class="video-player-modal" id="videoPlayerModal">
+        <div class="video-player-container" id="videoPlayerContainer">
+            <button class="player-close" id="playerClose">
+                <i class="fas fa-times"></i>
             </button>
-            <button class="tab-btn" data-period="week" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease;">
-                <i class="fas fa-chart-line"></i> This Week
+            <video class="video-player" id="videoPlayer" controls>
+                <source src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+
+            <div class="video-controls">
+                <button class="control-btn" id="playPauseBtn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill">
+                        <div class="progress-handle"></div>
+                    </div>
+                </div>
+                <div class="time-display">
+                    <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+                </div>
+                <button class="control-btn" id="volumeBtn">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <div class="volume-slider" id="volumeSlider">
+                    <div class="volume-fill" id="volumeFill"></div>
+                </div>
+                <button class="control-btn" id="fullscreenBtn">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+
+            <div class="player-side-actions">
+                <button class="player-action-btn" id="playerLikeBtn">
+                    <i class="far fa-heart"></i>
+                    <div class="player-action-count">0</div>
+                </button>
+                <button class="player-action-btn" id="playerCommentBtn">
+                    <i class="far fa-comment"></i>
+                    <div class="player-action-count">0</div>
+                </button>
+                <button class="player-action-btn" id="playerShareBtn">
+                    <i class="fas fa-share"></i>
+                </button>
+                <button class="player-action-btn" id="playerSaveBtn">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </div>
+
+            <button class="swipe-arrow-btn prev-arrow" id="prevVideo">
+                <i class="fas fa-chevron-left"></i>
             </button>
-            <button class="tab-btn" data-period="month" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease;">
-                <i class="fas fa-calendar"></i> This Month
+            <button class="swipe-arrow-btn next-arrow" id="nextVideo">
+                <i class="fas fa-chevron-right"></i>
             </button>
-        </div>
-
-        <!-- Trending Content -->
-        <div class="trending-content" id="trendingContent">
-            <div class="featured-grid" id="trendingGrid">
-                <div class="loading-skeleton"></div>
-                <div class="loading-skeleton"></div>
-                <div class="loading-skeleton"></div>
-                <div class="loading-skeleton"></div>
-            </div>
-        </div>
-
-        <!-- Top Categories -->
-        <div style="margin-top: 4rem;">
-            <h2 class="section-title">
-                <i class="fas fa-crown"></i> Top Categories
-            </h2>
-            <div class="featured-grid" id="topCategoriesGrid">
-                <div class="loading-skeleton"></div>
-                <div class="loading-skeleton"></div>
-                <div class="loading-skeleton"></div>
-                <div class="loading-skeleton"></div>
-            </div>
-        </div>
-
-        <!-- Leaderboards -->
-        <div style="margin-top: 4rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-            <!-- Top Liked Posts -->
-            <div class="trending-box" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; backdrop-filter: blur(10px); padding: 2rem; box-shadow: var(--shadow-md);">
-                <h3 style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-primary);">
-                    <i class="fas fa-heart" style="color: var(--danger-color);"></i> Top Liked Posts
-                </h3>
-                <div class="leaderboard-list" id="topLikedList"></div>
-            </div>
-
-            <!-- Top Viewed Posts -->
-            <div class="trending-box" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; backdrop-filter: blur(10px); padding: 2rem; box-shadow: var(--shadow-md);">
-                <h3 style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-primary);">
-                    <i class="fas fa-eye" style="color: var(--primary-color);"></i> Top Viewed Posts
-                </h3>
-                <div class="leaderboard-list" id="topViewedList"></div>
-            </div>
-
-            <!-- Top Commented Posts -->
-            <div class="trending-box" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; backdrop-filter: blur(10px); padding: 2rem; box-shadow: var(--shadow-md);">
-                <h3 style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-primary);">
-                    <i class="fas fa-comments" style="color: var(--secondary-color);"></i> Most Commented
-                </h3>
-                <div class="leaderboard-list" id="topCommentedList"></div>
-            </div>
         </div>
     </div>
 
@@ -193,9 +200,9 @@
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
-                    <a href="index.html">Home</a>
+                    <a href="../index.html">Home</a>
+                    <a href="videos.html">Videos</a>
                     <a href="trending.html">Trending</a>
-                    <a href="gallery.html">Gallery</a>
                     <a href="about.html">About</a>
                 </div>
                 <div class="footer-section">
@@ -212,13 +219,15 @@
         </div>
     </footer>
 
-    <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/db.js"></script>
-    <script type="module" src="js/trending.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/particles.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/mobile-navigation.js"></script>
+    <!-- ✅ FIXED JS PATHS -->
+    <script type="module" src="../js/config.js"></script>
+    <script type="module" src="../js/db.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/particles.js"></script>
+    <script src="../js/theme.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/search.js"></script>
+    <script src="../js/trending.js"></script>
+    <script src="../js/mobile-navigation.js"></script>
 </body>
 </html>
