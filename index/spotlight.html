@@ -17,14 +17,14 @@
             font-size: 16px !important;
         }
     </style>
-
     <title>Student Spotlight - ENNOYEKS School Gallery</title>
-    
+   
+    <!-- ✅ FIXED PATHS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    <link rel="stylesheet" href="css/spotlight.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/spotlight.css">
 </head>
 <body class="light-mode">
     <!-- Animated Background -->
@@ -54,7 +54,7 @@
             </div>
 
             <div class="nav-links">
-                <a href="index.html" class="nav-link">
+                <a href="../index.html" class="nav-link">
                     <i class="fas fa-home"></i>
                     <span>Home</span>
                 </a>
@@ -151,7 +151,6 @@
                             <option value="leadership">Leadership</option>
                         </select>
                     </div>
-
                     <div class="filter-group">
                         <label for="gradeFilter">Grade:</label>
                         <select id="gradeFilter" class="filter-select">
@@ -162,7 +161,6 @@
                             <option value="12">Grade 12</option>
                         </select>
                     </div>
-
                     <div class="filter-group">
                         <label for="sortFilter">Sort By:</label>
                         <select id="sortFilter" class="filter-select">
@@ -171,7 +169,6 @@
                             <option value="achievements">Most Achievements</option>
                         </select>
                     </div>
-
                     <button class="btn-reset" id="resetFilters">
                         <i class="fas fa-redo"></i> Reset
                     </button>
@@ -353,7 +350,7 @@
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
-                    <a href="index.html">Home</a>
+                    <a href="../index.html">Home</a>
                     <a href="gallery.html">Gallery</a>
                     <a href="trending.html">Trending</a>
                     <a href="about.html">About</a>
@@ -385,22 +382,18 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js"></script>
 
-    <!-- Core Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/db.js"></script>
-    <script src="js/particles.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/search.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/firebase-init.js"></script>
-    <script src="js/supabase-init.js"></script>
-
-    <!-- Spotlight Logic -->
-    <script src="js/spotlight.js"></script>
-
-    <!-- Mobile Navigation -->
-    <script src="js/mobile-navigation.js"></script>
+    <!-- ✅ FIXED JS PATHS -->
+    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/db.js"></script>
+    <script src="../js/particles.js"></script>
+    <script src="../js/theme.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/search.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/firebase-init.js"></script>
+    <script src="../js/supabase-init.js"></script>
+    <script src="../js/spotlight.js"></script>
+    <script src="../js/mobile-navigation.js"></script>
 </body>
 </html>
