@@ -16,14 +16,17 @@
         select {
             font-size: 16px !important;
         }
-    </style>   
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSHS School Gallery - Capture Moments, Share Stories</title>
+    <title>For You Feed - ENNOYEKS School Gallery</title>
+    
+    <!-- ✅ FIXED: Added ../ for CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/gallery.css">
 </head>
 <body class="light-mode">
     <!-- Animated Background -->
@@ -41,58 +44,45 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <!-- Logo -->
             <div class="logo">
                 <i class="fas fa-graduation-cap"></i>
-                <span>HSHS International</span>
+                <span>ENNOYEKS</span>
             </div>
 
-            <!-- Search Bar -->
             <div class="search-container">
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search posts, students, events..." class="search-input" id="searchInput">
                 <div class="search-results" id="searchResults"></div>
             </div>
 
-            <!-- Nav Links -->
             <div class="nav-links">
-                <a href="index.html" class="nav-link active">
+                <a href="../index.html" class="nav-link">
                     <i class="fas fa-home"></i>
                     <span>Home</span>
                 </a>
-                <a href="index/gallery.html" class="nav-link">
+                <a href="gallery.html" class="nav-link active">
                     <i class="fas fa-images"></i>
                     <span>Gallery</span>
                 </a>
-                <a href="index/photos.html" class="nav-link">
+                <a href="photos.html" class="nav-link">
                     <i class="fas fa-photo-video"></i>
                     <span>Photos</span>
                 </a>
-                <a href="index/videos.html" class="nav-link">
+                <a href="videos.html" class="nav-link">
                     <i class="fas fa-video"></i>
                     <span>Videos</span>
                 </a>
-                <a href="index/trending.html" class="nav-link">
+                <a href="trending.html" class="nav-link">
                     <i class="fas fa-fire"></i>
                     <span>Trending</span>
                 </a>
-                <a href="index/spotlight.html" class="nav-link">
+                <a href="spotlight.html" class="nav-link">
                     <i class="fas fa-star"></i>
                     <span>Spotlight</span>
                 </a>
-                <a href="index/polls.html" class="nav-link">
-                    <i class="fas fa-poll"></i>
-                    <span>Polls</span>
-                </a>
-                <a href="index/memories.html" class="nav-link">
-                    <i class="fas fa-history"></i>
-                    <span>Memories</span>
-                </a>
             </div>
 
-            <!-- Right Actions -->
             <div class="nav-actions">
-                <!-- Notifications -->
                 <div class="notification-icon">
                     <i class="fas fa-bell"></i>
                     <span class="notification-badge" id="notificationBadge">0</span>
@@ -103,22 +93,20 @@
                     </div>
                 </div>
 
-                <!-- Theme Toggle -->
                 <button class="theme-toggle" id="themeToggle">
                     <i class="fas fa-moon"></i>
                 </button>
 
-                <!-- Profile -->
                 <div class="profile-icon">
                     <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img" id="profileImg">
                     <div class="profile-dropdown" id="profileDropdown">
-                        <a href="index/profile.html" class="dropdown-item">
+                        <a href="profile.html" class="dropdown-item">
                             <i class="fas fa-user"></i> My Profile
                         </a>
-                        <a href="index/settings.html" class="dropdown-item">
+                        <a href="settings.html" class="dropdown-item">
                             <i class="fas fa-cog"></i> Settings
                         </a>
-                        <a href="index/admin.html" class="dropdown-item">
+                        <a href="admin.html" class="dropdown-item">
                             <i class="fas fa-shield-alt"></i> Admin Dashboard
                         </a>
                         <hr>
@@ -128,7 +116,6 @@
                     </div>
                 </div>
 
-                <!-- Mobile Menu Toggle -->
                 <button class="mobile-menu-toggle" id="mobileMenuToggle">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -136,177 +123,76 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1 class="hero-title">HSHS SCHOOL GALLERY</h1>
-                <p class="hero-subtitle">Capture Moments. Share Stories. Celebrate Community.</p>
-                <div class="hero-description">
-                    Experience the ultimate platform for school memories, achievements, and connections
-                </div>
-                <div class="hero-buttons">
-                    <button class="btn btn-primary" id="exploreBtn">
-                        <i class="fas fa-play"></i> Explore Feed
-                    </button>
-                    <button class="btn btn-secondary" id="learnMoreBtn">
-                        <i class="fas fa-info-circle"></i> Learn More
-                    </button>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="hero-image-container">
-                    <img src="https://via.placeholder.com/600x400" alt="School Gallery" class="hero-image">
-                    <div class="hero-overlay"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Parallax Elements -->
-        <div class="parallax-shapes">
-            <div class="parallax-item" style="--speed: 0.5">
-                <i class="fas fa-camera"></i>
-            </div>
-            <div class="parallax-item" style="--speed: 0.7">
-                <i class="fas fa-video"></i>
-            </div>
-            <div class="parallax-item" style="--speed: 0.3">
-                <i class="fas fa-heart"></i>
-            </div>
-            <div class="parallax-item" style="--speed: 0.6">
-                <i class="fas fa-share"></i>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Section -->
-    <section class="featured-section">
-        <div class="container">
-            <h2 class="section-title">
-                <i class="fas fa-crown"></i> Featured Today
-            </h2>
-            <div class="featured-grid" id="featuredGrid">
-                <div class="loading-skeleton"></div>
-                <div class="loading-skeleton"></div>
-                <div class="loading-skeleton"></div>
-                <div class="loading-skeleton"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Quick Stats -->
-    <section class="quick-stats">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-images"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalPhotos">0</div>
-                        <div class="stat-label">Photos</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalVideos">0</div>
-                        <div class="stat-label">Videos</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalStudents">0</div>
-                        <div class="stat-label">Students</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-number" id="totalLikes">0</div>
-                        <div class="stat-label">Likes</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Trending Sections -->
-    <section class="trending-sections">
-        <div class="container">
-            <div class="trending-row">
-                <!-- Trending Today -->
-                <div class="trending-box">
-                    <h3>
-                        <i class="fas fa-fire"></i> Trending Today
-                    </h3>
-                    <div class="trending-list" id="trendingToday">
-                        <div class="loading-skeleton"></div>
-                        <div class="loading-skeleton"></div>
-                        <div class="loading-skeleton"></div>
-                    </div>
-                </div>
-
-                <!-- Daily Quote -->
-                <div class="daily-quote-box">
-                    <i class="fas fa-quote-left"></i>
-                    <p class="quote-text" id="dailyQuote">Loading today's inspiration...</p>
-                    <p class="quote-author" id="quoteAuthor">ENNOYEKS School</p>
-                </div>
-
-                <!-- Upcoming Events -->
-                <div class="trending-box">
-                    <h3>
-                        <i class="fas fa-calendar-alt"></i> Upcoming Events
-                    </h3>
-                    <div class="upcoming-events" id="upcomingEvents">
-                        <div class="loading-skeleton"></div>
-                        <div class="loading-skeleton"></div>
-                        <div class="loading-skeleton"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Call to Action -->
-    <section class="cta-section">
-        <div class="cta-content">
-            <h2>Ready to Share Your Story?</h2>
-            <p>Upload your photos and videos to showcase school moments</p>
-            <button class="btn btn-primary" id="uploadBtn">
-                <i class="fas fa-cloud-upload-alt"></i> Start Uploading
+    <!-- Gallery Container -->
+    <div class="gallery-container">
+        <div class="category-filter" id="categoryFilter">
+            <button class="category-btn active" data-category="all">
+                <i class="fas fa-th"></i> All
+            </button>
+            <button class="category-btn" data-category="academics">
+                <i class="fas fa-book"></i> Academics
+            </button>
+            <button class="category-btn" data-category="sports">
+                <i class="fas fa-basketball-ball"></i> Sports
+            </button>
+            <button class="category-btn" data-category="clubs">
+                <i class="fas fa-users"></i> Clubs
+            </button>
+            <button class="category-btn" data-category="trips">
+                <i class="fas fa-bus"></i> Trips
+            </button>
+            <button class="category-btn" data-category="graduation">
+                <i class="fas fa-graduation-cap"></i> Graduation
+            </button>
+            <button class="category-btn" data-category="arts">
+                <i class="fas fa-palette"></i> Arts
+            </button>
+            <button class="category-btn" data-category="music">
+                <i class="fas fa-music"></i> Music
+            </button>
+            <button class="category-btn" data-category="events">
+                <i class="fas fa-calendar"></i> Events
             </button>
         </div>
-    </section>
+
+        <div class="story-bar" id="storyBar">
+            <div class="story-item">
+                <i class="fas fa-plus"></i>
+            </div>
+        </div>
+
+        <div class="gallery-feed" id="galleryFeed">
+            <div class="post-loading">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+
+        <div class="swipe-indicator" id="swipeIndicator">
+            <div class="swipe-arrow">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+            <div class="swipe-text">Scroll to explore</div>
+        </div>
+    </div>
+
+    <div class="double-tap-overlay" id="doubleTapOverlay">
+        <i class="fas fa-heart"></i>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h4>HSHS Gallery</h4>
+                    <h4>ENNOYEKS Gallery</h4>
                     <p>The ultimate platform for school memories and community engagement.</p>
-                    <div class="social-links">
-                        <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
-                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" title="TikTok"><i class="fab fa-tiktok"></i></a>
-                    </div>
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
-                    <a href="index.html">Home</a>
-                    <a href="index/gallery.html">Gallery</a>
-                    <a href="index/trending.html">Trending</a>
-                    <a href="index/about.html">About</a>
+                    <a href="../index.html">Home</a>
+                    <a href="gallery.html">Gallery</a>
+                    <a href="trending.html">Trending</a>
+                    <a href="about.html">About</a>
                 </div>
                 <div class="footer-section">
                     <h4>Resources</h4>
@@ -315,25 +201,22 @@
                     <a href="#">Contact</a>
                     <a href="#">Support</a>
                 </div>
-                <div class="footer-section">
-                    <h4>Contact</h4>
-                    <p>Email: info@hshs.ac.ug</p>
-                    <p>Phone: +256 200 946933</p>
-                    <p>Address: Bududa, kikholo</p>
-                </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 HSHS School Gallery. All rights reserved.</p>
+                <p>&copy; 2026 ENNOYEKS School Gallery. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/db.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/particles.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/mobile-navigation.js"></script>
+    <!-- ✅ FIXED: Added ../ for all JS files -->
+    <script type="module" src="../js/config.js"></script>
+    <script type="module" src="../js/db.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/particles.js"></script>
+    <script src="../js/theme.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/search.js"></script>
+    <script src="../js/gallery.js"></script>
+    <script src="../js/mobile-navigation.js"></script>
 </body>
 </html>
