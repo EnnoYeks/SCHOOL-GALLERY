@@ -507,3 +507,32 @@
     clip: auto;
     white-space: normal;
 }
+
+/* ============================================
+   FINAL FIX: Navbar - Show Polls & Memories
+   ============================================ */
+
+@media (min-width: 1025px) {
+    .nav-links {
+        gap: 0.25rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    .nav-link {
+        padding: 0.5rem 0.65rem;
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .nav-links {
+        gap: 0.2rem;
+    }
+    .nav-link {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.78rem;
+    }
+}
