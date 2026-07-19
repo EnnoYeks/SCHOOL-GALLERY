@@ -1,100 +1,102 @@
 /* ============================================
-   GALLERY/FEED STYLES - FIXED VERSION
+   GALLERY/FEED STYLES - MOBILE OPTIMIZED
    ============================================ */
 
-/* Category Filter - Higher position + better spacing */
-.category-filter {
-    position: absolute;
-    top: 68px;                    /* ← Reduced from 80px so tabs sit higher */
-    left: 1rem;
-    right: 1rem;
-    display: flex;
-    gap: 0.6rem;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    z-index: 25;
-    padding: 0.6rem 0;
-    background: rgba(15, 23, 42, 0.95);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-}
-
-/* Nicer tab styling with colored borders */
-.category-btn {
-    flex: 0 0 auto;
-    padding: 0.45rem 1.1rem;
-    border: 1.5px solid #64748b;
-    background: transparent;
-    color: #cbd5e1;
-    border-radius: 9999px;
-    font-weight: 600;
-    font-size: 0.82rem;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.category-btn:hover {
-    border-color: #a855f7;
-    color: #a855f7;
-}
-
-.category-btn.active {
-    background: linear-gradient(135deg, #6366f1, #a855f7);
-    color: white;
-    border-color: transparent;
-    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
-}
-
-/* Story Bar / + Button - Clean floating position on the left */
-.story-bar {
-    position: absolute;
-    top: 68px;
-    left: 0.6rem;
-    z-index: 30;
-    background: transparent;
-    padding: 0;
-    border: none;
-}
-
-.story-item {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #a855f7);
-    border: 3px solid #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.story-item:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4);
-}
-
-/* Give category filter space for the + button */
-.category-filter {
-    padding-left: 58px !important;
-}
-
-/* Keep the rest of your original styles below this line */
 .gallery-container {
     position: relative;
     min-height: 100vh;
     padding-top: 60px;
 }
 
+/* Category Filter - Horizontal Scroll */
+.category-filter {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    background: var(--glass-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.category-filter::-webkit-scrollbar {
+    height: 4px;
+}
+
+.category-filter::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.category-filter::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+.category-btn {
+    flex: 0 0 auto;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.category-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.category-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-color: transparent;
+}
+
+/* Story Bar */
+.story-bar {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+.story-item {
+    flex: 0 0 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.story-item:hover {
+    transform: scale(1.05);
+    border-color: var(--primary-color);
+}
+
+/* Gallery Feed */
 .gallery-feed {
     display: flex;
     flex-direction: column;
     gap: 0;
 }
 
+/* Post Card - Full Screen Mobile */
 .post-card {
     position: relative;
     width: 100%;
@@ -137,6 +139,7 @@
     z-index: 5;
 }
 
+/* Post Information */
 .post-info {
     position: absolute;
     bottom: 70px;
@@ -183,6 +186,7 @@
     gap: 0.3rem;
 }
 
+/* Side Actions */
 .side-actions {
     position: absolute;
     right: 1rem;
@@ -224,6 +228,7 @@
     font-weight: 600;
 }
 
+/* Post Loading */
 .post-loading {
     height: 100vh;
     display: flex;
@@ -270,17 +275,29 @@
 }
 
 @keyframes popHeart {
-    0% { opacity: 1; transform: scale(0.5); }
-    50% { opacity: 1; }
-    100% { opacity: 0; transform: scale(1.5); }
+    0% {
+        opacity: 1;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
 }
 
 @keyframes scaleUp {
-    from { transform: scale(0); }
-    to { transform: scale(1); }
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
 }
 
-/* Swipe Indicator (you like this - kept it) */
+/* Swipe Indicator */
 .swipe-indicator {
     position: fixed;
     bottom: 20px;
@@ -306,38 +323,72 @@
 }
 
 @keyframes slideDownUp {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(10px); }
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(10px);
+    }
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
 }
 
 /* Animations */
 @keyframes slideUpIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
 }
 
 /* Desktop Styles */
 @media screen and (min-width: 961px) {
+    
     .post-card {
         height: 600px;
         border-radius: 15px;
         margin: 1rem auto;
         max-width: 400px;
     }
+
     .side-actions {
         right: -60px;
         gap: 1rem;
     }
+
     .action-btn {
         width: 50px;
         height: 50px;
@@ -350,6 +401,7 @@
     padding: 3rem 1rem;
     color: var(--text-secondary);
 }
+
 .empty-state i {
     font-size: 3rem;
     margin-bottom: 1rem;
