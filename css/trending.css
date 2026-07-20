@@ -373,3 +373,59 @@
     text-align: center;
     padding: 3rem 1rem;
     color: var(--text-secondary);
+}
+
+.empty-state span {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.empty-state h3 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 0.4rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+    .trending-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .trending-sidebar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .trending-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .trending-tabs {
+        top: 56px;
+    }
+
+    .trending-tab,
+    .tab-btn {
+        padding: 0.85rem 1.1rem;
+        font-size: 0.9rem;
+    }
+
+    .trending-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .trending-sidebar {
+        grid-template-columns: 1fr;
+    }
+
+    .media-wrap {
+        height: 180px;
+    }
+}
