@@ -1,290 +1,1128 @@
-/*
- * ENNOYEKS School Gallery - Trending Page
- * Requires an existing Firebase setup from ./db.js that exports `db` and optionally `storage`.
- */
-import { db, storage } from './db.js';
-import {
-  collection,
-  doc,
-  getDocs,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+/* ============================================
+   TRENDING PAGE STYLES - MOBILE OPTIMIZED
+   ============================================ */
 
-const TRENDING_WEIGHTS = Object.freeze({ likes: 5, comments: 10, views: 1, shares: 7 });
-const PAGE_SIZE = 9;
-const CACHE_TTL = 5 * 60 * 1000;
-const SEARCH_MIN_LENGTH = 2;
-const state = {
-  period: 'week',
-  posts: [],
-  visiblePosts: [],
-  page: 1,
-  isLoading: false,
-  hasMore: true,
-  cache: new Map(),
-  notificationUnsubscribe: null,
-};
-
-const $ = (id) => document.getElementById(id);
-const els = {
-  trendingGrid: $('trendingGrid'),
-  topCategoriesGrid: $('topCategoriesGrid'),
-  topLikedList: $('topLikedList'),
-  topViewedList: $('topViewedList'),
-  topCommentedList: $('topCommentedList'),
-  searchInput: $('searchInput'),
-  searchResults: $('searchResults'),
-  notificationBadge: $('notificationBadge'),
-  notificationsList: $('notificationsList'),
-};
-
-const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({
-  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
-}[char]));
-const toNumber = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
-const debounce = (fn, wait = 250) => {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn(...args), wait);
-  };
-};
-
-async function resolveMediaURL(url = '') {
-  if (!url || !storage || !url.startsWith('gs://')) return url;
-  try {
-    return await getDownloadURL(ref(storage, url));
-  } catch (error) {
-    console.warn('Unable to resolve Storage URL:', error);
-    return '';
-  }
+.trending-main {
+    position: relative;
+    z-index: 10;
+    padding-top: 60px;
 }
 
-async function normalizePost(snapshotOrData) {
-  const data = typeof snapshotOrData.data === 'function' ? snapshotOrData.data() : snapshotOrData;
-  const id = snapshotOrData.id || data.id;
-  return {
-    id,
-    title: data.title || 'Untitled post',
-    description: data.description || '',
-    mediaURL: await resolveMediaURL(data.mediaURL || data.thumbnailURL || ''),
-    mediaType: data.mediaType || 'image',
-    category: data.category || 'General',
-    author: data.author || data.authorName || 'ENNOYEKS Student',
-    authorPhoto: data.authorPhoto || '',
-    timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(data.timestamp || Date.now()),
-    likesCount: toNumber(data.likesCount),
-    commentsCount: toNumber(data.commentsCount),
-    viewsCount: toNumber(data.viewsCount),
-    sharesCount: toNumber(data.sharesCount),
-    featured: Boolean(data.featured),
-  };
+/* ============================================
+   HERO SECTION
+   ============================================ */
+
+.trending-hero {
+    position: relative;
+    padding: 3rem 1rem;
+    text-align: center;
+    overflow: hidden;
 }
 
-function getPeriodStart(period = 'week') {
-  const now = new Date();
-  const start = new Date(now);
-  if (period === 'today') start.setHours(0, 0, 0, 0);
-  else if (period === 'month') start.setDate(now.getDate() - 30);
-  else start.setDate(now.getDate() - 7);
-  return start;
+.trending-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    opacity: 0.1;
+    z-index: -1;
 }
 
-function calculateTrendingScore(post) {
-  return (post.likesCount * TRENDING_WEIGHTS.likes)
-    + (post.commentsCount * TRENDING_WEIGHTS.comments)
-    + (post.viewsCount * TRENDING_WEIGHTS.views)
-    + (post.sharesCount * TRENDING_WEIGHTS.shares);
+.trending-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1), transparent);
+    z-index: -1;
 }
 
-function withScores(posts) {
-  return posts.map((post) => ({ ...post, trendingScore: calculateTrendingScore(post) }))
-    .sort((a, b) => b.trendingScore - a.trendingScore || b.timestamp - a.timestamp);
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
 }
 
-function timeAgo(date) {
-  const seconds = Math.max(1, Math.floor((Date.now() - date.getTime()) / 1000));
-  const units = [['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]];
-  const match = units.find(([, value]) => seconds >= value);
-  if (!match) return 'just now';
-  const amount = Math.floor(seconds / match[1]);
-  return `${amount} ${match[0]}${amount > 1 ? 's' : ''} ago`;
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    line-height: 1.2;
 }
 
-function cacheGet(key) {
-  const item = state.cache.get(key);
-  return item && Date.now() - item.time < CACHE_TTL ? item.data : null;
-}
-function cacheSet(key, data) { state.cache.set(key, { data, time: Date.now() }); }
-
-function renderSkeleton(target, count = 6, type = 'card') {
-  if (!target) return;
-  target.innerHTML = Array.from({ length: count }, () => `<article class="skeleton ${type}-skeleton"><span></span><div></div><p></p><p></p></article>`).join('');
-}
-function renderMessage(target, message, icon = '✨') {
-  if (target) target.innerHTML = `<div class="empty-state"><span>${icon}</span><h3>${escapeHTML(message)}</h3><p>Check back soon for more ENNOYEKS School Gallery moments.</p></div>`;
-}
-function renderError(target, message = 'Something went wrong while loading trending content.') { renderMessage(target, message, '⚠️'); }
-
-function postMedia(post, large = true) {
-  if (post.mediaType === 'video') {
-    return `<video class="post-media" ${large ? 'controls' : ''} preload="metadata" poster="${escapeHTML(post.mediaURL)}"><source src="${escapeHTML(post.mediaURL)}"></video>`;
-  }
-  return `<img class="post-media" src="${escapeHTML(post.mediaURL)}" alt="${escapeHTML(post.title)}" loading="lazy">`;
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    line-height: 1.6;
 }
 
-function renderTrendingPosts(append = false) {
-  if (!els.trendingGrid) return;
-  const nextPosts = state.posts.slice(0, state.page * PAGE_SIZE);
-  state.visiblePosts = nextPosts;
-  state.hasMore = nextPosts.length < state.posts.length;
-  if (!nextPosts.length) return renderMessage(els.trendingGrid, 'No trending posts yet');
-  els.trendingGrid.innerHTML = nextPosts.map((post, index) => `
-    <article class="trending-card fade-in" style="--delay:${Math.min(index, 8) * 70}ms" data-post-id="${escapeHTML(post.id)}">
-      <div class="media-wrap">
-        ${postMedia(post)}
-        <span class="category-badge">${escapeHTML(post.category)}</span>
-        ${post.featured ? '<span class="featured-badge">Featured</span>' : ''}
-      </div>
-      <div class="card-content">
-        <h3>${escapeHTML(post.title)}</h3>
-        <p>${escapeHTML(post.description.slice(0, 150))}${post.description.length > 150 ? '…' : ''}</p>
-        <div class="author-row">
-          <img src="${escapeHTML(post.authorPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(post.author))}" alt="${escapeHTML(post.author)}" loading="lazy">
-          <div><strong>${escapeHTML(post.author)}</strong><span>${timeAgo(post.timestamp)}</span></div>
-        </div>
-        <div class="stats-row">
-          <span>❤️ ${post.likesCount}</span><span>💬 ${post.commentsCount}</span><span>👁️ ${post.viewsCount}</span><span>🔁 ${post.sharesCount}</span><span class="hot">🔥 ${post.trendingScore}</span>
-        </div>
-      </div>
-    </article>`).join('');
-  if (!append) els.trendingGrid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-export async function getTrendingPosts(period = state.period) {
-  const key = `trending:${period}`;
-  const cached = cacheGet(key);
-  if (cached) return cached;
-  const q = query(collection(db, 'posts'), where('timestamp', '>=', getPeriodStart(period)), orderBy('timestamp', 'desc'), limit(60));
-  const snap = await getDocs(q);
-  const posts = withScores(await Promise.all(snap.docs.map(normalizePost)));
-  cacheSet(key, posts);
-  return posts;
-}
-
-export async function getTopCategories() {
-  const posts = cacheGet(`trending:${state.period}`) || await getTrendingPosts(state.period);
-  const categories = [...posts.reduce((map, post) => {
-    const current = map.get(post.category) || { name: post.category, postsCount: 0, engagement: 0 };
-    current.postsCount += 1;
-    current.engagement += post.likesCount + post.commentsCount + post.viewsCount + post.sharesCount;
-    map.set(post.category, current);
-    return map;
-  }, new Map()).values()].sort((a, b) => b.engagement - a.engagement);
-  return categories;
-}
-export async function getTopLikedPosts() { return (await getTrendingPosts(state.period)).slice().sort((a, b) => b.likesCount - a.likesCount).slice(0, 5); }
-export async function getTopViewedPosts() { return (await getTrendingPosts(state.period)).slice().sort((a, b) => b.viewsCount - a.viewsCount).slice(0, 5); }
-export async function getTopCommentedPosts() { return (await getTrendingPosts(state.period)).slice().sort((a, b) => b.commentsCount - a.commentsCount).slice(0, 5); }
-export async function searchTrendingPosts(queryText) {
-  const queryLower = queryText.trim().toLowerCase();
-  if (queryLower.length < SEARCH_MIN_LENGTH) return [];
-  const posts = cacheGet(`trending:${state.period}`) || await getTrendingPosts(state.period);
-  return posts.filter((post) => [post.title, post.description, post.category].some((field) => field.toLowerCase().includes(queryLower))).slice(0, 8);
-}
-
-function renderCategories(categories) {
-  if (!els.topCategoriesGrid) return;
-  if (!categories.length) return renderMessage(els.topCategoriesGrid, 'No category activity yet');
-  const icons = ['🎓', '🏆', '🎨', '🔬', '📚', '🎭', '⚽', '🎵'];
-  els.topCategoriesGrid.innerHTML = categories.map((cat, i) => `<article class="category-card slide-up"><span>${icons[i % icons.length]}</span><h4>${escapeHTML(cat.name)}</h4><p>${cat.postsCount} posts</p><strong>${cat.engagement.toLocaleString()} engagement</strong></article>`).join('');
-}
-function renderLeaderboard(target, posts, metric, icon) {
-  if (!target) return;
-  if (!posts.length) return renderMessage(target, 'No posts to rank yet', '🏅');
-  target.innerHTML = posts.map((post, i) => `<li class="leaderboard-item"><b>#${i + 1}</b><img src="${escapeHTML(post.mediaURL)}" alt="${escapeHTML(post.title)}" loading="lazy"><span>${escapeHTML(post.title)}</span><strong>${icon} ${post[metric].toLocaleString()}</strong></li>`).join('');
-}
-async function renderSidebars() {
-  const [categories, liked, viewed, commented] = await Promise.all([getTopCategories(), getTopLikedPosts(), getTopViewedPosts(), getTopCommentedPosts()]);
-  renderCategories(categories);
-  renderLeaderboard(els.topLikedList, liked, 'likesCount', '❤️');
-  renderLeaderboard(els.topViewedList, viewed, 'viewsCount', '👁️');
-  renderLeaderboard(els.topCommentedList, commented, 'commentsCount', '💬');
-}
-
-async function loadTrending(period = state.period) {
-  try {
-    state.isLoading = true; state.period = period; state.page = 1;
-    renderSkeleton(els.trendingGrid, 6); renderSkeleton(els.topCategoriesGrid, 4, 'category');
-    state.posts = await getTrendingPosts(period);
-    renderTrendingPosts();
-    await renderSidebars();
-  } catch (error) {
-    console.error(error);
-    renderError(els.trendingGrid);
-  } finally { state.isLoading = false; }
-}
-
-function setupTabs() {
-  const container = document.querySelector('[data-trending-tabs]') || document.querySelector('.trending-tabs');
-  if (!container) return;
-  container.addEventListener('click', (event) => {
-    const tab = event.target.closest('[data-period]');
-    if (!tab) return;
-    container.querySelectorAll('[data-period]').forEach((item) => item.classList.toggle('active', item === tab));
-    loadTrending(tab.dataset.period);
-  });
-}
-function setupSearch() {
-  if (!els.searchInput || !els.searchResults) return;
-  els.searchInput.addEventListener('input', debounce(async (event) => {
-    const results = await searchTrendingPosts(event.target.value);
-    els.searchResults.classList.toggle('show', results.length > 0);
-    els.searchResults.innerHTML = results.map((post) => `<button class="search-result" data-post-id="${escapeHTML(post.id)}"><img src="${escapeHTML(post.mediaURL)}" alt=""><span><strong>${escapeHTML(post.title)}</strong><small>${escapeHTML(post.category)} • 🔥 ${post.trendingScore}</small></span></button>`).join('');
-  }));
-  document.addEventListener('click', (event) => {
-    if (!els.searchInput.contains(event.target) && !els.searchResults.contains(event.target)) els.searchResults.classList.remove('show');
-  });
-}
-function setupInfiniteScroll() {
-  window.addEventListener('scroll', debounce(() => {
-    if (state.isLoading || !state.hasMore) return;
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 600) {
-      state.page += 1;
-      renderTrendingPosts(true);
+/* Mobile Hero */
+@media screen and (max-width: 640px) {
+    .trending-hero {
+        padding: 2rem 1rem;
     }
-  }, 120));
-}
-function setupNotifications() {
-  if (!els.notificationBadge && !els.notificationsList) return;
-  const q = query(collection(db, 'notifications'), orderBy('timestamp', 'desc'), limit(10));
-  state.notificationUnsubscribe = onSnapshot(q, (snap) => {
-    const notifications = snap.docs.map((item) => ({ id: item.id, ...item.data() }));
-    const unread = notifications.filter((item) => !item.read).length;
-    if (els.notificationBadge) {
-      els.notificationBadge.textContent = unread;
-      els.notificationBadge.hidden = unread === 0;
+
+    .hero-title {
+        font-size: 1.7rem;
     }
-    if (els.notificationsList) {
-      els.notificationsList.innerHTML = notifications.length ? notifications.map((item) => `<button class="notification-item ${item.read ? '' : 'unread'}" data-notification-id="${item.id}"><strong>${escapeHTML(item.title || 'Notification')}</strong><span>${escapeHTML(item.message || item.body || '')}</span></button>`).join('') : '<div class="empty-notifications">No notifications yet.</div>';
+
+    .hero-subtitle {
+        font-size: 0.95rem;
     }
-  });
-  els.notificationsList?.addEventListener('click', async (event) => {
-    const item = event.target.closest('[data-notification-id]');
-    if (item) await updateDoc(doc(db, 'notifications', item.dataset.notificationId), { read: true, readAt: serverTimestamp() });
-  });
 }
 
-function boot() {
-  setupTabs(); setupSearch(); setupInfiniteScroll(); setupNotifications(); loadTrending('week');
-}
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-else boot();
+/* ============================================
+   TRENDING TABS
+   ============================================ */
 
+.trending-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border-color);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 60px;
+    z-index: 50;
+}
+
+.trending-tabs::-webkit-scrollbar {
+    height: 4px;
+}
+
+.trending-tabs::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.trending-tabs::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+.tab-btn {
+    flex: 0 0 auto;
+    padding: 1rem 1.5rem;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-btn i {
+    margin-right: 0.5rem;
+}
+
+/* Mobile Tabs */
+@media screen and (max-width: 640px) {
+    .trending-tabs {
+        padding: 0 1rem;
+    }
+
+    .tab-btn {
+        padding: 1rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .tab-btn i {
+        display: block;
+        margin-bottom: 0.25rem;
+        margin-right: 0;
+    }
+}
+
+/* ============================================
+   TAB CONTENT
+   ============================================ */
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   TRENDING POSTS SECTION
+   ============================================ */
+
+.trending-section {
+    padding: 2rem 0;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-title i {
+    color: var(--primary-color);
+}
+
+/* Trending Posts Grid */
+.trending-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+@media screen and (max-width: 640px) {
+    .trending-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+@media screen and (min-width: 641px) and (max-width: 960px) {
+    .trending-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+/* Trending Post Card */
+.trending-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+}
+
+.trending-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+/* Post Image */
+.trending-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+.trending-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.trending-card:hover .trending-image img {
+    transform: scale(1.1);
+}
+
+/* Trend Badge */
+.trend-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    backdrop-filter: blur(10px);
+}
+
+.trend-rank {
+    font-size: 1rem;
+}
+
+/* Category Tag */
+.category-tag {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+}
+
+/* Post Info */
+.trending-info {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.trending-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+}
+
+.trending-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+    flex: 1;
+}
+
+/* Trending Stats */
+.trending-stats {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    flex: 1;
+}
+
+.stat i {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.stat-value {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Trending Meta */
+.trending-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+}
+
+.trending-author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.author-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.trending-time {
+    color: var(--text-tertiary);
+}
+
+/* Mobile Card */
+@media screen and (max-width: 640px) {
+    .trending-card {
+        margin-bottom: 0.5rem;
+    }
+
+    .trending-image {
+        height: 150px;
+    }
+
+    .trending-info {
+        padding: 1rem;
+    }
+
+    .trending-title {
+        font-size: 0.95rem;
+    }
+
+    .trending-description {
+        font-size: 0.8rem;
+    }
+
+    .trending-stats {
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+    }
+
+    .stat {
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================
+   TRENDING HASHTAGS
+   ============================================ */
+
+.hashtags-section {
+    padding: 2rem 0;
+}
+
+.hashtags-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+@media screen and (max-width: 640px) {
+    .hashtags-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+}
+
+.hashtag-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.hashtag-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+}
+
+.hashtag-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.hashtag-count {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.hashtag-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: #10b981;
+    font-weight: 700;
+}
+
+.hashtag-trend i {
+    font-size: 0.7rem;
+}
+
+/* ============================================
+   TOP CREATORS
+   ============================================ */
+
+.top-creators-section {
+    padding: 2rem 0;
+}
+
+.creators-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+@media screen and (max-width: 640px) {
+    .creators-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+.creator-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+}
+
+.creator-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+.creator-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1rem;
+    border: 3px solid var(--primary-color);
+    box-shadow: var(--shadow-md);
+}
+
+.creator-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+}
+
+.creator-category {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.creator-stats {
+    display: flex;
+    justify-content: space-around;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+}
+
+.creator-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.creator-stat-value {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.creator-stat-label {
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.follow-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.follow-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.follow-btn.following {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+/* Mobile Creator */
+@media screen and (max-width: 640px) {
+    .creator-avatar {
+        width: 60px;
+        height: 60px;
+    }
+
+    .creator-name {
+        font-size: 0.95rem;
+    }
+
+    .creator-stats {
+        font-size: 0.75rem;
+        padding: 0.75rem 0;
+    }
+}
+
+/* ============================================
+   LEADERBOARD SECTION
+   ============================================ */
+
+.leaderboard-section {
+    padding: 2rem 0;
+}
+
+.leaderboard-wrapper {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.leaderboard-header {
+    display: grid;
+    grid-template-columns: 60px 1fr 100px 100px;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rank-col {
+    text-align: center;
+}
+
+.points-col,
+.views-col {
+    text-align: right;
+}
+
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.leaderboard-item {
+    display: grid;
+    grid-template-columns: 60px 1fr 100px 100px;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.leaderboard-item:hover {
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.leaderboard-item:last-child {
+    border-bottom: none;
+}
+
+.rank-number {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.user-name {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.user-title {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.points-display {
+    text-align: right;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.views-display {
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Mobile Leaderboard */
+@media screen and (max-width: 640px) {
+    .leaderboard-header {
+        grid-template-columns: 40px 1fr 60px;
+        padding: 1rem;
+        font-size: 0.75rem;
+    }
+
+    .leaderboard-item {
+        grid-template-columns: 40px 1fr 60px;
+        padding: 0.75rem 1rem;
+    }
+
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+    }
+
+    .user-name {
+        font-size: 0.85rem;
+    }
+
+    .user-title {
+        display: none;
+    }
+
+    .views-col,
+    .views-display {
+        display: none;
+    }
+}
+
+/* ============================================
+   TRENDING CHARTS/GRAPHS
+   ============================================ */
+
+.chart-section {
+    padding: 2rem 0;
+}
+
+.chart-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 1rem;
+}
+
+.chart-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg-secondary), var(--border-color));
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* Mobile Chart */
+@media screen and (max-width: 640px) {
+    .chart-card {
+        padding: 1.5rem 1rem;
+    }
+
+    .chart-container {
+        height: 200px;
+    }
+}
+
+/* ============================================
+   TRENDING TIMELINE
+   ============================================ */
+
+.timeline-section {
+    padding: 2rem 0;
+}
+
+.timeline {
+    position: relative;
+    padding: 2rem 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+}
+
+.timeline-item {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.timeline-item:nth-child(odd) .timeline-content {
+    margin-left: 0;
+    margin-right: 50%;
+    padding-right: 2rem;
+}
+
+.timeline-item:nth-child(even) .timeline-content {
+    margin-left: 50%;
+    margin-right: 0;
+    padding-left: 2rem;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow: 0 0 0 4px var(--bg-primary);
+}
+
+.timeline-content {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+}
+
+.timeline-date {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.timeline-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Mobile Timeline */
+@media screen and (max-width: 640px) {
+    .timeline::before {
+        left: 20px;
+    }
+
+    .timeline-dot {
+        left: 20px;
+    }
+
+    .timeline-item:nth-child(odd) .timeline-content,
+    .timeline-item:nth-child(even) .timeline-content {
+        margin-left: 60px;
+        margin-right: 0;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+/* ============================================
+   FILTERS & SEARCH
+   ============================================ */
+
+.trending-search {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.search-field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.search-field input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.search-field input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.search-field i {
+    color: var(--primary-color);
+}
+
+/* Mobile Search */
+@media screen and (max-width: 640px) {
+    .trending-search {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+
+    .search-field {
+        padding: 0.5rem;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+    }
+}
+
+/* ============================================
+   LOADING SKELETONS
+   ============================================ */
+
+.loading-skeleton {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(
+        90deg,
+        var(--bg-secondary) 25%,
+        var(--border-color) 50%,
+        var(--bg-secondary) 75%
+    );
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 15px;
+    margin-bottom: 1rem;
+}
+
+.leaderboard-skeleton {
+    width: 100%;
+    height: 60px;
+    background: linear-gradient(
+        90deg,
+        var(--bg-secondary) 25%,
+        var(--border-color) 50%,
+        var(--bg-secondary) 75%
+    );
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.pagination-btn {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 40px;
+    text-align: center;
+}
+
+.pagination-btn:hover {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+}
+
+.pagination-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-color: transparent;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media screen and (max-width: 640px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .trending-main {
+        padding-top: 60px;
+    }
+
+    .trending-section {
+        padding: 1.5rem 0;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+}
+
+@media screen and (min-width: 641px) and (max-width: 960px) {
+    .trending-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hashtags-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .creators-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .trending-tabs,
+    .pagination,
+    .follow-btn {
+        display: none !important;
+    }
+
+    .trending-card,
+    .creator-card,
+    .leaderboard-item {
+        page-break-inside: avoid;
+    }
+}
