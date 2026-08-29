@@ -154,6 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
         searchBtn.src = current.replace(/navigation\.js(\?.*)?$/, 'mobile-search-btn.js');
         document.head.appendChild(searchBtn);
     }
+    if (!document.getElementById('hshs-brand-js')) {
+        var brand = document.createElement('script');
+        brand.id = 'hshs-brand-js';
+        brand.src = current.replace(/navigation\.js(\?.*)?$/, 'hshs-brand.js');
+        document.head.appendChild(brand);
+    }
 })();
 
 if (typeof module !== 'undefined' && module.exports) {
