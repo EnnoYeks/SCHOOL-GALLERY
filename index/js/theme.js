@@ -1,1 +1,1 @@
-document.write('<script src="../../js/theme.js"><\/script>');
+(function(){var s=document.createElement('script');s.src='../../js/theme.js';document.head.appendChild(s);})();

@@ -1,2 +1,1 @@
-document.write('<script src="../../js/navigation.js"><\/script>');
-document.write('<script src="../../js/mobile-navigation.js"><\/script>');
+(function(){function add(src){var s=document.createElement('script');s.src=src;document.head.appendChild(s);}add('../../js/navigation.js');add('../../js/mobile-navigation.js');})();
