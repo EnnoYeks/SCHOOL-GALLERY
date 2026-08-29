@@ -21,6 +21,38 @@
         return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     }
 
+    function canonicalize(url) {
+        const next = new URL(url, location.href);
+        let file = (next.pathname.split('/').pop() || '').toLowerCase();
+        if (file === 'contact.html') {
+            next.pathname = next.pathname.replace(/contact\.html$/i, 'contat.html');
+            file = 'contat.html';
+        }
+        if (file === 'index.html' && /\/index\//i.test(next.pathname)) {
+            next.pathname = '/index.html';
+        }
+        const nested = ['gallery.html','photos.html','videos.html','trending.html','spotlight.html','polls.html','memories.html','about.html','contat.html','profile.html','settings.html','admin.html'];
+        if (nested.indexOf(file) !== -1 && next.pathname.indexOf('/index/') === -1) {
+            next.pathname = '/index/' + file;
+        }
+        return next;
+    }
+
+    function fixBadLinks(root) {
+        const scope = root || document;
+        scope.querySelectorAll('a[href]').forEach(function (a) {
+            const raw = a.getAttribute('href');
+            if (!raw || raw.charAt(0) === '#' || raw.indexOf('mailto:') === 0) return;
+            if (/^https?:/i.test(raw) && raw.indexOf(location.origin) !== 0) return;
+            try {
+                const next = canonicalize(raw);
+                if (next.origin !== location.origin) return;
+                const dest = next.pathname + next.search + next.hash;
+                if (dest && dest !== raw) a.setAttribute('href', dest);
+            } catch (e) {}
+        });
+    }
+
     function inSubfolderNow() {
         const file = currentFile();
         return /\/index\//i.test(location.pathname) || (PAGE_FILES.includes(file) && file !== 'index.html');
@@ -284,7 +316,7 @@
     }
 
     async function navigate(url, fromHistory) {
-        const next = new URL(url, location.href);
+        const next = canonicalize(url);
         if (next.origin !== location.origin) { location.href = next.href; return; }
         if (next.hash === '#more') return;
         const root = wrapPage();
@@ -299,6 +331,7 @@
             adoptCss(doc);
             const incoming = extractPage(doc);
             root.innerHTML = incoming.innerHTML;
+            fixBadLinks(root);
             document.title = doc.title || document.title;
             closeMore();
             syncDesktopNav();
@@ -320,7 +353,7 @@
         if (!raw || raw.charAt(0) === '#') return false;
         if (anchor.target === '_blank') return false;
         let next;
-        try { next = new URL(anchor.href, location.href); } catch (e) { return false; }
+        try { next = canonicalize(anchor.href); } catch (e) { return false; }
         if (next.origin !== location.origin) return false;
         const name = next.pathname.split('/').pop().toLowerCase();
         return name === '' || name === 'index.html' || name.endsWith('.html');
@@ -369,6 +402,7 @@
         buildBar();
         wrapPage();
         ensureLoader();
+        fixBadLinks(document);
         wireHomeButtons();
         wireSpa();
         markActive();
