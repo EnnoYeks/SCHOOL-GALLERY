@@ -1,6 +1,5 @@
 // ============================================
 // HSHS MOBILE SHELL + in-app page swap
-// Navbar and tab bar stay put. Only page content changes.
 // ============================================
 
 (function () {
@@ -10,10 +9,10 @@
     const PAGE_FILES = [
         'gallery.html', 'photos.html', 'videos.html', 'trending.html',
         'spotlight.html', 'polls.html', 'memories.html', 'about.html',
-        'contat.html', 'contact.html', 'profile.html', 'settings.html', 'admin.html'
+        'contat.html', 'contact.html', 'profile.html', 'settings.html', 'admin.html', 'clips.html', 'shorts.html'
     ];
 
-    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js/;
+    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js/;
     const loadedCss = new Set();
     const loadedPageScripts = new Set();
 
@@ -28,10 +27,14 @@
             next.pathname = next.pathname.replace(/contact\.html$/i, 'contat.html');
             file = 'contat.html';
         }
+        if (file === 'shorts.html') {
+            next.pathname = next.pathname.replace(/shorts\.html$/i, 'clips.html');
+            file = 'clips.html';
+        }
         if (file === 'index.html' && /\/index\//i.test(next.pathname)) {
             next.pathname = '/index.html';
         }
-        const nested = ['gallery.html','photos.html','videos.html','trending.html','spotlight.html','polls.html','memories.html','about.html','contat.html','profile.html','settings.html','admin.html'];
+        const nested = ['gallery.html','photos.html','videos.html','trending.html','spotlight.html','polls.html','memories.html','about.html','contat.html','profile.html','settings.html','admin.html','clips.html'];
         if (nested.indexOf(file) !== -1 && next.pathname.indexOf('/index/') === -1) {
             next.pathname = '/index/' + file;
         }
@@ -72,9 +75,10 @@
                 { id: 'home', href: homeHref(), icon: 'fa-home', label: 'Home', match: ['index.html', ''] },
                 { id: 'gallery', href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
                 { id: 'spotlight', href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', match: ['spotlight.html'] },
-                { id: 'trending', href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] }
+                { id: 'clips', href: sub('clips.html'), icon: 'fa-clapperboard', label: 'Clips', match: ['clips.html', 'shorts.html'] }
             ],
             MORE: [
+                { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
                 { href: sub('photos.html'), icon: 'fa-camera', label: 'Photos', match: ['photos.html'] },
                 { href: sub('videos.html'), icon: 'fa-play', label: 'Videos', match: ['videos.html'] },
                 { href: sub('polls.html'), icon: 'fa-square-poll-vertical', label: 'Polls', match: ['polls.html'] },
@@ -88,6 +92,7 @@
             DESKTOP: [
                 { href: homeHref(), icon: 'fa-home', label: 'Home', match: ['index.html', ''] },
                 { href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
+                { href: sub('clips.html'), icon: 'fa-clapperboard', label: 'Clips', match: ['clips.html'] },
                 { href: sub('photos.html'), icon: 'fa-photo-film', label: 'Photos', match: ['photos.html'] },
                 { href: sub('videos.html'), icon: 'fa-video', label: 'Videos', match: ['videos.html'] },
                 { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
@@ -140,13 +145,13 @@
 
     function markActive() {
         const file = currentFile();
-        const moreFiles = ['photos.html','videos.html','polls.html','memories.html','about.html','contat.html','contact.html','profile.html','settings.html','admin.html'];
+        const moreFiles = ['photos.html','videos.html','polls.html','memories.html','about.html','contat.html','contact.html','profile.html','settings.html','admin.html','trending.html'];
         document.querySelectorAll('.mobile-tabbar a').forEach((a) => {
             const tab = a.getAttribute('data-tab');
             let on = false;
             if (tab === 'home') on = file === 'index.html' || file === '';
             else if (tab === 'more') on = moreFiles.includes(file);
-            else on = file === tab + '.html';
+            else on = file === tab + '.html' || (tab === 'clips' && file === 'shorts.html');
             a.classList.toggle('active', on);
         });
         document.querySelectorAll('.more-grid a').forEach((a) => {
