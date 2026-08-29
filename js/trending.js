@@ -18,10 +18,10 @@ import {
 } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 import { ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js';
 
-// Trending is driven by two related signals:
-// 1. Total engagement: likes + comments + shares
-// 2. Likes: given an extra boost because they are the clearest positive signal
-// Views provide reach/context without overpowering actual interaction.
+// Trending signals:
+// - Total engagement = likes + comments + shares
+// - Likes receive an additional boost because they are the clearest positive signal
+// - Views add reach/context without overpowering interaction
 const TRENDING_WEIGHTS = Object.freeze({ engagement: 4, likes: 2, views: 1 });
 const PAGE_SIZE = 9;
 const CACHE_TTL = 5 * 60 * 1000;
@@ -102,8 +102,12 @@ function getPeriodStart(period = 'week') {
   return start;
 }
 
+function calculateEngagement(post) {
+  return post.likesCount + post.commentsCount + post.sharesCount;
+}
+
 function calculateTrendingScore(post) {
-  const engagement = post.likesCount + post.commentsCount + post.sharesCount;
+  const engagement = calculateEngagement(post);
   return (engagement * TRENDING_WEIGHTS.engagement)
     + (post.likesCount * TRENDING_WEIGHTS.likes)
     + (post.viewsCount * TRENDING_WEIGHTS.views);
@@ -112,7 +116,7 @@ function calculateTrendingScore(post) {
 function withScores(posts) {
   return posts.map((post) => ({
     ...post,
-    engagementCount: post.likesCount + post.commentsCount + post.sharesCount,
+    engagementCount: calculateEngagement(post),
     trendingScore: calculateTrendingScore(post),
   }))
     .sort((a, b) => b.trendingScore - a.trendingScore || b.timestamp - a.timestamp);
