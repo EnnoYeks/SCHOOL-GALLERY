@@ -85,6 +85,13 @@
         link.rel = 'stylesheet';
         link.href = cssHref;
         document.head.appendChild(link);
+        if (!document.getElementById('hshs-loader-css')) {
+            const loader = document.createElement('link');
+            loader.id = 'hshs-loader-css';
+            loader.rel = 'stylesheet';
+            loader.href = cssHref.replace('mobile-shell.css', 'mobile-loader.css');
+            document.head.appendChild(loader);
+        }
     }
 
     function syncDesktopNav() {
@@ -133,7 +140,6 @@
         document.body.classList.add('has-mobile-shell');
         const r = routes();
         const moreActive = r.MORE.some(isActive);
-
         const bar = document.createElement('nav');
         bar.className = 'mobile-tabbar';
         bar.setAttribute('aria-label', 'Primary');
@@ -148,11 +154,9 @@
                 <span>More</span>
             </a>
         `;
-
         const backdrop = document.createElement('div');
         backdrop.className = 'more-backdrop';
         backdrop.id = 'moreBackdrop';
-
         const sheet = document.createElement('aside');
         sheet.className = 'more-sheet';
         sheet.id = 'moreSheet';
@@ -168,11 +172,9 @@
                 `).join('')}
             </div>
         `;
-
         document.body.appendChild(bar);
         document.body.appendChild(backdrop);
         document.body.appendChild(sheet);
-
         document.getElementById('openMoreSheet').addEventListener('click', function (e) {
             e.preventDefault();
             sheet.classList.add('open');
@@ -213,9 +215,7 @@
         const box = document.createElement('div');
         Array.from(doc.body.children).forEach(function (el) {
             const cls = el.className ? String(el.className) : '';
-            const skip = el.tagName === 'SCRIPT'
-                || el.id === 'hshs-page'
-                || keepNames.some(function (name) { return cls.indexOf(name) !== -1; });
+            const skip = el.tagName === 'SCRIPT' || el.id === 'hshs-page' || keepNames.some(function (name) { return cls.indexOf(name) !== -1; });
             if (!skip) box.appendChild(el.cloneNode(true));
         });
         return box;
@@ -252,13 +252,44 @@
         });
     }
 
+    function ensureLoader() {
+        var el = document.getElementById('hshs-loader');
+        if (el) return el;
+        el = document.createElement('div');
+        el.id = 'hshs-loader';
+        el.className = 'hshs-loader';
+        el.setAttribute('aria-live', 'polite');
+        el.setAttribute('aria-busy', 'false');
+        el.innerHTML = '<div class="hshs-loader-bar"></div><div class="hshs-loader-card"><span class="hshs-loader-spin"></span><span class="hshs-loader-text">Loading...</span></div>';
+        document.body.appendChild(el);
+        return el;
+    }
+
+    function showLoader(label) {
+        var el = ensureLoader();
+        var text = el.querySelector('.hshs-loader-text');
+        if (text) text.textContent = label || 'Loading...';
+        el.classList.add('is-on');
+        el.setAttribute('aria-busy', 'true');
+        document.body.classList.add('is-page-loading');
+    }
+
+    function hideLoader() {
+        var el = document.getElementById('hshs-loader');
+        if (el) {
+            el.classList.remove('is-on');
+            el.setAttribute('aria-busy', 'false');
+        }
+        document.body.classList.remove('is-page-loading');
+    }
+
     async function navigate(url, fromHistory) {
         const next = new URL(url, location.href);
         if (next.origin !== location.origin) { location.href = next.href; return; }
         if (next.hash === '#more') return;
-
         const root = wrapPage();
         root.classList.add('is-swapping');
+        showLoader('Loading...');
         try {
             const res = await fetch(next.href, { credentials: 'same-origin' });
             if (!res.ok) throw new Error('fetch failed');
@@ -279,6 +310,7 @@
             location.href = next.href;
         } finally {
             root.classList.remove('is-swapping');
+            hideLoader();
         }
     }
 
@@ -336,6 +368,7 @@
         syncDesktopNav();
         buildBar();
         wrapPage();
+        ensureLoader();
         wireHomeButtons();
         wireSpa();
         markActive();
