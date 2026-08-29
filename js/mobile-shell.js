@@ -9,7 +9,8 @@
     const PAGE_FILES = [
         'gallery.html', 'photos.html', 'videos.html', 'trending.html',
         'spotlight.html', 'polls.html', 'memories.html', 'about.html',
-        'contat.html', 'contact.html', 'profile.html', 'settings.html', 'admin.html', 'clips.html', 'shorts.html'
+        'contat.html', 'contact.html', 'profile.html', 'settings.html', 'admin.html',
+        'clips.html', 'shorts.html', 'buzz.html'
     ];
 
     const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js/;
@@ -27,14 +28,14 @@
             next.pathname = next.pathname.replace(/contact\.html$/i, 'contat.html');
             file = 'contat.html';
         }
-        if (file === 'shorts.html') {
-            next.pathname = next.pathname.replace(/shorts\.html$/i, 'clips.html');
-            file = 'clips.html';
+        if (file === 'shorts.html' || file === 'clips.html') {
+            next.pathname = next.pathname.replace(/(shorts|clips)\.html$/i, 'buzz.html');
+            file = 'buzz.html';
         }
         if (file === 'index.html' && /\/index\//i.test(next.pathname)) {
             next.pathname = '/index.html';
         }
-        const nested = ['gallery.html','photos.html','videos.html','trending.html','spotlight.html','polls.html','memories.html','about.html','contat.html','profile.html','settings.html','admin.html','clips.html'];
+        const nested = ['gallery.html','photos.html','videos.html','trending.html','spotlight.html','polls.html','memories.html','about.html','contat.html','profile.html','settings.html','admin.html','clips.html','buzz.html'];
         if (nested.indexOf(file) !== -1 && next.pathname.indexOf('/index/') === -1) {
             next.pathname = '/index/' + file;
         }
@@ -60,14 +61,8 @@
         const file = currentFile();
         return /\/index\//i.test(location.pathname) || (PAGE_FILES.includes(file) && file !== 'index.html');
     }
-
-    function homeHref() {
-        return inSubfolderNow() ? '../index.html' : 'index.html';
-    }
-
-    function sub(name) {
-        return inSubfolderNow() ? name : 'index/' + name;
-    }
+    function homeHref() { return inSubfolderNow() ? '../index.html' : 'index.html'; }
+    function sub(name) { return inSubfolderNow() ? name : 'index/' + name; }
 
     function routes() {
         return {
@@ -75,7 +70,7 @@
                 { id: 'home', href: homeHref(), icon: 'fa-home', label: 'Home', match: ['index.html', ''] },
                 { id: 'gallery', href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
                 { id: 'spotlight', href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', match: ['spotlight.html'] },
-                { id: 'clips', href: sub('clips.html'), icon: 'fa-clapperboard', label: 'Clips', match: ['clips.html', 'shorts.html'] }
+                { id: 'buzz', href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html', 'shorts.html'] }
             ],
             MORE: [
                 { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
@@ -92,7 +87,7 @@
             DESKTOP: [
                 { href: homeHref(), icon: 'fa-home', label: 'Home', match: ['index.html', ''] },
                 { href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
-                { href: sub('clips.html'), icon: 'fa-clapperboard', label: 'Clips', match: ['clips.html'] },
+                { href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html'] },
                 { href: sub('photos.html'), icon: 'fa-photo-film', label: 'Photos', match: ['photos.html'] },
                 { href: sub('videos.html'), icon: 'fa-video', label: 'Videos', match: ['videos.html'] },
                 { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
@@ -134,11 +129,9 @@
     function syncDesktopNav() {
         const nav = document.querySelector('.navbar .nav-links');
         if (!nav) return;
-        const DESKTOP = routes().DESKTOP;
-        nav.innerHTML = DESKTOP.map((item) => `
+        nav.innerHTML = routes().DESKTOP.map((item) => `
             <a href="${item.href}" class="nav-link${isActive(item) ? ' active' : ''}">
-                <i class="fas ${item.icon}"></i>
-                <span>${item.label}</span>
+                <i class="fas ${item.icon}"></i><span>${item.label}</span>
             </a>
         `).join('');
     }
@@ -151,7 +144,7 @@
             let on = false;
             if (tab === 'home') on = file === 'index.html' || file === '';
             else if (tab === 'more') on = moreFiles.includes(file);
-            else on = file === tab + '.html' || (tab === 'clips' && file === 'shorts.html');
+            else on = file === tab + '.html' || (tab === 'buzz' && (file === 'clips.html' || file === 'shorts.html'));
             a.classList.toggle('active', on);
         });
         document.querySelectorAll('.more-grid a').forEach((a) => {
@@ -182,33 +175,21 @@
         bar.setAttribute('aria-label', 'Primary');
         bar.innerHTML = r.PRIMARY.map((item) => `
             <a href="${item.href}" class="${isActive(item) ? 'active' : ''}" data-tab="${item.id}">
-                <i class="fas ${item.icon}"></i>
-                <span>${item.label}</span>
+                <i class="fas ${item.icon}"></i><span>${item.label}</span>
             </a>
         `).join('') + `
             <a href="#more" class="${moreActive ? 'active' : ''}" data-tab="more" id="openMoreSheet">
-                <i class="fas fa-ellipsis"></i>
-                <span>More</span>
-            </a>
-        `;
+                <i class="fas fa-ellipsis"></i><span>More</span>
+            </a>`;
         const backdrop = document.createElement('div');
         backdrop.className = 'more-backdrop';
         backdrop.id = 'moreBackdrop';
         const sheet = document.createElement('aside');
         sheet.className = 'more-sheet';
         sheet.id = 'moreSheet';
-        sheet.innerHTML = `
-            <h3>All pages</h3>
-            <p>Jump to any section</p>
-            <div class="more-grid">
-                ${r.MORE.map((item) => `
-                    <a href="${item.href}" class="${isActive(item) ? 'active' : ''}">
-                        <i class="fas ${item.icon}"></i>
-                        <span>${item.label}</span>
-                    </a>
-                `).join('')}
-            </div>
-        `;
+        sheet.innerHTML = `<h3>All pages</h3><p>Jump to any section</p><div class="more-grid">` +
+            r.MORE.map((item) => `<a href="${item.href}" class="${isActive(item) ? 'active' : ''}"><i class="fas ${item.icon}"></i><span>${item.label}</span></a>`).join('') +
+            `</div>`;
         document.body.appendChild(bar);
         document.body.appendChild(backdrop);
         document.body.appendChild(sheet);
@@ -218,9 +199,7 @@
             backdrop.classList.add('open');
         });
         backdrop.addEventListener('click', closeMore);
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') closeMore();
-        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMore(); });
     }
 
     function wrapPage() {
@@ -295,28 +274,20 @@
         el = document.createElement('div');
         el.id = 'hshs-loader';
         el.className = 'hshs-loader';
-        el.setAttribute('aria-live', 'polite');
-        el.setAttribute('aria-busy', 'false');
         el.innerHTML = '<div class="hshs-loader-bar"></div><div class="hshs-loader-card"><span class="hshs-loader-spin"></span><span class="hshs-loader-text">Loading...</span></div>';
         document.body.appendChild(el);
         return el;
     }
-
     function showLoader(label) {
         var el = ensureLoader();
         var text = el.querySelector('.hshs-loader-text');
         if (text) text.textContent = label || 'Loading...';
         el.classList.add('is-on');
-        el.setAttribute('aria-busy', 'true');
         document.body.classList.add('is-page-loading');
     }
-
     function hideLoader() {
         var el = document.getElementById('hshs-loader');
-        if (el) {
-            el.classList.remove('is-on');
-            el.setAttribute('aria-busy', 'false');
-        }
+        if (el) el.classList.remove('is-on');
         document.body.classList.remove('is-page-loading');
     }
 
@@ -334,8 +305,7 @@
             if (!fromHistory) history.pushState({ url: next.href }, '', next.href);
             const doc = new DOMParser().parseFromString(html, 'text/html');
             adoptCss(doc);
-            const incoming = extractPage(doc);
-            root.innerHTML = incoming.innerHTML;
+            root.innerHTML = extractPage(doc).innerHTML;
             fixBadLinks(root);
             document.title = doc.title || document.title;
             closeMore();
@@ -368,10 +338,7 @@
         function bind(id, dest) {
             const el = document.getElementById(id);
             if (!el) return;
-            el.onclick = function (e) {
-                e.preventDefault();
-                navigate(dest);
-            };
+            el.onclick = function (e) { e.preventDefault(); navigate(dest); };
         }
         bind('exploreBtn', sub('gallery.html'));
         bind('learnMoreBtn', sub('about.html'));
@@ -379,10 +346,7 @@
         const logo = document.querySelector('.logo');
         if (logo) {
             logo.style.cursor = 'pointer';
-            logo.onclick = function (e) {
-                e.preventDefault();
-                navigate(homeHref());
-            };
+            logo.onclick = function (e) { e.preventDefault(); navigate(homeHref()); };
         }
     }
 
@@ -393,16 +357,12 @@
             e.preventDefault();
             navigate(a.href);
         });
-        window.addEventListener('popstate', function () {
-            navigate(location.href, true);
-        });
+        window.addEventListener('popstate', function () { navigate(location.href, true); });
     }
 
     function boot() {
         injectCss();
-        document.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
-            if (l.href) loadedCss.add(l.href);
-        });
+        document.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) { if (l.href) loadedCss.add(l.href); });
         syncDesktopNav();
         buildBar();
         wrapPage();
@@ -415,7 +375,6 @@
     }
 
     window.__hshsNavigate = navigate;
-
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
     else boot();
 })();
