@@ -7,6 +7,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/fireba
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
 
 // Supabase (Media Storage)
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
@@ -29,6 +30,7 @@ const app = initializeApp(firebaseConfig);
 
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
+export const storage = getStorage(app);
 export const analytics = getAnalytics(app);
 
 // ============================================
@@ -92,8 +94,8 @@ export const CONFIG = {
 window.firebaseApp = app;
 window.firestore = firestore;
 window.auth = auth;
+window.storage = storage;
 window.analytics = analytics;
 window.supabase = supabase;
 window.CONFIG = CONFIG;
 window.firebaseConfig = firebaseConfig;
-
