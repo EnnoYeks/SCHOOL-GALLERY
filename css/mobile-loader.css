@@ -56,3 +56,57 @@ body.is-page-loading #hshs-page { opacity: 0.45; }
     100% { width: 12%; left: 88%; }
 }
 @keyframes hshsSpin { to { transform: rotate(360deg); } }
+
+/* Keep content above the fixed tab bar on phones */
+@media (max-width: 1024px) {
+    html, body.has-mobile-shell {
+        overflow-x: hidden;
+        overflow-y: auto !important;
+        overscroll-behavior-y: contain;
+    }
+    body.has-mobile-shell {
+        padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important;
+    }
+    body.has-mobile-shell #hshs-page {
+        padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+    }
+    body.has-mobile-shell .footer {
+        padding-bottom: calc(28px + env(safe-area-inset-bottom)) !important;
+        margin-bottom: 0 !important;
+    }
+    /* Sticky filters were pinning the page and hiding the gallery under the tab bar */
+    body.has-mobile-shell .spotlight-filters,
+    body.has-mobile-shell .category-filter,
+    body.has-mobile-shell .filter-bar {
+        position: static !important;
+        top: auto !important;
+    }
+    body.has-mobile-shell .spotlight-main {
+        padding-bottom: 1.5rem;
+    }
+    body.has-mobile-shell .featured-loading,
+    body.has-mobile-shell .featured-student-card .loading-skeleton {
+        min-height: 110px !important;
+        height: 120px !important;
+    }
+    body.has-mobile-shell .students-section,
+    body.has-mobile-shell .hall-of-fame-section,
+    body.has-mobile-shell .achievements-section,
+    body.has-mobile-shell .categories-section,
+    body.has-mobile-shell .testimonials-section {
+        padding-top: 1.2rem;
+        padding-bottom: 1.2rem;
+    }
+    body.has-mobile-shell .section-title {
+        margin-bottom: 0.8rem;
+    }
+    .hshs-scroll-pad {
+        display: block;
+        height: calc(96px + env(safe-area-inset-bottom));
+        width: 100%;
+        pointer-events: none;
+    }
+}
+@media (min-width: 1025px) {
+    .hshs-scroll-pad { display: none; }
+}
