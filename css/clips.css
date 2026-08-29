@@ -1,0 +1,47 @@
+/* HSHS Clips - vertical 9:16 feed */
+.clips-page { background: #050816; }
+.clips-main { position: relative; z-index: 10; height: calc(100dvh - 58px); }
+.clip-feed { height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; }
+.clip-card {
+    position: relative; height: calc(100dvh - 132px); min-height: 520px; margin: 0 auto 8px;
+    scroll-snap-align: start; scroll-snap-stop: always; overflow: hidden; background: #0b1220;
+}
+.clip-stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.clip-poster {
+    width: 100%; height: 100%; object-fit: cover;
+    background: radial-gradient(circle at 20% 20%, rgba(99,102,241,.45), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(236,72,153,.4), transparent 42%),
+                linear-gradient(180deg, #1e1b4b, #0f172a);
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 3.2rem;
+}
+.clip-fade {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,.15) 0%, transparent 28%, transparent 48%, rgba(0,0,0,.72) 100%);
+}
+.clip-side { position: absolute; right: 10px; bottom: 92px; display: flex; flex-direction: column; gap: 14px; z-index: 4; }
+.clip-action { width: 48px; border: 0; background: none; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; }
+.clip-action i { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.16); backdrop-filter: blur(10px); font-size: 18px; }
+.clip-action.liked i { background: #ec4899; }
+.clip-meta { position: absolute; left: 14px; right: 70px; bottom: 18px; color: #fff; z-index: 4; }
+.clip-user { font-weight: 800; margin-bottom: 4px; }
+.clip-title { font-size: .95rem; line-height: 1.35; opacity: .95; }
+.clip-music { margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 999px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.18); font-size: 12px; font-weight: 700; }
+.clip-music i { color: #f472b6; }
+.clip-dim { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1320; }
+.clip-dim.open { display: block; }
+.clip-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1330; max-height: 62vh; overflow: auto; padding: 12px 16px calc(90px + env(safe-area-inset-bottom)); background: var(--bg-primary); border-radius: 22px 22px 0 0; transform: translateY(110%); transition: transform .25s ease; }
+.clip-sheet.open { transform: translateY(0); }
+.clip-sheet-handle { width: 42px; height: 5px; border-radius: 99px; background: var(--border-color); margin: 4px auto 12px; }
+.clip-sheet h3 { margin: 0 0 8px; }
+.clip-sheet-note { color: var(--text-secondary); font-size: .88rem; margin: 0 0 12px; }
+.comment-list, .music-list { display: flex; flex-direction: column; gap: 10px; }
+.comment-item, .music-item { padding: 10px 12px; border-radius: 14px; background: var(--bg-secondary); border: 1px solid var(--border-color); }
+.music-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.music-item button { border: 0; border-radius: 999px; padding: 6px 12px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; font-weight: 700; }
+.comment-form { display: flex; gap: 8px; margin-top: 12px; }
+.comment-form input { flex: 1; border-radius: 999px; border: 1px solid var(--border-color); padding: .75rem 1rem; background: var(--bg-secondary); color: var(--text-primary); }
+.comment-form button { width: 44px; border: 0; border-radius: 50%; background: var(--primary-color); color: #fff; }
+@media (min-width: 1025px) {
+    .clips-main { max-width: 420px; margin: 0 auto; height: calc(100vh - 80px); }
+    .clip-card { border-radius: 18px; height: calc(100vh - 160px); }
+}
