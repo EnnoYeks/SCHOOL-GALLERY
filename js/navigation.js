@@ -17,17 +17,14 @@ class Navigation {
     setupNavigation() {
         const navLinks = document.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                // Remove active class from all links
+            link.addEventListener('click', () => {
                 navLinks.forEach(l => l.classList.remove('active'));
-                // Add active class to clicked link
                 link.classList.add('active');
             });
         });
     }
 
     setupDropdowns() {
-        // Notification dropdown
         const notificationIcon = document.querySelector('.notification-icon');
         const notificationDropdown = document.getElementById('notificationDropdown');
 
@@ -38,7 +35,6 @@ class Navigation {
             });
         }
 
-        // Profile dropdown
         const profileIcon = document.querySelector('.profile-icon');
         const profileDropdown = document.getElementById('profileDropdown');
 
@@ -49,14 +45,9 @@ class Navigation {
             });
         }
 
-        // Close dropdowns when clicking outside
         document.addEventListener('click', () => {
-            if (notificationDropdown) {
-                notificationDropdown.classList.remove('active');
-            }
-            if (profileDropdown) {
-                profileDropdown.classList.remove('active');
-            }
+            if (notificationDropdown) notificationDropdown.classList.remove('active');
+            if (profileDropdown) profileDropdown.classList.remove('active');
         });
     }
 
@@ -70,7 +61,6 @@ class Navigation {
                 mobileMenuToggle.classList.toggle('active');
             });
 
-            // Close menu when a link is clicked
             const links = navLinks.querySelectorAll('a');
             links.forEach(link => {
                 link.addEventListener('click', () => {
@@ -82,25 +72,15 @@ class Navigation {
     }
 
     setupScrollEffects() {
-        let lastScroll = 0;
         const navbar = document.querySelector('.navbar');
-
         if (navbar) {
             window.addEventListener('scroll', () => {
-                const currentScroll = window.pageYOffset;
-
-                if (currentScroll > 100) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-
-                lastScroll = currentScroll;
+                if (window.pageYOffset > 100) navbar.classList.add('scrolled');
+                else navbar.classList.remove('scrolled');
             });
         }
     }
 
-    // Update Notification Badge
     updateNotificationBadge(count) {
         const badge = document.getElementById('notificationBadge');
         if (badge) {
@@ -109,7 +89,6 @@ class Navigation {
         }
     }
 
-    // Add Notification
     addNotification(notification) {
         const notificationsList = document.getElementById('notificationsList');
         if (notificationsList) {
@@ -129,49 +108,48 @@ class Navigation {
                 </div>
             `;
             notificationsList.insertBefore(item, notificationsList.firstChild);
-            
-            // Update badge
             const currentCount = parseInt(document.getElementById('notificationBadge').textContent) || 0;
             this.updateNotificationBadge(currentCount + 1);
         }
     }
 }
 
-// Initialize navigation
 const navigation = new Navigation();
 
-// Tab Switching Function
 function switchTab(tabName) {
-    // Hide all tabs
     const tabs = document.querySelectorAll('.tab-content');
     tabs.forEach(tab => tab.classList.remove('active'));
-
-    // Remove active class from all buttons
     const buttons = document.querySelectorAll('.tab-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
-
-    // Show selected tab
     const selectedTab = document.getElementById(tabName + 'Tab');
-    if (selectedTab) {
-        selectedTab.classList.add('active');
-    }
-
-    // Add active class to clicked button
-    event.target.classList.add('active');
+    if (selectedTab) selectedTab.classList.add('active');
+    if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
 }
 
-// Tab Button Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const tabName = btn.getAttribute('data-tab');
-            switchTab(tabName);
+        btn.addEventListener('click', () => {
+            switchTab(btn.getAttribute('data-tab'));
         });
     });
 });
 
-// Export for use in other files
+(function loadHshsMobileShell() {
+    if (window.__hshsMobileShell) return;
+    var current = document.currentScript && document.currentScript.src;
+    if (!current) {
+        var list = document.querySelectorAll('script[src*="navigation.js"]');
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].src.indexOf('mobile-navigation') === -1) current = list[i].src;
+        }
+    }
+    if (!current) return;
+    var script = document.createElement('script');
+    script.src = current.replace(/navigation\.js(\?.*)?$/, 'mobile-shell.js');
+    document.head.appendChild(script);
+})();
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = Navigation;
 }

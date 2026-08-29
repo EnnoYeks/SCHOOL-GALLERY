@@ -1,0 +1,58 @@
+/* In-app loading indicator */
+.hshs-loader {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+.hshs-loader.is-on {
+    opacity: 1;
+    visibility: visible;
+}
+.hshs-loader-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 28%;
+    border-radius: 0 99px 99px 0;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    animation: hshsLoadBar 0.9s ease-in-out infinite;
+}
+.hshs-loader-card {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 0.92rem;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(16px);
+}
+.hshs-loader-spin {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: hshsSpin 0.7s linear infinite;
+}
+body.is-page-loading #hshs-page { opacity: 0.45; }
+#hshs-page { transition: opacity 0.16s ease; }
+@keyframes hshsLoadBar {
+    0% { width: 10%; left: 0; }
+    50% { width: 48%; left: 22%; }
+    100% { width: 12%; left: 88%; }
+}
+@keyframes hshsSpin { to { transform: rotate(360deg); } }
