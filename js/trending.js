@@ -18,7 +18,11 @@ import {
 } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 import { ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js';
 
-const TRENDING_WEIGHTS = Object.freeze({ likes: 5, comments: 10, views: 1, shares: 7 });
+// Trending is driven by two related signals:
+// 1. Total engagement: likes + comments + shares
+// 2. Likes: given an extra boost because they are the clearest positive signal
+// Views provide reach/context without overpowering actual interaction.
+const TRENDING_WEIGHTS = Object.freeze({ engagement: 4, likes: 2, views: 1 });
 const PAGE_SIZE = 9;
 const CACHE_TTL = 5 * 60 * 1000;
 const SEARCH_MIN_LENGTH = 2;
@@ -99,14 +103,18 @@ function getPeriodStart(period = 'week') {
 }
 
 function calculateTrendingScore(post) {
-  return (post.likesCount * TRENDING_WEIGHTS.likes)
-    + (post.commentsCount * TRENDING_WEIGHTS.comments)
-    + (post.viewsCount * TRENDING_WEIGHTS.views)
-    + (post.sharesCount * TRENDING_WEIGHTS.shares);
+  const engagement = post.likesCount + post.commentsCount + post.sharesCount;
+  return (engagement * TRENDING_WEIGHTS.engagement)
+    + (post.likesCount * TRENDING_WEIGHTS.likes)
+    + (post.viewsCount * TRENDING_WEIGHTS.views);
 }
 
 function withScores(posts) {
-  return posts.map((post) => ({ ...post, trendingScore: calculateTrendingScore(post) }))
+  return posts.map((post) => ({
+    ...post,
+    engagementCount: post.likesCount + post.commentsCount + post.sharesCount,
+    trendingScore: calculateTrendingScore(post),
+  }))
     .sort((a, b) => b.trendingScore - a.trendingScore || b.timestamp - a.timestamp);
 }
 
@@ -162,7 +170,7 @@ function renderTrendingPosts(append = false) {
           <div><strong>${escapeHTML(post.author)}</strong><span>${timeAgo(post.timestamp)}</span></div>
         </div>
         <div class="stats-row">
-          <span>❤️ ${post.likesCount}</span><span>💬 ${post.commentsCount}</span><span>👁️ ${post.viewsCount}</span><span>🔁 ${post.sharesCount}</span><span class="hot">🔥 ${post.trendingScore}</span>
+          <span>❤️ ${post.likesCount}</span><span>💬 ${post.commentsCount}</span><span>👁️ ${post.viewsCount}</span><span>🔁 ${post.sharesCount}</span><span class="engagement">⚡ ${post.engagementCount}</span><span class="hot">🔥 ${post.trendingScore}</span>
         </div>
       </div>
     </article>`).join('');
@@ -185,7 +193,7 @@ export async function getTopCategories() {
   const categories = [...posts.reduce((map, post) => {
     const current = map.get(post.category) || { name: post.category, postsCount: 0, engagement: 0 };
     current.postsCount += 1;
-    current.engagement += post.likesCount + post.commentsCount + post.viewsCount + post.sharesCount;
+    current.engagement += post.engagementCount;
     map.set(post.category, current);
     return map;
   }, new Map()).values()].sort((a, b) => b.engagement - a.engagement);
@@ -216,7 +224,7 @@ async function renderSidebars() {
   const [categories, liked, viewed, commented] = await Promise.all([getTopCategories(), getTopLikedPosts(), getTopViewedPosts(), getTopCommentedPosts()]);
   renderCategories(categories);
   renderLeaderboard(els.topLikedList, liked, 'likesCount', '❤️');
-  renderLeaderboard(els.topViewedList, viewed, 'viewsCount', '👁️');
+  renderLeaderboard(els.topViewedList, viewed, 'viewsCount', '👁');
   renderLeaderboard(els.topCommentedList, commented, 'commentsCount', '💬');
 }
 
@@ -288,4 +296,3 @@ function boot() {
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 else boot();
-
