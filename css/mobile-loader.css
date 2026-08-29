@@ -1,6 +1,6 @@
 /* In-app loading indicator */
 .hshs-loader {
-    pointer-events: none;
+    pointer-events: none !important;
     position: fixed;
     inset: 0;
     z-index: 1400;
@@ -48,8 +48,13 @@
     border-radius: 50%;
     animation: hshsSpin 0.7s linear infinite;
 }
-body.is-page-loading #hshs-page { opacity: 0.45; }
-#hshs-page { transition: opacity 0.16s ease; }
+body.is-page-loading #hshs-page { opacity: 0.55; }
+#hshs-page {
+    transition: opacity 0.16s ease;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
 @keyframes hshsLoadBar {
     0% { width: 10%; left: 0; }
     50% { width: 48%; left: 22%; }
@@ -57,56 +62,33 @@ body.is-page-loading #hshs-page { opacity: 0.45; }
 }
 @keyframes hshsSpin { to { transform: rotate(360deg); } }
 
-/* Keep content above the fixed tab bar on phones */
+/* Phone spacing only. Do not lock html/body overflow (that freezes swipe). */
 @media (max-width: 1024px) {
-    html, body.has-mobile-shell {
-        overflow-x: hidden;
-        overflow-y: auto !important;
-        overscroll-behavior-y: contain;
+    html {
+        height: auto !important;
+        overflow: visible !important;
     }
     body.has-mobile-shell {
-        padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important;
-    }
-    body.has-mobile-shell #hshs-page {
-        padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+        height: auto !important;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: scroll !important;
+        touch-action: pan-y;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important;
     }
     body.has-mobile-shell .footer {
-        padding-bottom: calc(28px + env(safe-area-inset-bottom)) !important;
-        margin-bottom: 0 !important;
+        padding-bottom: 1.25rem !important;
     }
-    /* Sticky filters were pinning the page and hiding the gallery under the tab bar */
     body.has-mobile-shell .spotlight-filters,
     body.has-mobile-shell .category-filter,
     body.has-mobile-shell .filter-bar {
         position: static !important;
         top: auto !important;
     }
-    body.has-mobile-shell .spotlight-main {
-        padding-bottom: 1.5rem;
-    }
     body.has-mobile-shell .featured-loading,
     body.has-mobile-shell .featured-student-card .loading-skeleton {
         min-height: 110px !important;
         height: 120px !important;
     }
-    body.has-mobile-shell .students-section,
-    body.has-mobile-shell .hall-of-fame-section,
-    body.has-mobile-shell .achievements-section,
-    body.has-mobile-shell .categories-section,
-    body.has-mobile-shell .testimonials-section {
-        padding-top: 1.2rem;
-        padding-bottom: 1.2rem;
-    }
-    body.has-mobile-shell .section-title {
-        margin-bottom: 0.8rem;
-    }
-    .hshs-scroll-pad {
-        display: block;
-        height: calc(96px + env(safe-area-inset-bottom));
-        width: 100%;
-        pointer-events: none;
-    }
-}
-@media (min-width: 1025px) {
-    .hshs-scroll-pad { display: none; }
 }
