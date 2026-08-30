@@ -42,3 +42,30 @@ body.light-mode .vibe-tab{background:#e2e8f0;color:#334155}
 body.light-mode .vibe-tab.active{background:#6d28d9;color:#fff}
 body.light-mode .vibe-feat .meta,body.light-mode .vibe-row .copy b{color:#0f172a}
 @media (min-width:1025px){.vibe-page{max-width:980px;padding-top:96px}.vibe-featured{gap:16px}.vibe-feat,.vibe-feat img,.vibe-feat .thumb-fallback{min-height:220px;height:220px}}
+
+/* Loading frames */
+@keyframes vibeShine{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.vibe-shine{
+  background:linear-gradient(90deg,#1e293b 20%,#334155 50%,#1e293b 80%);
+  background-size:200% 100%;
+  animation:vibeShine 1.2s ease-in-out infinite;
+}
+.vibe-skel-feat{
+  border-radius:16px;overflow:hidden;background:#0f172a;min-height:214px;
+}
+.vibe-skel-feat .frame{height:168px;position:relative}
+.vibe-skel-feat .frame .play{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12)
+}
+.vibe-skel-feat .line{height:10px;border-radius:6px;margin:10px 10px 0;width:78%}
+.vibe-skel-feat .line.short{width:46%;height:8px;margin-top:8px;margin-bottom:12px}
+.vibe-skel-row{display:grid;grid-template-columns:112px 1fr;gap:10px;align-items:center}
+.vibe-skel-row .frame{width:112px;height:72px;border-radius:12px;position:relative}
+.vibe-skel-row .frame .play{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.12)
+}
+.vibe-skel-row .lines{display:flex;flex-direction:column;gap:8px}
+.vibe-skel-row .line{height:10px;border-radius:6px;width:86%}
+.vibe-skel-row .line.short{width:42%;height:8px}
