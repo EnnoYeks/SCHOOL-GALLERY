@@ -10,7 +10,7 @@
     --success-color: #10b981;
     --danger-color: #ef4444;
     --warning-color: #f59e0b;
-    
+
     --bg-primary: #ffffff;
     --bg-secondary: #f3f4f6;
     --bg-tertiary: #e5e7eb;
@@ -18,21 +18,20 @@
     --text-secondary: #6b7280;
     --text-tertiary: #9ca3af;
     --border-color: #e5e7eb;
-    
+
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.2);
-    
+
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.15);
     --shadow-xl: 0 25px 50px rgba(0, 0, 0, 0.2);
-    
+
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Dark Mode */
 body.dark-mode {
-    /* Dark Mode Colors */
     --primary-color: #818cf8;
     --secondary-color: #f472b6;
     --accent-color: #fbbf24;
@@ -47,7 +46,6 @@ body.dark-mode {
     --text-primary: #f9fafb;
     --text-secondary: #d1d5db;
     --text-tertiary: #9ca3af;
-
     --border-color: rgba(255,255,255,0.12);
 
     --glass-bg: rgba(15,23,42,0.75);
@@ -97,38 +95,54 @@ body {
 
     background: linear-gradient(
         120deg,
-        #ff0066,
-        #6a00ff,
-        #00c6ff,
-        #00ff88,
-        #ffcc00
+        #ff007f,
+        #7928ca,
+        #00dfd8,
+        #ff4e50,
+        #f9d423,
+        #e100ff,
+        #050515,
+        #120e43,
+        #58287f,
+        #00d2ff,
+        #ff9a9e,
+        #fecfef,
+        #a1c4fd,
+        #c2e9fb,
+        #0f2027,
+        #203a43,
+        #2c5364,
+        #00ff87
     );
 
-    background-size: 400% 400%;
-    animation: colorShift 8s ease infinite;
+    background-size: 800% 800%;
+    animation: colorShift 24s ease-in-out infinite;
 }
-    @keyframes colorShift {
 
+@keyframes colorShift {
     0% {
         background-position: 0% 50%;
     }
 
-    25% {
+    20% {
         background-position: 50% 100%;
     }
 
-    50% {
+    40% {
         background-position: 100% 50%;
     }
 
-    75% {
-        background-position: 50% 0%;
+    60% {
+        background-position: 70% 0%;
+    }
+
+    80% {
+        background-position: 20% 30%;
     }
 
     100% {
         background-position: 0% 50%;
     }
-
 }
 
 .gradient-bg {
@@ -154,8 +168,8 @@ body {
     filter: blur(40px);
     animation: waveMove 12s ease-in-out infinite alternate;
 }
-      @keyframes waveMove {
 
+@keyframes waveMove {
     0% {
         transform: translate(-5%, -5%) rotate(0deg) scale(1);
     }
@@ -167,38 +181,7 @@ body {
     100% {
         transform: translate(-10%, 5%) rotate(-8deg) scale(1);
     }
-
 }
-       .animated-bg {
-   background: linear-gradient(
-    120deg,
-    #ff0066,
-    #6a00ff,
-    #00c6ff,
-    #00ff88,
-    #ffcc00
-);
-
-    background-size: 400% 400%;
-    animation: colorShift 20s ease infinite;
-}
-
-
-@keyframes colorShift {
-
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-
-}          
 
 .particles-container {
     position: absolute;
@@ -304,7 +287,6 @@ body {
     font-size: 1.8rem;
 }
 
-/* Search Container */
 .search-container {
     flex: 1;
     max-width: 400px;
@@ -357,7 +339,6 @@ body {
     display: block;
 }
 
-/* Nav Links */
 .nav-links {
     display: flex;
     align-items: center;
@@ -388,7 +369,6 @@ body {
     font-size: 1.1rem;
 }
 
-/* Nav Actions */
 .nav-actions {
     display: flex;
     align-items: center;
