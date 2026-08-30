@@ -108,17 +108,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById(id)) return;
         var s = document.createElement('script');
         s.id = id;
+        s.async = false;
         s.src = current.replace(/navigation\.js(\?.*)?$/, file);
         document.head.appendChild(s);
     }
 
-    // Start the HTML page warmer before the in-app shell. This means the shell's
-    // normal fetch() can receive a page that has already been downloaded.
+    // Prefetch first, then start the shell. The scripts are ordered so the
+    // page warmer is available before in-app navigation can request a page.
     add('hshs-page-prefetch-js', 'page-prefetch.js');
 
     var script = document.createElement('script');
+    script.id = 'hshs-mobile-shell-js';
+    script.async = false;
     script.src = current.replace(/navigation\.js(\?.*)?$/, 'mobile-shell.js');
     document.head.appendChild(script);
+
     add('hshs-search-btn-js', 'mobile-search-btn.js');
     add('hshs-brand-js', 'hshs-brand.js');
     add('hshs-page-swipe-js', 'page-swipe.js');
