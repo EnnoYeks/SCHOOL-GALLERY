@@ -14,6 +14,7 @@
     ];
     let activeId = CLIPS[0].id;
     const liked = new Set();
+
     function renderFeed() {
         const feed = document.getElementById('clipFeed');
         if (!feed) return;
@@ -34,10 +35,13 @@
                 '</div></article>';
         }).join('');
     }
+
     function openSheet(id) {
         closeSheets();
-        document.getElementById(id).classList.add('open');
-        document.getElementById('clipDim').classList.add('open');
+        var sheet = document.getElementById(id);
+        var dim = document.getElementById('clipDim');
+        if (sheet) sheet.classList.add('open');
+        if (dim) dim.classList.add('open');
     }
     function closeSheets() {
         document.querySelectorAll('.clip-sheet').forEach(function (el) { el.classList.remove('open'); });
@@ -46,62 +50,78 @@
     }
     function showComments(id) {
         activeId = id;
-        const clip = CLIPS.find(function (c) { return c.id === id; });
-        document.getElementById('commentList').innerHTML = clip.comments.map(function (text) {
+        var clip = CLIPS.find(function (c) { return c.id === id; });
+        var list = document.getElementById('commentList');
+        if (!clip || !list) return;
+        list.innerHTML = clip.comments.map(function (text) {
             return '<div class="comment-item">' + text + '</div>';
         }).join('') || '<div class="comment-item">Be the first to comment.</div>';
         openSheet('commentSheet');
     }
     function showMusic(id) {
         activeId = id;
-        const clip = CLIPS.find(function (c) { return c.id === id; });
-        document.getElementById('musicList').innerHTML = MIX.map(function (track) {
-            const on = clip.music === track.name;
+        var clip = CLIPS.find(function (c) { return c.id === id; });
+        var list = document.getElementById('musicList');
+        if (!clip || !list) return;
+        list.innerHTML = MIX.map(function (track) {
+            var on = clip.music === track.name;
             return '<div class="music-item"><span>' + track.name + '</span><button data-track="' + track.name + '">' + (on ? 'On' : 'Use') + '</button></div>';
         }).join('');
         openSheet('musicSheet');
     }
-    function boot() {
-        renderFeed();
-        document.getElementById('clipFeed').addEventListener('click', function (e) {
-            const like = e.target.closest('.like-btn');
-            const comment = e.target.closest('.comment-btn');
-            const music = e.target.closest('.music-btn');
-            const mute = e.target.closest('.mute-btn');
+
+    function bindOnce() {
+        if (window.__hshsClipsBound) return;
+        window.__hshsClipsBound = true;
+        document.addEventListener('click', function (e) {
+            if (!document.getElementById('clipFeed')) return;
+            var like = e.target.closest('.like-btn');
+            var comment = e.target.closest('.comment-btn');
+            var music = e.target.closest('.music-btn');
+            var mute = e.target.closest('.mute-btn');
             if (like) {
-                const id = Number(like.getAttribute('data-id'));
+                var id = Number(like.getAttribute('data-id'));
                 if (liked.has(id)) liked.delete(id); else liked.add(id);
                 renderFeed();
             }
             if (comment) showComments(Number(comment.getAttribute('data-id')));
             if (music) showMusic(Number(music.getAttribute('data-id')));
             if (mute) {
-                const icon = mute.querySelector('i');
-                const label = mute.querySelector('span');
-                const off = icon.classList.contains('fa-volume-xmark');
+                var icon = mute.querySelector('i');
+                var label = mute.querySelector('span');
+                var off = icon.classList.contains('fa-volume-xmark');
                 icon.className = off ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
                 label.textContent = off ? 'Sound' : 'Muted';
             }
+            if (e.target.id === 'clipDim' || e.target.closest('#clipDim')) closeSheets();
+            var trackBtn = e.target.closest('#musicList button[data-track]');
+            if (trackBtn) {
+                var clip = CLIPS.find(function (c) { return c.id === activeId; });
+                if (clip) clip.music = trackBtn.getAttribute('data-track');
+                renderFeed();
+                closeSheets();
+            }
         });
-        document.getElementById('clipDim').addEventListener('click', closeSheets);
-        document.getElementById('commentForm').addEventListener('submit', function (e) {
+        document.addEventListener('submit', function (e) {
+            if (e.target.id !== 'commentForm') return;
             e.preventDefault();
-            const input = document.getElementById('commentInput');
-            const text = (input.value || '').trim();
+            var input = document.getElementById('commentInput');
+            var text = (input && input.value || '').trim();
             if (!text) return;
-            CLIPS.find(function (c) { return c.id === activeId; }).comments.push(text);
+            var clip = CLIPS.find(function (c) { return c.id === activeId; });
+            if (!clip) return;
+            clip.comments.push(text);
             input.value = '';
             showComments(activeId);
             renderFeed();
         });
-        document.getElementById('musicList').addEventListener('click', function (e) {
-            const btn = e.target.closest('button[data-track]');
-            if (!btn) return;
-            CLIPS.find(function (c) { return c.id === activeId; }).music = btn.getAttribute('data-track');
-            renderFeed();
-            closeSheets();
-        });
     }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-    else boot();
+
+    function initHshsClips() {
+        bindOnce();
+        renderFeed();
+    }
+    window.initHshsClips = initHshsClips;
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initHshsClips);
+    else initHshsClips();
 })();
