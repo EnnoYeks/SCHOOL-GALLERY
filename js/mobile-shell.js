@@ -63,8 +63,25 @@
     }
     function homeHref() { return inSubfolderNow() ? '../index.html' : 'index.html'; }
     function sub(name) { return inSubfolderNow() ? name : 'index/' + name; }
+    function isAdmin() {
+        try { return !!localStorage.getItem('adminToken'); } catch (e) { return false; }
+    }
 
     function routes() {
+        const more = [
+            { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
+            { href: sub('photos.html'), icon: 'fa-camera', label: 'Photos', match: ['photos.html'] },
+            { href: sub('videos.html'), icon: 'fa-play', label: 'Vibe', match: ['videos.html'] },
+            { href: sub('polls.html'), icon: 'fa-square-poll-vertical', label: 'Polls', match: ['polls.html'] },
+            { href: sub('memories.html'), icon: 'fa-clock-rotate-left', label: 'Memories', match: ['memories.html'] },
+            { href: sub('about.html'), icon: 'fa-circle-info', label: 'About', match: ['about.html'] },
+            { href: sub('contat.html'), icon: 'fa-envelope', label: 'Contact', match: ['contat.html', 'contact.html'] },
+            { href: sub('profile.html'), icon: 'fa-user', label: 'Profile', match: ['profile.html'] },
+            { href: sub('settings.html'), icon: 'fa-gear', label: 'Settings', match: ['settings.html'] }
+        ];
+        if (isAdmin()) {
+            more.push({ href: sub('admin.html'), icon: 'fa-shield-halved', label: 'Staff', match: ['admin.html'] });
+        }
         return {
             PRIMARY: [
                 { id: 'home', href: homeHref(), icon: 'fa-home', label: 'Home', match: ['index.html', ''] },
@@ -72,18 +89,7 @@
                 { id: 'spotlight', href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', match: ['spotlight.html'] },
                 { id: 'buzz', href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html', 'shorts.html'] }
             ],
-            MORE: [
-                { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
-                { href: sub('photos.html'), icon: 'fa-camera', label: 'Photos', match: ['photos.html'] },
-                { href: sub('videos.html'), icon: 'fa-play', label: 'Vibe', match: ['videos.html'] },
-                { href: sub('polls.html'), icon: 'fa-square-poll-vertical', label: 'Polls', match: ['polls.html'] },
-                { href: sub('memories.html'), icon: 'fa-clock-rotate-left', label: 'Memories', match: ['memories.html'] },
-                { href: sub('about.html'), icon: 'fa-circle-info', label: 'About', match: ['about.html'] },
-                { href: sub('contat.html'), icon: 'fa-envelope', label: 'Contact', match: ['contat.html', 'contact.html'] },
-                { href: sub('profile.html'), icon: 'fa-user', label: 'Profile', match: ['profile.html'] },
-                { href: sub('settings.html'), icon: 'fa-gear', label: 'Settings', match: ['settings.html'] },
-                { href: sub('admin.html'), icon: 'fa-shield-halved', label: 'Admin', match: ['admin.html'] }
-            ],
+            MORE: more,
             DESKTOP: [
                 { href: homeHref(), icon: 'fa-home', label: 'Home', match: ['index.html', ''] },
                 { href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
@@ -138,7 +144,7 @@
 
     function markActive() {
         const file = currentFile();
-        const moreFiles = ['photos.html','videos.html','polls.html','memories.html','about.html','contat.html','contact.html','profile.html','settings.html','admin.html','trending.html'];
+        const moreFiles = ['photos.html','videos.html','polls.html','memories.html','about.html','contat.html','contact.html','profile.html','settings.html','trending.html'];
         document.querySelectorAll('.mobile-tabbar a').forEach((a) => {
             const tab = a.getAttribute('data-tab');
             let on = false;
@@ -300,6 +306,8 @@
         const next = canonicalize(url);
         if (next.origin !== location.origin) { location.href = next.href; return; }
         if (next.hash === '#more') return;
+        const file = (next.pathname.split('/').pop() || '').toLowerCase();
+        if (file === 'admin.html') { location.href = next.href; return; }
         const root = wrapPage();
         root.classList.add('is-swapping');
         showLoader('Loading...');
@@ -337,6 +345,7 @@
         try { next = canonicalize(anchor.href); } catch (e) { return false; }
         if (next.origin !== location.origin) return false;
         const name = next.pathname.split('/').pop().toLowerCase();
+        if (name === 'admin.html') return false;
         return name === '' || name === 'index.html' || name.endsWith('.html');
     }
 
