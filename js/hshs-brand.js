@@ -1,4 +1,6 @@
 (function () {
+    var APP = 'HSHS World';
+
     function dressLogo() {
         var logo = document.querySelector('.logo');
         if (!logo) return;
@@ -10,7 +12,7 @@
             mark.appendChild(icon);
             var copy = document.createElement('span');
             copy.className = 'brand-copy';
-            copy.innerHTML = '<strong>HSHS</strong><small>International</small>';
+            copy.innerHTML = '<strong>HSHS</strong><small>World</small>';
             logo.innerHTML = '';
             logo.appendChild(mark);
             logo.appendChild(copy);
@@ -18,9 +20,9 @@
             var strong = logo.querySelector('.brand-copy strong');
             var small = logo.querySelector('.brand-copy small');
             if (strong) strong.textContent = 'HSHS';
-            if (small) small.textContent = 'International';
+            if (small) small.textContent = 'World';
         }
-        logo.setAttribute('title', 'HSHS International');
+        logo.setAttribute('title', APP);
     }
 
     function dressProfile() {
@@ -63,11 +65,66 @@
         }
     }
 
+    function cleanText(node) {
+        if (!node || node.nodeType !== 3) return;
+        var next = node.nodeValue
+            .replace(/ENNOYEKS School Gallery/gi, APP)
+            .replace(/ENNOYEKS School/gi, APP)
+            .replace(/ENNOYEKS Student/gi, 'HSHS Student')
+            .replace(/ENNOYEKS/gi, 'HSHS')
+            .replace(/HSHS School Gallery/gi, APP)
+            .replace(/HSHS International/gi, APP);
+        if (next !== node.nodeValue) node.nodeValue = next;
+    }
+
+    function walk(root) {
+        var skip = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, INPUT: 1 };
+        var tree = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT, {
+            acceptNode: function (n) {
+                var p = n.parentNode;
+                if (!p || skip[p.tagName]) return NodeFilter.FILTER_REJECT;
+                return NodeFilter.FILTER_ACCEPT;
+            }
+        });
+        var node;
+        while ((node = tree.nextNode())) cleanText(node);
+    }
+
+    function dressTitle() {
+        var t = document.title || '';
+        t = t.replace(/HSHS International/gi, APP)
+            .replace(/HSHS School Gallery/gi, APP)
+            .replace(/ENNOYEKS School Gallery/gi, APP)
+            .replace(/ENNOYEKS/gi, 'HSHS');
+        if (!/HSHS World/i.test(t)) {
+            var page = t.split('|')[0].split('-')[0].trim();
+            t = page && page.toLowerCase() !== 'hshs world' ? page + ' | ' + APP : APP;
+        }
+        document.title = t;
+    }
+
+    function dressHero() {
+        var title = document.querySelector('.hero-title');
+        if (title) title.textContent = 'HSHS WORLD';
+        var sub = document.querySelector('.hero-subtitle');
+        if (sub && /capture moments/i.test(sub.textContent)) {
+            sub.textContent = 'Your school. One world. Photos, Vibe, Buzz and memories.';
+        }
+        var quote = document.getElementById('quoteAuthor');
+        if (quote && /ENNOYEKS/i.test(quote.textContent)) quote.textContent = APP;
+        document.querySelectorAll('.footer-section h4').forEach(function (h) {
+            if (/HSHS Gallery|School Gallery|ENNOYEKS/i.test(h.textContent)) h.textContent = APP;
+        });
+    }
+
     function start() {
         dressLogo();
         dressProfile();
+        dressTitle();
+        dressHero();
+        if (document.body) walk(document.body);
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
-    setInterval(start, 1500);
+    setInterval(start, 2000);
 })();

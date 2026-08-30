@@ -1,5 +1,5 @@
 // ============================================
-// ENNOYEKS SCHOOL GALLERY - CONFIGURATION
+// HSHS WORLD - CONFIGURATION
 // ============================================
 
 // Firebase
@@ -11,10 +11,6 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-
 
 // Supabase (Media Storage)
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-// ============================================
-// FIREBASE CONFIGURATION
-// ============================================
 
 const firebaseConfig = {
   apiKey: "AIzaSyCoFBtKrk7ZRvV1mZe5hN9tRCPKsuQBlgo",
@@ -33,10 +29,6 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const analytics = getAnalytics(app);
 
-// ============================================
-// SUPABASE CONFIGURATION (MEDIA STORAGE)
-// ============================================
-
 const supabaseUrl = "https://hhlogdqpgjiajeufwnop.supabase.co";
 
 const supabaseKey =
@@ -47,13 +39,9 @@ export const supabase = createClient(
   supabaseKey
 );
 
-// ============================================
-// APP CONFIGURATION
-// ============================================
-
 export const CONFIG = {
   app: {
-    name: "HSHS School Gallery",
+    name: "HSHS World",
     version: "1.0.0",
     school: "HAWTHORNE SCRIBNER HIGH SCHOOL",
     schoolMotto: "Educate Engage Empower.",
@@ -90,7 +78,6 @@ export const CONFIG = {
   }
 };
 
-// Expose shared globals for legacy page scripts.
 window.firebaseApp = app;
 window.firestore = firestore;
 window.auth = auth;
