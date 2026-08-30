@@ -1,33 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- CRITICAL: Add this meta tag FIRST in head -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
-<meta name="description" content="ENNOYEKS School Gallery - Share moments, connect community">
-<meta name="theme-color" content="#6366f1">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<!-- Prevent zoom on input focus (iOS) -->
-<style>
-    input[type="text"],
-    input[type="email"],
-    textarea,
-    select {
-        font-size: 16px !important;
-    }
-</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+    <meta name="description" content="ENNOYEKS School Gallery - Share moments, connect community">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select { font-size: 16px !important; }
+    </style>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - ENNOYEKS School Gallery</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body class="light-mode">
-    <!-- Animated Background -->
     <div class="animated-bg">
         <div class="gradient-bg"></div>
         <div class="particles-container" id="particlesContainer"></div>
@@ -39,22 +31,19 @@
         </div>
     </div>
 
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
             <div class="logo">
                 <i class="fas fa-graduation-cap"></i>
                 <span>ENNOYEKS</span>
             </div>
-
             <div class="search-container">
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search..." class="search-input" id="searchInput">
                 <div class="search-results" id="searchResults"></div>
             </div>
-
             <div class="nav-links">
-                <a href="index.html" class="nav-link">
+                <a href="../index.html" class="nav-link">
                     <i class="fas fa-home"></i>
                     <span>Home</span>
                 </a>
@@ -67,7 +56,6 @@
                     <span>Settings</span>
                 </a>
             </div>
-
             <div class="nav-actions">
                 <div class="notification-icon">
                     <i class="fas fa-bell"></i>
@@ -78,11 +66,9 @@
                         </div>
                     </div>
                 </div>
-
                 <button class="theme-toggle" id="themeToggle">
                     <i class="fas fa-moon"></i>
                 </button>
-
                 <div class="profile-icon">
                     <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img" id="profileImg">
                     <div class="profile-dropdown" id="profileDropdown">
@@ -98,7 +84,6 @@
                         </a>
                     </div>
                 </div>
-
                 <button class="mobile-menu-toggle" id="mobileMenuToggle">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -106,214 +91,169 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container" style="padding: 2rem; position: relative; z-index: 10; margin-top: 60px; max-width: 1000px;">
-        <!-- Settings Tabs -->
         <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-color); overflow-x: auto;">
-            <button class="tab-btn active" data-tab="account" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+            <button class="tab-btn active" data-tab="account" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">
                 <i class="fas fa-user"></i> Account
             </button>
-            <button class="tab-btn" data-tab="privacy" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+            <button class="tab-btn" data-tab="privacy" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">
                 <i class="fas fa-lock"></i> Privacy
             </button>
-            <button class="tab-btn" data-tab="notifications" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+            <button class="tab-btn" data-tab="notifications" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">
                 <i class="fas fa-bell"></i> Notifications
             </button>
-            <button class="tab-btn" data-tab="theme" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease;">
+            <button class="tab-btn" data-tab="theme" style="padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s;">
                 <i class="fas fa-palette"></i> Theme
             </button>
         </div>
 
         <!-- Account Settings Tab -->
         <div class="tab-content active" id="accountTab">
-            <div class="admin-form">
-                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">Account Settings</h2>
-                
-                <div class="form-group">
-                    <label class="form-label">Full Name</label>
-                    <input type="text" class="form-input" value="John Doe" placeholder="Enter your full name">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" class="form-input" value="john.doe@school.edu" placeholder="Enter your email">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Class / Grade</label>
-                    <input type="text" class="form-input" value="Senior Year" placeholder="Enter your class">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Bio</label>
-                    <textarea class="form-textarea" placeholder="Tell us about yourself">Passionate about photography and school events...</textarea>
-                </div>
-
-                <button style="width: 100%; padding: 1rem; border: none; border-radius: 10px; background: var(--primary-color); color: white; font-weight: 600; cursor: pointer;">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Account Settings</h2>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Full Name</label>
+                <input type="text" class="form-input" placeholder="Enter your full name" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px;">
             </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Email Address</label>
+                <input type="email" class="form-input" placeholder="Enter your email" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Class / Grade</label>
+                <input type="text" class="form-input" placeholder="Enter your class" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Bio</label>
+                <textarea class="form-textarea" placeholder="Tell us about yourself" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; height: 100px;"></textarea>
+            </div>
+            <button style="width: 100%; padding: 1rem; border: none; border-radius: 10px; background: var(--primary-color); color: white; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
         </div>
 
         <!-- Privacy Settings Tab -->
         <div class="tab-content" id="privacyTab">
-            <div class="admin-form">
-                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">Privacy Settings</h2>
-                
-                <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label style="font-weight: 600; color: var(--text-primary);">Public Profile</label>
-                        <input type="checkbox" checked>
-                    </div>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Allow others to view your profile and posts</p>
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Privacy Settings</h2>
+            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-weight: 600;">Public Profile</label>
+                    <input type="checkbox" checked>
                 </div>
-
-                <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label style="font-weight: 600; color: var(--text-primary);">Show Activity Status</label>
-                        <input type="checkbox" checked>
-                    </div>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Let others see when you're online</p>
-                </div>
-
-                <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label style="font-weight: 600; color: var(--text-primary);">Allow Direct Messages</label>
-                        <input type="checkbox" checked>
-                    </div>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Let others send you direct messages</p>
-                </div>
-
-                <button style="width: 100%; padding: 1rem; border: none; border-radius: 10px; background: var(--primary-color); color: white; font-weight: 600; cursor: pointer;">
-                    <i class="fas fa-save"></i> Save Privacy Settings
-                </button>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">Allow others to view your profile</p>
             </div>
+            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-weight: 600;">Show Activity Status</label>
+                    <input type="checkbox" checked>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">Let others see when you're online</p>
+            </div>
+            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-weight: 600;">Allow Direct Messages</label>
+                    <input type="checkbox" checked>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">Let others send you direct messages</p>
+            </div>
+            <button style="width: 100%; padding: 1rem; border: none; border-radius: 10px; background: var(--primary-color); color: white; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-save"></i> Save Privacy Settings
+            </button>
         </div>
 
         <!-- Notifications Tab -->
         <div class="tab-content" id="notificationsTab">
-            <div class="admin-form">
-                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">Notification Preferences</h2>
-                
-                <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label style="font-weight: 600; color: var(--text-primary);">Post Likes</label>
-                        <input type="checkbox" checked>
-                    </div>
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Notification Preferences</h2>
+            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-weight: 600;">Post Likes</label>
+                    <input type="checkbox" checked>
                 </div>
-
-                <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label style="font-weight: 600; color: var(--text-primary);">Comments</label>
-                        <input type="checkbox" checked>
-                    </div>
-                </div>
-
-                <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label style="font-weight: 600; color: var(--text-primary);">Shares</label>
-                        <input type="checkbox" checked>
-                    </div>
-                </div>
-
-                <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label style="font-weight: 600; color: var(--text-primary);">Mentions</label>
-                        <input type="checkbox" checked>
-                    </div>
-                </div>
-
-                <button style="width: 100%; padding: 1rem; border: none; border-radius: 10px; background: var(--primary-color); color: white; font-weight: 600; cursor: pointer;">
-                    <i class="fas fa-save"></i> Save Notification Settings
-                </button>
             </div>
+            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-weight: 600;">Comments</label>
+                    <input type="checkbox" checked>
+                </div>
+            </div>
+            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-weight: 600;">Shares</label>
+                    <input type="checkbox" checked>
+                </div>
+            </div>
+            <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-weight: 600;">Mentions</label>
+                    <input type="checkbox" checked>
+                </div>
+            </div>
+            <button style="width: 100%; padding: 1rem; border: none; border-radius: 10px; background: var(--primary-color); color: white; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-save"></i> Save Notification Settings
+            </button>
         </div>
 
         <!-- Theme Tab -->
         <div class="tab-content" id="themeTab">
-            <div class="theme-manager">
-                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary);">
-                    <i class="fas fa-palette"></i> Customize Theme
-                </h2>
-
-                <!-- Preset Themes -->
-                <div class="color-picker-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-swatches"></i> Preset Themes
-                    </h3>
-                    <div class="preset-themes">
-                        <div class="preset-theme active">
-                            <div class="theme-preview">
-                                <div class="theme-color-dot" style="background: #6366f1;"></div>
-                                <div class="theme-color-dot" style="background: #ec4899;"></div>
-                                <div class="theme-color-dot" style="background: #f59e0b;"></div>
-                            </div>
-                            <div class="theme-name">Default</div>
-                        </div>
-                        <div class="preset-theme">
-                            <div class="theme-preview">
-                                <div class="theme-color-dot" style="background: #3b82f6;"></div>
-                                <div class="theme-color-dot" style="background: #8b5cf6;"></div>
-                                <div class="theme-color-dot" style="background: #ec4899;"></div>
-                            </div>
-                            <div class="theme-name">Ocean</div>
-                        </div>
-                        <div class="preset-theme">
-                            <div class="theme-preview">
-                                <div class="theme-color-dot" style="background: #10b981;"></div>
-                                <div class="theme-color-dot" style="background: #14b8a6;"></div>
-                                <div class="theme-color-dot" style="background: #f59e0b;"></div>
-                            </div>
-                            <div class="theme-name">Forest</div>
-                        </div>
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">
+                <i class="fas fa-palette"></i> Customize Theme
+            </h2>
+            <h3 style="font-weight: 600; margin-bottom: 1rem;">Preset Themes</h3>
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                <div class="preset-theme active" style="text-align: center; cursor: pointer; padding: 1rem; border: 2px solid #6366f1; border-radius: 10px;">
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <div style="width: 20px; height: 20px; background: #6366f1; border-radius: 50%;"></div>
+                        <div style="width: 20px; height: 20px; background: #ec4899; border-radius: 50%;"></div>
+                        <div style="width: 20px; height: 20px; background: #f59e0b; border-radius: 50%;"></div>
                     </div>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Default</div>
                 </div>
-
-                <!-- Animation Speed -->
-                <div class="animation-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-tachometer-alt"></i> Animation Speed
-                    </h3>
-                    <input type="range" class="animation-speed-slider" min="0" max="100" value="50">
-                    <div class="speed-options">
-                        <button class="speed-btn">Slow</button>
-                        <button class="speed-btn active">Normal</button>
-                        <button class="speed-btn">Fast</button>
+                <div class="preset-theme" style="text-align: center; cursor: pointer; padding: 1rem; border: 2px solid transparent; border-radius: 10px;">
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <div style="width: 20px; height: 20px; background: #3b82f6; border-radius: 50%;"></div>
+                        <div style="width: 20px; height: 20px; background: #8b5cf6; border-radius: 50%;"></div>
+                        <div style="width: 20px; height: 20px; background: #ec4899; border-radius: 50%;"></div>
                     </div>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Ocean</div>
                 </div>
-
-                <!-- Theme Actions -->
-                <div class="theme-actions">
-                    <button class="action-btn save">
-                        <i class="fas fa-save"></i> Save Theme
-                    </button>
-                    <button class="action-btn reset">
-                        <i class="fas fa-redo"></i> Reset to Default
-                    </button>
+                <div class="preset-theme" style="text-align: center; cursor: pointer; padding: 1rem; border: 2px solid transparent; border-radius: 10px;">
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <div style="width: 20px; height: 20px; background: #10b981; border-radius: 50%;"></div>
+                        <div style="width: 20px; height: 20px; background: #14b8a6; border-radius: 50%;"></div>
+                        <div style="width: 20px; height: 20px; background: #f59e0b; border-radius: 50%;"></div>
+                    </div>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Forest</div>
                 </div>
+            </div>
+            <h3 style="font-weight: 600; margin-bottom: 1rem;">Animation Speed</h3>
+            <input type="range" class="animation-speed-slider" min="0" max="100" value="50" style="width: 100%; margin-bottom: 1rem;">
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
+                <button class="speed-btn" style="flex: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background: transparent; cursor: pointer;">Slow</button>
+                <button class="speed-btn active" style="flex: 1; padding: 0.75rem; border: 1px solid var(--primary-color); border-radius: 8px; background: var(--primary-color); color: white; cursor: pointer;">Normal</button>
+                <button class="speed-btn" style="flex: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background: transparent; cursor: pointer;">Fast</button>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="action-btn save" style="flex: 1; padding: 1rem; background: var(--primary-color); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-save"></i> Save Theme
+                </button>
+                <button class="action-btn reset" style="flex: 1; padding: 1rem; background: var(--border-color); color: var(--text-primary); border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-redo"></i> Reset to Default
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
                     <h4>ENNOYEKS Gallery</h4>
-                    <p>The ultimate platform for school memories and community engagement.</p>
+                    <p>School memories and community engagement.</p>
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
-                    <a href="index.html">Home</a>
+                    <a href="../index.html">Home</a>
                     <a href="gallery.html">Gallery</a>
                     <a href="settings.html">Settings</a>
-                </div>
-                <div class="footer-section">
-                    <h4>Resources</h4>
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Contact</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -322,12 +262,14 @@
         </div>
     </footer>
 
-    <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/db.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/particles.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/mobile-navigation.js"></script>
+    <script type="module" src="../js/config.js"></script>
+    <script type="module" src="../js/db.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/particles.js"></script>
+    <script src="../js/theme.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/mobile-navigation.js"></script>
+    <script src="../js/user-manager.js" type="module"></script>
+    <script src="../js/settings-controller.js"></script>
 </body>
 </html>
