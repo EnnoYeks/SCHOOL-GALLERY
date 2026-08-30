@@ -1,0 +1,68 @@
+:root {
+    --primary-color: #1d4ed8;
+    --secondary-color: #0ea5e9;
+    --accent-color: #eab308;
+}
+body.dark-mode {
+    --primary-color: #60a5fa;
+    --secondary-color: #38bdf8;
+    --accent-color: #facc15;
+}
+
+.animated-bg {
+    background:
+        radial-gradient(1200px 700px at 12% 18%, rgba(234,179,8,.28), transparent 58%),
+        radial-gradient(900px 600px at 88% 12%, rgba(14,165,233,.32), transparent 55%),
+        radial-gradient(800px 700px at 80% 88%, rgba(180,35,24,.22), transparent 60%),
+        radial-gradient(700px 500px at 10% 82%, rgba(29,78,216,.35), transparent 58%),
+        linear-gradient(160deg, #071433 0%, #12306b 38%, #0b3b5a 68%, #1d4ed8 100%) !important;
+    background-size: 140% 140% !important;
+    animation: hshsSky 22s ease-in-out infinite alternate !important;
+}
+@keyframes hshsSky {
+    0% { background-position: 0% 20%, 100% 0%, 80% 100%, 0% 100%, 0% 0%; }
+    50% { background-position: 30% 40%, 70% 20%, 60% 70%, 20% 80%, 40% 30%; }
+    100% { background-position: 10% 80%, 60% 40%, 90% 20%, 30% 10%, 80% 70%; }
+}
+.gradient-bg {
+    background:
+        radial-gradient(ellipse at 20% 30%, rgba(29,78,216,.55), transparent 58%),
+        radial-gradient(ellipse at 78% 18%, rgba(234,179,8,.38), transparent 55%),
+        radial-gradient(ellipse at 70% 78%, rgba(14,165,233,.42), transparent 58%),
+        radial-gradient(ellipse at 18% 82%, rgba(180,35,24,.28), transparent 60%) !important;
+    animation: hshsDrift 16s ease-in-out infinite alternate !important;
+}
+@keyframes hshsDrift {
+    0% { transform: translate(-6%, -4%) scale(1) rotate(0deg); }
+    50% { transform: translate(6%, 8%) scale(1.12) rotate(6deg); }
+    100% { transform: translate(-8%, 4%) scale(1.04) rotate(-6deg); }
+}
+.shape-1 { background: linear-gradient(135deg, #1d4ed8, #0ea5e9) !important; }
+.shape-2 { background: linear-gradient(135deg, #eab308, #f59e0b) !important; }
+.shape-3 { background: linear-gradient(135deg, #0ea5e9, #14b8a6) !important; }
+.shape-4 { background: linear-gradient(135deg, #b42318, #1d4ed8) !important; }
+
+@media (max-width: 1024px) {
+    body.has-mobile-shell .hero-text {
+        background:
+            linear-gradient(135deg, #0b1f4d 0%, #1d4ed8 46%, #0ea5e9 78%, #eab308 100%) !important;
+    }
+    body.has-mobile-shell .hero-buttons .btn-primary {
+        color: #12306b !important;
+    }
+}
+.cta-section,
+.daily-quote-box {
+    background: linear-gradient(135deg, #0b1f4d, #1d4ed8 55%, #0ea5e9) !important;
+}
+.vibe-hero-card {
+    background: linear-gradient(120deg, #0b1f4d 0%, #1d4ed8 48%, #22d3ee 100%) !important;
+}
+.vibe-upload {
+    background: linear-gradient(135deg, #1d4ed8, #0ea5e9) !important;
+}
+.vibe-tab.active,
+body.light-mode .vibe-tab.active,
+.vibe-feat .badge {
+    background: #1d4ed8 !important;
+}
