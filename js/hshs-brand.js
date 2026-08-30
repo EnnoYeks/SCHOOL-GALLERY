@@ -2,6 +2,21 @@
     var APP = 'HSHS World';
     var BADGE = 'https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png';
 
+    function dressThemeCss() {
+        if (document.getElementById('hshs-theme-css')) return;
+        var guess = Array.from(document.querySelectorAll('script[src]'))
+            .map(function (s) { return s.getAttribute('src') || ''; })
+            .find(function (s) { return s.indexOf('navigation.js') !== -1 && s.indexOf('mobile-navigation') === -1; });
+        var href = guess
+            ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-theme.css')
+            : (location.pathname.indexOf('/index/') !== -1 ? '../css/hshs-theme.css' : 'css/hshs-theme.css');
+        var link = document.createElement('link');
+        link.id = 'hshs-theme-css';
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+    }
+
     function dressFavicon() {
         var links = [
             { rel: 'icon', type: 'image/png', href: BADGE },
@@ -26,6 +41,7 @@
             theme.setAttribute('name', 'theme-color');
             document.head.appendChild(theme);
         }
+        theme.setAttribute('content', '#12306b');
     }
 
     function dressLogo() {
@@ -72,7 +88,7 @@
             img.src = 'data:image/svg+xml,' + encodeURIComponent(
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
                 '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
-                '<stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#ec4899"/></linearGradient></defs>' +
+                '<stop offset="0" stop-color="#1d4ed8"/><stop offset="1" stop-color="#eab308"/></linearGradient></defs>' +
                 '<circle cx="32" cy="32" r="32" fill="url(#g)"/>' +
                 '<circle cx="32" cy="24" r="10" fill="white" fill-opacity=".92"/>' +
                 '<path d="M14 54c4-12 14-18 18-18s14 6 18 18" fill="white" fill-opacity=".92"/>' +
@@ -149,6 +165,7 @@
     }
 
     function start() {
+        dressThemeCss();
         dressFavicon();
         dressLogo();
         dressProfile();
