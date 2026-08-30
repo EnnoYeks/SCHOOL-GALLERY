@@ -1,15 +1,40 @@
 (function () {
     var APP = 'HSHS World';
+    var BADGE = 'https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png';
+
+    function dressFavicon() {
+        var links = [
+            { rel: 'icon', type: 'image/png', href: BADGE },
+            { rel: 'shortcut icon', type: 'image/png', href: BADGE },
+            { rel: 'apple-touch-icon', href: BADGE }
+        ];
+        links.forEach(function (item) {
+            var id = 'hshs-icon-' + item.rel.replace(/\s+/g, '-');
+            var el = document.getElementById(id);
+            if (!el) {
+                el = document.createElement('link');
+                el.id = id;
+                document.head.appendChild(el);
+            }
+            el.rel = item.rel;
+            if (item.type) el.type = item.type;
+            el.href = item.href;
+        });
+        var theme = document.querySelector('meta[name="theme-color"]');
+        if (!theme) {
+            theme = document.createElement('meta');
+            theme.setAttribute('name', 'theme-color');
+            document.head.appendChild(theme);
+        }
+    }
 
     function dressLogo() {
         var logo = document.querySelector('.logo');
         if (!logo) return;
         if (!logo.querySelector('.brand-copy')) {
-            var icon = logo.querySelector('i') || document.createElement('i');
-            icon.className = 'fas fa-graduation-cap';
             var mark = document.createElement('span');
             mark.className = 'brand-mark';
-            mark.appendChild(icon);
+            mark.innerHTML = '<img src="' + BADGE + '" alt="Hawthorne Scribner High School badge">';
             var copy = document.createElement('span');
             copy.className = 'brand-copy';
             copy.innerHTML = '<strong>HSHS World</strong>';
@@ -17,6 +42,10 @@
             logo.appendChild(mark);
             logo.appendChild(copy);
         } else {
+            var mark = logo.querySelector('.brand-mark');
+            if (mark && !mark.querySelector('img')) {
+                mark.innerHTML = '<img src="' + BADGE + '" alt="Hawthorne Scribner High School badge">';
+            }
             var strong = logo.querySelector('.brand-copy strong');
             var small = logo.querySelector('.brand-copy small');
             if (strong) strong.textContent = 'HSHS World';
@@ -120,6 +149,7 @@
     }
 
     function start() {
+        dressFavicon();
         dressLogo();
         dressProfile();
         dressTitle();
