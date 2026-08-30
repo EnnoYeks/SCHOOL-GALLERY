@@ -90,6 +90,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     if (!current) return;
+
+    // Load the navigation no-flicker rules immediately with the shared shell.
+    // Responsive layout remains CSS-driven and never needs device detection.
+    function addStylesheet(id, file) {
+        if (document.getElementById(id)) return;
+        var link = document.createElement('link');
+        link.id = id;
+        link.rel = 'stylesheet';
+        link.href = current.replace(/navigation\.js(\?.*)?$/, '../css/' + file);
+        document.head.appendChild(link);
+    }
+
+    addStylesheet('hshs-no-flicker-css', 'hshs-no-flicker.css');
+
     function add(id, file) {
         if (document.getElementById(id)) return;
         var s = document.createElement('script');
