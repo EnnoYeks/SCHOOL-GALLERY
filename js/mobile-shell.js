@@ -75,7 +75,7 @@
             MORE: [
                 { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
                 { href: sub('photos.html'), icon: 'fa-camera', label: 'Photos', match: ['photos.html'] },
-                { href: sub('videos.html'), icon: 'fa-play', label: 'Videos', match: ['videos.html'] },
+                { href: sub('videos.html'), icon: 'fa-play', label: 'Vibe', match: ['videos.html'] },
                 { href: sub('polls.html'), icon: 'fa-square-poll-vertical', label: 'Polls', match: ['polls.html'] },
                 { href: sub('memories.html'), icon: 'fa-clock-rotate-left', label: 'Memories', match: ['memories.html'] },
                 { href: sub('about.html'), icon: 'fa-circle-info', label: 'About', match: ['about.html'] },
@@ -89,7 +89,7 @@
                 { href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
                 { href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html'] },
                 { href: sub('photos.html'), icon: 'fa-photo-film', label: 'Photos', match: ['photos.html'] },
-                { href: sub('videos.html'), icon: 'fa-video', label: 'Videos', match: ['videos.html'] },
+                { href: sub('videos.html'), icon: 'fa-video', label: 'Vibe', match: ['videos.html'] },
                 { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
                 { href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', match: ['spotlight.html'] },
                 { href: sub('polls.html'), icon: 'fa-poll', label: 'Polls', match: ['polls.html'] },
@@ -163,6 +163,11 @@
         const backdrop = document.getElementById('moreBackdrop');
         if (sheet) sheet.classList.remove('open');
         if (backdrop) backdrop.classList.remove('open');
+    }
+
+    function bootPageWidgets() {
+        if (typeof window.initHshsClips === 'function') window.initHshsClips();
+        if (typeof window.startVideos === 'function') window.startVideos();
     }
 
     function buildBar() {
@@ -313,6 +318,7 @@
             markActive();
             wireHomeButtons();
             runPageScripts(doc);
+            setTimeout(bootPageWidgets, 40);
             window.scrollTo(0, 0);
         } catch (err) {
             location.href = next.href;
@@ -343,6 +349,7 @@
         bind('exploreBtn', sub('gallery.html'));
         bind('learnMoreBtn', sub('about.html'));
         bind('uploadBtn', sub('photos.html'));
+        bind('uploadVideoBtn', sub('photos.html'));
         const logo = document.querySelector('.logo');
         if (logo) {
             logo.style.cursor = 'pointer';
@@ -371,6 +378,7 @@
         wireHomeButtons();
         wireSpa();
         markActive();
+        bootPageWidgets();
         history.replaceState({ url: location.href }, '', location.href);
     }
 
