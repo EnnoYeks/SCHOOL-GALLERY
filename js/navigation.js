@@ -160,6 +160,12 @@ document.addEventListener('DOMContentLoaded', () => {
         brand.src = current.replace(/navigation\.js(\?.*)?$/, 'hshs-brand.js');
         document.head.appendChild(brand);
     }
+    if (!document.getElementById('hshs-page-swipe-js')) {
+        var pageSwipe = document.createElement('script');
+        pageSwipe.id = 'hshs-page-swipe-js';
+        pageSwipe.src = current.replace(/navigation\.js(\?.*)?$/, 'page-swipe.js');
+        document.head.appendChild(pageSwipe);
+    }
 })();
 
 if (typeof module !== 'undefined' && module.exports) {
