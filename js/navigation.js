@@ -111,6 +111,11 @@ document.addEventListener('DOMContentLoaded', () => {
         s.src = current.replace(/navigation\.js(\?.*)?$/, file);
         document.head.appendChild(s);
     }
+
+    // Start the HTML page warmer before the in-app shell. This means the shell's
+    // normal fetch() can receive a page that has already been downloaded.
+    add('hshs-page-prefetch-js', 'page-prefetch.js');
+
     var script = document.createElement('script');
     script.src = current.replace(/navigation\.js(\?.*)?$/, 'mobile-shell.js');
     document.head.appendChild(script);
