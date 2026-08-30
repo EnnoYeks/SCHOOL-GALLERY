@@ -12,15 +12,15 @@
             mark.appendChild(icon);
             var copy = document.createElement('span');
             copy.className = 'brand-copy';
-            copy.innerHTML = '<strong>HSHS</strong><small>World</small>';
+            copy.innerHTML = '<strong>HSHS World</strong>';
             logo.innerHTML = '';
             logo.appendChild(mark);
             logo.appendChild(copy);
         } else {
             var strong = logo.querySelector('.brand-copy strong');
             var small = logo.querySelector('.brand-copy small');
-            if (strong) strong.textContent = 'HSHS';
-            if (small) small.textContent = 'World';
+            if (strong) strong.textContent = 'HSHS World';
+            if (small) small.remove();
         }
         logo.setAttribute('title', APP);
     }
@@ -67,6 +67,7 @@
 
     function cleanText(node) {
         if (!node || node.nodeType !== 3) return;
+        if (node.parentNode && node.parentNode.closest && node.parentNode.closest('.brand-copy')) return;
         var next = node.nodeValue
             .replace(/ENNOYEKS School Gallery/gi, APP)
             .replace(/ENNOYEKS School/gi, APP)
@@ -78,6 +79,7 @@
     }
 
     function walk(root) {
+        if (!document.body) return;
         var skip = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, INPUT: 1 };
         var tree = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT, {
             acceptNode: function (n) {
@@ -122,7 +124,7 @@
         dressProfile();
         dressTitle();
         dressHero();
-        if (document.body) walk(document.body);
+        walk(document.body);
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
