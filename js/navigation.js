@@ -3,17 +3,13 @@
 // ============================================
 
 class Navigation {
-    constructor() {
-        this.init();
-    }
-
+    constructor() { this.init(); }
     init() {
         this.setupNavigation();
         this.setupDropdowns();
         this.setupMobileMenu();
         this.setupScrollEffects();
     }
-
     setupNavigation() {
         const navLinks = document.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
@@ -23,54 +19,38 @@ class Navigation {
             });
         });
     }
-
     setupDropdowns() {
         const notificationIcon = document.querySelector('.notification-icon');
         const notificationDropdown = document.getElementById('notificationDropdown');
-
         if (notificationIcon && notificationDropdown) {
             notificationIcon.addEventListener('click', (e) => {
                 e.stopPropagation();
                 notificationDropdown.classList.toggle('active');
             });
         }
-
         const profileIcon = document.querySelector('.profile-icon');
         const profileDropdown = document.getElementById('profileDropdown');
-
         if (profileIcon && profileDropdown) {
             profileIcon.addEventListener('click', (e) => {
                 e.stopPropagation();
                 profileDropdown.classList.toggle('active');
             });
         }
-
         document.addEventListener('click', () => {
             if (notificationDropdown) notificationDropdown.classList.remove('active');
             if (profileDropdown) profileDropdown.classList.remove('active');
         });
     }
-
     setupMobileMenu() {
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
         const navLinks = document.querySelector('.nav-links');
-
         if (mobileMenuToggle && navLinks) {
             mobileMenuToggle.addEventListener('click', () => {
                 navLinks.classList.toggle('mobile-visible');
                 mobileMenuToggle.classList.toggle('active');
             });
-
-            const links = navLinks.querySelectorAll('a');
-            links.forEach(link => {
-                link.addEventListener('click', () => {
-                    navLinks.classList.remove('mobile-visible');
-                    mobileMenuToggle.classList.remove('active');
-                });
-            });
         }
     }
-
     setupScrollEffects() {
         const navbar = document.querySelector('.navbar');
         if (navbar) {
@@ -78,38 +58,6 @@ class Navigation {
                 if (window.pageYOffset > 100) navbar.classList.add('scrolled');
                 else navbar.classList.remove('scrolled');
             });
-        }
-    }
-
-    updateNotificationBadge(count) {
-        const badge = document.getElementById('notificationBadge');
-        if (badge) {
-            badge.textContent = count;
-            badge.style.display = count > 0 ? 'flex' : 'none';
-        }
-    }
-
-    addNotification(notification) {
-        const notificationsList = document.getElementById('notificationsList');
-        if (notificationsList) {
-            const item = document.createElement('div');
-            item.className = 'notification-item';
-            item.innerHTML = `
-                <div style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
-                    <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">
-                        ${notification.title}
-                    </div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);">
-                        ${notification.message}
-                    </div>
-                    <div style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.5rem;">
-                        ${Utils.formatDate(notification.createdAt)}
-                    </div>
-                </div>
-            `;
-            notificationsList.insertBefore(item, notificationsList.firstChild);
-            const currentCount = parseInt(document.getElementById('notificationBadge').textContent) || 0;
-            this.updateNotificationBadge(currentCount + 1);
         }
     }
 }
@@ -127,11 +75,8 @@ function switchTab(tabName) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            switchTab(btn.getAttribute('data-tab'));
-        });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
     });
 });
 
@@ -145,29 +90,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     if (!current) return;
+    function add(id, file) {
+        if (document.getElementById(id)) return;
+        var s = document.createElement('script');
+        s.id = id;
+        s.src = current.replace(/navigation\.js(\?.*)?$/, file);
+        document.head.appendChild(s);
+    }
     var script = document.createElement('script');
     script.src = current.replace(/navigation\.js(\?.*)?$/, 'mobile-shell.js');
     document.head.appendChild(script);
-    if (!document.getElementById('hshs-search-btn-js')) {
-        var searchBtn = document.createElement('script');
-        searchBtn.id = 'hshs-search-btn-js';
-        searchBtn.src = current.replace(/navigation\.js(\?.*)?$/, 'mobile-search-btn.js');
-        document.head.appendChild(searchBtn);
-    }
-    if (!document.getElementById('hshs-brand-js')) {
-        var brand = document.createElement('script');
-        brand.id = 'hshs-brand-js';
-        brand.src = current.replace(/navigation\.js(\?.*)?$/, 'hshs-brand.js');
-        document.head.appendChild(brand);
-    }
-    if (!document.getElementById('hshs-page-swipe-js')) {
-        var pageSwipe = document.createElement('script');
-        pageSwipe.id = 'hshs-page-swipe-js';
-        pageSwipe.src = current.replace(/navigation\.js(\?.*)?$/, 'page-swipe.js');
-        document.head.appendChild(pageSwipe);
-    }
+    add('hshs-search-btn-js', 'mobile-search-btn.js');
+    add('hshs-brand-js', 'hshs-brand.js');
+    add('hshs-page-swipe-js', 'page-swipe.js');
+    add('hshs-motion-js', 'hshs-motion.js');
 })();
-
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Navigation;
-}
