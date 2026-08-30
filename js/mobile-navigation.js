@@ -1,46 +1,29 @@
 // ============================================
-// MOBILE NAVIGATION OPTIMIZATION
+// HSHS MOBILE / TOUCH ENHANCEMENTS
 // ============================================
+// Responsive layout is handled by CSS media queries.
+// This file must NOT decide whether the device is mobile on every page load.
 
-class MobileNavigation {
-    constructor() {
-        this.isMobile = typeof Utils !== 'undefined' && Utils.isMobile ? Utils.isMobile() : window.innerWidth <= 768;
-        this.init();
-    }
+(function () {
+    if (window.__hshsMobileEnhancements) return;
+    window.__hshsMobileEnhancements = true;
 
-    init() {
-        if (this.isMobile) {
-            this.optimizeForMobile();
-            this.setupTouchOptimizations();
-        }
-        this.setupResponsiveListeners();
-        this.loadPageSwipe();
-    }
+    function setupTouchOptimizations() {
+        if (document.getElementById('hshs-touch-css')) return;
 
-    optimizeForMobile() {
-        document.querySelectorAll('.hide-mobile').forEach(function (el) {
-            el.style.display = 'none';
-        });
-        document.querySelectorAll('.show-mobile').forEach(function (el) {
-            el.style.display = 'block';
-        });
-    }
-
-    setupTouchOptimizations() {
         var style = document.createElement('style');
+        style.id = 'hshs-touch-css';
         style.textContent = '@media (hover: none) and (pointer: coarse) { button:hover, a:hover, .clickable:hover { transform: none !important; } }';
         document.head.appendChild(style);
     }
 
-    loadPageSwipe() {
-        // Page-to-page swipe is deliberately loaded from the shared mobile
-        // navigation so every HSHS page gets the same gesture behavior.
+    function loadPageSwipe() {
+        // Page-to-page swipe is deliberately shared across HSHS pages.
         if (window.__hshsPageSwipe || document.getElementById('hshs-page-swipe-script')) return;
 
         var style = document.createElement('style');
         style.id = 'hshs-page-swipe-css';
         style.textContent = `
-            /* HSHS page swipe: horizontal page movement only. */
             #hshs-page,
             body > main,
             body > .page-content,
@@ -81,16 +64,14 @@ class MobileNavigation {
 
         var script = document.createElement('script');
         script.id = 'hshs-page-swipe-script';
-        script.src = this.getAssetPath('../js/page-swipe.js');
+        script.src = getAssetPath('../js/page-swipe.js');
         script.onload = function () {
             document.documentElement.classList.add('hshs-page-swipe-ready');
         };
         document.body.appendChild(script);
     }
 
-    getAssetPath(file) {
-        // All current page files live either at / or /index/*.html.
-        // Resolve against the current document so Vercel/GitHub Pages paths work.
+    function getAssetPath(file) {
         try {
             return new URL(file, document.baseURI).href;
         } catch (e) {
@@ -98,33 +79,20 @@ class MobileNavigation {
         }
     }
 
-    setupResponsiveListeners() {
-        var self = this;
-        var currentBreakpoint = this.getCurrentBreakpoint();
-        window.addEventListener('resize', function () {
-            var next = self.getCurrentBreakpoint();
-            if (next !== currentBreakpoint) {
-                currentBreakpoint = next;
-                self.handleBreakpointChange(next);
-            }
-        });
+    function init() {
+        setupTouchOptimizations();
+        loadPageSwipe();
     }
 
-    getCurrentBreakpoint() {
-        var width = window.innerWidth;
-        if (width <= 640) return 'mobile';
-        if (width <= 960) return 'tablet';
-        return 'desktop';
+    // No device detection and no resize polling here.
+    // CSS handles mobile/tablet/desktop layout from the first render.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+        init();
     }
 
-    handleBreakpointChange(breakpoint) {
-        window.dispatchEvent(new CustomEvent('breakpointchange', { detail: { breakpoint: breakpoint } }));
-        if (breakpoint === 'mobile') this.optimizeForMobile();
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { init: init };
     }
-}
-
-var mobileNav = new MobileNavigation();
-
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = MobileNavigation;
-}
+})();
