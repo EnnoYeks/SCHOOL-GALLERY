@@ -1,38 +1,90 @@
-
-// ============================================
-// ADMIN DASHBOARD LOGIC
-// ============================================
-
+// HSHS staff desk
 class AdminDashboard {
     constructor() {
-        this.isAdmin = this.checkAdminAccess();
-        if (!this.isAdmin) {
-            this.redirectToHome();
+        this.lock = document.getElementById('adminLock');
+        this.desk = document.getElementById('adminDesk') || document.querySelector('.admin-container');
+        if (!this.checkAdminAccess()) {
+            this.showLock();
             return;
         }
+        this.unlockDesk();
         this.init();
     }
 
-    checkAdminAccess() {
-        const adminToken = Utils.getData('adminToken');
-        return !!adminToken;
+    staffCode() {
+        try {
+            return localStorage.getItem('hshsStaffCode') || 'HSHS-STAFF';
+        } catch (e) {
+            return 'HSHS-STAFF';
+        }
     }
 
-    redirectToHome() {
-        window.location.href = 'index.html';
+    checkAdminAccess() {
+        try {
+            if (window.Utils && Utils.getData) return !!Utils.getData('adminToken');
+            return !!localStorage.getItem('adminToken');
+        } catch (e) {
+            return false;
+        }
+    }
+
+    saveToken() {
+        try {
+            if (window.Utils && Utils.setData) Utils.setData('adminToken', 'ok');
+            localStorage.setItem('adminToken', 'ok');
+        } catch (e) {}
+    }
+
+    clearToken() {
+        try {
+            if (window.Utils && Utils.removeData) Utils.removeData('adminToken');
+            localStorage.removeItem('adminToken');
+        } catch (e) {}
+    }
+
+    showLock() {
+        if (this.desk) this.desk.hidden = true;
+        if (this.lock) this.lock.hidden = false;
+        const form = document.getElementById('adminLockForm');
+        const err = document.getElementById('adminLockError');
+        if (!form) return;
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('adminLockInput');
+            const value = (input && input.value || '').trim();
+            if (value !== this.staffCode()) {
+                if (err) {
+                    err.hidden = false;
+                    err.textContent = 'That staff code is not right.';
+                }
+                return;
+            }
+            this.saveToken();
+            this.unlockDesk();
+            this.init();
+        });
+    }
+
+    unlockDesk() {
+        if (this.lock) this.lock.hidden = true;
+        if (this.desk) this.desk.hidden = false;
+    }
+
+    goHome() {
+        const inIndex = /\/index\//i.test(location.pathname);
+        location.href = inIndex ? '../index.html' : 'index.html';
     }
 
     async init() {
-        await this.loadDashboard();
         this.setupTabs();
-        await this.loadStats();
         this.setupEventListeners();
+        try { await this.loadDashboard(); } catch (e) {}
+        try { await this.loadStats(); } catch (e) {}
     }
 
     async loadDashboard() {
+        if (typeof db === 'undefined' || !db.getAnalytics) return;
         const analytics = await db.getAnalytics();
-        
-        // Update stat cards
         const statElements = {
             totalPosts: document.getElementById('totalPosts'),
             totalPhotosStat: document.getElementById('totalPhotosStat'),
@@ -41,329 +93,88 @@ class AdminDashboard {
             totalCommentsStat: document.getElementById('totalCommentsStat'),
             totalViewsStat: document.getElementById('totalViewsStat')
         };
-
         Object.entries(statElements).forEach(([key, element]) => {
-            if (element) {
-                const value = analytics[key.replace('Stat', '')] || 0;
-                Utils.animateCounter(element, 0, value, 800);
-            }
+            if (!element) return;
+            const value = analytics[key.replace('Stat', '')] || 0;
+            if (window.Utils && Utils.animateCounter) Utils.animateCounter(element, 0, value, 800);
+            else element.textContent = value;
         });
     }
 
-    async loadStats() {
-        const analytics = await db.getAnalytics();
-        console.log('Analytics:', analytics);
-    }
+    async loadStats() {}
 
     setupTabs() {
         const tabButtons = document.querySelectorAll('.menu-item');
         const tabs = document.querySelectorAll('.tab-content');
-
         tabButtons.forEach(btn => {
             btn.addEventListener('click', async () => {
                 const tabName = btn.getAttribute('data-tab');
-                
-                // Remove active class
+                if (btn.id === 'adminLogoutBtn' || btn.getAttribute('data-tab') === 'logout') {
+                    this.clearToken();
+                    this.goHome();
+                    return;
+                }
+                if (!tabName) return;
                 tabButtons.forEach(b => b.classList.remove('active'));
                 tabs.forEach(t => t.classList.remove('active'));
-
-                // Add active class
                 btn.classList.add('active');
                 const tab = document.getElementById(tabName + 'Tab');
-                if (tab) {
-                    tab.classList.add('active');
-                    
-                    // Load content based on tab
-                    if (tabName === 'posts') {
-                        await this.loadPostsTable();
-                    } else if (tabName === 'photos') {
-                        await this.loadPhotosTable();
-                    } else if (tabName === 'videos') {
-                        await this.loadVideosTable();
-                    }
-                }
+                if (tab) tab.classList.add('active');
+                if (tabName === 'posts') await this.loadPostsTable();
+                if (tabName === 'photos') await this.loadPhotosTable();
+                if (tabName === 'videos') await this.loadVideosTable();
             });
         });
     }
 
     async loadPostsTable() {
         const tbody = document.getElementById('postsTableBody');
-        if (!tbody) return;
-
+        if (!tbody || typeof db === 'undefined') return;
         const posts = await db.getPosts(100, 0);
-        
-        if (posts.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No posts found</td></tr>';
+        if (!posts.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem">No posts found</td></tr>';
             return;
         }
-
-        tbody.innerHTML = posts.map(post => `
-            <tr>
-                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
-                    <strong>${post.title}</strong>
-                </td>
-                <td>${Utils.capitalize(post.category || 'general')}</td>
-                <td>${Utils.formatDate(post.createdAt)}</td>
-                <td>${Utils.formatNumber(post.likes || 0)}</td>
-                <td>${Utils.formatNumber(post.views || 0)}</td>
-                <td>
-                    <div class="table-actions">
-                        <button class="action-btn-small" onclick="adminDashboard.editPost('${post.id}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="action-btn-small warning" onclick="adminDashboard.approvePost('${post.id}')">
-                            <i class="fas fa-check"></i> Approve
-                        </button>
-                        <button class="action-btn-small danger" onclick="adminDashboard.deletePost('${post.id}')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = posts.map(post => '<tr><td><strong>' + (post.title || '') + '</strong></td><td>' + (post.category || 'general') + '</td><td></td><td>' + (post.likes || 0) + '</td><td>' + (post.views || 0) + '</td><td></td></tr>').join('');
     }
 
     async loadPhotosTable() {
         const tbody = document.getElementById('photosTableBody');
-        if (!tbody) return;
-
+        if (!tbody || typeof db === 'undefined') return;
         const photos = await db.getPhotos(100, 0);
-
-        if (photos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No photos found</td></tr>';
+        if (!photos.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem">No photos found</td></tr>';
             return;
         }
-
-        tbody.innerHTML = photos.map(photo => `
-            <tr>
-                <td>
-                    <img src="${photo.image}" alt="${photo.title}" style="
-                        width: 40px;
-                        height: 40px;
-                        border-radius: 5px;
-                        object-fit: cover;
-                    ">
-                </td>
-                <td><strong>${photo.title}</strong></td>
-                <td>${Utils.formatDate(photo.createdAt)}</td>
-                <td>${Utils.formatNumber(photo.likes || 0)}</td>
-                <td>${Utils.formatNumber(photo.views || 0)}</td>
-                <td>
-                    <div class="table-actions">
-                        <button class="action-btn-small" onclick="adminDashboard.editPhoto('${photo.id}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="action-btn-small danger" onclick="adminDashboard.deletePhoto('${photo.id}')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = photos.map(photo => '<tr><td></td><td><strong>' + (photo.title || '') + '</strong></td><td></td><td>' + (photo.likes || 0) + '</td><td>' + (photo.views || 0) + '</td><td></td></tr>').join('');
     }
 
     async loadVideosTable() {
         const tbody = document.getElementById('videosTableBody');
-        if (!tbody) return;
-
+        if (!tbody || typeof db === 'undefined') return;
         const videos = await db.getVideos(100, 0);
-
-        if (videos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No videos found</td></tr>';
+        if (!videos.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem">No videos found</td></tr>';
             return;
         }
-
-        tbody.innerHTML = videos.map(video => `
-            <tr>
-                <td>
-                    <img src="${video.thumbnail}" alt="${video.title}" style="
-                        width: 40px;
-                        height: 40px;
-                        border-radius: 5px;
-                        object-fit: cover;
-                    ">
-                </td>
-                <td><strong>${video.title}</strong></td>
-                <td>${video.duration}</td>
-                <td>${Utils.formatDate(video.createdAt)}</td>
-                <td>${Utils.formatNumber(video.views || 0)}</td>
-                <td>
-                    <div class="table-actions">
-                        <button class="action-btn-small" onclick="adminDashboard.editVideo('${video.id}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="action-btn-small danger" onclick="adminDashboard.deleteVideo('${video.id}')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = videos.map(video => '<tr><td></td><td><strong>' + (video.title || '') + '</strong></td><td>' + (video.duration || '') + '</td><td></td><td>' + (video.views || 0) + '</td><td></td></tr>').join('');
     }
 
     setupEventListeners() {
-        const uploadBtn = document.getElementById('uploadBtn');
-        const refreshBtn = document.getElementById('refreshBtn');
-        const uploadBtnModal = document.querySelector('.btn-admin');
-
-        if (uploadBtn) {
-            uploadBtn.addEventListener('click', () => {
-                this.openUploadModal();
-            });
-        }
-
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => {
-                this.loadDashboard();
-                Utils.showToast('Dashboard refreshed', 'success');
-            });
-        }
+        document.getElementById('uploadBtn')?.addEventListener('click', () => this.openUploadModal());
+        document.getElementById('refreshBtn')?.addEventListener('click', () => {
+            this.loadDashboard();
+            if (window.Utils && Utils.showToast) Utils.showToast('Dashboard refreshed', 'success');
+        });
+        document.getElementById('adminHomeBtn')?.addEventListener('click', () => this.goHome());
     }
 
     openUploadModal() {
         const modal = document.getElementById('adminModal');
-        if (modal) {
-            modal.classList.add('active');
-        }
-
-        const closeBtn = document.getElementById('modalCloseBtn');
-        const cancelBtn = document.getElementById('modalCancelBtn');
-
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                modal.classList.remove('active');
-            });
-        }
-
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', () => {
-                modal.classList.remove('active');
-            });
-        }
-    }
-
-    editPost(postId) {
-        Utils.showToast('Edit feature coming soon!', 'info');
-    }
-
-    async approvePost(postId) {
-        const post = await db.getPostById(postId);
-        if (post) {
-            await db.updatePost(postId, { approved: true });
-            await this.loadPostsTable();
-            Utils.showToast('Post approved', 'success');
-        }
-    }
-
-    deletePost(postId) {
-        if (confirm('Are you sure you want to delete this post?')) {
-            db.deletePost(postId);
-            this.loadPostsTable();
-            Utils.showToast('Post deleted', 'success');
-        }
-    }
-
-    editPhoto(photoId) {
-        Utils.showToast('Edit feature coming soon!', 'info');
-    }
-
-    async deletePhoto(photoId) {
-        if (confirm('Are you sure you want to delete this photo?')) {
-            await db.deletePhoto(photoId);
-            await this.loadPhotosTable();
-            Utils.showToast('Photo deleted', 'success');
-        }
-    }
-
-    editVideo(videoId) {
-        Utils.showToast('Edit feature coming soon!', 'info');
-    }
-
-    async deleteVideo(videoId) {
-        if (confirm('Are you sure you want to delete this video?')) {
-            await db.deleteVideo(videoId);
-            await this.loadVideosTable();
-            Utils.showToast('Video deleted', 'success');
-        }
-    }
-
-    // Export Data
-    async exportData(type = 'all') {
-        let data = {};
-
-        if (type === 'all' || type === 'posts') {
-            data.posts = await db.getPosts(100, 0);
-        }
-        if (type === 'all' || type === 'photos') {
-            data.photos = await db.getPhotos(100, 0);
-        }
-        if (type === 'all' || type === 'videos') {
-            data.videos = await db.getVideos(100, 0);
-        }
-
-        const dataStr = JSON.stringify(data, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `ennoyeks-export-${type}-${new Date().toISOString().slice(0, 10)}.json`;
-        link.click();
-
-        Utils.showToast('Data exported successfully', 'success');
-    }
-
-    // Import Data
-    importData(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                
-                if (data.posts) {
-                    db.posts = [...db.posts, ...data.posts];
-                }
-                if (data.photos) {
-                    db.photos = [...db.photos, ...data.photos];
-                }
-                if (data.videos) {
-                    db.videos = [...db.videos, ...data.videos];
-                }
-
-                db.saveToStorage();
-                this.loadDashboard();
-                Utils.showToast('Data imported successfully', 'success');
-            } catch (error) {
-                Utils.showToast('Error importing data', 'error');
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    // Generate Report
-    async generateReport() {
-        const analytics = await db.getAnalytics();
-        const report = {
-            generatedAt: new Date().toISOString(),
-            school: CONFIG.app.school,
-            ...analytics
-        };
-
-        const reportStr = JSON.stringify(report, null, 2);
-        const blob = new Blob([reportStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `report-${new Date().toISOString().slice(0, 10)}.json`;
-        link.click();
-
-        Utils.showToast('Report generated', 'success');
+        if (modal) modal.classList.add('active');
+        document.getElementById('modalCloseBtn')?.addEventListener('click', () => modal.classList.remove('active'));
+        document.getElementById('modalCancelBtn')?.addEventListener('click', () => modal.classList.remove('active'));
     }
 }
 
-// Initialize admin dashboard
-const adminDashboard = new AdminDashboard();
-
-// Export for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = AdminDashboard;
-}
+window.adminDashboard = new AdminDashboard();
