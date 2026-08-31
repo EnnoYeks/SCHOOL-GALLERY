@@ -44,13 +44,31 @@
         theme.setAttribute('content', '#12306b');
     }
 
+    function sizeBadge(logo) {
+        var mark = logo.querySelector('.brand-mark');
+        var img = logo.querySelector('.brand-mark img');
+        if (mark) {
+            mark.style.width = '42px';
+            mark.style.height = '42px';
+            mark.style.flex = '0 0 42px';
+        }
+        if (img) {
+            img.width = 42;
+            img.height = 42;
+            img.style.width = '42px';
+            img.style.height = '42px';
+            img.style.objectFit = 'contain';
+            img.style.display = 'block';
+        }
+    }
+
     function dressLogo() {
         var logo = document.querySelector('.logo');
         if (!logo) return;
         if (!logo.querySelector('.brand-copy')) {
             var mark = document.createElement('span');
             mark.className = 'brand-mark';
-            mark.innerHTML = '<img src="' + BADGE + '" alt="Hawthorne Scribner High School badge">';
+            mark.innerHTML = '<img src="' + BADGE + '" alt="Hawthorne Scribner High School badge" width="42" height="42">';
             var copy = document.createElement('span');
             copy.className = 'brand-copy';
             copy.innerHTML = '<strong>HSHS World</strong>';
@@ -60,13 +78,14 @@
         } else {
             var mark = logo.querySelector('.brand-mark');
             if (mark && !mark.querySelector('img')) {
-                mark.innerHTML = '<img src="' + BADGE + '" alt="Hawthorne Scribner High School badge">';
+                mark.innerHTML = '<img src="' + BADGE + '" alt="Hawthorne Scribner High School badge" width="42" height="42">';
             }
             var strong = logo.querySelector('.brand-copy strong');
             var small = logo.querySelector('.brand-copy small');
             if (strong) strong.textContent = 'HSHS World';
             if (small) small.remove();
         }
+        sizeBadge(logo);
         logo.setAttribute('title', APP);
     }
 
