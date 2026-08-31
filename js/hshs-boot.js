@@ -2,8 +2,7 @@
     if (window.__hshsBoot) return;
     window.__hshsBoot = true;
 
-    var MIN_BOOT = 5000;
-    var MIN_SKEL = 3000;
+    var MIN_BOOT = 280;
     var parts = { css: 0, dom: 0, shell: 0, fonts: 0, images: 0, page: 0 };
     var weight = { css: 18, dom: 12, shell: 20, fonts: 10, images: 28, page: 12 };
     var done = false;
@@ -32,15 +31,17 @@
     }
     function catSvg() {
         return '<svg viewBox="0 0 120 100" aria-hidden="true">' +
-            '<path class="tail" d="M78 52 C96 52 102 70 90 86 C86 92 78 88 80 80 C82 72 86 66 78 62" fill="#2a2a2e"/>' +
-            '<ellipse cx="62" cy="54" rx="26" ry="18" fill="#2a2a2e"/>' +
-            '<circle cx="44" cy="38" r="16" fill="#2a2a2e"/>' +
-            '<path d="M32 30 L30 14 L42 26Z" fill="#2a2a2e"/>' +
-            '<path d="M46 26 L58 14 L56 30Z" fill="#2a2a2e"/>' +
-            '<ellipse cx="40" cy="37" rx="3.2" ry="3.6" fill="#fff"/>' +
-            '<ellipse cx="50" cy="37" rx="3.2" ry="3.6" fill="#fff"/>' +
-            '<circle cx="40.4" cy="37.4" r="1.1" fill="#2a2a2e"/>' +
-            '<circle cx="50.4" cy="37.4" r="1.1" fill="#2a2a2e"/>' +
+            '<g class="tail"><path d="M78 52 C98 48 108 72 94 88 C88 94 78 88 82 78 C86 68 88 62 78 60" fill="#2a2a2e"/></g>' +
+            '<ellipse class="body" cx="62" cy="56" rx="26" ry="17" fill="#2a2a2e"/>' +
+            '<g class="head">' +
+            '<circle cx="44" cy="36" r="16" fill="#2a2a2e"/>' +
+            '<path d="M32 28 L29 12 L43 24Z" fill="#2a2a2e"/>' +
+            '<path d="M46 24 L59 12 L56 28Z" fill="#2a2a2e"/>' +
+            '<ellipse cx="40" cy="35" rx="3.3" ry="3.7" fill="#fff"/>' +
+            '<ellipse cx="50" cy="35" rx="3.3" ry="3.7" fill="#fff"/>' +
+            '<circle cx="40.5" cy="35.5" r="1.15" fill="#2a2a2e"/>' +
+            '<circle cx="50.5" cy="35.5" r="1.15" fill="#2a2a2e"/>' +
+            '</g>' +
             '<path d="M36 54 C28 56 24 62 30 64 C38 66 44 62 46 58" fill="#2a2a2e"/>' +
             '</svg>';
     }
@@ -93,7 +94,7 @@
             link.addEventListener('load', one, { once: true });
             link.addEventListener('error', one, { once: true });
         });
-        setTimeout(function () { setPart('css', 1, 'Styles ready'); }, 4000);
+        setTimeout(function () { setPart('css', 1, 'Styles ready'); }, 2500);
     }
     function watchImages(scope) {
         var root = scope || document;
@@ -113,7 +114,7 @@
                 img.addEventListener('load', one, { once: true });
                 img.addEventListener('error', one, { once: true });
             });
-            setTimeout(function () { setPart('images', 1, 'Pictures ready'); resolve(); }, 6000);
+            setTimeout(function () { setPart('images', 1, 'Pictures ready'); resolve(); }, 3500);
         });
     }
     function finish() {
@@ -128,7 +129,7 @@
             var boot = document.getElementById('hshs-boot');
             if (boot) {
                 boot.classList.add('is-off');
-                setTimeout(function () { if (boot.parentNode) boot.remove(); }, 380);
+                setTimeout(function () { if (boot.parentNode) boot.remove(); }, 280);
             }
         }, wait);
     }
@@ -144,40 +145,18 @@
         var playList = '<div class="sk-play-list">' + repeat('<div class="sk-play-row"><div class="thumb"></div><div><div class="sk-line"></div><div class="sk-line s"></div></div></div>', 4) + '</div>';
         var photos = '<div class="sk-photo-grid">' + repeat('<article class="sk-photo"></article>', 6) + '</div>';
         var rows = repeat('<div class="sk-row"></div>', 4);
-        if (file.indexOf('videos') !== -1) {
-            return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + tabs + playGrid + playList + '</div>';
-        }
-        if (file.indexOf('buzz') !== -1 || file.indexOf('clips') !== -1 || file.indexOf('shorts') !== -1) {
-            return '<div class="hshs-page-skel"><div class="sk-buzz"></div></div>';
-        }
-        if (file.indexOf('gallery') !== -1 || file.indexOf('photos') !== -1) {
-            return '<div class="hshs-page-skel">' + tabs + photos + '</div>';
-        }
-        if (file.indexOf('spotlight') !== -1) {
-            return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + rows + '</div>';
-        }
-        if (file.indexOf('trending') !== -1) {
-            return '<div class="hshs-page-skel">' + repeat('<div class="sk-row"></div>', 6) + '</div>';
-        }
-        if (file.indexOf('polls') !== -1 || file.indexOf('memories') !== -1) {
-            return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + rows + '</div>';
-        }
-        if (file.indexOf('profile') !== -1) {
-            return '<div class="hshs-page-skel"><div class="sk-avatar"></div>' + rows + '</div>';
-        }
-        if (file.indexOf('settings') !== -1 || file.indexOf('about') !== -1 || file.indexOf('contat') !== -1) {
-            return '<div class="hshs-page-skel">' + rows + rows + '</div>';
-        }
+        if (file.indexOf('videos') !== -1) return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + tabs + playGrid + playList + '</div>';
+        if (file.indexOf('buzz') !== -1 || file.indexOf('clips') !== -1) return '<div class="hshs-page-skel"><div class="sk-buzz"></div></div>';
+        if (file.indexOf('gallery') !== -1 || file.indexOf('photos') !== -1) return '<div class="hshs-page-skel">' + tabs + photos + '</div>';
+        if (file.indexOf('spotlight') !== -1 || file.indexOf('polls') !== -1 || file.indexOf('memories') !== -1) return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + rows + '</div>';
+        if (file.indexOf('profile') !== -1) return '<div class="hshs-page-skel"><div class="sk-avatar"></div>' + rows + '</div>';
         return '<div class="hshs-page-skel"><div class="sk-hero"></div><div class="sk-stats"><div class="sk-stat"></div><div class="sk-stat"></div><div class="sk-stat"></div><div class="sk-stat"></div></div>' + photos + '</div>';
     }
     window.__hshsBootMark = setPart;
     window.__hshsPageSkeleton = pageSkeleton;
     window.__hshsWaitImages = watchImages;
-    window.__hshsMinSkel = MIN_SKEL;
-    window.__hshsHold = function (startedAt, minMs) {
-        var left = Math.max(0, (minMs || MIN_SKEL) - (Date.now() - startedAt));
-        return new Promise(function (resolve) { setTimeout(resolve, left); });
-    };
+    window.__hshsMinSkel = 0;
+    window.__hshsHold = function () { return Promise.resolve(); };
 
     ensureCss();
     mountSplash();
@@ -190,7 +169,7 @@
     } else setPart('dom', 1, 'Page structure ready');
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setPart('fonts', 1, 'Text ready'); });
     else setPart('fonts', 1, 'Text ready');
-    setTimeout(function () { setPart('fonts', 1, 'Text ready'); }, 2500);
+    setTimeout(function () { setPart('fonts', 1, 'Text ready'); }, 1800);
     var shellTries = 0;
     var shellTimer = setInterval(function () {
         if (window.__hshsMobileShell || ++shellTries > 80) {
@@ -201,12 +180,11 @@
     watchImages(document).then(function () { setPart('page', 1, 'Content ready'); });
     window.addEventListener('load', function () {
         setPart('css', 1); setPart('dom', 1); setPart('fonts', 1);
-        setPart('images', 1); setPart('page', 1, 'Finishing');
-        setPart('shell', Math.max(parts.shell, 0.8));
-        setTimeout(function () { setPart('shell', 1, 'Ready'); }, 200);
+        setPart('images', 1); setPart('page', 1, 'Ready');
+        setPart('shell', 1, 'Ready');
     });
     setTimeout(function () {
         setPart('css', 1); setPart('dom', 1); setPart('shell', 1);
         setPart('fonts', 1); setPart('images', 1); setPart('page', 1, 'Ready');
-    }, 12000);
+    }, 8000);
 })();
