@@ -21,6 +21,16 @@
     function currentFile() {
         return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     }
+    function fileKey(url) {
+        if (window.__hshsFileKey) return window.__hshsFileKey(url);
+        try {
+            var f = (new URL(url, location.href).pathname.split('/').pop() || 'index.html').toLowerCase();
+            if (!f) f = 'index.html';
+            if (f === 'clips.html' || f === 'shorts.html') f = 'buzz.html';
+            if (f === 'contact.html') f = 'contat.html';
+            return f;
+        } catch (e) { return url; }
+    }
 
     function canonicalize(url) {
         const next = new URL(url, location.href);
@@ -169,6 +179,19 @@
         const backdrop = document.getElementById('moreBackdrop');
         if (sheet) sheet.classList.remove('open');
         if (backdrop) backdrop.classList.remove('open');
+        document.body.classList.remove('more-open');
+    }
+    function openMore() {
+        const sheet = document.getElementById('moreSheet');
+        const backdrop = document.getElementById('moreBackdrop');
+        if (sheet) sheet.classList.add('open');
+        if (backdrop) backdrop.classList.add('open');
+        document.body.classList.add('more-open');
+    }
+    function toggleMore() {
+        const sheet = document.getElementById('moreSheet');
+        if (sheet && sheet.classList.contains('open')) closeMore();
+        else openMore();
     }
 
     function bootPageWidgets() {
@@ -198,7 +221,7 @@
         const sheet = document.createElement('aside');
         sheet.className = 'more-sheet';
         sheet.id = 'moreSheet';
-        sheet.innerHTML = `<h3>All pages</h3><p>Jump to any section</p><div class="more-grid">` +
+        sheet.innerHTML = `<div class="more-head"><div><h3>All pages</h3><p>Jump to any section</p></div><button type="button" class="more-close" id="closeMoreSheet" aria-label="Close">×</button></div><div class="more-grid">` +
             r.MORE.map((item) => `<a href="${item.href}" class="${isActive(item) ? 'active' : ''}"><i class="fas ${item.icon}"></i><span>${item.label}</span></a>`).join('') +
             `</div>`;
         document.body.appendChild(bar);
@@ -206,10 +229,17 @@
         document.body.appendChild(sheet);
         document.getElementById('openMoreSheet').addEventListener('click', function (e) {
             e.preventDefault();
-            sheet.classList.add('open');
-            backdrop.classList.add('open');
+            e.stopPropagation();
+            toggleMore();
+        });
+        document.getElementById('closeMoreSheet').addEventListener('click', function (e) {
+            e.preventDefault();
+            closeMore();
         });
         backdrop.addEventListener('click', closeMore);
+        sheet.addEventListener('click', function (e) {
+            if (e.target.closest('.more-grid a')) closeMore();
+        });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMore(); });
     }
 
@@ -282,6 +312,7 @@
     }
 
     function applyPage(html, url, fromHistory) {
+        closeMore();
         if (!fromHistory) history.pushState({ url: url }, '', url);
         const doc = new DOMParser().parseFromString(html, 'text/html');
         adoptCss(doc);
@@ -289,7 +320,6 @@
         root.innerHTML = extractPage(doc).innerHTML;
         fixBadLinks(root);
         document.title = doc.title || document.title;
-        closeMore();
         syncDesktopNav();
         markActive();
         wireHomeButtons();
@@ -299,15 +329,21 @@
         document.dispatchEvent(new Event('hshs:page'));
     }
 
+    function cachedHtml(url) {
+        const key = fileKey(url);
+        return pageCache[key] || pageCache[url] || null;
+    }
+
     async function navigate(url, fromHistory) {
         const next = canonicalize(url);
         if (next.origin !== location.origin) { location.href = next.href; return; }
-        if (next.hash === '#more') return;
+        if (next.hash === '#more') { toggleMore(); return; }
         const file = (next.pathname.split('/').pop() || '').toLowerCase();
         if (file === 'admin.html') { location.href = next.href; return; }
         const root = wrapPage();
-        const cached = pageCache[next.href];
+        const cached = cachedHtml(next.href) || cachedHtml(file);
         if (cached) {
+            pageCache[fileKey(next.href)] = cached;
             applyPage(cached, next.href, fromHistory);
             return;
         }
@@ -317,6 +353,7 @@
             if (!res.ok) throw new Error('fetch failed');
             const html = await res.text();
             pageCache[next.href] = html;
+            pageCache[fileKey(next.href)] = html;
             applyPage(html, next.href, fromHistory);
         } catch (err) {
             location.href = next.href;
@@ -358,9 +395,10 @@
             const a = e.target.closest('a');
             if (!isInternalAppLink(a)) return;
             e.preventDefault();
+            closeMore();
             navigate(a.href);
         });
-        window.addEventListener('popstate', function () { navigate(location.href, true); });
+        window.addEventListener('popstate', function () { closeMore(); navigate(location.href, true); });
     }
 
     function boot() {
@@ -379,6 +417,7 @@
     }
 
     window.__hshsNavigate = navigate;
+    window.__hshsCloseMore = closeMore;
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
     else boot();
 })();
