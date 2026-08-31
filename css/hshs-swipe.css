@@ -1,36 +1,50 @@
 @media (max-width: 1024px) {
     #hshs-cube-stage {
-        perspective: 1100px;
+        perspective: 1400px;
+        perspective-origin: 50% 45%;
         overflow: hidden;
         touch-action: pan-y;
+        min-height: calc(100vh - 148px);
     }
     #hshs-cube {
         position: relative;
+        min-height: calc(100vh - 148px);
         transform-style: preserve-3d;
+        transform: translateZ(calc(var(--cube-z, 50vw) * -1)) rotateY(0deg);
         will-change: transform;
     }
     #hshs-cube.is-dragging { transition: none; }
     #hshs-cube.is-settle {
-        transition: transform .48s cubic-bezier(.22,.68,.28,1);
+        transition: transform .55s cubic-bezier(.22,.7,.2,1);
+    }
+    #hshs-page,
+    #hshs-cube-next {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    #hshs-page {
+        position: relative;
+        transform: rotateY(0deg) translateZ(var(--cube-z, 50vw));
     }
     #hshs-cube-next {
-        position: absolute; inset: 0;
-        background: var(--bg-primary, #0b1220);
-        transform: rotateY(90deg) translateZ(50vw);
-        backface-visibility: hidden;
+        position: absolute;
+        inset: 0;
+        overflow: auto;
+        background: var(--bg-primary, #071433);
         pointer-events: none;
-        display: flex; align-items: center; justify-content: center;
-        color: #fff; font-weight: 800; letter-spacing: .04em;
-        opacity: 0;
+        transform: rotateY(90deg) translateZ(var(--cube-z, 50vw));
     }
-    #hshs-cube.is-dragging #hshs-cube-next,
-    #hshs-cube.is-settle #hshs-cube-next { opacity: 1; }
+    #hshs-cube-next.is-left {
+        transform: rotateY(-90deg) translateZ(var(--cube-z, 50vw));
+    }
+    .mobile-tabbar, .navbar, .more-sheet, .more-backdrop {
+        transform: none !important;
+    }
     .mobile-tabbar a {
         transition: transform .22s ease, color .22s ease, background .22s ease;
     }
     .mobile-tabbar a.active {
-        transform: translateY(-2px) scale(1.12);
+        transform: translateY(-2px) scale(1.14);
         color: #eab308;
     }
-    .mobile-tabbar a.active i { transform: scale(1.12); }
 }
