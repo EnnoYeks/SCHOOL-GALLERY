@@ -50,6 +50,47 @@ body.dark-mode {
     body.has-mobile-shell .hero-buttons .btn-primary {
         color: #12306b !important;
     }
+    body.has-mobile-shell .navbar {
+        background: transparent !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+        padding: 8px 10px 4px !important;
+    }
+    body.has-mobile-shell .navbar-container {
+        background: linear-gradient(135deg, rgba(7,20,51,.92), rgba(18,48,107,.88));
+        border: 1px solid rgba(234,179,8,.35);
+        border-radius: 18px;
+        padding: 8px 10px !important;
+        gap: 8px !important;
+        box-shadow: 0 10px 24px rgba(0,0,0,.22);
+    }
+    body.has-mobile-shell .logo {
+        background: none !important;
+        -webkit-text-fill-color: #fff !important;
+        color: #fff !important;
+        gap: 8px !important;
+    }
+    body.has-mobile-shell .brand-copy strong {
+        font-size: 1.02rem;
+        letter-spacing: .02em;
+        color: #fff;
+    }
+    body.has-mobile-shell .hshs-search-btn {
+        width: 38px; height: 38px; border: 0; border-radius: 12px;
+        background: linear-gradient(135deg, #eab308, #f59e0b);
+        color: #102047; font-size: 15px; display: inline-flex;
+        align-items: center; justify-content: center;
+    }
+    body.has-mobile-shell .profile-img,
+    body.has-mobile-shell .hshs-avatar {
+        width: 34px !important; height: 34px !important;
+        border: 2px solid #eab308 !important;
+    }
+    body.has-mobile-shell .theme-toggle { color: #fff; }
+    body.search-open .search-container {
+        display: block !important;
+        position: absolute; left: 12px; right: 12px; top: 62px; z-index: 40;
+    }
 }
 .cta-section,
 .daily-quote-box {
@@ -66,7 +107,6 @@ body.light-mode .vibe-tab.active,
 .vibe-feat .badge {
     background: #1d4ed8 !important;
 }
-
 .spotlight-filters {
     display: none !important;
 }
