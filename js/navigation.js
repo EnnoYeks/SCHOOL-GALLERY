@@ -81,6 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 (function loadHshsMobileShell() {
+    if (!document.getElementById('hshs-boot-critical')) {
+        var st = document.createElement('style');
+        st.id = 'hshs-boot-critical';
+        st.textContent = 'html.hshs-booting body>*:not(#hshs-boot),html:not(.hshs-ready) body>*:not(#hshs-boot){opacity:0!important}html.hshs-booting .nav-links,html:not(.hshs-ready) .nav-links{display:none!important}@media(max-width:1024px){.brand-mark,.brand-mark img,.logo img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}}';
+        document.documentElement.classList.add('hshs-booting');
+        document.head.appendChild(st);
+    }
     if (window.__hshsMobileShell) return;
     var current = document.currentScript && document.currentScript.src;
     if (!current) {
@@ -99,6 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
         s.src = current.replace(/navigation\.js(\?.*)?$/, file);
         document.head.appendChild(s);
     }
+
+    add('hshs-boot-js', 'hshs-boot.js');
 
     var script = document.createElement('script');
     script.id = 'hshs-mobile-shell-js';
