@@ -31,18 +31,44 @@
     }
     function catSvg() {
         return '<svg viewBox="0 0 120 100" aria-hidden="true">' +
-            '<g class="tail"><path d="M78 52 C98 48 108 72 94 88 C88 94 78 88 82 78 C86 68 88 62 78 60" fill="#2a2a2e"/></g>' +
-            '<ellipse class="body" cx="62" cy="56" rx="26" ry="17" fill="#2a2a2e"/>' +
+            '<g class="tail"><path d="M78 52 C98 48 108 72 94 88 C88 94 78 88 82 78 C86 68 88 62 78 60" fill="#1a1a1e"/></g>' +
+            '<ellipse class="body" cx="62" cy="56" rx="26" ry="17" fill="#1a1a1e"/>' +
             '<g class="head">' +
-            '<circle cx="44" cy="36" r="16" fill="#2a2a2e"/>' +
-            '<path d="M32 28 L29 12 L43 24Z" fill="#2a2a2e"/>' +
-            '<path d="M46 24 L59 12 L56 28Z" fill="#2a2a2e"/>' +
-            '<ellipse cx="40" cy="35" rx="3.3" ry="3.7" fill="#fff"/>' +
-            '<ellipse cx="50" cy="35" rx="3.3" ry="3.7" fill="#fff"/>' +
-            '<circle cx="40.5" cy="35.5" r="1.15" fill="#2a2a2e"/>' +
-            '<circle cx="50.5" cy="35.5" r="1.15" fill="#2a2a2e"/>' +
+            '<circle cx="44" cy="36" r="16" fill="#1a1a1e"/>' +
+            '<path d="M32 28 L29 12 L43 24Z" fill="#1a1a1e"/>' +
+            '<path d="M46 24 L59 12 L56 28Z" fill="#1a1a1e"/>' +
+            '<ellipse cx="40" cy="35" rx="3.3" ry="3.7" fill="#f4efe4"/>' +
+            '<ellipse cx="50" cy="35" rx="3.3" ry="3.7" fill="#f4efe4"/>' +
+            '<circle cx="40.5" cy="35.5" r="1.15" fill="#1a1a1e"/>' +
+            '<circle cx="50.5" cy="35.5" r="1.15" fill="#1a1a1e"/>' +
             '</g>' +
-            '<path d="M36 54 C28 56 24 62 30 64 C38 66 44 62 46 58" fill="#2a2a2e"/>' +
+            '<path d="M36 54 C28 56 24 62 30 64 C38 66 44 62 46 58" fill="#1a1a1e"/>' +
+            '</svg>';
+    }
+    function campusSvg() {
+        function win(x, y) {
+            return '<rect x="' + x + '" y="' + y + '" width="10" height="14" rx="1"/>';
+        }
+        var windows = '';
+        var cols = [52, 78, 104, 130, 156, 236, 262, 288, 380, 410, 440, 470, 500, 600, 710, 740, 770, 800, 900, 930, 960, 1060, 1090, 1120];
+        cols.forEach(function (x, i) {
+            windows += win(x, i % 3 === 0 ? 148 : 168);
+            if (i % 2 === 0) windows += win(x, 188);
+        });
+        return '<svg viewBox="0 0 1200 280" preserveAspectRatio="xMidYMax slice" aria-hidden="true">' +
+            '<rect y="218" width="1200" height="62" fill="#061028"/>' +
+            '<g fill="#0a1733">' +
+            '<rect x="40" y="120" width="160" height="110"/>' +
+            '<rect x="220" y="90" width="120" height="140"/>' +
+            '<polygon points="220,90 280,48 340,90"/>' +
+            '<rect x="360" y="130" width="200" height="100"/>' +
+            '<rect x="580" y="70" width="90" height="160"/>' +
+            '<rect x="690" y="110" width="170" height="120"/>' +
+            '<rect x="880" y="95" width="140" height="135"/>' +
+            '<polygon points="880,95 950,52 1020,95"/>' +
+            '<rect x="1040" y="125" width="130" height="105"/>' +
+            '</g>' +
+            '<g fill="#eab308" opacity=".88">' + windows + '</g>' +
             '</svg>';
     }
     function mountSplash() {
@@ -52,19 +78,34 @@
         var box = document.createElement('div');
         box.id = 'hshs-boot';
         box.innerHTML =
+            '<div class="hshs-boot-sky" aria-hidden="true">' +
+            '<div class="hshs-boot-stars"></div>' +
+            '<div class="hshs-boot-aurora a"></div>' +
+            '<div class="hshs-boot-aurora b"></div>' +
+            '<div class="hshs-boot-aurora c"></div>' +
+            '<div class="hshs-boot-campus">' + campusSvg() + '</div>' +
+            '<div class="hshs-boot-memories">' +
+            '<figure class="hshs-boot-polaroid p1"><i></i></figure>' +
+            '<figure class="hshs-boot-polaroid p2"><i></i></figure>' +
+            '<figure class="hshs-boot-polaroid p3"><i></i></figure>' +
+            '<figure class="hshs-boot-polaroid p4"><i></i></figure>' +
+            '</div>' +
+            '<div class="hshs-boot-grain"></div>' +
+            '</div>' +
             '<div class="hshs-boot-stage">' +
+            '<p class="hshs-boot-kicker">Hawthorne Scribner</p>' +
             '<div class="hshs-boot-track-wrap">' +
             '<div class="hshs-boot-cat" id="hshsBootCat">' + catSvg() + '</div>' +
             '<div class="hshs-boot-track"><div class="hshs-boot-fill" id="hshsBootFill"></div></div>' +
             '</div>' +
             '<div class="hshs-boot-copy"><strong>HSHS World</strong>' +
-            '<small><span id="hshsBootNote">Loading the site</span> · <span id="hshsBootPct">2%</span></small>' +
+            '<small><span id="hshsBootNote">Opening the courtyard</span> · <span id="hshsBootPct">2%</span></small>' +
             '</div></div>';
         (document.body || document.documentElement).appendChild(box);
         fillEl = document.getElementById('hshsBootFill');
         labelEl = document.getElementById('hshsBootNote');
         pctEl = document.getElementById('hshsBootPct');
-        paint('Loading the site');
+        paint('Opening the courtyard');
     }
     function ensureCss() {
         if (document.getElementById('hshs-boot-css')) return;
@@ -86,7 +127,7 @@
         var left = links.length, marked = 0;
         function one() {
             marked += 1;
-            setPart('css', marked / left, 'Loading styles');
+            setPart('css', marked / left, 'Gathering memories');
             if (marked >= left) setPart('css', 1, 'Styles ready');
         }
         links.forEach(function (link) {
@@ -106,7 +147,7 @@
         return new Promise(function (resolve) {
             function one() {
                 marked += 1;
-                setPart('images', marked / left, 'Loading pictures');
+                setPart('images', marked / left, 'Warming the lights');
                 if (marked >= left) { setPart('images', 1, 'Pictures ready'); resolve(); }
             }
             imgs.forEach(function (img) {
@@ -162,7 +203,7 @@
             var boot = document.getElementById('hshs-boot');
             if (boot) {
                 boot.classList.add('is-off');
-                setTimeout(function () { if (boot.parentNode) boot.remove(); }, 280);
+                setTimeout(function () { if (boot.parentNode) boot.remove(); }, 420);
             }
         }, wait);
     }
