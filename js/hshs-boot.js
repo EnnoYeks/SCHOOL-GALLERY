@@ -2,7 +2,7 @@
     if (window.__hshsBoot) return;
     window.__hshsBoot = true;
 
-    var MIN_BOOT = 400;
+    var MIN_BOOT = 4000;
     var parts = { css: 0, dom: 0, shell: 0, fonts: 0, images: 0, page: 0, site: 0 };
     var weight = { css: 12, dom: 8, shell: 14, fonts: 8, images: 18, page: 10, site: 30 };
     var done = false;
@@ -117,6 +117,15 @@
             setTimeout(function () { setPart('images', 1, 'Pictures ready'); resolve(); }, 3500);
         });
     }
+    function fileKey(href) {
+        try {
+            var f = (new URL(href, location.href).pathname.split('/').pop() || 'index.html').toLowerCase();
+            if (!f) f = 'index.html';
+            if (f === 'clips.html' || f === 'shorts.html') f = 'buzz.html';
+            if (f === 'contact.html') f = 'contat.html';
+            return f;
+        } catch (e) { return href; }
+    }
     function prefetchSite() {
         var cache = window.__hshsPageCache = window.__hshsPageCache || {};
         var nested = ['gallery.html','spotlight.html','buzz.html','photos.html','videos.html','trending.html','polls.html','memories.html','about.html','profile.html','settings.html','contat.html'];
@@ -132,6 +141,7 @@
                 return res.text();
             }).then(function (html) {
                 cache[href] = html;
+                cache[fileKey(href)] = html;
                 marked += 1;
                 setPart('site', marked / left, 'Loading pages');
             }).catch(function () {
@@ -180,6 +190,7 @@
     window.__hshsWaitImages = watchImages;
     window.__hshsMinSkel = 0;
     window.__hshsHold = function () { return Promise.resolve(); };
+    window.__hshsFileKey = fileKey;
 
     ensureCss();
     mountSplash();
@@ -213,5 +224,5 @@
     setTimeout(function () {
         setPart('css', 1); setPart('dom', 1); setPart('shell', 1);
         setPart('fonts', 1); setPart('images', 1); setPart('page', 1); setPart('site', 1, 'Ready');
-    }, 10000);
+    }, 12000);
 })();
