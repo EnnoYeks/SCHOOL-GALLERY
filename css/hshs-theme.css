@@ -91,6 +91,13 @@ body.dark-mode {
         display: block !important;
         position: absolute; left: 12px; right: 12px; top: 62px; z-index: 40;
     }
+    .more-sheet { pointer-events: none; }
+    .more-sheet.open { pointer-events: auto; }
+    .more-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .more-close {
+        width: 36px; height: 36px; border: 0; border-radius: 12px;
+        background: rgba(15,23,42,.08); color: inherit; font-size: 22px; line-height: 1;
+    }
 }
 .cta-section,
 .daily-quote-box {
