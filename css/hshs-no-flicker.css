@@ -1,15 +1,1 @@
-/* Loader overlays off */
-.hshs-loader,
-.hshs-loader.is-on {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
-body.is-page-loading #hshs-page {
-    opacity: 1 !important;
-}
-#hshs-page.is-swapping {
-    opacity: 1 !important;
-    transform: none !important;
-}
+/* removed old loader */

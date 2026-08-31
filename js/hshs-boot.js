@@ -2,39 +2,34 @@
     if (window.__hshsBoot) return;
     window.__hshsBoot = true;
 
+    var MIN_BOOT = 5000;
+    var MIN_SKEL = 3000;
     var parts = { css: 0, dom: 0, shell: 0, fonts: 0, images: 0, page: 0 };
     var weight = { css: 18, dom: 12, shell: 20, fonts: 10, images: 28, page: 12 };
     var done = false;
     var started = Date.now();
-    var labelEl, fillEl, catEl, pctEl;
+    var labelEl, fillEl, pctEl;
 
     function total() {
         var n = 0;
         Object.keys(parts).forEach(function (k) { n += parts[k] * weight[k]; });
         return Math.max(2, Math.min(100, Math.round(n)));
     }
-
     function setPart(name, value, note) {
         if (done) return;
         parts[name] = Math.max(parts[name], Math.min(1, value));
         paint(note);
         if (ready()) finish();
     }
-
     function ready() {
         return parts.css >= 1 && parts.dom >= 1 && parts.shell >= 1 && parts.fonts >= 1 && parts.images >= 1 && parts.page >= 1;
     }
-
     function paint(note) {
         var pct = total();
-        var stage = document.querySelector('.hshs-boot-stage');
-        var travel = stage ? Math.max(80, stage.clientWidth - 40) : 200;
         if (fillEl) fillEl.style.width = pct + '%';
-        if (catEl) catEl.style.transform = 'translateX(' + (pct / 100) * travel + 'px)';
         if (pctEl) pctEl.textContent = pct + '%';
         if (labelEl && note) labelEl.textContent = note;
     }
-
     function catSvg() {
         return '<svg viewBox="0 0 120 100" aria-hidden="true">' +
             '<path class="tail" d="M78 52 C96 52 102 70 90 86 C86 92 78 88 80 80 C82 72 86 66 78 62" fill="#2a2a2e"/>' +
@@ -49,7 +44,6 @@
             '<path d="M36 54 C28 56 24 62 30 64 C38 66 44 62 46 58" fill="#2a2a2e"/>' +
             '</svg>';
     }
-
     function mountSplash() {
         if (document.getElementById('hshs-boot')) return;
         document.documentElement.classList.add('hshs-booting');
@@ -67,12 +61,10 @@
             '</div></div>';
         (document.body || document.documentElement).appendChild(box);
         fillEl = document.getElementById('hshsBootFill');
-        catEl = document.getElementById('hshsBootCat');
         labelEl = document.getElementById('hshsBootNote');
         pctEl = document.getElementById('hshsBootPct');
         paint('Opening school pages');
     }
-
     function ensureCss() {
         if (document.getElementById('hshs-boot-css')) return;
         var guess = Array.from(document.querySelectorAll('script[src]'))
@@ -85,14 +77,12 @@
         link.id = 'hshs-boot-css';
         link.rel = 'stylesheet';
         link.href = href;
-        document.head.appendChild(link);
+        document.head.insertBefore(link, document.head.firstChild);
     }
-
     function watchCss() {
         var links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
         if (!links.length) { setPart('css', 1, 'Styles ready'); return; }
-        var left = links.length;
-        var marked = 0;
+        var left = links.length, marked = 0;
         function one() {
             marked += 1;
             setPart('css', marked / left, 'Loading styles');
@@ -105,42 +95,33 @@
         });
         setTimeout(function () { setPart('css', 1, 'Styles ready'); }, 4000);
     }
-
     function watchImages(scope) {
         var root = scope || document;
         var imgs = Array.from(root.querySelectorAll('img')).filter(function (img) {
             return !img.closest('#hshs-boot');
         });
         if (!imgs.length) { setPart('images', 1, 'Pictures ready'); return Promise.resolve(); }
-        var left = imgs.length;
-        var marked = 0;
+        var left = imgs.length, marked = 0;
         return new Promise(function (resolve) {
             function one() {
                 marked += 1;
                 setPart('images', marked / left, 'Loading pictures');
-                if (marked >= left) {
-                    setPart('images', 1, 'Pictures ready');
-                    resolve();
-                }
+                if (marked >= left) { setPart('images', 1, 'Pictures ready'); resolve(); }
             }
             imgs.forEach(function (img) {
                 if (img.complete && img.naturalWidth) { one(); return; }
                 img.addEventListener('load', one, { once: true });
                 img.addEventListener('error', one, { once: true });
             });
-            setTimeout(function () {
-                setPart('images', 1, 'Pictures ready');
-                resolve();
-            }, 6000);
+            setTimeout(function () { setPart('images', 1, 'Pictures ready'); resolve(); }, 6000);
         });
     }
-
     function finish() {
         if (done) return;
         done = true;
         parts.css = parts.dom = parts.shell = parts.fonts = parts.images = parts.page = 1;
         paint('Ready');
-        var wait = Math.max(0, 420 - (Date.now() - started));
+        var wait = Math.max(0, MIN_BOOT - (Date.now() - started));
         setTimeout(function () {
             document.documentElement.classList.remove('hshs-booting');
             document.documentElement.classList.add('hshs-ready');
@@ -151,39 +132,65 @@
             }
         }, wait);
     }
-
-    function pageSkeleton() {
-        return '<div class="hshs-page-skel">' +
-            '<div class="sk-hero"></div>' +
-            '<div class="sk-line"></div><div class="sk-line short"></div>' +
-            '<div class="sk-grid"><div class="sk-card"></div><div class="sk-card"></div></div>' +
-            '</div>';
+    function repeat(html, n) {
+        var out = '';
+        for (var i = 0; i < n; i++) out += html;
+        return out;
     }
-
+    function pageSkeleton(file) {
+        file = (file || '').toLowerCase();
+        var tabs = '<div class="sk-tabs"><i></i><i></i><i></i><i></i></div>';
+        var playGrid = '<div class="sk-play-grid">' + repeat('<article class="sk-play"><span class="sk-play-btn"></span></article>', 4) + '</div>';
+        var playList = '<div class="sk-play-list">' + repeat('<div class="sk-play-row"><div class="thumb"></div><div><div class="sk-line"></div><div class="sk-line s"></div></div></div>', 4) + '</div>';
+        var photos = '<div class="sk-photo-grid">' + repeat('<article class="sk-photo"></article>', 6) + '</div>';
+        var rows = repeat('<div class="sk-row"></div>', 4);
+        if (file.indexOf('videos') !== -1) {
+            return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + tabs + playGrid + playList + '</div>';
+        }
+        if (file.indexOf('buzz') !== -1 || file.indexOf('clips') !== -1 || file.indexOf('shorts') !== -1) {
+            return '<div class="hshs-page-skel"><div class="sk-buzz"></div></div>';
+        }
+        if (file.indexOf('gallery') !== -1 || file.indexOf('photos') !== -1) {
+            return '<div class="hshs-page-skel">' + tabs + photos + '</div>';
+        }
+        if (file.indexOf('spotlight') !== -1) {
+            return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + rows + '</div>';
+        }
+        if (file.indexOf('trending') !== -1) {
+            return '<div class="hshs-page-skel">' + repeat('<div class="sk-row"></div>', 6) + '</div>';
+        }
+        if (file.indexOf('polls') !== -1 || file.indexOf('memories') !== -1) {
+            return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + rows + '</div>';
+        }
+        if (file.indexOf('profile') !== -1) {
+            return '<div class="hshs-page-skel"><div class="sk-avatar"></div>' + rows + '</div>';
+        }
+        if (file.indexOf('settings') !== -1 || file.indexOf('about') !== -1 || file.indexOf('contat') !== -1) {
+            return '<div class="hshs-page-skel">' + rows + rows + '</div>';
+        }
+        return '<div class="hshs-page-skel"><div class="sk-hero"></div><div class="sk-stats"><div class="sk-stat"></div><div class="sk-stat"></div><div class="sk-stat"></div><div class="sk-stat"></div></div>' + photos + '</div>';
+    }
     window.__hshsBootMark = setPart;
     window.__hshsPageSkeleton = pageSkeleton;
     window.__hshsWaitImages = watchImages;
+    window.__hshsMinSkel = MIN_SKEL;
+    window.__hshsHold = function (startedAt, minMs) {
+        var left = Math.max(0, (minMs || MIN_SKEL) - (Date.now() - startedAt));
+        return new Promise(function (resolve) { setTimeout(resolve, left); });
+    };
 
     ensureCss();
     mountSplash();
     watchCss();
-
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () {
             setPart('dom', 1, 'Page structure ready');
             mountSplash();
         });
-    } else {
-        setPart('dom', 1, 'Page structure ready');
-    }
-
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(function () { setPart('fonts', 1, 'Text ready'); });
-    } else {
-        setPart('fonts', 1, 'Text ready');
-    }
+    } else setPart('dom', 1, 'Page structure ready');
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setPart('fonts', 1, 'Text ready'); });
+    else setPart('fonts', 1, 'Text ready');
     setTimeout(function () { setPart('fonts', 1, 'Text ready'); }, 2500);
-
     var shellTries = 0;
     var shellTimer = setInterval(function () {
         if (window.__hshsMobileShell || ++shellTries > 80) {
@@ -191,27 +198,15 @@
             setPart('shell', 1, 'App shell ready');
         }
     }, 50);
-
-    watchImages(document).then(function () {
-        setPart('page', 1, 'Content ready');
-    });
-
+    watchImages(document).then(function () { setPart('page', 1, 'Content ready'); });
     window.addEventListener('load', function () {
-        setPart('css', 1);
-        setPart('dom', 1);
-        setPart('fonts', 1);
-        setPart('images', 1);
-        setPart('page', 1, 'Finishing');
+        setPart('css', 1); setPart('dom', 1); setPart('fonts', 1);
+        setPart('images', 1); setPart('page', 1, 'Finishing');
         setPart('shell', Math.max(parts.shell, 0.8));
         setTimeout(function () { setPart('shell', 1, 'Ready'); }, 200);
     });
-
     setTimeout(function () {
-        setPart('css', 1);
-        setPart('dom', 1);
-        setPart('shell', 1);
-        setPart('fonts', 1);
-        setPart('images', 1);
-        setPart('page', 1, 'Ready');
-    }, 9000);
+        setPart('css', 1); setPart('dom', 1); setPart('shell', 1);
+        setPart('fonts', 1); setPart('images', 1); setPart('page', 1, 'Ready');
+    }, 12000);
 })();

@@ -1,1 +1,1 @@
-/* Page-slide motion disabled. */
+/* removed old loader */

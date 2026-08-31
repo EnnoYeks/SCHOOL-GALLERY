@@ -1,1 +1,1 @@
-/* Extra swipe overlay disabled. */
+/* removed old loader */

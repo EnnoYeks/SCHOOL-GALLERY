@@ -111,25 +111,22 @@
     }
 
     function injectCss() {
-        if (document.getElementById('hshs-mobile-shell-css')) return;
         const guess = Array.from(document.querySelectorAll('script[src]'))
             .map((s) => s.getAttribute('src') || '')
             .find((s) => s.includes('navigation.js') && !s.includes('mobile-navigation'));
-        const cssHref = guess
-            ? guess.replace(/js\/navigation\.js.*$/, 'css/mobile-shell.css')
-            : (inSubfolderNow() ? '../css/mobile-shell.css' : 'css/mobile-shell.css');
-        const link = document.createElement('link');
-        link.id = 'hshs-mobile-shell-css';
-        link.rel = 'stylesheet';
-        link.href = cssHref;
-        document.head.appendChild(link);
-        if (!document.getElementById('hshs-loader-css')) {
-            const loader = document.createElement('link');
-            loader.id = 'hshs-loader-css';
-            loader.rel = 'stylesheet';
-            loader.href = cssHref.replace('mobile-shell.css', 'mobile-loader.css');
-            document.head.appendChild(loader);
+        const base = guess
+            ? guess.replace(/js\/navigation\.js.*$/, 'css/')
+            : (inSubfolderNow() ? '../css/' : 'css/');
+        function addLink(id, file) {
+            if (document.getElementById(id)) return;
+            const link = document.createElement('link');
+            link.id = id;
+            link.rel = 'stylesheet';
+            link.href = base + file;
+            document.head.insertBefore(link, document.head.firstChild);
         }
+        addLink('hshs-boot-css', 'hshs-boot.css');
+        addLink('hshs-mobile-shell-css', 'mobile-shell.css');
     }
     injectCss();
 
@@ -302,18 +299,21 @@
         const file = (next.pathname.split('/').pop() || '').toLowerCase();
         if (file === 'admin.html') { location.href = next.href; return; }
         const root = wrapPage();
-        if (window.__hshsPageSkeleton) root.innerHTML = window.__hshsPageSkeleton();
+        const startedAt = Date.now();
+        if (window.__hshsPageSkeleton) root.innerHTML = window.__hshsPageSkeleton(file);
         if (window.__hshsBootMark) window.__hshsBootMark('page', 0.15, 'Opening page');
         try {
             const res = await fetch(next.href, { credentials: 'same-origin' });
             if (!res.ok) throw new Error('fetch failed');
-            if (window.__hshsBootMark) window.__hshsBootMark('page', 0.55, 'Page downloaded');
             const html = await res.text();
             if (!fromHistory) history.pushState({ url: next.href }, '', next.href);
             const doc = new DOMParser().parseFromString(html, 'text/html');
             adoptCss(doc);
             const incoming = extractPage(doc);
-            incoming.style.opacity = '0';
+            await Promise.all([
+                waitImages(incoming),
+                window.__hshsHold ? window.__hshsHold(startedAt, window.__hshsMinSkel || 3000) : new Promise(function (r) { setTimeout(r, 3000); })
+            ]);
             root.innerHTML = incoming.innerHTML;
             fixBadLinks(root);
             document.title = doc.title || document.title;
@@ -324,9 +324,7 @@
             runPageScripts(doc);
             setTimeout(bootPageWidgets, 40);
             window.scrollTo(0, 0);
-            await waitImages(root);
             if (window.__hshsBootMark) window.__hshsBootMark('page', 1, 'Page ready');
-            root.style.opacity = '1';
         } catch (err) {
             location.href = next.href;
         }
