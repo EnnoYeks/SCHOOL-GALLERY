@@ -13,7 +13,7 @@
         'clips.html', 'shorts.html', 'buzz.html'
     ];
 
-    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js/;
+    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js|hshs-boot\.js/;
     const loadedCss = new Set();
     const loadedPageScripts = new Set();
 
@@ -131,6 +131,7 @@
             document.head.appendChild(loader);
         }
     }
+    injectCss();
 
     function syncDesktopNav() {
         const nav = document.querySelector('.navbar .nav-links');
@@ -223,11 +224,12 @@
             document.querySelector('.navbar'),
             document.querySelector('.mobile-tabbar'),
             document.querySelector('.more-sheet'),
-            document.querySelector('.more-backdrop')
+            document.querySelector('.more-backdrop'),
+            document.getElementById('hshs-boot')
         ]);
         const move = [];
         Array.from(document.body.children).forEach(function (el) {
-            if (keep.has(el) || el.id === 'hshs-page' || el.tagName === 'SCRIPT') return;
+            if (keep.has(el) || el.id === 'hshs-page' || el.id === 'hshs-boot' || el.tagName === 'SCRIPT') return;
             move.push(el);
         });
         const navbar = document.querySelector('.navbar');
@@ -242,7 +244,7 @@
         const box = document.createElement('div');
         Array.from(doc.body.children).forEach(function (el) {
             const cls = el.className ? String(el.className) : '';
-            const skip = el.tagName === 'SCRIPT' || el.id === 'hshs-page' || keepNames.some(function (name) { return cls.indexOf(name) !== -1; });
+            const skip = el.tagName === 'SCRIPT' || el.id === 'hshs-page' || el.id === 'hshs-boot' || keepNames.some(function (name) { return cls.indexOf(name) !== -1; });
             if (!skip) box.appendChild(el.cloneNode(true));
         });
         return box;
@@ -279,11 +281,18 @@
         });
     }
 
-    function showLoader() {}
-    function hideLoader() {
-        var el = document.getElementById('hshs-loader');
-        if (el) el.remove();
-        document.body.classList.remove('is-page-loading');
+    function waitImages(root) {
+        if (window.__hshsWaitImages) return window.__hshsWaitImages(root);
+        const imgs = Array.from((root || document).querySelectorAll('img'));
+        if (!imgs.length) return Promise.resolve();
+        return Promise.all(imgs.map(function (img) {
+            if (img.complete) return Promise.resolve();
+            return new Promise(function (resolve) {
+                img.addEventListener('load', resolve, { once: true });
+                img.addEventListener('error', resolve, { once: true });
+                setTimeout(resolve, 4000);
+            });
+        }));
     }
 
     async function navigate(url, fromHistory) {
@@ -293,14 +302,19 @@
         const file = (next.pathname.split('/').pop() || '').toLowerCase();
         if (file === 'admin.html') { location.href = next.href; return; }
         const root = wrapPage();
+        if (window.__hshsPageSkeleton) root.innerHTML = window.__hshsPageSkeleton();
+        if (window.__hshsBootMark) window.__hshsBootMark('page', 0.15, 'Opening page');
         try {
             const res = await fetch(next.href, { credentials: 'same-origin' });
             if (!res.ok) throw new Error('fetch failed');
+            if (window.__hshsBootMark) window.__hshsBootMark('page', 0.55, 'Page downloaded');
             const html = await res.text();
             if (!fromHistory) history.pushState({ url: next.href }, '', next.href);
             const doc = new DOMParser().parseFromString(html, 'text/html');
             adoptCss(doc);
-            root.innerHTML = extractPage(doc).innerHTML;
+            const incoming = extractPage(doc);
+            incoming.style.opacity = '0';
+            root.innerHTML = incoming.innerHTML;
             fixBadLinks(root);
             document.title = doc.title || document.title;
             closeMore();
@@ -310,10 +324,11 @@
             runPageScripts(doc);
             setTimeout(bootPageWidgets, 40);
             window.scrollTo(0, 0);
+            await waitImages(root);
+            if (window.__hshsBootMark) window.__hshsBootMark('page', 1, 'Page ready');
+            root.style.opacity = '1';
         } catch (err) {
             location.href = next.href;
-        } finally {
-            hideLoader();
         }
     }
 
@@ -363,13 +378,13 @@
         syncDesktopNav();
         buildBar();
         wrapPage();
-        hideLoader();
         fixBadLinks(document);
         wireHomeButtons();
         wireSpa();
         markActive();
         bootPageWidgets();
         history.replaceState({ url: location.href }, '', location.href);
+        if (window.__hshsBootMark) window.__hshsBootMark('shell', 1, 'App shell ready');
     }
 
     window.__hshsNavigate = navigate;
