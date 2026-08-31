@@ -1,0 +1,32 @@
+@media (max-width: 1024px) {
+    .animated-bg {
+        animation: none !important;
+        background-size: 140% 140% !important;
+        background-position: 30% 40% !important;
+    }
+    .gradient-bg { animation: none !important; filter: blur(18px); }
+    .floating-shapes,
+    .parallax-shapes,
+    .particles-container { display: none !important; }
+    img, video {
+        content-visibility: auto;
+        contain-intrinsic-size: 160px 120px;
+    }
+    .featured-card,
+    .vibe-skel-feat,
+    .vibe-skel-row,
+    .stat-card,
+    .post-card {
+        content-visibility: auto;
+        contain: content;
+    }
+    .mobile-tabbar {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    #hshs-boot .hshs-boot-cat,
+    #hshs-boot .tail { animation: none !important; }
+}
