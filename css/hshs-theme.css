@@ -66,3 +66,7 @@ body.light-mode .vibe-tab.active,
 .vibe-feat .badge {
     background: #1d4ed8 !important;
 }
+
+.spotlight-filters {
+    display: none !important;
+}
