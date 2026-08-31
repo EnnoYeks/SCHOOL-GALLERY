@@ -37,7 +37,7 @@
     #hshs-cube-next.is-left {
         transform: rotateY(-90deg) translateZ(var(--cube-z, 50vw));
     }
-    .mobile-tabbar, .navbar, .more-sheet, .more-backdrop {
+    .mobile-tabbar, .navbar {
         transform: none !important;
     }
     .mobile-tabbar a {
