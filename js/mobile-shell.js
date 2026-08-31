@@ -13,9 +13,10 @@
         'clips.html', 'shorts.html', 'buzz.html'
     ];
 
-    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js|hshs-boot\.js/;
+    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js|hshs-boot\.js|hshs-swipe\.js/;
     const loadedCss = new Set();
     const loadedPageScripts = new Set();
+    const pageCache = window.__hshsPageCache = window.__hshsPageCache || {};
 
     function currentFile() {
         return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -127,6 +128,7 @@
         }
         addLink('hshs-boot-css', 'hshs-boot.css');
         addLink('hshs-mobile-shell-css', 'mobile-shell.css');
+        addLink('hshs-swipe-css', 'hshs-swipe.css');
     }
     injectCss();
 
@@ -222,7 +224,8 @@
             document.querySelector('.mobile-tabbar'),
             document.querySelector('.more-sheet'),
             document.querySelector('.more-backdrop'),
-            document.getElementById('hshs-boot')
+            document.getElementById('hshs-boot'),
+            document.getElementById('hshs-cube-stage')
         ]);
         const move = [];
         Array.from(document.body.children).forEach(function (el) {
@@ -237,7 +240,7 @@
     }
 
     function extractPage(doc) {
-        const keepNames = ['animated-bg', 'navbar', 'mobile-tabbar', 'more-sheet', 'more-backdrop', 'hshs-page'];
+        const keepNames = ['animated-bg', 'navbar', 'mobile-tabbar', 'more-sheet', 'more-backdrop', 'hshs-page', 'hshs-cube'];
         const box = document.createElement('div');
         Array.from(doc.body.children).forEach(function (el) {
             const cls = el.className ? String(el.className) : '';
@@ -278,18 +281,22 @@
         });
     }
 
-    function waitImages(root) {
-        if (window.__hshsWaitImages) return window.__hshsWaitImages(root);
-        const imgs = Array.from((root || document).querySelectorAll('img'));
-        if (!imgs.length) return Promise.resolve();
-        return Promise.all(imgs.map(function (img) {
-            if (img.complete) return Promise.resolve();
-            return new Promise(function (resolve) {
-                img.addEventListener('load', resolve, { once: true });
-                img.addEventListener('error', resolve, { once: true });
-                setTimeout(resolve, 4000);
-            });
-        }));
+    function applyPage(html, url, fromHistory) {
+        if (!fromHistory) history.pushState({ url: url }, '', url);
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        adoptCss(doc);
+        const root = wrapPage();
+        root.innerHTML = extractPage(doc).innerHTML;
+        fixBadLinks(root);
+        document.title = doc.title || document.title;
+        closeMore();
+        syncDesktopNav();
+        markActive();
+        wireHomeButtons();
+        runPageScripts(doc);
+        setTimeout(bootPageWidgets, 40);
+        window.scrollTo(0, 0);
+        document.dispatchEvent(new Event('hshs:page'));
     }
 
     async function navigate(url, fromHistory) {
@@ -299,32 +306,18 @@
         const file = (next.pathname.split('/').pop() || '').toLowerCase();
         if (file === 'admin.html') { location.href = next.href; return; }
         const root = wrapPage();
-        const startedAt = Date.now();
+        const cached = pageCache[next.href];
+        if (cached) {
+            applyPage(cached, next.href, fromHistory);
+            return;
+        }
         if (window.__hshsPageSkeleton) root.innerHTML = window.__hshsPageSkeleton(file);
-        if (window.__hshsBootMark) window.__hshsBootMark('page', 0.15, 'Opening page');
         try {
             const res = await fetch(next.href, { credentials: 'same-origin' });
             if (!res.ok) throw new Error('fetch failed');
             const html = await res.text();
-            if (!fromHistory) history.pushState({ url: next.href }, '', next.href);
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            adoptCss(doc);
-            const incoming = extractPage(doc);
-            await Promise.all([
-                waitImages(incoming),
-                window.__hshsHold ? window.__hshsHold(startedAt, window.__hshsMinSkel || 3000) : new Promise(function (r) { setTimeout(r, 3000); })
-            ]);
-            root.innerHTML = incoming.innerHTML;
-            fixBadLinks(root);
-            document.title = doc.title || document.title;
-            closeMore();
-            syncDesktopNav();
-            markActive();
-            wireHomeButtons();
-            runPageScripts(doc);
-            setTimeout(bootPageWidgets, 40);
-            window.scrollTo(0, 0);
-            if (window.__hshsBootMark) window.__hshsBootMark('page', 1, 'Page ready');
+            pageCache[next.href] = html;
+            applyPage(html, next.href, fromHistory);
         } catch (err) {
             location.href = next.href;
         }

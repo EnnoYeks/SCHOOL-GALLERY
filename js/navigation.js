@@ -100,4 +100,5 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-mobile-shell-js', 'mobile-shell.js');
     add('hshs-search-btn-js', 'mobile-search-btn.js');
     add('hshs-brand-js', 'hshs-brand.js');
+    add('hshs-swipe-js', 'hshs-swipe.js');
 })();
