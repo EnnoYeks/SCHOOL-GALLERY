@@ -72,13 +72,40 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 (function loadHshsMobileShell() {
+    function isPhone() {
+        try { return window.matchMedia('(max-width: 1024px)').matches; }
+        catch (e) { return window.innerWidth <= 1024; }
+    }
+    function lockDevice() {
+        var phone = isPhone();
+        var html = document.documentElement;
+        html.classList.add('hshs-booting');
+        html.classList.toggle('hshs-device-mobile', phone);
+        html.classList.toggle('hshs-device-desktop', !phone);
+        html.setAttribute('data-hshs-device', phone ? 'mobile' : 'desktop');
+        var body = document.body;
+        if (body) {
+            body.classList.toggle('has-mobile-shell', phone);
+            body.classList.toggle('hshs-device-mobile', phone);
+            body.classList.toggle('hshs-device-desktop', !phone);
+        }
+        window.__hshsIsMobile = phone;
+        return phone;
+    }
+    lockDevice();
+
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html,html.hshs-booting,html:not(.hshs-ready){background:#071433!important}html.hshs-booting body>*:not(#hshs-boot),html:not(.hshs-ready) body>*:not(#hshs-boot){opacity:0!important}html.hshs-booting .nav-links,html:not(.hshs-ready) .nav-links{display:none!important}@media(max-width:1024px){.brand-mark,.brand-mark img,.logo img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
-        document.documentElement.classList.add('hshs-booting');
+        st.textContent = 'html,html.hshs-booting,html:not(.hshs-ready){background:#071433!important}' +
+            'html.hshs-booting body>*:not(#hshs-boot),html:not(.hshs-ready) body>*:not(#hshs-boot){opacity:0!important;pointer-events:none!important}' +
+            'html.hshs-booting .nav-links,html:not(.hshs-ready) .nav-links{display:none!important}' +
+            'html.hshs-device-mobile .navbar .nav-links,html.hshs-device-mobile .mobile-menu-toggle{display:none!important}' +
+            'html.hshs-device-desktop .mobile-tabbar,html.hshs-device-desktop .more-sheet,html.hshs-device-desktop .more-backdrop{display:none!important}' +
+            '@media(max-width:1024px){.brand-mark,.brand-mark img,.logo img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
         document.head.appendChild(st);
     }
+
     var current = document.currentScript && document.currentScript.src;
     if (!current) {
         var list = document.querySelectorAll('script[src*="navigation.js"]');
@@ -87,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     if (!current) return;
-    function add(id, file) {
+
+    function addJs(id, file) {
         if (document.getElementById(id)) return;
         var s = document.createElement('script');
         s.id = id;
@@ -95,10 +123,28 @@ document.addEventListener('DOMContentLoaded', () => {
         s.src = current.replace(/navigation\.js(\?.*)?$/, file);
         document.head.appendChild(s);
     }
-    add('hshs-boot-js', 'hshs-boot.js');
-    add('hshs-perf-js', 'hshs-perf.js');
-    add('hshs-mobile-shell-js', 'mobile-shell.js');
-    add('hshs-search-btn-js', 'mobile-search-btn.js');
-    add('hshs-brand-js', 'hshs-brand.js');
-    add('hshs-swipe-js', 'hshs-swipe.js');
+    function addCss(id, file) {
+        if (document.getElementById(id)) return;
+        var l = document.createElement('link');
+        l.id = id;
+        l.rel = 'stylesheet';
+        l.href = current.replace(/js\/navigation\.js(\?.*)?$/, 'css/' + file);
+        document.head.appendChild(l);
+    }
+
+    addCss('hshs-boot-css', 'hshs-boot.css');
+    addCss('hshs-mobile-shell-css', 'mobile-shell.css');
+    addJs('hshs-device-js', 'hshs-device.js');
+    addJs('hshs-boot-js', 'hshs-boot.js');
+    addJs('hshs-perf-js', 'hshs-perf.js');
+    addJs('hshs-mobile-shell-js', 'mobile-shell.js');
+    addJs('hshs-search-btn-js', 'mobile-search-btn.js');
+    addJs('hshs-brand-js', 'hshs-brand.js');
+    addJs('hshs-swipe-js', 'hshs-swipe.js');
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', lockDevice, { once: true });
+    } else {
+        lockDevice();
+    }
 })();
