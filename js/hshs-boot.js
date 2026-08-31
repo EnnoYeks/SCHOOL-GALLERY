@@ -2,15 +2,7 @@
     if (window.__hshsBoot) return;
     window.__hshsBoot = true;
 
-    var seen = {};
-    var parts = {
-        css: 0,
-        dom: 0,
-        shell: 0,
-        fonts: 0,
-        images: 0,
-        page: 0
-    };
+    var parts = { css: 0, dom: 0, shell: 0, fonts: 0, images: 0, page: 0 };
     var weight = { css: 18, dom: 12, shell: 20, fonts: 10, images: 28, page: 12 };
     var done = false;
     var started = Date.now();
@@ -35,24 +27,26 @@
 
     function paint(note) {
         var pct = total();
+        var stage = document.querySelector('.hshs-boot-stage');
+        var travel = stage ? Math.max(80, stage.clientWidth - 40) : 200;
         if (fillEl) fillEl.style.width = pct + '%';
-        if (catEl) catEl.style.transform = 'translateX(' + (pct / 100) * 232 + 'px)';
+        if (catEl) catEl.style.transform = 'translateX(' + (pct / 100) * travel + 'px)';
         if (pctEl) pctEl.textContent = pct + '%';
         if (labelEl && note) labelEl.textContent = note;
     }
 
     function catSvg() {
-        return '<svg viewBox="0 0 86 64" aria-hidden="true">' +
-            '<ellipse class="tail" cx="68" cy="46" rx="10" ry="16" fill="#2b2b2f"/>' +
-            '<ellipse cx="44" cy="40" rx="22" ry="16" fill="#2b2b2f"/>' +
-            '<circle cx="30" cy="28" r="13" fill="#2b2b2f"/>' +
-            '<polygon points="20,20 22,8 28,18" fill="#2b2b2f"/>' +
-            '<polygon points="32,18 38,8 40,20" fill="#2b2b2f"/>' +
-            '<circle class="blink" cx="26" cy="27" r="2.2" fill="#fff"/>' +
-            '<circle class="blink" cx="34" cy="27" r="2.2" fill="#fff"/>' +
-            '<circle cx="26.3" cy="27.3" r=".8" fill="#111"/>' +
-            '<circle cx="34.3" cy="27.3" r=".8" fill="#111"/>' +
-            '<path d="M18 38 C16 46 22 50 28 48" fill="#2b2b2f"/>' +
+        return '<svg viewBox="0 0 120 100" aria-hidden="true">' +
+            '<path class="tail" d="M78 52 C96 52 102 70 90 86 C86 92 78 88 80 80 C82 72 86 66 78 62" fill="#2a2a2e"/>' +
+            '<ellipse cx="62" cy="54" rx="26" ry="18" fill="#2a2a2e"/>' +
+            '<circle cx="44" cy="38" r="16" fill="#2a2a2e"/>' +
+            '<path d="M32 30 L30 14 L42 26Z" fill="#2a2a2e"/>' +
+            '<path d="M46 26 L58 14 L56 30Z" fill="#2a2a2e"/>' +
+            '<ellipse cx="40" cy="37" rx="3.2" ry="3.6" fill="#fff"/>' +
+            '<ellipse cx="50" cy="37" rx="3.2" ry="3.6" fill="#fff"/>' +
+            '<circle cx="40.4" cy="37.4" r="1.1" fill="#2a2a2e"/>' +
+            '<circle cx="50.4" cy="37.4" r="1.1" fill="#2a2a2e"/>' +
+            '<path d="M36 54 C28 56 24 62 30 64 C38 66 44 62 46 58" fill="#2a2a2e"/>' +
             '</svg>';
     }
 
@@ -155,7 +149,6 @@
                 boot.classList.add('is-off');
                 setTimeout(function () { if (boot.parentNode) boot.remove(); }, 380);
             }
-            try { sessionStorage.setItem('hshs-booted', '1'); } catch (e) {}
         }, wait);
     }
 
