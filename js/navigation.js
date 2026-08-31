@@ -5,19 +5,9 @@
 class Navigation {
     constructor() { this.init(); }
     init() {
-        this.setupNavigation();
         this.setupDropdowns();
         this.setupMobileMenu();
         this.setupScrollEffects();
-    }
-    setupNavigation() {
-        const navLinks = document.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-            });
-        });
     }
     setupDropdowns() {
         const notificationIcon = document.querySelector('.notification-icon');
@@ -53,25 +43,26 @@ class Navigation {
     }
     setupScrollEffects() {
         const navbar = document.querySelector('.navbar');
-        if (navbar) {
-            window.addEventListener('scroll', () => {
-                if (window.pageYOffset > 100) navbar.classList.add('scrolled');
-                else navbar.classList.remove('scrolled');
+        if (!navbar) return;
+        var ticking = false;
+        window.addEventListener('scroll', function () {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(function () {
+                navbar.classList.toggle('scrolled', window.pageYOffset > 100);
+                ticking = false;
             });
-        }
+        }, { passive: true });
     }
 }
 
 const navigation = new Navigation();
 
 function switchTab(tabName) {
-    const tabs = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => tab.classList.remove('active'));
-    const buttons = document.querySelectorAll('.tab-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     const selectedTab = document.getElementById(tabName + 'Tab');
     if (selectedTab) selectedTab.classList.add('active');
-    if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -84,11 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html.hshs-booting body>*:not(#hshs-boot),html:not(.hshs-ready) body>*:not(#hshs-boot){opacity:0!important}html.hshs-booting .nav-links,html:not(.hshs-ready) .nav-links{display:none!important}@media(max-width:1024px){.brand-mark,.brand-mark img,.logo img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}}';
+        st.textContent = 'html.hshs-booting body>*:not(#hshs-boot),html:not(.hshs-ready) body>*:not(#hshs-boot){opacity:0!important}html.hshs-booting .nav-links,html:not(.hshs-ready) .nav-links{display:none!important}@media(max-width:1024px){.brand-mark,.brand-mark img,.logo img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
         document.documentElement.classList.add('hshs-booting');
         document.head.appendChild(st);
     }
-    if (window.__hshsMobileShell) return;
     var current = document.currentScript && document.currentScript.src;
     if (!current) {
         var list = document.querySelectorAll('script[src*="navigation.js"]');
@@ -97,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     if (!current) return;
-
     function add(id, file) {
         if (document.getElementById(id)) return;
         var s = document.createElement('script');
@@ -106,15 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
         s.src = current.replace(/navigation\.js(\?.*)?$/, file);
         document.head.appendChild(s);
     }
-
     add('hshs-boot-js', 'hshs-boot.js');
-
-    var script = document.createElement('script');
-    script.id = 'hshs-mobile-shell-js';
-    script.async = false;
-    script.src = current.replace(/navigation\.js(\?.*)?$/, 'mobile-shell.js');
-    document.head.appendChild(script);
-
+    add('hshs-perf-js', 'hshs-perf.js');
+    add('hshs-mobile-shell-js', 'mobile-shell.js');
     add('hshs-search-btn-js', 'mobile-search-btn.js');
     add('hshs-brand-js', 'hshs-brand.js');
 })();
