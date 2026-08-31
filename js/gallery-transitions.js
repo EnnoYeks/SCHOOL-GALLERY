@@ -1,1 +1,1 @@
-/* Gallery transition overlay disabled. */
+/* removed old loader */
