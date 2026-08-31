@@ -2,9 +2,9 @@
     if (window.__hshsBoot) return;
     window.__hshsBoot = true;
 
-    var MIN_BOOT = 280;
-    var parts = { css: 0, dom: 0, shell: 0, fonts: 0, images: 0, page: 0 };
-    var weight = { css: 18, dom: 12, shell: 20, fonts: 10, images: 28, page: 12 };
+    var MIN_BOOT = 400;
+    var parts = { css: 0, dom: 0, shell: 0, fonts: 0, images: 0, page: 0, site: 0 };
+    var weight = { css: 12, dom: 8, shell: 14, fonts: 8, images: 18, page: 10, site: 30 };
     var done = false;
     var started = Date.now();
     var labelEl, fillEl, pctEl;
@@ -21,7 +21,7 @@
         if (ready()) finish();
     }
     function ready() {
-        return parts.css >= 1 && parts.dom >= 1 && parts.shell >= 1 && parts.fonts >= 1 && parts.images >= 1 && parts.page >= 1;
+        return parts.css >= 1 && parts.dom >= 1 && parts.shell >= 1 && parts.fonts >= 1 && parts.images >= 1 && parts.page >= 1 && parts.site >= 1;
     }
     function paint(note) {
         var pct = total();
@@ -58,13 +58,13 @@
             '<div class="hshs-boot-track"><div class="hshs-boot-fill" id="hshsBootFill"></div></div>' +
             '</div>' +
             '<div class="hshs-boot-copy"><strong>HSHS World</strong>' +
-            '<small><span id="hshsBootNote">Opening school pages</span> · <span id="hshsBootPct">2%</span></small>' +
+            '<small><span id="hshsBootNote">Loading the site</span> · <span id="hshsBootPct">2%</span></small>' +
             '</div></div>';
         (document.body || document.documentElement).appendChild(box);
         fillEl = document.getElementById('hshsBootFill');
         labelEl = document.getElementById('hshsBootNote');
         pctEl = document.getElementById('hshsBootPct');
-        paint('Opening school pages');
+        paint('Loading the site');
     }
     function ensureCss() {
         if (document.getElementById('hshs-boot-css')) return;
@@ -117,10 +117,33 @@
             setTimeout(function () { setPart('images', 1, 'Pictures ready'); resolve(); }, 3500);
         });
     }
+    function prefetchSite() {
+        var cache = window.__hshsPageCache = window.__hshsPageCache || {};
+        var nested = ['gallery.html','spotlight.html','buzz.html','photos.html','videos.html','trending.html','polls.html','memories.html','about.html','profile.html','settings.html','contat.html'];
+        var inSub = location.pathname.indexOf('/index/') !== -1;
+        var list = nested.map(function (f) {
+            return new URL(inSub ? f : ('index/' + f), location.href).href;
+        });
+        list.push(new URL(inSub ? '../index.html' : 'index.html', location.href).href);
+        var left = list.length, marked = 0;
+        return Promise.all(list.map(function (href) {
+            return fetch(href, { credentials: 'same-origin' }).then(function (res) {
+                if (!res.ok) throw new Error('skip');
+                return res.text();
+            }).then(function (html) {
+                cache[href] = html;
+                marked += 1;
+                setPart('site', marked / left, 'Loading pages');
+            }).catch(function () {
+                marked += 1;
+                setPart('site', marked / left, 'Loading pages');
+            });
+        })).then(function () { setPart('site', 1, 'Site ready'); });
+    }
     function finish() {
         if (done) return;
         done = true;
-        parts.css = parts.dom = parts.shell = parts.fonts = parts.images = parts.page = 1;
+        Object.keys(parts).forEach(function (k) { parts[k] = 1; });
         paint('Ready');
         var wait = Math.max(0, MIN_BOOT - (Date.now() - started));
         setTimeout(function () {
@@ -165,8 +188,12 @@
         document.addEventListener('DOMContentLoaded', function () {
             setPart('dom', 1, 'Page structure ready');
             mountSplash();
+            prefetchSite();
         });
-    } else setPart('dom', 1, 'Page structure ready');
+    } else {
+        setPart('dom', 1, 'Page structure ready');
+        prefetchSite();
+    }
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setPart('fonts', 1, 'Text ready'); });
     else setPart('fonts', 1, 'Text ready');
     setTimeout(function () { setPart('fonts', 1, 'Text ready'); }, 1800);
@@ -185,6 +212,6 @@
     });
     setTimeout(function () {
         setPart('css', 1); setPart('dom', 1); setPart('shell', 1);
-        setPart('fonts', 1); setPart('images', 1); setPart('page', 1, 'Ready');
-    }, 8000);
+        setPart('fonts', 1); setPart('images', 1); setPart('page', 1); setPart('site', 1, 'Ready');
+    }, 10000);
 })();

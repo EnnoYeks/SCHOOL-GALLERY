@@ -5,7 +5,7 @@
 
     var ORDER = ['index.html','gallery.html','spotlight.html','buzz.html','photos.html','videos.html','trending.html','polls.html','memories.html'];
     var startX = 0, startY = 0, lastX = 0, lastT = 0, vx = 0;
-    var tracking = false, locked = false, axis = null;
+    var tracking = false, axis = null, primed = null;
 
     function addCss() {
         if (document.getElementById('hshs-swipe-css')) return;
@@ -21,33 +21,59 @@
         link.href = href;
         document.head.appendChild(link);
     }
+    function sizeCube() {
+        var w = window.innerWidth || 360;
+        document.documentElement.style.setProperty('--cube-z', (w / 2) + 'px');
+    }
     function fileOf() {
-        return (location.pathname.split('/').pop() || 'index.html').toLowerCase() || 'index.html';
+        var f = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (!f || f === 'index.html') return 'index.html';
+        if (f === 'clips.html' || f === 'shorts.html') return 'buzz.html';
+        return f;
     }
     function indexOf() {
-        var f = fileOf();
-        if (f === '' || f === 'index.html') return 0;
-        if (f === 'clips.html' || f === 'shorts.html') f = 'buzz.html';
-        var i = ORDER.indexOf(f);
+        var i = ORDER.indexOf(fileOf());
         return i < 0 ? 0 : i;
     }
     function hrefFor(file) {
-        var now = fileOf();
-        var inSub = location.pathname.indexOf('/index/') !== -1 || (now !== 'index.html' && now !== '');
+        var inSub = location.pathname.indexOf('/index/') !== -1 || fileOf() !== 'index.html';
         if (file === 'index.html') return inSub ? '../index.html' : 'index.html';
         return inSub ? file : 'index/' + file;
     }
     function neighbor(dir) {
         var i = indexOf() + dir;
         if (i < 0 || i >= ORDER.length) return null;
-        return { file: ORDER[i], href: hrefFor(ORDER[i]), label: ORDER[i].replace('.html','').replace('index','Home').replace('videos','Vibe') };
+        return { file: ORDER[i], href: new URL(hrefFor(ORDER[i]), location.href).href, label: ORDER[i].replace('.html','').replace('index','home').replace('videos','vibe') };
+    }
+    function extract(html) {
+        try {
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            var box = document.createElement('div');
+            Array.from(doc.body.children).forEach(function (el) {
+                var cls = el.className ? String(el.className) : '';
+                var id = el.id || '';
+                if (el.tagName === 'SCRIPT') return;
+                if (/animated-bg|navbar|mobile-tabbar|more-sheet|more-backdrop|hshs-boot|hshs-cube/.test(cls + ' ' + id)) return;
+                box.appendChild(el.cloneNode(true));
+            });
+            return box.innerHTML;
+        } catch (e) { return ''; }
+    }
+    function fillFace(n) {
+        var s = stage();
+        if (!s || !n) return;
+        s.next.classList.toggle('is-left', n.dir < 0);
+        var cache = window.__hshsPageCache || {};
+        var html = cache[n.href] || cache[n.file];
+        if (html) s.next.innerHTML = extract(html);
+        else if (window.__hshsPageSkeleton) s.next.innerHTML = window.__hshsPageSkeleton(n.file);
+        else s.next.innerHTML = '<div class="hshs-page-skel"><div class="sk-hero"></div></div>';
     }
     function stage() {
         var page = document.getElementById('hshs-page');
         if (!page) return null;
-        var wrap = document.getElementById('hshs-cube-stage');
-        if (!wrap) {
-            wrap = document.createElement('div');
+        if (!document.getElementById('hshs-cube-stage')) {
+            var wrap = document.createElement('div');
             wrap.id = 'hshs-cube-stage';
             page.parentNode.insertBefore(wrap, page);
             var cube = document.createElement('div');
@@ -58,6 +84,7 @@
             next.id = 'hshs-cube-next';
             cube.appendChild(next);
         }
+        sizeCube();
         return {
             wrap: document.getElementById('hshs-cube-stage'),
             cube: document.getElementById('hshs-cube'),
@@ -67,7 +94,7 @@
     function blocked(e) {
         if (document.body.classList.contains('search-open')) return true;
         if (document.getElementById('moreSheet') && document.getElementById('moreSheet').classList.contains('open')) return true;
-        if (e.target.closest && (e.target.closest('.video-player-modal') || e.target.closest('.clip-sheet') || e.target.closest('.mobile-tabbar') || e.target.closest('.navbar'))) return true;
+        if (e.target.closest && e.target.closest('.video-player-modal, .clip-sheet, .mobile-tabbar, .navbar, input, textarea')) return true;
         return false;
     }
     function setCube(deg, dragging) {
@@ -80,10 +107,9 @@
     function onStart(e) {
         if (blocked(e)) return;
         var t = e.touches ? e.touches[0] : e;
-        tracking = true; locked = false; axis = null;
+        tracking = true; axis = null; primed = null;
         startX = lastX = t.clientX; startY = t.clientY; lastT = Date.now(); vx = 0;
-        var s = stage();
-        if (s) { s.cube.classList.add('is-dragging'); s.cube.classList.remove('is-settle'); }
+        stage();
     }
     function onMove(e) {
         if (!tracking) return;
@@ -91,22 +117,23 @@
         var dx = t.clientX - startX;
         var dy = t.clientY - startY;
         if (!axis) {
-            if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-            axis = Math.abs(dx) > Math.abs(dy) * 1.15 ? 'x' : 'y';
+            if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
+            axis = Math.abs(dx) > Math.abs(dy) * 1.2 ? 'x' : 'y';
             if (axis === 'y') { tracking = false; return; }
         }
         if (axis !== 'x') return;
         e.preventDefault();
-        locked = true;
         var now = Date.now();
         vx = (t.clientX - lastX) / Math.max(8, now - lastT);
         lastX = t.clientX; lastT = now;
-        var w = window.innerWidth || 360;
-        var deg = Math.max(-78, Math.min(78, (dx / w) * 82));
         var dir = dx < 0 ? 1 : -1;
         var n = neighbor(dir);
-        var s = stage();
-        if (s && s.next) s.next.textContent = n ? n.label.toUpperCase() : '';
+        if (n && (!primed || primed.href !== n.href)) {
+            primed = { href: n.href, file: n.file, dir: dir };
+            fillFace(primed);
+        }
+        var w = window.innerWidth || 360;
+        var deg = Math.max(-88, Math.min(88, (dx / w) * 90));
         setCube(deg, true);
     }
     function onEnd() {
@@ -117,20 +144,19 @@
         var w = window.innerWidth || 360;
         var dir = dx < 0 ? 1 : -1;
         var n = neighbor(dir);
-        var should = n && (Math.abs(dx) > w * 0.28 || Math.abs(vx) > 0.55);
-        if (!should) {
-            setCube(0, false);
-            return;
-        }
+        var should = n && (Math.abs(dx) > w * 0.26 || Math.abs(vx) > 0.5);
+        if (!should) { setCube(0, false); return; }
         setCube(dir > 0 ? -90 : 90, false);
         setTimeout(function () {
             if (window.__hshsNavigate) window.__hshsNavigate(n.href);
-            setTimeout(function () { setCube(0, false); }, 30);
-        }, 420);
+            requestAnimationFrame(function () { setCube(0, false); });
+        }, 520);
     }
     function boot() {
         addCss();
+        sizeCube();
         stage();
+        window.addEventListener('resize', sizeCube, { passive: true });
         document.addEventListener('touchstart', onStart, { passive: true });
         document.addEventListener('touchmove', onMove, { passive: false });
         document.addEventListener('touchend', onEnd);
