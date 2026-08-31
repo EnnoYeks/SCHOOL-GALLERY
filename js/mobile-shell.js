@@ -279,26 +279,10 @@
         });
     }
 
-    function ensureLoader() {
-        var el = document.getElementById('hshs-loader');
-        if (el) return el;
-        el = document.createElement('div');
-        el.id = 'hshs-loader';
-        el.className = 'hshs-loader';
-        el.innerHTML = '<div class="hshs-loader-bar"></div><div class="hshs-loader-card"><span class="hshs-loader-spin"></span><span class="hshs-loader-text">Loading...</span></div>';
-        document.body.appendChild(el);
-        return el;
-    }
-    function showLoader(label) {
-        var el = ensureLoader();
-        var text = el.querySelector('.hshs-loader-text');
-        if (text) text.textContent = label || 'Loading...';
-        el.classList.add('is-on');
-        document.body.classList.add('is-page-loading');
-    }
+    function showLoader() {}
     function hideLoader() {
         var el = document.getElementById('hshs-loader');
-        if (el) el.classList.remove('is-on');
+        if (el) el.remove();
         document.body.classList.remove('is-page-loading');
     }
 
@@ -309,8 +293,6 @@
         const file = (next.pathname.split('/').pop() || '').toLowerCase();
         if (file === 'admin.html') { location.href = next.href; return; }
         const root = wrapPage();
-        root.classList.add('is-swapping');
-        showLoader('Loading...');
         try {
             const res = await fetch(next.href, { credentials: 'same-origin' });
             if (!res.ok) throw new Error('fetch failed');
@@ -331,7 +313,6 @@
         } catch (err) {
             location.href = next.href;
         } finally {
-            root.classList.remove('is-swapping');
             hideLoader();
         }
     }
@@ -382,7 +363,7 @@
         syncDesktopNav();
         buildBar();
         wrapPage();
-        ensureLoader();
+        hideLoader();
         fixBadLinks(document);
         wireHomeButtons();
         wireSpa();

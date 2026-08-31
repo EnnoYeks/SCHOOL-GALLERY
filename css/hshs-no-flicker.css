@@ -1,24 +1,15 @@
-/* ============================================
-   HSHS FIRST-PAINT / NAVIGATION NO-FLICKER
-   ============================================ */
-
-body.is-page-loading #hshs-page {
-    opacity: 1 !important;
-}
-
-.hshs-loader {
+/* Loader overlays off */
+.hshs-loader,
+.hshs-loader.is-on {
+    display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
 }
-
-#hshs-page.is-swapping {
+body.is-page-loading #hshs-page {
     opacity: 1 !important;
 }
-
-@media (prefers-reduced-motion: reduce) {
-    #hshs-page,
-    #hshs-page.is-swapping {
-        transition: none !important;
-    }
+#hshs-page.is-swapping {
+    opacity: 1 !important;
+    transform: none !important;
 }

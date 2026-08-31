@@ -91,19 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (!current) return;
 
-    // Load the navigation no-flicker rules immediately with the shared shell.
-    // Responsive layout remains CSS-driven and never needs device detection.
-    function addStylesheet(id, file) {
-        if (document.getElementById(id)) return;
-        var link = document.createElement('link');
-        link.id = id;
-        link.rel = 'stylesheet';
-        link.href = current.replace(/navigation\.js(\?.*)?$/, '../css/' + file);
-        document.head.appendChild(link);
-    }
-
-    addStylesheet('hshs-no-flicker-css', 'hshs-no-flicker.css');
-
     function add(id, file) {
         if (document.getElementById(id)) return;
         var s = document.createElement('script');
@@ -113,10 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(s);
     }
 
-    // Prefetch first, then start the shell. The scripts are ordered so the
-    // page warmer is available before in-app navigation can request a page.
-    add('hshs-page-prefetch-js', 'page-prefetch.js');
-
     var script = document.createElement('script');
     script.id = 'hshs-mobile-shell-js';
     script.async = false;
@@ -125,6 +108,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     add('hshs-search-btn-js', 'mobile-search-btn.js');
     add('hshs-brand-js', 'hshs-brand.js');
-    add('hshs-page-swipe-js', 'page-swipe.js');
-    add('hshs-motion-js', 'hshs-motion.js');
 })();
