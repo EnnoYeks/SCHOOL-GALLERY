@@ -21,9 +21,9 @@
         link.href = href;
         document.head.appendChild(link);
     }
+    function half() { return (window.innerWidth || 360) / 2; }
     function sizeCube() {
-        var w = window.innerWidth || 360;
-        document.documentElement.style.setProperty('--cube-z', (w / 2) + 'px');
+        document.documentElement.style.setProperty('--cube-z', half() + 'px');
     }
     function fileOf() {
         var f = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -43,7 +43,7 @@
     function neighbor(dir) {
         var i = indexOf() + dir;
         if (i < 0 || i >= ORDER.length) return null;
-        return { file: ORDER[i], href: new URL(hrefFor(ORDER[i]), location.href).href, label: ORDER[i].replace('.html','').replace('index','home').replace('videos','vibe') };
+        return { file: ORDER[i], href: new URL(hrefFor(ORDER[i]), location.href).href };
     }
     function extract(html) {
         try {
@@ -64,10 +64,10 @@
         if (!s || !n) return;
         s.next.classList.toggle('is-left', n.dir < 0);
         var cache = window.__hshsPageCache || {};
-        var html = cache[n.href] || cache[n.file];
+        var html = cache[n.href];
         if (html) s.next.innerHTML = extract(html);
         else if (window.__hshsPageSkeleton) s.next.innerHTML = window.__hshsPageSkeleton(n.file);
-        else s.next.innerHTML = '<div class="hshs-page-skel"><div class="sk-hero"></div></div>';
+        else s.next.innerHTML = '';
     }
     function stage() {
         var page = document.getElementById('hshs-page');
@@ -102,7 +102,7 @@
         if (!s) return;
         s.cube.classList.toggle('is-dragging', !!dragging);
         s.cube.classList.toggle('is-settle', !dragging);
-        s.cube.style.transform = 'rotateY(' + deg + 'deg)';
+        s.cube.style.transform = 'translateZ(' + (-half()) + 'px) rotateY(' + deg + 'deg)';
     }
     function onStart(e) {
         if (blocked(e)) return;
@@ -132,8 +132,7 @@
             primed = { href: n.href, file: n.file, dir: dir };
             fillFace(primed);
         }
-        var w = window.innerWidth || 360;
-        var deg = Math.max(-88, Math.min(88, (dx / w) * 90));
+        var deg = Math.max(-88, Math.min(88, (dx / (window.innerWidth || 360)) * 90));
         setCube(deg, true);
     }
     function onEnd() {
@@ -150,7 +149,7 @@
         setTimeout(function () {
             if (window.__hshsNavigate) window.__hshsNavigate(n.href);
             requestAnimationFrame(function () { setCube(0, false); });
-        }, 520);
+        }, 540);
     }
     function boot() {
         addCss();

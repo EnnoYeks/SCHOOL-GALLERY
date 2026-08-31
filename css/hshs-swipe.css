@@ -1,7 +1,7 @@
 @media (max-width: 1024px) {
     #hshs-cube-stage {
         perspective: 1400px;
-        perspective-origin: 50% 50%;
+        perspective-origin: 50% 45%;
         overflow: hidden;
         touch-action: pan-y;
         min-height: calc(100vh - 148px);
@@ -10,7 +10,7 @@
         position: relative;
         min-height: calc(100vh - 148px);
         transform-style: preserve-3d;
-        transform: rotateY(0deg);
+        transform: translateZ(calc(var(--cube-z, 50vw) * -1)) rotateY(0deg);
         will-change: transform;
     }
     #hshs-cube.is-dragging { transition: none; }
@@ -29,7 +29,7 @@
     #hshs-cube-next {
         position: absolute;
         inset: 0;
-        overflow: hidden;
+        overflow: auto;
         background: var(--bg-primary, #071433);
         pointer-events: none;
         transform: rotateY(90deg) translateZ(var(--cube-z, 50vw));
