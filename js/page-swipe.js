@@ -24,41 +24,16 @@
     var i = ORDER.indexOf(file);
     return i < 0 ? 0 : i;
   }
-  function addCss() {
-    if (document.getElementById('hshs-page-swipe-css')) return;
-    var guess = Array.from(document.querySelectorAll('script[src]'))
-      .map(function (s) { return s.getAttribute('src') || ''; })
-      .find(function (s) { return s.indexOf('navigation.js') !== -1 && s.indexOf('mobile-navigation') === -1; });
-    var href = guess
-      ? guess.replace(/js\/navigation\.js.*$/, 'css/page-swipe.css')
-      : (location.pathname.indexOf('/index/') !== -1 ? '../css/page-swipe.css' : 'css/page-swipe.css');
-    var link = document.createElement('link');
-    link.id = 'hshs-page-swipe-css';
-    link.rel = 'stylesheet';
-    link.href = href;
-    document.head.appendChild(link);
-  }
-  function hints() {
-    if (document.querySelector('.hshs-swipe-hint')) return;
-    ['left', 'right'].forEach(function (side) {
-      var el = document.createElement('div');
-      el.className = 'hshs-swipe-hint is-' + side;
-      el.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(el);
-    });
-  }
-  function flashHint(dir) {
-    var side = dir > 0 ? 'right' : 'left';
-    var el = document.querySelector('.hshs-swipe-hint.is-' + side);
-    if (!el) return;
-    el.classList.add('is-on');
-    setTimeout(function () { el.classList.remove('is-on'); }, 280);
+  function deckOn() {
+    return !!(document.getElementById('hshs-swipe-stage') && window.matchMedia('(max-width: 1024px)').matches);
   }
   function playEnter(dir) {
     var page = document.getElementById('hshs-page');
     if (!page || !dir) return;
-    flashHint(dir);
-    page.classList.remove('hshs-page-in-left', 'hshs-page-in-right');
+    if (deckOn()) {
+      page.style.transform = '';
+      return;
+    }
     var from = dir > 0 ? 16 : -16;
     if (driver) driver.stop();
     if (!window.HshsSpring) {
@@ -94,11 +69,4 @@
     pendingDir = 0;
     if (window.__hshsStagger) window.__hshsStagger(document.getElementById('hshs-page') || document);
   });
-
-  function boot() {
-    addCss();
-    hints();
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
 })();
