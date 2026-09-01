@@ -97,7 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     add('hshs-boot-js', 'hshs-boot.js');
     add('hshs-perf-js', 'hshs-perf.js');
+    add('hshs-store-js', 'hshs-store.js');
     add('hshs-mobile-shell-js', 'mobile-shell.js');
+    add('hshs-upload-js', 'hshs-upload.js');
     add('hshs-search-btn-js', 'mobile-search-btn.js');
     add('hshs-brand-js', 'hshs-brand.js');
     add('hshs-swipe-js', 'hshs-swipe.js');

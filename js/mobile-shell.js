@@ -13,7 +13,7 @@
         'clips.html', 'shorts.html', 'buzz.html'
     ];
 
-    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js|hshs-boot\.js|hshs-swipe\.js/;
+    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js|hshs-boot\.js|hshs-swipe\.js|hshs-store\.js|hshs-upload\.js/;
     const loadedCss = new Set();
     const loadedPageScripts = new Set();
     const pageCache = window.__hshsPageCache = window.__hshsPageCache || {};
@@ -80,6 +80,7 @@
 
     function routes() {
         const more = [
+            { href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', match: ['spotlight.html'] },
             { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
             { href: sub('photos.html'), icon: 'fa-camera', label: 'Photos', match: ['photos.html'] },
             { href: sub('videos.html'), icon: 'fa-play', label: 'Vibe', match: ['videos.html'] },
@@ -97,7 +98,6 @@
             PRIMARY: [
                 { id: 'home', href: homeHref(), icon: 'fa-home', label: 'Home', match: ['index.html', ''] },
                 { id: 'gallery', href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
-                { id: 'spotlight', href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', match: ['spotlight.html'] },
                 { id: 'buzz', href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html', 'shorts.html'] }
             ],
             MORE: more,
@@ -154,9 +154,10 @@
 
     function markActive() {
         const file = currentFile();
-        const moreFiles = ['photos.html','videos.html','polls.html','memories.html','about.html','contat.html','contact.html','profile.html','settings.html','trending.html'];
+        const moreFiles = ['photos.html','videos.html','polls.html','memories.html','about.html','contat.html','contact.html','profile.html','settings.html','trending.html','spotlight.html'];
         document.querySelectorAll('.mobile-tabbar a').forEach((a) => {
             const tab = a.getAttribute('data-tab');
+            if (!tab || tab === 'upload') return;
             let on = false;
             if (tab === 'home') on = file === 'index.html' || file === '';
             else if (tab === 'more') on = moreFiles.includes(file);
@@ -207,26 +208,47 @@
         const bar = document.createElement('nav');
         bar.className = 'mobile-tabbar';
         bar.setAttribute('aria-label', 'Primary');
-        bar.innerHTML = r.PRIMARY.map((item) => `
+
+        const left = r.PRIMARY.slice(0, 2);
+        const right = r.PRIMARY.slice(2);
+
+        bar.innerHTML =
+            left.map((item) => `
             <a href="${item.href}" class="${isActive(item) ? 'active' : ''}" data-tab="${item.id}">
                 <i class="fas ${item.icon}"></i><span>${item.label}</span>
-            </a>
-        `).join('') + `
+            </a>`).join('') +
+            `
+            <button type="button" class="tab-upload" data-tab="upload" id="openUploadStudio" aria-label="Upload">
+                <span class="tab-upload-btn"><i class="fas fa-plus"></i></span>
+            </button>` +
+            right.map((item) => `
+            <a href="${item.href}" class="${isActive(item) ? 'active' : ''}" data-tab="${item.id}">
+                <i class="fas ${item.icon}"></i><span>${item.label}</span>
+            </a>`).join('') +
+            `
             <a href="#more" class="${moreActive ? 'active' : ''}" data-tab="more" id="openMoreSheet">
                 <i class="fas fa-ellipsis"></i><span>More</span>
             </a>`;
+
         const backdrop = document.createElement('div');
         backdrop.className = 'more-backdrop';
         backdrop.id = 'moreBackdrop';
         const sheet = document.createElement('aside');
         sheet.className = 'more-sheet';
         sheet.id = 'moreSheet';
-        sheet.innerHTML = `<div class="more-head"><div><h3>All pages</h3><p>Jump to any section</p></div><button type="button" class="more-close" id="closeMoreSheet" aria-label="Close">×</button></div><div class="more-grid">` +
+        sheet.innerHTML = `<div class="more-head"><div><h3>All pages</h3><p>Spotlight and the rest live here</p></div><button type="button" class="more-close" id="closeMoreSheet" aria-label="Close">×</button></div><div class="more-grid">` +
             r.MORE.map((item) => `<a href="${item.href}" class="${isActive(item) ? 'active' : ''}"><i class="fas ${item.icon}"></i><span>${item.label}</span></a>`).join('') +
             `</div>`;
         document.body.appendChild(bar);
         document.body.appendChild(backdrop);
         document.body.appendChild(sheet);
+
+        document.getElementById('openUploadStudio').addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeMore();
+            if (window.__hshsOpenUpload) window.__hshsOpenUpload();
+        });
         document.getElementById('openMoreSheet').addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -255,7 +277,8 @@
             document.querySelector('.more-sheet'),
             document.querySelector('.more-backdrop'),
             document.getElementById('hshs-boot'),
-            document.getElementById('hshs-cube-stage')
+            document.getElementById('hshs-cube-stage'),
+            document.getElementById('hshsUploadStudio')
         ]);
         const move = [];
         Array.from(document.body.children).forEach(function (el) {
@@ -274,7 +297,7 @@
         const box = document.createElement('div');
         Array.from(doc.body.children).forEach(function (el) {
             const cls = el.className ? String(el.className) : '';
-            const skip = el.tagName === 'SCRIPT' || el.id === 'hshs-page' || el.id === 'hshs-boot' || keepNames.some(function (name) { return cls.indexOf(name) !== -1; });
+            const skip = el.tagName === 'SCRIPT' || el.id === 'hshs-page' || el.id === 'hshs-boot' || el.id === 'hshsUploadStudio' || keepNames.some(function (name) { return cls.indexOf(name) !== -1; });
             if (!skip) box.appendChild(el.cloneNode(true));
         });
         return box;
