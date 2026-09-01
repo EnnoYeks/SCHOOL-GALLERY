@@ -36,6 +36,17 @@
       done: function () { if (to === 1) el.style.transform = ''; }
     });
   }
+  function tapMic(btn) {
+    if (typeof window.__hshsChatBeginRec === 'function' && !hold.closing) {
+      window.__hshsChatBeginRec();
+      return;
+    }
+    if (typeof window.__hshsChatEndRec === 'function' && hold.closing) {
+      window.__hshsChatEndRec(!hold.cancelled);
+      return;
+    }
+    if (typeof btn.onclick === 'function') btn.onclick();
+  }
   function setUi(on) {
     var form = $('hshsThreadForm');
     var bar = ensureBar();
@@ -69,11 +80,12 @@
       if (e.button && e.button !== 0) return;
       e.preventDefault();
       hold.on = true;
+      hold.closing = false;
       hold.cancelled = false;
       hold.startX = e.clientX;
       try { btn.setPointerCapture(e.pointerId); } catch (err) {}
       setUi(true);
-      if (typeof window.__hshsChatBeginRec === 'function') window.__hshsChatBeginRec();
+      tapMic(btn);
     });
     btn.addEventListener('pointermove', function (e) {
       if (!hold.on) return;
@@ -84,9 +96,9 @@
     function up() {
       if (!hold.on) return;
       hold.on = false;
-      var keep = !hold.cancelled && (Date.now() - hold.start >= 400);
+      hold.closing = true;
       setUi(false);
-      if (typeof window.__hshsChatEndRec === 'function') window.__hshsChatEndRec(keep);
+      tapMic(btn);
     }
     btn.addEventListener('pointerup', up);
     btn.addEventListener('pointercancel', up);
