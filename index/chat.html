@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
     <meta charset="UTF-8">
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#2563eb">
     <title>Chat - HSHS World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
@@ -11,7 +11,10 @@
     <link rel="stylesheet" href="../css/responsive.css">
     <link rel="stylesheet" href="../css/hshs-chat.css">
     <link rel="stylesheet" href="../css/hshs-social.css">
-    <style>input, textarea { font-size: 16px !important; }</style>
+    <style>
+        input, textarea { font-size: 16px !important; }
+        body { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+    </style>
 </head>
 <body class="light-mode">
     <div class="animated-bg">
@@ -40,7 +43,7 @@
     <div class="hshs-chat-page" id="hshsChatPage" data-theme="ocean" data-bubbles="rounded">
         <header class="hshs-chat-top">
             <div>
-                <h1>Chat</h1>
+                <h1>Messages</h1>
                 <p id="hshsChatStatus">Connecting…</p>
             </div>
             <div class="hshs-chat-tools">
@@ -65,7 +68,7 @@
             <aside class="hshs-chat-side" id="hshsChatSide">
                 <div class="hshs-chat-search">
                     <i class="fas fa-search"></i>
-                    <input type="search" id="hshsChatSearch" placeholder="Find @username or name" autocomplete="off">
+                    <input type="search" id="hshsChatSearch" placeholder="Search name or @username" autocomplete="off">
                 </div>
                 <div class="hshs-chat-list" id="hshsChatList">
                     <div class="hshs-chat-empty">Loading people…</div>
@@ -74,9 +77,9 @@
 
             <section class="hshs-chat-main" id="hshsChatMain">
                 <div class="hshs-chat-empty-main" id="hshsChatEmptyMain">
-                    <i class="fas fa-comments"></i>
-                    <h2>Search · Follow · Chat</h2>
-                    <p>Find classmates by username, follow them, then open a live chat with emojis and photos.</p>
+                    <div class="hshs-empty-art" aria-hidden="true">💬</div>
+                    <h2>Your school chats</h2>
+                    <p>Pick a classmate, send live messages, emojis, photos, or voice notes.</p>
                 </div>
 
                 <div class="hshs-thread" id="hshsThread" hidden>
@@ -99,7 +102,8 @@
                         <button type="button" class="hshs-compose-icon" id="hshsEmojiBtn" aria-label="Emoji"><i class="far fa-smile"></i></button>
                         <button type="button" class="hshs-compose-icon" id="hshsAttachBtn" aria-label="Attach"><i class="fas fa-paperclip"></i></button>
                         <input type="file" id="hshsAttachInput" accept="image/*" hidden>
-                        <input type="text" id="hshsThreadInput" placeholder="Message…" maxlength="800" autocomplete="off">
+                        <input type="text" id="hshsThreadInput" placeholder="Type a message" maxlength="800" autocomplete="off">
+                        <button type="button" class="hshs-compose-icon" id="hshsVoiceBtn" aria-label="Voice note"><i class="fas fa-microphone"></i></button>
                         <button type="submit" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
                     </form>
                 </div>
