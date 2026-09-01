@@ -95,9 +95,19 @@ document.addEventListener('DOMContentLoaded', () => {
         s.src = current.replace(/navigation\.js(\?.*)?$/, file);
         document.head.appendChild(s);
     }
+    function addCss(id, file) {
+        if (document.getElementById(id)) return;
+        var link = document.createElement('link');
+        link.id = id;
+        link.rel = 'stylesheet';
+        link.href = current.replace(/js\/navigation\.js(\?.*)?$/, 'css/' + file);
+        document.head.appendChild(link);
+    }
+    addCss('hshs-social-css', 'hshs-social.css');
     add('hshs-boot-js', 'hshs-boot.js');
     add('hshs-perf-js', 'hshs-perf.js');
     add('hshs-store-js', 'hshs-store.js');
+    add('hshs-social-js', 'hshs-social.js');
     add('hshs-mobile-shell-js', 'mobile-shell.js');
     add('hshs-upload-js', 'hshs-upload.js');
     add('hshs-search-btn-js', 'mobile-search-btn.js');
