@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
     <meta charset="UTF-8">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#111b21">
     <title>Chat - HSHS World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
@@ -13,13 +13,12 @@
     <link rel="stylesheet" href="../css/hshs-social.css">
     <style>
         input, textarea { font-size: 16px !important; }
-        body { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+        body.light-mode, body { background: #0b141a !important; }
     </style>
 </head>
 <body class="light-mode">
     <div class="animated-bg">
         <div class="gradient-bg"></div>
-        <div class="particles-container" id="particlesContainer"></div>
     </div>
 
     <nav class="navbar">
@@ -41,59 +40,53 @@
     </nav>
 
     <div class="hshs-chat-page" id="hshsChatPage" data-theme="ocean" data-bubbles="rounded">
-        <header class="hshs-chat-top">
-            <div>
-                <h1>Messages</h1>
-                <p id="hshsChatStatus">Connecting…</p>
-            </div>
-            <div class="hshs-chat-tools">
-                <select id="hshsThemeSelect" aria-label="Chat theme">
-                    <option value="ocean">Ocean</option>
-                    <option value="grape">Grape</option>
-                    <option value="mint">Mint</option>
-                    <option value="sunset">Sunset</option>
-                    <option value="rose">Rose</option>
-                    <option value="slate">Slate</option>
-                </select>
-                <select id="hshsBubbleSelect" aria-label="Bubble style">
-                    <option value="rounded">Rounded</option>
-                    <option value="soft">Soft</option>
-                    <option value="square">Square</option>
-                </select>
-                <div class="hshs-chat-me" id="hshsChatMe">You</div>
-            </div>
-        </header>
+        <div id="hshsChatBanner" class="hshs-chat-banner" hidden></div>
 
         <div class="hshs-chat-layout">
             <aside class="hshs-chat-side" id="hshsChatSide">
+                <div class="hshs-side-head">
+                    <h1>Chats</h1>
+                    <div class="hshs-side-actions">
+                        <select id="hshsThemeSelect" aria-label="Chat theme" title="Theme">
+                            <option value="ocean">Ocean</option>
+                            <option value="grape">Grape</option>
+                            <option value="mint">Mint</option>
+                            <option value="sunset">Sunset</option>
+                            <option value="rose">Rose</option>
+                            <option value="slate">Slate</option>
+                        </select>
+                        <span class="hshs-chat-me" id="hshsChatMe" style="display:none">You</span>
+                    </div>
+                </div>
                 <div class="hshs-chat-search">
                     <i class="fas fa-search"></i>
-                    <input type="search" id="hshsChatSearch" placeholder="Search name or @username" autocomplete="off">
+                    <input type="search" id="hshsChatSearch" placeholder="Search or start new chat" autocomplete="off">
                 </div>
                 <div class="hshs-chat-list" id="hshsChatList">
-                    <div class="hshs-chat-empty">Loading people…</div>
+                    <div class="hshs-chat-empty">Loading chats…</div>
                 </div>
             </aside>
 
             <section class="hshs-chat-main" id="hshsChatMain">
                 <div class="hshs-chat-empty-main" id="hshsChatEmptyMain">
                     <div class="hshs-empty-art" aria-hidden="true">💬</div>
-                    <h2>Your school chats</h2>
-                    <p>Pick a classmate, send live messages, emojis, photos, or voice notes.</p>
+                    <h2>HSHS World Chat</h2>
+                    <p>Pick a classmate on the left. Messages stay live with receipts, emojis, photos and voice notes.</p>
                 </div>
 
                 <div class="hshs-thread" id="hshsThread" hidden>
                     <div class="hshs-thread-head">
                         <button type="button" class="hshs-thread-back" id="hshsThreadBack" aria-label="Back">
-                            <i class="fas fa-chevron-left"></i>
+                            <i class="fas fa-arrow-left"></i>
                         </button>
+                        <div class="hshs-thread-avatar" id="hshsThreadAvatar">?</div>
                         <div>
                             <strong id="hshsThreadName">Contact</strong>
-                            <small id="hshsThreadMeta">Live</small>
+                            <small id="hshsThreadMeta">tap for info</small>
                         </div>
                     </div>
                     <div class="hshs-thread-msgs" id="hshsThreadMsgs"></div>
-                    <div class="hshs-attach-preview" id="hshsAttachPreview" hidden>
+                    <div class="hshs-attach-preview" id="hshsAttachPreview">
                         <img src="" alt="">
                         <button type="button" id="hshsClearAttach" aria-label="Remove">×</button>
                     </div>
