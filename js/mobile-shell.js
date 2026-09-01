@@ -13,7 +13,7 @@
         'clips.html', 'shorts.html', 'buzz.html', 'chat.html'
     ];
 
-    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js|hshs-boot\.js|hshs-swipe\.js|hshs-store\.js|hshs-upload\.js/;
+    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js|hshs-boot\.js|hshs-swipe\.js|hshs-store\.js|hshs-upload\.js|hshs-motion\.js|gallery-transitions\.js|page-swipe\.js/;
     const loadedCss = new Set();
     const loadedPageScripts = new Set();
     const pageCache = window.__hshsPageCache = window.__hshsPageCache || {};
@@ -141,6 +141,8 @@
         addLink('hshs-boot-css', 'hshs-boot.css');
         addLink('hshs-mobile-shell-css', 'mobile-shell.css');
         addLink('hshs-swipe-css', 'hshs-swipe.css');
+        addLink('hshs-motion-css', 'gallery-transitions.css');
+        addLink('hshs-page-swipe-css', 'page-swipe.css');
     }
     injectCss();
 

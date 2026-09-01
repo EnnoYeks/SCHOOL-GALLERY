@@ -104,6 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(link);
     }
     addCss('hshs-social-css', 'hshs-social.css');
+    addCss('hshs-motion-css', 'gallery-transitions.css');
+    addCss('hshs-page-swipe-css', 'page-swipe.css');
     add('hshs-boot-js', 'hshs-boot.js');
     add('hshs-perf-js', 'hshs-perf.js');
     add('hshs-store-js', 'hshs-store.js');
@@ -113,5 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-upload-js', 'hshs-upload.js');
     add('hshs-search-btn-js', 'mobile-search-btn.js');
     add('hshs-brand-js', 'hshs-brand.js');
+    add('hshs-motion-js', 'hshs-motion.js');
+    add('hshs-gallery-transitions-js', 'gallery-transitions.js');
     add('hshs-swipe-js', 'hshs-swipe.js');
+    add('hshs-page-swipe-js', 'page-swipe.js');
 })();
