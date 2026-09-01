@@ -17,10 +17,37 @@ import {
     if (window.__hshsChatBoot) return;
     window.__hshsChatBoot = true;
 
-    var EMOJIS = ['👋','😊','🎉','🏆','⚡','🔥','💪','🏃','🎵','🎓','💻','🔬','🏟️','💚','🙏','🤝','💯','✨','🌟','🚀','📸','🎤','🎮','✅'];
+    var EMOJI_SETS = {
+        smile: {
+            icon: '😊',
+            list: ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🥴','😇','🥳','🥺']
+        },
+        gesture: {
+            icon: '👍',
+            list: ['👋','🤚','🖐','✋','🖖','👌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','💪','🦾','🦵','🦶','👂','👃']
+        },
+        heart: {
+            icon: '❤️',
+            list: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍']
+        },
+        party: {
+            icon: '🎉',
+            list: ['🎉','🎊','🎈','🎁','🎀','🏆','🥇','🥈','🥉','⚽','🏀','🏈','⚾','🎾','🏐','🏉','🎱','🏓','🏸','🥅','🏒','🏑','🏏','⛳','🏹','🎣','🥊','🥋','🎽','🛹','🛷','⛸','🥌','🎿','⛷','🏂']
+        },
+        school: {
+            icon: '🎓',
+            list: ['🎓','📚','📖','✏️','📝','📎','📌','📍','✂️','📐','📏','🔬','🔭','🧪','🧫','🧬','💻','🖥','🖨','⌨️','🖱','💾','📱','📲','☎️','📞','📡','🔋','🔌','💡','🔦','🕯','🧯','🛢','💸','💵']
+        },
+        nature: {
+            icon: '🌟',
+            list: ['⭐','🌟','✨','⚡','🔥','💥','☀️','🌤','⛅','🌥','☁️','🌦','🌧','⛈','🌩','🌨','❄️','☃️','⛄','🌬','💨','💧','💦','🌊','🌈','🌸','💮','🏵','🌹','🥀','🌺','🌻','🌼','🌷','🌱','🌲']
+        }
+    };
+
     var state = {
         me: null, contacts: [], activeId: null, unsub: null, live: false,
-        emojiOpen: false, pendingImage: null, recording: false, mediaRecorder: null, chunks: []
+        emojiOpen: false, emojiTab: 'smile', pendingImage: null,
+        recording: false, mediaRecorder: null, chunks: []
     };
 
     function db() { return window.firestore || null; }
@@ -50,6 +77,17 @@ import {
         return String(s || '').replace(/[&<>"']/g, function (ch) {
             return ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' })[ch];
         });
+    }
+    function isEmojiOnly(text) {
+        var t = String(text || '').trim();
+        if (!t || t.length > 24) return false;
+        // strip variation selectors / ZWJ and see if remaining is mostly emoji
+        var cleaned = t.replace(/\s/g, '');
+        try {
+            return /^(\p{Extended_Pictographic}|\uFE0F|\u200D)+$/u.test(cleaned);
+        } catch (e) {
+            return /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\s]+$/u.test(t);
+        }
     }
     function setStatus(text, isError) {
         var el = document.getElementById('hshsChatStatus');
@@ -148,7 +186,7 @@ import {
         var box = document.getElementById('hshsThreadMsgs');
         if (!box) return;
         if (!msgs.length) {
-            box.innerHTML = '<div class="hshs-chat-empty">Say hi — live chat with receipts, emojis, photos & voice.</div>';
+            box.innerHTML = '<div class="hshs-chat-empty">Say hi with a glossy bubble 👋</div>';
             return;
         }
         var myId = me().id;
@@ -157,12 +195,13 @@ import {
             var media = '';
             if (m.imageUrl) media = '<img class="hshs-bubble-img" src="' + escapeHtml(m.imageUrl) + '" alt="">';
             if (m.audioUrl) {
-                media = '<div class="hshs-voice" data-audio="' + escapeHtml(m.audioUrl) + '">' +
+                media = '<div class="hshs-voice">' +
                     '<button type="button" aria-label="Play"><i class="fas fa-play"></i></button>' +
                     '<span>Voice note</span><audio preload="metadata" src="' + escapeHtml(m.audioUrl) + '"></audio></div>';
             }
+            var emojiOnly = !m.imageUrl && !m.audioUrl && isEmojiOnly(m.text);
             var text = m.text ? '<div class="hshs-bubble-text">' + escapeHtml(m.text) + '</div>' : '';
-            return '<div class="hshs-bubble ' + (mine ? 'mine' : 'theirs') + '">' +
+            return '<div class="hshs-bubble ' + (mine ? 'mine' : 'theirs') + (emojiOnly ? ' is-emoji-only' : '') + '">' +
                 media + text +
                 '<time>' + escapeHtml(fmtTime(m.createdAt)) + (mine ? ticks(m.status || 'sent') : '') + '</time></div>';
         }).join('');
@@ -191,9 +230,7 @@ import {
                 n += 1;
             }
         });
-        if (n) {
-            try { await batch.commit(); } catch (e) {}
-        }
+        if (n) { try { await batch.commit(); } catch (e) {} }
     }
 
     async function openThread(uid) {
@@ -217,8 +254,7 @@ import {
         document.getElementById('hshsThreadMeta').textContent = '@' + (peer.username || 'user') + (presence ? ' · ' + presence : '');
         var ap = document.getElementById('hshsAttachPreview');
         if (ap) ap.hidden = true;
-        var ep = document.getElementById('hshsEmojiPanel');
-        if (ep) ep.hidden = true;
+        closeEmojiPanel();
 
         stopListen();
         var firestore = db();
@@ -293,9 +329,7 @@ import {
         state.pendingImage = null;
         var prev = document.getElementById('hshsAttachPreview');
         if (prev) prev.hidden = true;
-        state.emojiOpen = false;
-        var panel = document.getElementById('hshsEmojiPanel');
-        if (panel) panel.hidden = true;
+        closeEmojiPanel();
     }
 
     async function toggleVoice() {
@@ -316,9 +350,7 @@ import {
                 stream.getTracks().forEach(function (t) { t.stop(); });
                 var blob = new Blob(state.chunks, { type: rec.mimeType || 'audio/webm' });
                 var reader = new FileReader();
-                reader.onload = function () {
-                    sendPayload({ text: '', audioUrl: String(reader.result) });
-                };
+                reader.onload = function () { sendPayload({ text: '', audioUrl: String(reader.result) }); };
                 reader.readAsDataURL(blob);
             };
             rec.start();
@@ -327,6 +359,42 @@ import {
         } catch (e) {
             setStatus('Microphone blocked — allow mic for voice notes.', true);
         }
+    }
+
+    function closeEmojiPanel() {
+        state.emojiOpen = false;
+        var panel = document.getElementById('hshsEmojiPanel');
+        if (panel) {
+            panel.hidden = true;
+            panel.classList.remove('open');
+        }
+    }
+
+    function renderEmojiPanel() {
+        var panel = document.getElementById('hshsEmojiPanel');
+        if (!panel) return;
+        var tabs = Object.keys(EMOJI_SETS).map(function (key) {
+            return '<button type="button" class="hshs-emoji-tab' + (state.emojiTab === key ? ' on' : '') + '" data-tab="' + key + '">' +
+                EMOJI_SETS[key].icon + '</button>';
+        }).join('');
+        var list = (EMOJI_SETS[state.emojiTab] || EMOJI_SETS.smile).list;
+        var grid = list.map(function (e) {
+            return '<button type="button" class="hshs-emoji" data-emoji="' + e + '">' + e + '</button>';
+        }).join('');
+        panel.innerHTML = '<div class="hshs-emoji-tabs">' + tabs + '</div><div class="hshs-emoji-grid">' + grid + '</div>';
+        panel.querySelectorAll('[data-tab]').forEach(function (b) {
+            b.onclick = function () {
+                state.emojiTab = b.getAttribute('data-tab');
+                renderEmojiPanel();
+            };
+        });
+        panel.querySelectorAll('[data-emoji]').forEach(function (b) {
+            b.onclick = function () {
+                var input = document.getElementById('hshsThreadInput');
+                input.value += b.getAttribute('data-emoji');
+                input.focus();
+            };
+        });
     }
 
     function wire() {
@@ -349,23 +417,19 @@ import {
                 if (page) page.classList.remove('is-open');
                 document.getElementById('hshsThread').hidden = true;
                 document.getElementById('hshsChatEmptyMain').hidden = false;
+                closeEmojiPanel();
                 renderList();
             };
         }
         var emojiBtn = document.getElementById('hshsEmojiBtn');
         var emojiPanel = document.getElementById('hshsEmojiPanel');
         if (emojiBtn && emojiPanel) {
-            emojiBtn.onclick = function () { state.emojiOpen = !state.emojiOpen; emojiPanel.hidden = !state.emojiOpen; };
-            emojiPanel.innerHTML = EMOJIS.map(function (e) {
-                return '<button type="button" class="hshs-emoji" data-emoji="' + e + '">' + e + '</button>';
-            }).join('');
-            emojiPanel.querySelectorAll('[data-emoji]').forEach(function (b) {
-                b.onclick = function () {
-                    var input = document.getElementById('hshsThreadInput');
-                    input.value += b.getAttribute('data-emoji');
-                    input.focus();
-                };
-            });
+            emojiBtn.onclick = function () {
+                state.emojiOpen = !state.emojiOpen;
+                emojiPanel.hidden = !state.emojiOpen;
+                emojiPanel.classList.toggle('open', state.emojiOpen);
+                if (state.emojiOpen) renderEmojiPanel();
+            };
         }
         var attachBtn = document.getElementById('hshsAttachBtn');
         var attachInput = document.getElementById('hshsAttachInput');
@@ -417,7 +481,7 @@ import {
         try {
             await getDocs(query(collection(firestore, 'chats'), limit(1)));
             state.live = true;
-            setStatus('Live · friends · receipts · voice');
+            setStatus('Live · polished bubbles · rich emoji');
         } catch (err) {
             state.live = false;
             setStatus(rulesHint(err), true);
@@ -440,16 +504,6 @@ import {
                 var banner = document.createElement('div');
                 banner.id = 'hshsChatBanner'; banner.className = 'hshs-chat-banner'; banner.hidden = true;
                 top.parentNode.insertBefore(banner, top.nextSibling);
-            }
-        }
-        if (!document.getElementById('hshsVoiceBtn')) {
-            var form = document.getElementById('hshsThreadForm');
-            if (form) {
-                var b = document.createElement('button');
-                b.type = 'button'; b.className = 'hshs-compose-icon'; b.id = 'hshsVoiceBtn'; b.setAttribute('aria-label', 'Voice note');
-                b.innerHTML = '<i class="fas fa-microphone"></i>';
-                var send = form.querySelector('button[type="submit"]');
-                form.insertBefore(b, send || null);
             }
         }
         buildContacts(); applyTheme(); wire(); renderList();
