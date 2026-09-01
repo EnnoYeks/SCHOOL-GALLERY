@@ -18,12 +18,42 @@ import {
     window.__hshsChatBoot = true;
 
     var EMOJI_SETS = {
-        smile: { icon: '😊', list: ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','🤗','🤩','🤔','😏','😌','😛','😜','🤪','🤨','😐','😑','😶','🙄','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😒','😓','😔','😕','🙃','🤑','😲','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🥴','😇','🥳','🥺'] },
-        gesture: { icon: '👍', list: ['👋','🤚','🖐','✋','🖖','👌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','💪'] },
-        heart: { icon: '❤️', list: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟'] },
-        party: { icon: '🎉', list: ['🎉','🎊','🎈','🎁','🎀','🏆','🥇','🥈','🥉','⚽','🏀','🏈','⚾','🎾','🏐','🎯','🎮','🎲'] },
-        school: { icon: '🎓', list: ['🎓','📚','📖','✏️','📝','📎','📌','🔬','🔭','🧪','💻','📱','💡','🏫','🚌','📅','✅','🔥'] },
-        nature: { icon: '🌟', list: ['⭐','🌟','✨','⚡','🔥','💥','☀️','⛅','☁️','🌧','⛈','❄️','🌈','🌸','🌹','🌺','🌻','🌷'] }
+        smile: {
+            icon: '😊',
+            list: [
+                '😀','😃','😄','😁','😆','😅','😂','🤣',
+                '😊','😇','🙂','🙃','😉','😌','😍','🥰',
+                '😘','😗','😙','😚','😋','😛','😝','😜',
+                '🤪','🤨','🧐','🤓','😎','🤩','🥳','😏',
+                '😒','😞','😔','😟','😕','🙁','😣','😖',
+                '😫','😩','🥺','😢','😭','😤','😠','😡',
+                '🤬','🤯','😳','🥵','🥶','😱','😨','😰',
+                '😥','😓','🤗','🤔','🤭','🤫','🤥','😶',
+                '😐','😑','😬','🙄','😯','😦','😧','😮',
+                '😲','🥱','😴','🤤','😪','😵','🤐','🥴',
+                '🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠'
+            ]
+        },
+        gesture: {
+            icon: '👍',
+            list: ['👋','🤚','🖐','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','💪','✍️']
+        },
+        heart: {
+            icon: '❤️',
+            list: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','✨']
+        },
+        party: {
+            icon: '🎉',
+            list: ['🎉','🎊','🎈','🎁','🎀','🏆','🥇','🥈','🥉','⚽','🏀','🏈','⚾','🎾','🏐','🎯','🎮','🎲','🎵','🎤']
+        },
+        school: {
+            icon: '🎓',
+            list: ['🎓','📚','📖','✏️','📝','📎','📌','🔬','🔭','🧪','💻','📱','💡','🏫','🚌','📅','✅','🔥','⭐','🌟']
+        },
+        nature: {
+            icon: '🌟',
+            list: ['⭐','🌟','✨','⚡','🔥','💥','☀️','⛅','☁️','🌧️','⛈️','❄️','🌈','🌸','🌹','🌺','🌻','🌷','🍀','🌙']
+        }
     };
 
     var PREVIEW_SEED = {
@@ -40,6 +70,9 @@ import {
         me: null, contacts: [], activeId: null, unsub: null, live: false,
         emojiOpen: false, emojiTab: 'smile', pendingImage: null,
         recording: false, mediaRecorder: null, chunks: [],
+        recStart: 0, recTimer: null, recCancelled: false,
+        recPointerId: null, recStartX: 0,
+        wired: false,
         previews: {}
     };
 
@@ -64,7 +97,13 @@ import {
         if (!ts) return '';
         var d = ts.toDate ? ts.toDate() : new Date(ts);
         if (isNaN(d.getTime())) return '';
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+    }
+    function fmtDay(ts) {
+        if (!ts) return '';
+        var d = ts.toDate ? ts.toDate() : new Date(ts);
+        if (isNaN(d.getTime())) return '';
+        return d.toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' });
     }
     function escapeHtml(s) {
         return String(s || '').replace(/[&<>"']/g, function (ch) {
@@ -114,6 +153,7 @@ import {
             var img = prev.querySelector('img');
             if (img) img.removeAttribute('src');
         }
+        syncFab();
     }
     function showAttach(url) {
         state.pendingImage = url;
@@ -123,6 +163,31 @@ import {
         prev.classList.add('is-on');
         var img = prev.querySelector('img');
         if (img) img.src = url;
+        syncFab();
+    }
+    function composerHasDraft() {
+        var input = document.getElementById('hshsThreadInput');
+        var text = input ? String(input.value || '').trim() : '';
+        return !!(text || state.pendingImage);
+    }
+    function syncFab() {
+        var voice = document.getElementById('hshsVoiceBtn');
+        var send = document.getElementById('hshsSendBtn');
+        if (!voice || !send) return;
+        if (state.recording) {
+            voice.hidden = false;
+            send.hidden = true;
+            voice.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            voice.classList.add('is-rec');
+            voice.setAttribute('aria-label', 'Send voice note');
+            return;
+        }
+        voice.classList.remove('is-rec');
+        voice.innerHTML = '<i class="fas fa-microphone"></i>';
+        voice.setAttribute('aria-label', 'Voice note');
+        var draft = composerHasDraft();
+        voice.hidden = draft;
+        send.hidden = !draft;
     }
 
     function buildContacts() {
@@ -215,22 +280,30 @@ import {
         var box = document.getElementById('hshsThreadMsgs');
         if (!box) return;
         if (!msgs.length) {
-            box.innerHTML = '<div class="hshs-chat-empty">Messages are end-to-end on your school network · say hi 👋</div>';
+            box.innerHTML = '<div class="hshs-chat-empty">Say hi 👋</div>';
             return;
         }
         var myId = me().id;
+        var lastDay = '';
         box.innerHTML = msgs.map(function (m) {
+            var day = fmtDay(m.createdAt);
+            var chip = '';
+            if (day && day !== lastDay) {
+                lastDay = day;
+                chip = '<div class="hshs-date-chip">' + escapeHtml(day) + '</div>';
+            }
             var mine = m.senderId === myId;
             var media = '';
             if (m.imageUrl) media = '<img class="hshs-bubble-img" src="' + escapeHtml(m.imageUrl) + '" alt="">';
             if (m.audioUrl) {
                 media = '<div class="hshs-voice">' +
                     '<button type="button" aria-label="Play"><i class="fas fa-play"></i></button>' +
-                    '<span>Voice note</span><audio preload="metadata" src="' + escapeHtml(m.audioUrl) + '"></audio></div>';
+                    '<span class="hshs-voice-wave" aria-hidden="true"></span>' +
+                    '<span>0:07</span><audio preload="metadata" src="' + escapeHtml(m.audioUrl) + '"></audio></div>';
             }
             var emojiOnly = !m.imageUrl && !m.audioUrl && isEmojiOnly(m.text);
             var text = m.text ? '<div class="hshs-bubble-text">' + escapeHtml(m.text) + '</div>' : '';
-            return '<div class="hshs-bubble ' + (mine ? 'mine' : 'theirs') + (emojiOnly ? ' is-emoji-only' : '') + '">' +
+            return chip + '<div class="hshs-bubble ' + (mine ? 'mine' : 'theirs') + (emojiOnly ? ' is-emoji-only' : '') + '">' +
                 media + text +
                 '<time>' + escapeHtml(fmtTime(m.createdAt)) + (mine ? ticks(m.status || 'sent') : '') + '</time></div>';
         }).join('');
@@ -245,8 +318,6 @@ import {
             };
         });
         box.scrollTop = box.scrollHeight;
-
-        // refresh list preview from last msg
         if (state.activeId && msgs.length) {
             var last = msgs[msgs.length - 1];
             state.previews[state.activeId] = {
@@ -286,9 +357,9 @@ import {
         state.activeId = peer.id;
         state.emojiOpen = false;
         hideAttach();
+        abortRecording(true);
         renderList();
         applyTheme();
-
         var page = document.getElementById('hshsChatPage');
         if (page) page.classList.add('is-open');
         document.getElementById('hshsChatEmptyMain').hidden = true;
@@ -303,11 +374,9 @@ import {
                 : initials(peer.name);
         }
         closeEmojiPanel();
-
-        // clear unread badge for this chat
+        syncFab();
         if (state.previews[peer.id]) state.previews[peer.id].unread = 0;
         else if (PREVIEW_SEED[peer.id]) state.previews[peer.id] = Object.assign({}, PREVIEW_SEED[peer.id], { unread: 0 });
-
         stopListen();
         var firestore = db();
         if (!firestore) { setStatus('Firestore not loaded.', true); renderMessages([]); return; }
@@ -379,24 +448,60 @@ import {
         await sendPayload(payload);
         hideAttach();
         closeEmojiPanel();
+        syncFab();
     }
 
-    async function toggleVoice() {
-        var btn = document.getElementById('hshsVoiceBtn');
-        if (state.recording && state.mediaRecorder) {
-            state.mediaRecorder.stop();
-            state.recording = false;
-            if (btn) btn.classList.remove('is-rec');
-            return;
+    function setRecUi(on) {
+        var wrap = document.getElementById('hshsComposeWrap');
+        var bar = document.getElementById('hshsRecBar');
+        if (wrap) wrap.classList.toggle('is-recording', !!on);
+        if (bar) {
+            bar.hidden = !on;
+            bar.classList.toggle('is-on', !!on);
+            bar.classList.remove('is-cancel');
         }
+        var slide = document.getElementById('hshsRecSlide');
+        if (slide) slide.style.transform = '';
+        syncFab();
+    }
+    function tickRecTimer() {
+        var el = document.getElementById('hshsRecTimer');
+        if (!el || !state.recStart) return;
+        var s = Math.max(0, Math.floor((Date.now() - state.recStart) / 1000));
+        var m = Math.floor(s / 60);
+        var r = s % 60;
+        el.textContent = m + ':' + String(r).padStart(2, '0');
+    }
+    function abortRecording(silent) {
+        state.recCancelled = true;
+        if (state.recTimer) { clearInterval(state.recTimer); state.recTimer = null; }
+        if (state.mediaRecorder && state.recording) {
+            try { state.mediaRecorder.stop(); } catch (e) {}
+        }
+        state.recording = false;
+        state.mediaRecorder = null;
+        state.chunks = [];
+        setRecUi(false);
+        if (!silent) setStatus('');
+    }
+
+    async function startRecording() {
+        if (state.recording) return;
         try {
             var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             state.chunks = [];
+            state.recCancelled = false;
             var rec = new MediaRecorder(stream);
             state.mediaRecorder = rec;
             rec.ondataavailable = function (e) { if (e.data && e.data.size) state.chunks.push(e.data); };
             rec.onstop = function () {
                 stream.getTracks().forEach(function (t) { t.stop(); });
+                var cancelled = state.recCancelled;
+                state.recording = false;
+                state.mediaRecorder = null;
+                if (state.recTimer) { clearInterval(state.recTimer); state.recTimer = null; }
+                setRecUi(false);
+                if (cancelled || !state.chunks.length) return;
                 var blob = new Blob(state.chunks, { type: rec.mimeType || 'audio/webm' });
                 var reader = new FileReader();
                 reader.onload = function () { sendPayload({ text: '', audioUrl: String(reader.result) }); };
@@ -404,16 +509,31 @@ import {
             };
             rec.start();
             state.recording = true;
-            if (btn) btn.classList.add('is-rec');
+            state.recStart = Date.now();
+            var timerEl = document.getElementById('hshsRecTimer');
+            if (timerEl) timerEl.textContent = '0:00';
+            state.recTimer = setInterval(tickRecTimer, 250);
+            setRecUi(true);
         } catch (e) {
             setStatus('Microphone blocked — allow mic for voice notes.', true);
         }
+    }
+    function finishRecording() {
+        if (!state.recording || !state.mediaRecorder) return;
+        if (Date.now() - state.recStart < 400) {
+            abortRecording(true);
+            return;
+        }
+        state.recCancelled = false;
+        try { state.mediaRecorder.stop(); } catch (e) {}
     }
 
     function closeEmojiPanel() {
         state.emojiOpen = false;
         var panel = document.getElementById('hshsEmojiPanel');
         if (panel) { panel.hidden = true; panel.classList.remove('open'); }
+        var btn = document.getElementById('hshsEmojiBtn');
+        if (btn) btn.classList.remove('is-on');
     }
 
     function renderEmojiPanel() {
@@ -427,7 +547,7 @@ import {
         var grid = list.map(function (e) {
             return '<button type="button" class="hshs-emoji" data-emoji="' + e + '">' + e + '</button>';
         }).join('');
-        panel.innerHTML = '<div class="hshs-emoji-tabs">' + tabs + '</div><div class="hshs-emoji-grid">' + grid + '</div>';
+        panel.innerHTML = '<div class="hshs-emoji-grid">' + grid + '</div><div class="hshs-emoji-tabs">' + tabs + '</div>';
         panel.querySelectorAll('[data-tab]').forEach(function (b) {
             b.onclick = function () { state.emojiTab = b.getAttribute('data-tab'); renderEmojiPanel(); };
         });
@@ -436,11 +556,66 @@ import {
                 var input = document.getElementById('hshsThreadInput');
                 input.value += b.getAttribute('data-emoji');
                 input.focus();
+                syncFab();
             };
         });
     }
 
+    function bindFileInput(input, btn) {
+        if (!input || !btn) return;
+        btn.onclick = function () { input.click(); };
+        input.onchange = function () {
+            var file = input.files && input.files[0];
+            if (!file) return;
+            compressImage(file).then(showAttach).catch(function () {
+                setStatus('Could not attach that image.', true);
+            });
+            input.value = '';
+        };
+    }
+
+    function wireVoiceGestures() {
+        var btn = document.getElementById('hshsVoiceBtn');
+        if (!btn) return;
+        var cancel = document.getElementById('hshsRecCancel');
+        if (cancel) cancel.onclick = function () { abortRecording(false); };
+        btn.addEventListener('pointerdown', function (e) {
+            if (composerHasDraft()) return;
+            if (state.recording) return;
+            state.recPointerId = e.pointerId;
+            state.recStartX = e.clientX;
+            try { btn.setPointerCapture(e.pointerId); } catch (err) {}
+            startRecording();
+        });
+        btn.addEventListener('pointermove', function (e) {
+            if (!state.recording || e.pointerId !== state.recPointerId) return;
+            var dx = e.clientX - state.recStartX;
+            var slide = document.getElementById('hshsRecSlide');
+            var bar = document.getElementById('hshsRecBar');
+            if (slide) slide.style.transform = 'translateX(' + Math.min(0, dx) + 'px)';
+            if (bar) bar.classList.toggle('is-cancel', dx < -72);
+        });
+        function endPtr(e) {
+            if (e.pointerId !== state.recPointerId) return;
+            var dx = e.clientX - state.recStartX;
+            state.recPointerId = null;
+            if (!state.recording) return;
+            if (dx < -72) abortRecording(false);
+            else finishRecording();
+        }
+        btn.addEventListener('pointerup', endPtr);
+        btn.addEventListener('pointercancel', function () { abortRecording(false); });
+        btn.addEventListener('click', function (e) {
+            if (state.recording) {
+                e.preventDefault();
+                finishRecording();
+            }
+        });
+    }
+
     function wire() {
+        if (state.wired) { syncFab(); return; }
+        state.wired = true;
         var form = document.getElementById('hshsThreadForm');
         if (form) {
             form.onsubmit = function (e) {
@@ -448,14 +623,18 @@ import {
                 var input = document.getElementById('hshsThreadInput');
                 var val = input.value; input.value = '';
                 sendMessage(val);
+                syncFab();
             };
         }
+        var input = document.getElementById('hshsThreadInput');
+        if (input) input.addEventListener('input', syncFab);
         var search = document.getElementById('hshsChatSearch');
         if (search) search.oninput = renderList;
         var back = document.getElementById('hshsThreadBack');
         if (back) {
             back.onclick = function () {
                 stopListen(); state.activeId = null;
+                abortRecording(true);
                 var page = document.getElementById('hshsChatPage');
                 if (page) page.classList.remove('is-open');
                 document.getElementById('hshsThread').hidden = true;
@@ -472,27 +651,15 @@ import {
                 state.emojiOpen = !state.emojiOpen;
                 emojiPanel.hidden = !state.emojiOpen;
                 emojiPanel.classList.toggle('open', state.emojiOpen);
+                emojiBtn.classList.toggle('is-on', state.emojiOpen);
                 if (state.emojiOpen) renderEmojiPanel();
             };
         }
-        var attachBtn = document.getElementById('hshsAttachBtn');
-        var attachInput = document.getElementById('hshsAttachInput');
-        if (attachBtn && attachInput) {
-            attachBtn.onclick = function () { attachInput.click(); };
-            attachInput.onchange = function () {
-                var file = attachInput.files && attachInput.files[0];
-                if (!file) return;
-                compressImage(file).then(showAttach).catch(function () {
-                    setStatus('Could not attach that image.', true);
-                });
-                attachInput.value = '';
-            };
-        }
+        bindFileInput(document.getElementById('hshsAttachInput'), document.getElementById('hshsAttachBtn'));
+        bindFileInput(document.getElementById('hshsCameraInput'), document.getElementById('hshsCameraBtn'));
         var clearAttach = document.getElementById('hshsClearAttach');
         if (clearAttach) clearAttach.onclick = hideAttach;
-        var voiceBtn = document.getElementById('hshsVoiceBtn');
-        if (voiceBtn) voiceBtn.onclick = toggleVoice;
-
+        wireVoiceGestures();
         var themeSel = document.getElementById('hshsThemeSelect');
         if (themeSel) {
             themeSel.value = me().chatTheme || 'ocean';
@@ -503,6 +670,7 @@ import {
                 applyTheme();
             };
         }
+        syncFab();
     }
 
     async function probeLive() {
@@ -517,12 +685,10 @@ import {
         }
         renderList();
     }
-
     function openFromQuery() {
         var withId = new URLSearchParams(location.search).get('with');
         if (withId) openThread(withId);
     }
-
     function boot() {
         if (!document.getElementById('hshsChatPage')) return;
         hideAttach();
@@ -537,7 +703,6 @@ import {
             setTimeout(waitDb, 150);
         })();
     }
-
     window.initHshsChat = boot;
     window.__hshsOpenChatWith = openThread;
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
