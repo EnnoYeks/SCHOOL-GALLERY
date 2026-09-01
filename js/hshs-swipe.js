@@ -94,7 +94,13 @@
     function blocked(e) {
         if (document.body.classList.contains('search-open')) return true;
         if (document.getElementById('moreSheet') && document.getElementById('moreSheet').classList.contains('open')) return true;
-        if (e.target.closest && e.target.closest('.video-player-modal, .clip-sheet, .mobile-tabbar, .navbar, input, textarea')) return true;
+        // Block cube swipe when interacting with UI controls / horizontal tab bars
+        if (e.target.closest && e.target.closest(
+            '.video-player-modal, .clip-sheet, .mobile-tabbar, .navbar, input, textarea, ' +
+            '.category-filter, .filter-bar, .vibe-tabs, .video-tabs, .trending-filters, ' +
+            '.tab-btn, [role="tablist"], .story-bar, .photos-search, .content-filter, ' +
+            '.category-btn, .filter-btn, .vibe-tab, .video-tab'
+        )) return true;
         return false;
     }
     function setCube(deg, dragging) {
