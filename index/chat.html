@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
     <meta charset="UTF-8">
-    <meta name="theme-color" content="#111b21">
+    <meta name="theme-color" content="#202c33">
     <title>Chat - HSHS World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
@@ -80,9 +80,12 @@
                             <i class="fas fa-arrow-left"></i>
                         </button>
                         <div class="hshs-thread-avatar" id="hshsThreadAvatar">?</div>
-                        <div>
+                        <div class="hshs-thread-who">
                             <strong id="hshsThreadName">Contact</strong>
                             <small id="hshsThreadMeta">tap for info</small>
+                        </div>
+                        <div class="hshs-thread-tools">
+                            <button type="button" class="hshs-head-icon" aria-label="More"><i class="fas fa-ellipsis-vertical"></i></button>
                         </div>
                     </div>
                     <div class="hshs-thread-msgs" id="hshsThreadMsgs"></div>
@@ -90,15 +93,39 @@
                         <img src="" alt="">
                         <button type="button" id="hshsClearAttach" aria-label="Remove">×</button>
                     </div>
-                    <div class="hshs-emoji-panel" id="hshsEmojiPanel" hidden></div>
-                    <form class="hshs-thread-compose" id="hshsThreadForm">
-                        <button type="button" class="hshs-compose-icon" id="hshsEmojiBtn" aria-label="Emoji"><i class="far fa-smile"></i></button>
-                        <button type="button" class="hshs-compose-icon" id="hshsAttachBtn" aria-label="Attach"><i class="fas fa-paperclip"></i></button>
-                        <input type="file" id="hshsAttachInput" accept="image/*" hidden>
-                        <input type="text" id="hshsThreadInput" placeholder="Type a message" maxlength="800" autocomplete="off">
-                        <button type="button" class="hshs-compose-icon" id="hshsVoiceBtn" aria-label="Voice note"><i class="fas fa-microphone"></i></button>
-                        <button type="submit" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
-                    </form>
+                    <div class="hshs-emoji-sheet" id="hshsEmojiPanel" hidden></div>
+                    <div class="hshs-compose-wrap" id="hshsComposeWrap">
+                        <div class="hshs-rec-bar" id="hshsRecBar" hidden>
+                            <span class="hshs-rec-dot" aria-hidden="true"></span>
+                            <span class="hshs-rec-timer" id="hshsRecTimer">0:00</span>
+                            <span class="hshs-rec-slide" id="hshsRecSlide"><i class="fas fa-chevron-left"></i> Slide to cancel</span>
+                            <button type="button" class="hshs-rec-trash" id="hshsRecCancel" aria-label="Cancel recording">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <form class="hshs-thread-compose" id="hshsThreadForm">
+                            <div class="hshs-compose-pill">
+                                <button type="button" class="hshs-compose-icon" id="hshsEmojiBtn" aria-label="Emoji">
+                                    <i class="far fa-face-smile"></i>
+                                </button>
+                                <input type="text" id="hshsThreadInput" placeholder="Message" maxlength="800" autocomplete="off">
+                                <button type="button" class="hshs-compose-icon" id="hshsAttachBtn" aria-label="Attach">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <button type="button" class="hshs-compose-icon" id="hshsCameraBtn" aria-label="Camera">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                            </div>
+                            <button type="button" class="hshs-fab" id="hshsVoiceBtn" aria-label="Voice note">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button type="submit" class="hshs-fab" id="hshsSendBtn" hidden aria-label="Send">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                            <input type="file" id="hshsAttachInput" accept="image/*" hidden>
+                            <input type="file" id="hshsCameraInput" accept="image/*" capture="environment" hidden>
+                        </form>
+                    </div>
                 </div>
             </section>
         </div>
