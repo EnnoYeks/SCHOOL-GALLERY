@@ -10,7 +10,7 @@
         'gallery.html', 'photos.html', 'videos.html', 'trending.html',
         'spotlight.html', 'polls.html', 'memories.html', 'about.html',
         'contat.html', 'contact.html', 'profile.html', 'settings.html', 'admin.html',
-        'clips.html', 'shorts.html', 'buzz.html'
+        'clips.html', 'shorts.html', 'buzz.html', 'chat.html'
     ];
 
     const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js|hshs-boot\.js|hshs-swipe\.js|hshs-store\.js|hshs-upload\.js/;
@@ -46,7 +46,7 @@
         if (file === 'index.html' && /\/index\//i.test(next.pathname)) {
             next.pathname = '/index.html';
         }
-        const nested = ['gallery.html','photos.html','videos.html','trending.html','spotlight.html','polls.html','memories.html','about.html','contat.html','profile.html','settings.html','admin.html','clips.html','buzz.html'];
+        const nested = ['gallery.html','photos.html','videos.html','trending.html','spotlight.html','polls.html','memories.html','about.html','contat.html','profile.html','settings.html','admin.html','clips.html','buzz.html','chat.html'];
         if (nested.indexOf(file) !== -1 && next.pathname.indexOf('/index/') === -1) {
             next.pathname = '/index/' + file;
         }
@@ -80,6 +80,7 @@
 
     function routes() {
         const more = [
+            { href: sub('chat.html'), icon: 'fa-comments', label: 'Chat', match: ['chat.html'] },
             { href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', match: ['spotlight.html'] },
             { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
             { href: sub('photos.html'), icon: 'fa-camera', label: 'Photos', match: ['photos.html'] },
@@ -104,6 +105,7 @@
             DESKTOP: [
                 { href: homeHref(), icon: 'fa-home', label: 'Home', match: ['index.html', ''] },
                 { href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
+                { href: sub('chat.html'), icon: 'fa-comments', label: 'Chat', match: ['chat.html'] },
                 { href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html'] },
                 { href: sub('photos.html'), icon: 'fa-photo-film', label: 'Photos', match: ['photos.html'] },
                 { href: sub('videos.html'), icon: 'fa-video', label: 'Vibe', match: ['videos.html'] },
@@ -154,7 +156,7 @@
 
     function markActive() {
         const file = currentFile();
-        const moreFiles = ['photos.html','videos.html','polls.html','memories.html','about.html','contat.html','contact.html','profile.html','settings.html','trending.html','spotlight.html'];
+        const moreFiles = ['photos.html','videos.html','polls.html','memories.html','about.html','contat.html','contact.html','profile.html','settings.html','trending.html','spotlight.html','chat.html'];
         document.querySelectorAll('.mobile-tabbar a').forEach((a) => {
             const tab = a.getAttribute('data-tab');
             if (!tab || tab === 'upload') return;
@@ -198,6 +200,7 @@
     function bootPageWidgets() {
         if (typeof window.initHshsClips === 'function') window.initHshsClips();
         if (typeof window.startVideos === 'function') window.startVideos();
+        if (typeof window.initHshsChat === 'function' && document.getElementById('hshsChatPage')) window.initHshsChat();
     }
 
     function buildBar() {
@@ -236,7 +239,7 @@
         const sheet = document.createElement('aside');
         sheet.className = 'more-sheet';
         sheet.id = 'moreSheet';
-        sheet.innerHTML = `<div class="more-head"><div><h3>All pages</h3><p>Spotlight and the rest live here</p></div><button type="button" class="more-close" id="closeMoreSheet" aria-label="Close">×</button></div><div class="more-grid">` +
+        sheet.innerHTML = `<div class="more-head"><div><h3>All pages</h3><p>Chat, Spotlight, and the rest</p></div><button type="button" class="more-close" id="closeMoreSheet" aria-label="Close">×</button></div><div class="more-grid">` +
             r.MORE.map((item) => `<a href="${item.href}" class="${isActive(item) ? 'active' : ''}"><i class="fas ${item.icon}"></i><span>${item.label}</span></a>`).join('') +
             `</div>`;
         document.body.appendChild(bar);
