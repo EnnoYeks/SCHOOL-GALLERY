@@ -2,19 +2,16 @@
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
-    <meta name="description" content="HSHS World live school chat">
-    <meta name="theme-color" content="#6366f1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta charset="UTF-8">
+    <meta name="theme-color" content="#6366f1">
     <title>Chat - HSHS World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/animations.css">
     <link rel="stylesheet" href="../css/responsive.css">
     <link rel="stylesheet" href="../css/hshs-chat.css">
-    <style>
-        input[type="text"], textarea { font-size: 16px !important; }
-    </style>
+    <link rel="stylesheet" href="../css/hshs-social.css">
+    <style>input, textarea { font-size: 16px !important; }</style>
 </head>
 <body class="light-mode">
     <div class="animated-bg">
@@ -28,40 +25,58 @@
                 <i class="fas fa-graduation-cap"></i>
                 <span>HSHS</span>
             </div>
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search @username…" class="search-input" id="searchInput">
+                <div class="search-results" id="searchResults"></div>
+            </div>
             <div class="nav-links"></div>
             <div class="nav-actions">
-                <button class="theme-toggle" id="themeToggle" type="button">
-                    <i class="fas fa-moon"></i>
-                </button>
+                <button class="theme-toggle" id="themeToggle" type="button"><i class="fas fa-moon"></i></button>
             </div>
         </div>
     </nav>
 
-    <div class="hshs-chat-page" id="hshsChatPage">
+    <div class="hshs-chat-page" id="hshsChatPage" data-theme="ocean" data-bubbles="rounded">
         <header class="hshs-chat-top">
             <div>
                 <h1>Chat</h1>
-                <p id="hshsChatStatus">Connecting to Firestore…</p>
+                <p id="hshsChatStatus">Connecting…</p>
             </div>
-            <div class="hshs-chat-me" id="hshsChatMe">You</div>
+            <div class="hshs-chat-tools">
+                <select id="hshsThemeSelect" aria-label="Chat theme">
+                    <option value="ocean">Ocean</option>
+                    <option value="grape">Grape</option>
+                    <option value="mint">Mint</option>
+                    <option value="sunset">Sunset</option>
+                    <option value="rose">Rose</option>
+                    <option value="slate">Slate</option>
+                </select>
+                <select id="hshsBubbleSelect" aria-label="Bubble style">
+                    <option value="rounded">Rounded</option>
+                    <option value="soft">Soft</option>
+                    <option value="square">Square</option>
+                </select>
+                <div class="hshs-chat-me" id="hshsChatMe">You</div>
+            </div>
         </header>
 
         <div class="hshs-chat-layout">
             <aside class="hshs-chat-side" id="hshsChatSide">
                 <div class="hshs-chat-search">
                     <i class="fas fa-search"></i>
-                    <input type="search" id="hshsChatSearch" placeholder="Search school contacts" autocomplete="off">
+                    <input type="search" id="hshsChatSearch" placeholder="Find @username or name" autocomplete="off">
                 </div>
                 <div class="hshs-chat-list" id="hshsChatList">
-                    <div class="hshs-chat-empty">Loading contacts…</div>
+                    <div class="hshs-chat-empty">Loading people…</div>
                 </div>
             </aside>
 
             <section class="hshs-chat-main" id="hshsChatMain">
                 <div class="hshs-chat-empty-main" id="hshsChatEmptyMain">
                     <i class="fas fa-comments"></i>
-                    <h2>School chat</h2>
-                    <p>Pick a contact to start a live conversation. Messages sync through Firestore.</p>
+                    <h2>Search · Follow · Chat</h2>
+                    <p>Find classmates by username, follow them, then open a live chat with emojis and photos.</p>
                 </div>
 
                 <div class="hshs-thread" id="hshsThread" hidden>
@@ -75,7 +90,15 @@
                         </div>
                     </div>
                     <div class="hshs-thread-msgs" id="hshsThreadMsgs"></div>
+                    <div class="hshs-attach-preview" id="hshsAttachPreview" hidden>
+                        <img src="" alt="">
+                        <button type="button" id="hshsClearAttach" aria-label="Remove">×</button>
+                    </div>
+                    <div class="hshs-emoji-panel" id="hshsEmojiPanel" hidden></div>
                     <form class="hshs-thread-compose" id="hshsThreadForm">
+                        <button type="button" class="hshs-compose-icon" id="hshsEmojiBtn" aria-label="Emoji"><i class="far fa-smile"></i></button>
+                        <button type="button" class="hshs-compose-icon" id="hshsAttachBtn" aria-label="Attach"><i class="fas fa-paperclip"></i></button>
+                        <input type="file" id="hshsAttachInput" accept="image/*" hidden>
                         <input type="text" id="hshsThreadInput" placeholder="Message…" maxlength="800" autocomplete="off">
                         <button type="submit" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
                     </form>
@@ -89,6 +112,8 @@
     <script src="../js/utils.js"></script>
     <script src="../js/theme.js"></script>
     <script src="../js/navigation.js"></script>
+    <script src="../js/hshs-store.js"></script>
+    <script src="../js/hshs-social.js"></script>
     <script type="module" src="../js/hshs-chat.js"></script>
     <script src="../js/mobile-navigation.js"></script>
 </body>
