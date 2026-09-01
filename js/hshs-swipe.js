@@ -5,7 +5,8 @@
 
     var ORDER = ['index.html','gallery.html','spotlight.html','buzz.html','photos.html','videos.html','trending.html','polls.html','memories.html'];
     var startX = 0, startY = 0, lastX = 0, lastT = 0, vx = 0;
-    var tracking = false, axis = null, primed = null;
+    var tracking = false, axis = null, primed = null, pendingNav = null;
+    var rot = 0, rotV = 0, rotTarget = 0, rotRun = false;
 
     function addCss() {
         if (document.getElementById('hshs-swipe-css')) return;
@@ -99,16 +100,61 @@
             '.video-player-modal, .clip-sheet, .mobile-tabbar, .navbar, input, textarea, ' +
             '.category-filter, .filter-bar, .vibe-tabs, .video-tabs, .trending-filters, ' +
             '.tab-btn, [role="tablist"], .story-bar, .photos-search, .content-filter, ' +
-            '.category-btn, .filter-btn, .vibe-tab, .video-tab, .hshs-upload-studio'
+            '.category-btn, .filter-btn, .vibe-tab, .video-tab, .hshs-upload-studio, ' +
+            '.hshs-thread-compose, .hshs-rec-bar, #hshsVoiceBtn'
         )) return true;
         return false;
+    }
+    function applyRot() {
+        var s = stage();
+        if (!s) return;
+        s.cube.style.transform = 'translateZ(' + (-half()) + 'px) rotateY(' + rot + 'deg)';
+    }
+    function finishNav() {
+        if (!pendingNav) return;
+        var href = pendingNav;
+        pendingNav = null;
+        if (window.__hshsNavigate) window.__hshsNavigate(href);
+        rot = 0; rotV = 0; rotTarget = 0;
+        applyRot();
+    }
+    function tickRot() {
+        if (rotRun) return;
+        rotRun = true;
+        var last = performance.now();
+        function frame(now) {
+            var dt = Math.min(0.032, (now - last) / 1000);
+            last = now;
+            if (window.HshsSpring && !(window.HshsSpring.reduced && window.HshsSpring.reduced())) {
+                var next = window.HshsSpring.step({ x: rot, v: rotV }, rotTarget, dt, 170, 24, 1);
+                rot = next.x; rotV = next.v;
+                applyRot();
+                if (next.rest) {
+                    rotRun = false;
+                    if (Math.abs(rotTarget) >= 80) finishNav();
+                    return;
+                }
+                requestAnimationFrame(frame);
+                return;
+            }
+            rot = rotTarget; rotV = 0; rotRun = false; applyRot();
+            if (Math.abs(rotTarget) >= 80) finishNav();
+        }
+        requestAnimationFrame(frame);
     }
     function setCube(deg, dragging) {
         var s = stage();
         if (!s) return;
         s.cube.classList.toggle('is-dragging', !!dragging);
         s.cube.classList.toggle('is-settle', !dragging);
-        s.cube.style.transform = 'translateZ(' + (-half()) + 'px) rotateY(' + deg + 'deg)';
+        if (dragging) {
+            rotRun = false;
+            rot = deg; rotV = 0; rotTarget = deg;
+            applyRot();
+            return;
+        }
+        rotTarget = deg;
+        tickRot();
     }
     function onStart(e) {
         if (blocked(e)) return;
@@ -144,18 +190,16 @@
     function onEnd() {
         if (!tracking) return;
         tracking = false;
-        if (axis !== 'x') { setCube(0, false); return; }
+        if (axis !== 'x') { pendingNav = null; setCube(0, false); return; }
         var dx = lastX - startX;
         var w = window.innerWidth || 360;
         var dir = dx < 0 ? 1 : -1;
         var n = neighbor(dir);
         var should = n && (Math.abs(dx) > w * 0.26 || Math.abs(vx) > 0.5);
-        if (!should) { setCube(0, false); return; }
+        rotV = (vx / w) * 90 * 1000;
+        if (!should) { pendingNav = null; setCube(0, false); return; }
+        pendingNav = n.href;
         setCube(dir > 0 ? -90 : 90, false);
-        setTimeout(function () {
-            if (window.__hshsNavigate) window.__hshsNavigate(n.href);
-            requestAnimationFrame(function () { setCube(0, false); });
-        }, 540);
     }
     function boot() {
         addCss();
