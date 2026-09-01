@@ -1,0 +1,274 @@
+/* People search + social profiles */
+
+.hshs-search-section {
+    padding: 10px 12px 4px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.hshs-search-empty {
+    padding: 18px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.hshs-people-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hshs-people-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.hshs-people-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.hshs-people-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.hshs-people-meta {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.hshs-people-meta strong {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hshs-people-meta small,
+.hshs-people-meta em {
+    color: var(--text-secondary);
+    font-style: normal;
+    font-size: 0.78rem;
+}
+
+.hshs-people-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hshs-follow-btn,
+.hshs-btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hshs-follow-btn.is-on,
+.hshs-btn.secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.hshs-btn.ghost {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.hshs-chat-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.hshs-search-post {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hshs-search-post small {
+    display: block;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* Profile page */
+#hshsProfileRoot {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 16px 12px 110px;
+    position: relative;
+    z-index: 10;
+}
+
+.hshs-profile-hero {
+    border-radius: 24px;
+    padding: 28px 20px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.hshs-profile-hero.theme-ocean { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
+.hshs-profile-hero.theme-grape { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.hshs-profile-hero.theme-mint { background: linear-gradient(135deg, #14b8a6, #059669); }
+.hshs-profile-hero.theme-sunset { background: linear-gradient(135deg, #f97316, #ea580c); }
+.hshs-profile-hero.theme-rose { background: linear-gradient(135deg, #f43f5e, #db2777); }
+.hshs-profile-hero.theme-slate { background: linear-gradient(135deg, #475569, #1e293b); }
+
+.hshs-profile-avatar {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 12px;
+    border-radius: 28px;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,0.18);
+    border: 3px solid rgba(255,255,255,0.55);
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.hshs-profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.hshs-profile-hero h1 { margin: 0 0 4px; font-size: 1.7rem; }
+.hshs-profile-handle { margin: 0 0 8px; opacity: 0.92; }
+.hshs-profile-bio { margin: 0 auto 14px; max-width: 420px; opacity: 0.95; }
+
+.hshs-profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    margin-bottom: 16px;
+}
+
+.hshs-profile-stats b { display: block; font-size: 1.25rem; }
+.hshs-profile-stats span { font-size: 0.82rem; opacity: 0.9; }
+
+.hshs-profile-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.hshs-profile-actions .hshs-btn {
+    background: #fff;
+    color: #111827;
+}
+
+.hshs-profile-actions .hshs-btn.ghost,
+.hshs-profile-actions .hshs-btn.secondary {
+    background: rgba(255,255,255,0.14);
+    color: #fff;
+    border-color: rgba(255,255,255,0.35);
+}
+
+.hshs-edit-panel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.hshs-edit-panel label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.hshs-edit-panel input,
+.hshs-edit-panel textarea,
+.hshs-edit-panel select {
+    width: 100%;
+    margin-top: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: inherit;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font: inherit;
+}
+
+.hshs-edit-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.hshs-profile-section h2 {
+    margin: 0 0 12px;
+    font-size: 1.15rem;
+}
+
+.hshs-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.hshs-profile-post {
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+}
+
+.hshs-profile-post img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+}
+
+.hshs-profile-post div { padding: 10px; }
+.hshs-profile-post small { color: var(--text-secondary); }
+
+.hshs-profile-empty {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 24px;
+}
+
+#searchResults.active {
+    max-height: min(70vh, 480px);
+    overflow: auto;
+}
