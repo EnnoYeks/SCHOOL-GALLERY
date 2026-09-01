@@ -1,6 +1,7 @@
 (function () {
     if (window.HshsStore) return;
     var KEY = 'hshsWorldStore_v2';
+    var ONLINE_MS = 45000;
     var PICS = [
         'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=900&q=70',
         'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=900&q=70',
@@ -19,33 +20,29 @@
         return 'p' + h.toString(16);
     }
     function slugify(name) {
-        return String(name || '')
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '_')
-            .replace(/^_|_$/g, '')
-            .slice(0, 18) || 'student';
+        return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 18) || 'student';
     }
     function load() {
         try {
             var v2 = JSON.parse(localStorage.getItem(KEY) || 'null');
             if (v2) return v2;
             var v1 = JSON.parse(localStorage.getItem('hshsWorldStore_v1') || 'null');
-            if (v1) {
-                migrate(v1);
-                localStorage.setItem(KEY, JSON.stringify(v1));
-                return v1;
-            }
+            if (v1) { migrate(v1); localStorage.setItem(KEY, JSON.stringify(v1)); return v1; }
             return null;
         } catch (e) { return null; }
     }
     function migrate(s) {
         s.follows = s.follows || [];
+        s.friendRequests = s.friendRequests || [];
+        s.friends = s.friends || [];
+        s.notifications = s.notifications || [];
         s.users = (s.users || []).map(function (u) {
             u.username = u.username || slugify(u.name);
             u.bio = u.bio || 'HSHS World member.';
             u.avatar = u.avatar || '';
             u.chatTheme = u.chatTheme || 'ocean';
             u.bubbleStyle = u.bubbleStyle || 'rounded';
+            u.lastSeen = u.lastSeen || now() - Math.floor(Math.random() * 600000);
             return u;
         });
         return s;
@@ -57,14 +54,14 @@
     }
     function seed() {
         var users = [
-            { id: 'u-demo', name: 'Amina Namukasa', username: 'amina_s4', classYear: 'S4', role: 'Student', bio: 'Sports, track days, and school vibes. \ud83c\udfc3', avatar: '', pin: pinHash('1234'), chatTheme: 'ocean', bubbleStyle: 'rounded', createdAt: now() - 86400000 * 20 },
-            { id: 'u-prefect', name: 'Joel Wambede', username: 'joel_pref', classYear: 'S6', role: 'Prefect', bio: 'Prefect desk. Keep it school-safe.', avatar: '', pin: pinHash('2468'), chatTheme: 'grape', bubbleStyle: 'rounded', createdAt: now() - 86400000 * 40 },
-            { id: 'u-sports', name: 'Sports Club', username: 'hshs_sports', classYear: 'Campus', role: 'Club', bio: 'Match days, drills, and house spirit.', avatar: '', pin: pinHash('1111'), chatTheme: 'mint', bubbleStyle: 'soft', createdAt: now() - 86400000 * 50 },
-            { id: 'u-choir', name: 'Choir Desk', username: 'hshs_choir', classYear: 'Music', role: 'Club', bio: 'Rehearsals and assembly anthems.', avatar: '', pin: pinHash('2222'), chatTheme: 'sunset', bubbleStyle: 'soft', createdAt: now() - 86400000 * 55 },
-            { id: 'u-lab', name: 'Science Lab', username: 'stem_lab', classYear: 'STEM', role: 'Department', bio: 'Experiments, fairs, and lab notes.', avatar: '', pin: pinHash('3333'), chatTheme: 'slate', bubbleStyle: 'square', createdAt: now() - 86400000 * 60 },
-            { id: 'u-house', name: 'House Captains', username: 'house_caps', classYear: 'Houses', role: 'Leadership', bio: 'House points and spirit days.', avatar: '', pin: pinHash('4444'), chatTheme: 'rose', bubbleStyle: 'rounded', createdAt: now() - 86400000 * 62 },
-            { id: 'u-maya', name: 'Maya Okello', username: 'maya_lens', classYear: 'S5', role: 'Student', bio: 'Photography club. Capturing campus light.', avatar: '', pin: pinHash('5555'), chatTheme: 'ocean', bubbleStyle: 'soft', createdAt: now() - 86400000 * 12 },
-            { id: 'u-brian', name: 'Brian Kato', username: 'brian_k', classYear: 'S3', role: 'Student', bio: 'Football and Friday vibes.', avatar: '', pin: pinHash('6666'), chatTheme: 'mint', bubbleStyle: 'rounded', createdAt: now() - 86400000 * 8 }
+            { id: 'u-demo', name: 'Amina Namukasa', username: 'amina_s4', classYear: 'S4', role: 'Student', bio: 'Sports, track days, and school vibes.', avatar: '', pin: pinHash('1234'), chatTheme: 'ocean', bubbleStyle: 'rounded', lastSeen: now(), createdAt: now() - 86400000 * 20 },
+            { id: 'u-prefect', name: 'Joel Wambede', username: 'joel_pref', classYear: 'S6', role: 'Prefect', bio: 'Prefect desk. Keep it school-safe.', avatar: '', pin: pinHash('2468'), chatTheme: 'grape', bubbleStyle: 'rounded', lastSeen: now() - 20000, createdAt: now() - 86400000 * 40 },
+            { id: 'u-sports', name: 'Sports Club', username: 'hshs_sports', classYear: 'Campus', role: 'Club', bio: 'Match days, drills, and house spirit.', avatar: '', pin: pinHash('1111'), chatTheme: 'mint', bubbleStyle: 'soft', lastSeen: now() - 120000, createdAt: now() - 86400000 * 50 },
+            { id: 'u-choir', name: 'Choir Desk', username: 'hshs_choir', classYear: 'Music', role: 'Club', bio: 'Rehearsals and assembly anthems.', avatar: '', pin: pinHash('2222'), chatTheme: 'sunset', bubbleStyle: 'soft', lastSeen: now() - 300000, createdAt: now() - 86400000 * 55 },
+            { id: 'u-lab', name: 'Science Lab', username: 'stem_lab', classYear: 'STEM', role: 'Department', bio: 'Experiments, fairs, and lab notes.', avatar: '', pin: pinHash('3333'), chatTheme: 'slate', bubbleStyle: 'square', lastSeen: now() - 900000, createdAt: now() - 86400000 * 60 },
+            { id: 'u-house', name: 'House Captains', username: 'house_caps', classYear: 'Houses', role: 'Leadership', bio: 'House points and spirit days.', avatar: '', pin: pinHash('4444'), chatTheme: 'rose', bubbleStyle: 'rounded', lastSeen: now() - 45000, createdAt: now() - 86400000 * 62 },
+            { id: 'u-maya', name: 'Maya Okello', username: 'maya_lens', classYear: 'S5', role: 'Student', bio: 'Photography club. Capturing campus light.', avatar: '', pin: pinHash('5555'), chatTheme: 'ocean', bubbleStyle: 'soft', lastSeen: now() - 8000, createdAt: now() - 86400000 * 12 },
+            { id: 'u-brian', name: 'Brian Kato', username: 'brian_k', classYear: 'S3', role: 'Student', bio: 'Football and Friday vibes.', avatar: '', pin: pinHash('6666'), chatTheme: 'mint', bubbleStyle: 'rounded', lastSeen: now() - 180000, createdAt: now() - 86400000 * 8 }
         ];
         var posts = [
             { id: 'p1', type: 'photo', title: 'Sports Day 2026', description: 'Track finals on the main field.', category: 'sports', image: PICS[0], imageUrl: PICS[0], thumbnailUrl: PICS[0], author: 'Amina Namukasa', authorId: 'u-demo', likes: 42, views: 310, comments: 6, shares: 4, createdAt: now() - 86400000 * 2 },
@@ -79,14 +76,19 @@
             posts: posts,
             follows: [
                 { followerId: 'u-demo', followingId: 'u-prefect', createdAt: now() - 86400000 },
-                { followerId: 'u-demo', followingId: 'u-sports', createdAt: now() - 86400000 * 2 },
-                { followerId: 'u-maya', followingId: 'u-demo', createdAt: now() - 3600000 },
-                { followerId: 'u-brian', followingId: 'u-demo', createdAt: now() - 7200000 }
+                { followerId: 'u-demo', followingId: 'u-sports', createdAt: now() - 86400000 * 2 }
+            ],
+            friendRequests: [
+                { id: 'fr-seed1', fromId: 'u-maya', toId: 'u-demo', status: 'pending', createdAt: now() - 900000 }
+            ],
+            friends: [
+                { a: 'u-demo', b: 'u-prefect', createdAt: now() - 86400000 * 3 }
+            ],
+            notifications: [
+                { id: 'n-seed1', userId: 'u-demo', type: 'friend_request', title: 'Friend request', message: 'Maya Okello (@maya_lens) wants to be friends', data: { requestId: 'fr-seed1', fromId: 'u-maya' }, read: false, createdAt: now() - 900000 }
             ],
             likes: [],
-            comments: [
-                { id: 'c1', postId: 'p1', author: 'Joel Wambede', text: 'What a race!', createdAt: now() - 3600000 }
-            ]
+            comments: [{ id: 'c1', postId: 'p1', author: 'Joel Wambede', text: 'What a race!', createdAt: now() - 3600000 }]
         });
     }
     function state() {
@@ -94,6 +96,9 @@
         if (!s || !s.users || !s.posts) s = seed();
         else migrate(s);
         if (!s.follows) s.follows = [];
+        if (!s.friendRequests) s.friendRequests = [];
+        if (!s.friends) s.friends = [];
+        if (!s.notifications) s.notifications = [];
         window.__hshsState = s;
         return s;
     }
@@ -101,12 +106,27 @@
         var ageHours = Math.max(1, (now() - new Date(item.createdAt).getTime()) / 3600000);
         return ((item.likes || 0) * 3) + ((item.comments || 0) * 2) + ((item.views || 0) * 0.05) + (item.featured ? 40 : 0) - (ageHours * 0.4);
     }
-    function userById(uid) {
-        return state().users.find(function (u) { return u.id === uid; }) || null;
-    }
+    function userById(uid) { return state().users.find(function (u) { return u.id === uid; }) || null; }
     function ensureUsername(user) {
         if (user && !user.username) user.username = slugify(user.name);
         return user;
+    }
+    function pairKey(a, b) { return [a, b].sort().join('__'); }
+    function pushNotify(userId, type, title, message, data) {
+        var s = state();
+        s.notifications.unshift({
+            id: id('n'),
+            userId: userId,
+            type: type,
+            title: title,
+            message: message,
+            data: data || {},
+            read: false,
+            createdAt: now()
+        });
+        s.notifications = s.notifications.slice(0, 80);
+        save(s);
+        try { document.dispatchEvent(new Event('hshs:notify')); } catch (e) {}
     }
 
     var api = {
@@ -144,17 +164,10 @@
                 username = username + Math.floor(Math.random() * 90 + 10);
             }
             var user = {
-                id: id('u'),
-                name: name,
-                username: username,
-                classYear: data.classYear || 'S1',
-                role: data.role || 'Student',
-                bio: data.bio || 'New HSHS World member.',
-                avatar: data.avatar || '',
-                chatTheme: data.chatTheme || 'ocean',
-                bubbleStyle: data.bubbleStyle || 'rounded',
-                pin: pinHash(pin),
-                createdAt: now()
+                id: id('u'), name: name, username: username, classYear: data.classYear || 'S1',
+                role: data.role || 'Student', bio: data.bio || 'New HSHS World member.', avatar: data.avatar || '',
+                chatTheme: data.chatTheme || 'ocean', bubbleStyle: data.bubbleStyle || 'rounded',
+                pin: pinHash(pin), lastSeen: now(), createdAt: now()
             };
             s.users.push(user);
             s.sessionUserId = user.id;
@@ -169,6 +182,7 @@
             });
             if (!user || user.pin !== pinHash(pin)) return { ok: false, error: 'Name, username, or PIN did not match.' };
             s.sessionUserId = user.id;
+            user.lastSeen = now();
             save(s);
             return { ok: true, user: ensureUsername(user) };
         },
@@ -176,8 +190,10 @@
             var s = state();
             if (!userById(uid)) return { ok: false, error: 'Account not found.' };
             s.sessionUserId = uid;
+            var u = userById(uid);
+            if (u) u.lastSeen = now();
             save(s);
-            return { ok: true, user: userById(uid) };
+            return { ok: true, user: u };
         },
         logout: function () {
             var s = state();
@@ -201,6 +217,27 @@
             });
             save(s);
             return { ok: true, user: user };
+        },
+        heartbeat: function () {
+            var s = state();
+            var user = userById(s.sessionUserId);
+            if (!user) return;
+            user.lastSeen = now();
+            save(s);
+        },
+        isOnline: function (uid) {
+            var u = userById(uid);
+            if (!u || !u.lastSeen) return false;
+            return (now() - u.lastSeen) < ONLINE_MS;
+        },
+        presenceLabel: function (uid) {
+            if (api.isOnline(uid)) return 'Online';
+            var u = userById(uid);
+            if (!u || !u.lastSeen) return 'Offline';
+            var d = now() - u.lastSeen;
+            if (d < 3600000) return 'Active ' + Math.max(1, Math.floor(d / 60000)) + 'm ago';
+            if (d < 86400000) return 'Active ' + Math.floor(d / 3600000) + 'h ago';
+            return 'Offline';
         },
         isFollowing: function (targetId) {
             var me = state().sessionUserId;
@@ -226,8 +263,90 @@
             var s = state();
             return {
                 followers: s.follows.filter(function (f) { return f.followingId === uid; }).length,
-                following: s.follows.filter(function (f) { return f.followerId === uid; }).length
+                following: s.follows.filter(function (f) { return f.followerId === uid; }).length,
+                friends: s.friends.filter(function (f) { return f.a === uid || f.b === uid; }).length
             };
+        },
+        isFriend: function (uid) {
+            var me = state().sessionUserId;
+            if (!me || !uid) return false;
+            var key = pairKey(me, uid);
+            return state().friends.some(function (f) { return pairKey(f.a, f.b) === key; });
+        },
+        friendStatus: function (uid) {
+            var me = state().sessionUserId;
+            if (!me || !uid || me === uid) return 'self';
+            if (api.isFriend(uid)) return 'friends';
+            var s = state();
+            var outgoing = s.friendRequests.find(function (r) { return r.fromId === me && r.toId === uid && r.status === 'pending'; });
+            if (outgoing) return 'outgoing';
+            var incoming = s.friendRequests.find(function (r) { return r.fromId === uid && r.toId === me && r.status === 'pending'; });
+            if (incoming) return 'incoming';
+            return 'none';
+        },
+        requestFriend: function (targetId) {
+            var s = state();
+            var me = s.sessionUserId;
+            var target = userById(targetId);
+            var meUser = userById(me);
+            if (!me || !target || !meUser) return { ok: false, error: 'Sign in first.' };
+            if (me === targetId) return { ok: false, error: 'That is you.' };
+            if (api.isFriend(targetId)) return { ok: true, status: 'friends' };
+            var existing = s.friendRequests.find(function (r) {
+                return r.status === 'pending' && ((r.fromId === me && r.toId === targetId) || (r.fromId === targetId && r.toId === me));
+            });
+            if (existing) {
+                if (existing.fromId === targetId) return api.acceptFriend(existing.id);
+                return { ok: true, status: 'outgoing', request: existing };
+            }
+            var req = { id: id('fr'), fromId: me, toId: targetId, status: 'pending', createdAt: now() };
+            s.friendRequests.unshift(req);
+            save(s);
+            pushNotify(targetId, 'friend_request', 'Friend request', meUser.name + ' (@' + (meUser.username || 'user') + ') wants to be friends', { requestId: req.id, fromId: me });
+            return { ok: true, status: 'outgoing', request: req };
+        },
+        acceptFriend: function (requestId) {
+            var s = state();
+            var me = s.sessionUserId;
+            var req = s.friendRequests.find(function (r) { return r.id === requestId; });
+            if (!req || req.toId !== me || req.status !== 'pending') return { ok: false, error: 'Request not found.' };
+            req.status = 'accepted';
+            var key = pairKey(req.fromId, req.toId);
+            if (!s.friends.some(function (f) { return pairKey(f.a, f.b) === key; })) {
+                s.friends.push({ a: req.fromId, b: req.toId, createdAt: now() });
+            }
+            save(s);
+            var meUser = userById(me);
+            pushNotify(req.fromId, 'friend_accept', 'Friend request accepted', (meUser ? meUser.name : 'Someone') + ' accepted your request', { userId: me });
+            return { ok: true, status: 'friends' };
+        },
+        declineFriend: function (requestId) {
+            var s = state();
+            var me = s.sessionUserId;
+            var req = s.friendRequests.find(function (r) { return r.id === requestId; });
+            if (!req || req.toId !== me) return { ok: false, error: 'Request not found.' };
+            req.status = 'declined';
+            save(s);
+            return { ok: true, status: 'declined' };
+        },
+        listNotifications: function (limitN) {
+            var me = state().sessionUserId;
+            return state().notifications.filter(function (n) { return n.userId === me; }).slice(0, limitN || 30);
+        },
+        unreadNotifications: function () {
+            var me = state().sessionUserId;
+            return state().notifications.filter(function (n) { return n.userId === me && !n.read; }).length;
+        },
+        markNotificationRead: function (nid) {
+            var s = state();
+            var n = s.notifications.find(function (x) { return x.id === nid; });
+            if (n) { n.read = true; save(s); }
+        },
+        markAllNotificationsRead: function () {
+            var s = state();
+            var me = s.sessionUserId;
+            s.notifications.forEach(function (n) { if (n.userId === me) n.read = true; });
+            save(s);
         },
         followersOf: function (uid) {
             return state().follows.filter(function (f) { return f.followingId === uid; }).map(function (f) { return userById(f.followerId); }).filter(Boolean);
@@ -241,16 +360,12 @@
                 return Object.assign({}, p, { image: p.image || p.imageUrl });
             });
         },
-        listVideos: function () {
-            return api.listPosts().filter(function (p) { return p.type === 'video'; });
-        },
+        listVideos: function () { return api.listPosts().filter(function (p) { return p.type === 'video'; }); },
         myPosts: function () {
             var uid = state().sessionUserId;
             return api.listPosts().filter(function (p) { return p.authorId === uid; });
         },
-        postsByUser: function (uid) {
-            return api.listPosts().filter(function (p) { return p.authorId === uid; });
-        },
+        postsByUser: function (uid) { return api.listPosts().filter(function (p) { return p.authorId === uid; }); },
         addPost: function (data) {
             var s = state();
             var user = userById(s.sessionUserId);
@@ -258,25 +373,15 @@
             var title = String(data.title || '').trim();
             if (!title) return { ok: false, error: 'Give the post a title.' };
             var post = {
-                id: id('p'),
-                type: data.type === 'video' ? 'video' : 'photo',
-                title: title,
-                description: data.description || '',
-                category: data.category || 'events',
+                id: id('p'), type: data.type === 'video' ? 'video' : 'photo', title: title,
+                description: data.description || '', category: data.category || 'events',
                 image: data.image || PICS[Math.floor(Math.random() * PICS.length)],
-                author: user.name,
-                authorId: user.id,
-                likes: 0, views: 1, comments: 0, shares: 0,
-                destinations: data.destinations || [],
-                filter: data.filter,
-                soundId: data.soundId,
-                duration: data.duration || '00:30',
-                createdAt: now()
+                author: user.name, authorId: user.id, likes: 0, views: 1, comments: 0, shares: 0,
+                destinations: data.destinations || [], filter: data.filter, soundId: data.soundId,
+                duration: data.duration || '00:30', createdAt: now()
             };
-            post.imageUrl = post.image;
-            post.thumbnailUrl = post.image;
-            s.posts.unshift(post);
-            save(s);
+            post.imageUrl = post.image; post.thumbnailUrl = post.image;
+            s.posts.unshift(post); save(s);
             return { ok: true, post: post };
         },
         deletePost: function (postId) {
