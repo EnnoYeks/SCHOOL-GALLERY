@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-upload-js', 'hshs-upload.js');
     add('hshs-search-btn-js', 'mobile-search-btn.js');
     add('hshs-brand-js', 'hshs-brand.js');
+    add('hshs-spring-js', 'hshs-spring.js');
     add('hshs-motion-js', 'hshs-motion.js');
     add('hshs-gallery-transitions-js', 'gallery-transitions.js');
     add('hshs-swipe-js', 'hshs-swipe.js');
