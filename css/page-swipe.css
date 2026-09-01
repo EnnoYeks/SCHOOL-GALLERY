@@ -1,1 +1,29 @@
-/* removed old loader */
+/* Tab-to-tab page swipe overlay (works with the existing cube swipe) */
+#hshs-page {
+  min-height: 40vh;
+}
+
+.hshs-swipe-hint {
+  pointer-events: none;
+  position: fixed;
+  top: 50%;
+  width: 8px;
+  height: 72px;
+  border-radius: 99px;
+  background: rgba(234, 179, 8, .35);
+  opacity: 0;
+  z-index: 90;
+  transform: translateY(-50%);
+  transition: opacity .2s ease;
+}
+.hshs-swipe-hint.is-left { left: 6px; }
+.hshs-swipe-hint.is-right { right: 6px; }
+.hshs-swipe-hint.is-on { opacity: 1; }
+
+@media (min-width: 1025px) {
+  .hshs-swipe-hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hshs-swipe-hint { display: none; }
+}

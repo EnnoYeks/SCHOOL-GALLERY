@@ -1,1 +1,104 @@
-/* removed old loader */
+/* HSHS shared motion — tokens, card stagger, cheap transforms only */
+:root {
+  --hshs-motion: 420ms;
+  --hshs-motion-fast: 220ms;
+  --hshs-spring: cubic-bezier(.22, 1.6, .36, 1);
+  --hshs-ease: cubic-bezier(.22, .7, .2, 1);
+}
+
+.hshs-enter {
+  animation: hshsEnter var(--hshs-motion) var(--hshs-spring) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+@keyframes hshsEnter {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+#hshs-page.hshs-page-in-right {
+  animation: hshsPageInRight var(--hshs-motion-fast) var(--hshs-ease) both;
+}
+#hshs-page.hshs-page-in-left {
+  animation: hshsPageInLeft var(--hshs-motion-fast) var(--hshs-ease) both;
+}
+#hshs-page.hshs-page-out-left {
+  animation: hshsPageOutLeft var(--hshs-motion-fast) var(--hshs-ease) both;
+}
+#hshs-page.hshs-page-out-right {
+  animation: hshsPageOutRight var(--hshs-motion-fast) var(--hshs-ease) both;
+}
+
+@keyframes hshsPageInRight {
+  from { opacity: .35; transform: translateX(18%); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hshsPageInLeft {
+  from { opacity: .35; transform: translateX(-18%); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hshsPageOutLeft {
+  to { opacity: .2; transform: translateX(-12%); }
+}
+@keyframes hshsPageOutRight {
+  to { opacity: .2; transform: translateX(12%); }
+}
+
+.photo-card,
+.post-card,
+.stat-card,
+.featured-grid > *,
+.masonry-grid > *,
+.gallery-feed > * {
+  will-change: transform;
+}
+
+.photo-card,
+.stat-card {
+  transition: transform var(--hshs-motion-fast) var(--hshs-ease),
+              box-shadow var(--hshs-motion-fast) var(--hshs-ease);
+}
+.photo-card:hover {
+  transform: translateY(-6px);
+}
+.photo-card .photo-image,
+.post-card .post-media {
+  transition: transform .5s var(--hshs-ease);
+}
+.photo-card:hover .photo-image {
+  transform: scale(1.06);
+}
+
+.mobile-tabbar a {
+  transition: transform var(--hshs-motion-fast) var(--hshs-spring),
+              color var(--hshs-motion-fast) ease;
+}
+.mobile-tabbar a.active i {
+  animation: hshsTabPop .38s var(--hshs-spring);
+}
+@keyframes hshsTabPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.22) translateY(-2px); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hshs-enter,
+  #hshs-page.hshs-page-in-right,
+  #hshs-page.hshs-page-in-left,
+  #hshs-page.hshs-page-out-left,
+  #hshs-page.hshs-page-out-right,
+  .mobile-tabbar a.active i {
+    animation: none !important;
+  }
+  .photo-card:hover,
+  .photo-card:hover .photo-image {
+    transform: none;
+  }
+}
