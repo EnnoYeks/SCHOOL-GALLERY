@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-perf-js', 'hshs-perf.js');
     add('hshs-store-js', 'hshs-store.js');
     add('hshs-social-js', 'hshs-social.js');
+    add('hshs-notify-js', 'hshs-notify.js');
     add('hshs-mobile-shell-js', 'mobile-shell.js');
     add('hshs-upload-js', 'hshs-upload.js');
     add('hshs-search-btn-js', 'mobile-search-btn.js');
