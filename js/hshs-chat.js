@@ -18,36 +18,29 @@ import {
     window.__hshsChatBoot = true;
 
     var EMOJI_SETS = {
-        smile: {
-            icon: '😊',
-            list: ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🥴','😇','🥳','🥺']
-        },
-        gesture: {
-            icon: '👍',
-            list: ['👋','🤚','🖐','✋','🖖','👌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','💪','🦾','🦵','🦶','👂','👃']
-        },
-        heart: {
-            icon: '❤️',
-            list: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍']
-        },
-        party: {
-            icon: '🎉',
-            list: ['🎉','🎊','🎈','🎁','🎀','🏆','🥇','🥈','🥉','⚽','🏀','🏈','⚾','🎾','🏐','🏉','🎱','🏓','🏸','🥅','🏒','🏑','🏏','⛳','🏹','🎣','🥊','🥋','🎽','🛹','🛷','⛸','🥌','🎿','⛷','🏂']
-        },
-        school: {
-            icon: '🎓',
-            list: ['🎓','📚','📖','✏️','📝','📎','📌','📍','✂️','📐','📏','🔬','🔭','🧪','🧫','🧬','💻','🖥','🖨','⌨️','🖱','💾','📱','📲','☎️','📞','📡','🔋','🔌','💡','🔦','🕯','🧯','🛢','💸','💵']
-        },
-        nature: {
-            icon: '🌟',
-            list: ['⭐','🌟','✨','⚡','🔥','💥','☀️','🌤','⛅','🌥','☁️','🌦','🌧','⛈','🌩','🌨','❄️','☃️','⛄','🌬','💨','💧','💦','🌊','🌈','🌸','💮','🏵','🌹','🥀','🌺','🌻','🌼','🌷','🌱','🌲']
-        }
+        smile: { icon: '😊', list: ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','🤗','🤩','🤔','😏','😌','😛','😜','🤪','🤨','😐','😑','😶','🙄','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😒','😓','😔','😕','🙃','🤑','😲','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🥴','😇','🥳','🥺'] },
+        gesture: { icon: '👍', list: ['👋','🤚','🖐','✋','🖖','👌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','💪'] },
+        heart: { icon: '❤️', list: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟'] },
+        party: { icon: '🎉', list: ['🎉','🎊','🎈','🎁','🎀','🏆','🥇','🥈','🥉','⚽','🏀','🏈','⚾','🎾','🏐','🎯','🎮','🎲'] },
+        school: { icon: '🎓', list: ['🎓','📚','📖','✏️','📝','📎','📌','🔬','🔭','🧪','💻','📱','💡','🏫','🚌','📅','✅','🔥'] },
+        nature: { icon: '🌟', list: ['⭐','🌟','✨','⚡','🔥','💥','☀️','⛅','☁️','🌧','⛈','❄️','🌈','🌸','🌹','🌺','🌻','🌷'] }
+    };
+
+    var PREVIEW_SEED = {
+        'u-prefect': { text: 'Assembly at 8 sharp 📋', time: '11:39', unread: 2 },
+        'u-maya': { text: 'New campus shots 📸', time: '11:25', unread: 0 },
+        'u-brian': { text: 'Match day vibes ⚽', time: '10:12', unread: 5 },
+        'u-sports': { text: 'Training moved to field B', time: '09:40', unread: 1 },
+        'u-choir': { text: 'Sticker', time: 'Yesterday', unread: 0, sticker: true },
+        'u-lab': { text: 'Lab report due Friday 🔬', time: '09:05', unread: 0 },
+        'u-house': { text: 'House points updated 🏆', time: '08:50', unread: 3 }
     };
 
     var state = {
         me: null, contacts: [], activeId: null, unsub: null, live: false,
         emojiOpen: false, emojiTab: 'smile', pendingImage: null,
-        recording: false, mediaRecorder: null, chunks: []
+        recording: false, mediaRecorder: null, chunks: [],
+        previews: {}
     };
 
     function db() { return window.firestore || null; }
@@ -81,22 +74,16 @@ import {
     function isEmojiOnly(text) {
         var t = String(text || '').trim();
         if (!t || t.length > 24) return false;
-        // strip variation selectors / ZWJ and see if remaining is mostly emoji
         var cleaned = t.replace(/\s/g, '');
-        try {
-            return /^(\p{Extended_Pictographic}|\uFE0F|\u200D)+$/u.test(cleaned);
-        } catch (e) {
-            return /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\s]+$/u.test(t);
-        }
+        try { return /^(\p{Extended_Pictographic}|\uFE0F|\u200D)+$/u.test(cleaned); }
+        catch (e) { return false; }
     }
     function setStatus(text, isError) {
-        var el = document.getElementById('hshsChatStatus');
-        if (el) el.textContent = text;
         var banner = document.getElementById('hshsChatBanner');
         if (banner) {
             banner.className = 'hshs-chat-banner' + (isError ? ' error' : '');
             banner.textContent = text || '';
-            banner.hidden = !text;
+            banner.hidden = !text || !isError;
         }
     }
     function applyTheme() {
@@ -109,7 +96,7 @@ import {
     function rulesHint(err) {
         var msg = (err && err.message) ? err.message : String(err || 'Chat error');
         if (/permission|insufficient|Missing or insufficient/i.test(msg)) {
-            return 'Firestore blocked chat writes. Update Firestore rules for chats/messages.';
+            return 'Firestore blocked chat writes. Update rules for chats/messages.';
         }
         return msg;
     }
@@ -118,13 +105,35 @@ import {
         if (status === 'delivered') return '<span class="hshs-ticks">✓✓</span>';
         return '<span class="hshs-ticks">✓</span>';
     }
+    function hideAttach() {
+        state.pendingImage = null;
+        var prev = document.getElementById('hshsAttachPreview');
+        if (prev) {
+            prev.classList.remove('is-on');
+            prev.hidden = true;
+            var img = prev.querySelector('img');
+            if (img) img.removeAttribute('src');
+        }
+    }
+    function showAttach(url) {
+        state.pendingImage = url;
+        var prev = document.getElementById('hshsAttachPreview');
+        if (!prev) return;
+        prev.hidden = false;
+        prev.classList.add('is-on');
+        var img = prev.querySelector('img');
+        if (img) img.src = url;
+    }
 
     function buildContacts() {
         var list = [];
         if (window.HshsStore && window.HshsStore.listUsers) {
             window.HshsStore.listUsers().forEach(function (u) {
                 if (!u || !u.id || u.id === me().id) return;
-                list.push({ id: u.id, name: u.name, username: u.username || '', role: u.role || 'Student', classYear: u.classYear || '', avatar: u.avatar || '' });
+                list.push({
+                    id: u.id, name: u.name, username: u.username || '',
+                    role: u.role || 'Student', classYear: u.classYear || '', avatar: u.avatar || ''
+                });
             });
         }
         if (!list.length) {
@@ -142,27 +151,47 @@ import {
         q = String(q).toLowerCase().trim().replace(/^@/, '');
         return state.contacts.filter(function (c) {
             if (!q) return true;
-            return (c.name + ' @' + (c.username || '') + ' ' + c.role + ' ' + (c.classYear || '')).toLowerCase().indexOf(q) !== -1;
+            return (c.name + ' @' + (c.username || '') + ' ' + c.role).toLowerCase().indexOf(q) !== -1;
         });
     }
+    function previewFor(c) {
+        var live = state.previews[c.id];
+        if (live) return live;
+        var seed = PREVIEW_SEED[c.id];
+        if (seed) return seed;
+        return { text: 'Tap to say hi 👋', time: '', unread: 0 };
+    }
+
     function renderList() {
         var box = document.getElementById('hshsChatList');
         if (!box) return;
         var rows = filteredContacts();
         if (!rows.length) {
-            box.innerHTML = '<div class="hshs-chat-empty">No people match. Try @username</div>';
+            box.innerHTML = '<div class="hshs-chat-empty">No chats found</div>';
             return;
         }
         var s = window.HshsStore;
         box.innerHTML = rows.map(function (c) {
             var online = s && s.isOnline ? s.isOnline(c.id) : false;
-            var label = s && s.presenceLabel ? s.presenceLabel(c.id) : (online ? 'Online' : 'Offline');
+            var prev = previewFor(c);
+            var av = c.avatar
+                ? '<img src="' + escapeHtml(c.avatar) + '" alt="">'
+                : initials(c.name);
+            var previewLine = prev.sticker
+                ? '<i class="fas fa-sticky-note" style="opacity:.7"></i> Sticker'
+                : escapeHtml(prev.text || '');
+            var badge = prev.unread ? '<span class="hshs-badge">' + prev.unread + '</span>' : '';
             return (
                 '<button type="button" class="hshs-contact' + (state.activeId === c.id ? ' active' : '') + '" data-uid="' + c.id + '">' +
-                '<span class="hshs-contact-avatar">' + initials(c.name) + '<i class="hshs-online-dot' + (online ? '' : ' off') + '"></i></span>' +
-                '<span class="hshs-contact-body"><strong>' + escapeHtml(c.name) + '</strong>' +
-                '<small>@' + escapeHtml(c.username || 'user') + ' · ' + escapeHtml(label) + '</small></span>' +
-                '<span class="hshs-contact-meta">' + (state.live ? 'Live' : '…') + '</span></button>'
+                '<span class="hshs-contact-avatar">' + av +
+                '<i class="hshs-online-dot' + (online ? '' : ' off') + '"></i></span>' +
+                '<span class="hshs-contact-body">' +
+                '<strong>' + escapeHtml(c.name) + '</strong>' +
+                '<small>' + previewLine + '</small></span>' +
+                '<span class="hshs-contact-meta">' +
+                '<span class="time' + (prev.unread ? ' unread' : '') + '">' + escapeHtml(prev.time || '') + '</span>' +
+                badge +
+                '</span></button>'
             );
         }).join('');
         box.querySelectorAll('[data-uid]').forEach(function (btn) {
@@ -186,7 +215,7 @@ import {
         var box = document.getElementById('hshsThreadMsgs');
         if (!box) return;
         if (!msgs.length) {
-            box.innerHTML = '<div class="hshs-chat-empty">Say hi with a glossy bubble 👋</div>';
+            box.innerHTML = '<div class="hshs-chat-empty">Messages are end-to-end on your school network · say hi 👋</div>';
             return;
         }
         var myId = me().id;
@@ -216,6 +245,17 @@ import {
             };
         });
         box.scrollTop = box.scrollHeight;
+
+        // refresh list preview from last msg
+        if (state.activeId && msgs.length) {
+            var last = msgs[msgs.length - 1];
+            state.previews[state.activeId] = {
+                text: last.audioUrl ? 'Voice note' : (last.imageUrl ? 'Photo' : (last.text || '')),
+                time: fmtTime(last.createdAt) || 'now',
+                unread: 0
+            };
+            renderList();
+        }
     }
 
     async function markIncomingRead(cid, docs) {
@@ -238,23 +278,35 @@ import {
         if (!peer && window.HshsStore) peer = window.HshsStore.getUser(uid);
         if (!peer) return;
         if (!state.contacts.some(function (c) { return c.id === peer.id; })) {
-            state.contacts.unshift({ id: peer.id, name: peer.name, username: peer.username || '', role: peer.role || 'Student', classYear: peer.classYear || '' });
+            state.contacts.unshift({
+                id: peer.id, name: peer.name, username: peer.username || '',
+                role: peer.role || 'Student', classYear: peer.classYear || '', avatar: peer.avatar || ''
+            });
         }
         state.activeId = peer.id;
         state.emojiOpen = false;
-        state.pendingImage = null;
+        hideAttach();
         renderList();
         applyTheme();
+
         var page = document.getElementById('hshsChatPage');
         if (page) page.classList.add('is-open');
         document.getElementById('hshsChatEmptyMain').hidden = true;
         document.getElementById('hshsThread').hidden = false;
         document.getElementById('hshsThreadName').textContent = peer.name;
         var presence = window.HshsStore && window.HshsStore.presenceLabel ? window.HshsStore.presenceLabel(peer.id) : '';
-        document.getElementById('hshsThreadMeta').textContent = '@' + (peer.username || 'user') + (presence ? ' · ' + presence : '');
-        var ap = document.getElementById('hshsAttachPreview');
-        if (ap) ap.hidden = true;
+        document.getElementById('hshsThreadMeta').textContent = presence || ('@' + (peer.username || 'user'));
+        var av = document.getElementById('hshsThreadAvatar');
+        if (av) {
+            av.innerHTML = peer.avatar
+                ? '<img src="' + escapeHtml(peer.avatar) + '" alt="">'
+                : initials(peer.name);
+        }
         closeEmojiPanel();
+
+        // clear unread badge for this chat
+        if (state.previews[peer.id]) state.previews[peer.id].unread = 0;
+        else if (PREVIEW_SEED[peer.id]) state.previews[peer.id] = Object.assign({}, PREVIEW_SEED[peer.id], { unread: 0 });
 
         stopListen();
         var firestore = db();
@@ -264,7 +316,6 @@ import {
             var q = query(collection(firestore, 'chats', cid, 'messages'), orderBy('createdAt', 'asc'), limit(150));
             state.unsub = onSnapshot(q, function (snap) {
                 state.live = true;
-                setStatus('Live · @' + (peer.username || peer.name));
                 markIncomingRead(cid, snap.docs);
                 var msgs = snap.docs.map(function (d) {
                     var data = d.data() || {};
@@ -326,9 +377,7 @@ import {
         var payload = { text: text.slice(0, 800) };
         if (state.pendingImage) payload.imageUrl = state.pendingImage;
         await sendPayload(payload);
-        state.pendingImage = null;
-        var prev = document.getElementById('hshsAttachPreview');
-        if (prev) prev.hidden = true;
+        hideAttach();
         closeEmojiPanel();
     }
 
@@ -364,10 +413,7 @@ import {
     function closeEmojiPanel() {
         state.emojiOpen = false;
         var panel = document.getElementById('hshsEmojiPanel');
-        if (panel) {
-            panel.hidden = true;
-            panel.classList.remove('open');
-        }
+        if (panel) { panel.hidden = true; panel.classList.remove('open'); }
     }
 
     function renderEmojiPanel() {
@@ -383,10 +429,7 @@ import {
         }).join('');
         panel.innerHTML = '<div class="hshs-emoji-tabs">' + tabs + '</div><div class="hshs-emoji-grid">' + grid + '</div>';
         panel.querySelectorAll('[data-tab]').forEach(function (b) {
-            b.onclick = function () {
-                state.emojiTab = b.getAttribute('data-tab');
-                renderEmojiPanel();
-            };
+            b.onclick = function () { state.emojiTab = b.getAttribute('data-tab'); renderEmojiPanel(); };
         });
         panel.querySelectorAll('[data-emoji]').forEach(function (b) {
             b.onclick = function () {
@@ -417,6 +460,7 @@ import {
                 if (page) page.classList.remove('is-open');
                 document.getElementById('hshsThread').hidden = true;
                 document.getElementById('hshsChatEmptyMain').hidden = false;
+                hideAttach();
                 closeEmojiPanel();
                 renderList();
             };
@@ -433,28 +477,23 @@ import {
         }
         var attachBtn = document.getElementById('hshsAttachBtn');
         var attachInput = document.getElementById('hshsAttachInput');
-        var attachPrev = document.getElementById('hshsAttachPreview');
         if (attachBtn && attachInput) {
             attachBtn.onclick = function () { attachInput.click(); };
             attachInput.onchange = function () {
                 var file = attachInput.files && attachInput.files[0];
                 if (!file) return;
-                compressImage(file).then(function (url) {
-                    state.pendingImage = url;
-                    if (attachPrev) { attachPrev.hidden = false; attachPrev.querySelector('img').src = url; }
-                }).catch(function () { setStatus('Could not attach that image.', true); });
+                compressImage(file).then(showAttach).catch(function () {
+                    setStatus('Could not attach that image.', true);
+                });
                 attachInput.value = '';
             };
         }
         var clearAttach = document.getElementById('hshsClearAttach');
-        if (clearAttach) clearAttach.onclick = function () {
-            state.pendingImage = null; if (attachPrev) attachPrev.hidden = true;
-        };
+        if (clearAttach) clearAttach.onclick = hideAttach;
         var voiceBtn = document.getElementById('hshsVoiceBtn');
         if (voiceBtn) voiceBtn.onclick = toggleVoice;
 
         var themeSel = document.getElementById('hshsThemeSelect');
-        var bubbleSel = document.getElementById('hshsBubbleSelect');
         if (themeSel) {
             themeSel.value = me().chatTheme || 'ocean';
             themeSel.onchange = function () {
@@ -464,24 +503,14 @@ import {
                 applyTheme();
             };
         }
-        if (bubbleSel) {
-            bubbleSel.value = me().bubbleStyle || 'rounded';
-            bubbleSel.onchange = function () {
-                state.me.bubbleStyle = bubbleSel.value;
-                localStorage.setItem('hshsBubbleStyle', bubbleSel.value);
-                if (window.HshsStore && window.HshsStore.currentUser()) window.HshsStore.updateProfile({ bubbleStyle: bubbleSel.value });
-                applyTheme();
-            };
-        }
     }
 
     async function probeLive() {
         var firestore = db();
-        if (!firestore) { setStatus('Waiting for Firebase…', true); return; }
+        if (!firestore) return;
         try {
             await getDocs(query(collection(firestore, 'chats'), limit(1)));
             state.live = true;
-            setStatus('Live · polished bubbles · rich emoji');
         } catch (err) {
             state.live = false;
             setStatus(rulesHint(err), true);
@@ -496,21 +525,16 @@ import {
 
     function boot() {
         if (!document.getElementById('hshsChatPage')) return;
-        var meEl = document.getElementById('hshsChatMe');
-        if (meEl) meEl.textContent = '@' + (me().username || me().name);
-        if (!document.getElementById('hshsChatBanner')) {
-            var top = document.querySelector('.hshs-chat-top');
-            if (top) {
-                var banner = document.createElement('div');
-                banner.id = 'hshsChatBanner'; banner.className = 'hshs-chat-banner'; banner.hidden = true;
-                top.parentNode.insertBefore(banner, top.nextSibling);
-            }
-        }
-        buildContacts(); applyTheme(); wire(); renderList();
+        hideAttach();
+        buildContacts();
+        applyTheme();
+        wire();
+        renderList();
         var tries = 0;
         (function waitDb() {
             if (db() || tries > 20) { probeLive(); openFromQuery(); return; }
-            tries += 1; setTimeout(waitDb, 150);
+            tries += 1;
+            setTimeout(waitDb, 150);
         })();
     }
 
