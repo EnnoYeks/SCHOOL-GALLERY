@@ -13,9 +13,9 @@
         transform: translateZ(calc(var(--cube-z, 50vw) * -1)) rotateY(0deg);
         will-change: transform;
     }
-    #hshs-cube.is-dragging { transition: none; }
+    #hshs-cube.is-dragging,
     #hshs-cube.is-settle {
-        transition: transform .55s cubic-bezier(.22,.7,.2,1);
+        transition: none;
     }
     #hshs-page,
     #hshs-cube-next {

@@ -1,0 +1,56 @@
+.hshs-thread { position: relative; }
+.hshs-thread-compose { position: relative; }
+.hshs-thread-compose.is-recording input[type="text"],
+.hshs-thread-compose.is-recording #hshsEmojiBtn,
+.hshs-thread-compose.is-recording #hshsAttachBtn,
+.hshs-thread-compose.is-recording button[type="submit"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.hshs-rec-bar {
+  position: absolute;
+  left: 8px;
+  right: 58px;
+  bottom: 8px;
+  height: 46px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: 24px;
+  background: #2a3942;
+  color: #e9edef;
+  z-index: 4;
+  will-change: transform;
+}
+.hshs-rec-bar.is-on { display: flex; }
+.hshs-rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ea4335;
+  box-shadow: 0 0 0 0 rgba(234,67,53,.5);
+  animation: hshsRecPulse 1s ease-out infinite;
+}
+@keyframes hshsRecPulse {
+  70% { box-shadow: 0 0 0 8px rgba(234,67,53,0); }
+}
+.hshs-rec-time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  min-width: 36px;
+}
+.hshs-rec-slide {
+  margin-left: auto;
+  color: #8696a0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.hshs-compose-icon.is-rec {
+  background: #ea4335 !important;
+  color: #fff !important;
+}
+#hshsVoiceBtn { touch-action: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hshs-rec-dot { animation: none; }
+}

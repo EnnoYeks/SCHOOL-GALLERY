@@ -9,6 +9,7 @@
   ];
   var lastFile = fileOf();
   var pendingDir = 0;
+  var driver = null;
 
   function fileOf(href) {
     var path = href || location.pathname;
@@ -22,9 +23,6 @@
   function idx(file) {
     var i = ORDER.indexOf(file);
     return i < 0 ? 0 : i;
-  }
-  function reduced() {
-    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
   function addCss() {
     if (document.getElementById('hshs-page-swipe-css')) return;
@@ -58,11 +56,24 @@
   }
   function playEnter(dir) {
     var page = document.getElementById('hshs-page');
-    if (!page || reduced() || !dir) return;
-    page.classList.remove('hshs-page-in-left', 'hshs-page-in-right');
-    void page.offsetWidth;
-    page.classList.add(dir > 0 ? 'hshs-page-in-right' : 'hshs-page-in-left');
+    if (!page || !dir) return;
     flashHint(dir);
+    page.classList.remove('hshs-page-in-left', 'hshs-page-in-right');
+    var from = dir > 0 ? 16 : -16;
+    if (driver) driver.stop();
+    if (!window.HshsSpring) {
+      page.classList.add(dir > 0 ? 'hshs-page-in-right' : 'hshs-page-in-left');
+      return;
+    }
+    driver = window.HshsSpring.animate({
+      from: from,
+      to: 0,
+      k: 160,
+      c: 26,
+      m: 1,
+      apply: function (x) { page.style.transform = 'translateX(' + x + '%)'; },
+      done: function () { page.style.transform = ''; }
+    });
   }
 
   document.addEventListener('click', function (e) {
