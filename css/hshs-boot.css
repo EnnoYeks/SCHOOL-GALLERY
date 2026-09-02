@@ -42,7 +42,7 @@ html:not(.hshs-booting) body > *:not(#hshs-boot) {
 .hshs-boot-badge svg { width: 158px; height: 158px; display: block; overflow: visible; }
 .hshs-boot-dots {
   display: flex; justify-content: center; align-items: center;
-  gap: 11px; height: 16px; margin: 2px 0 14px;
+  gap: 11px; height: 16px; margin: 2px 0 0;
 }
 .hshs-boot-dots i {
   width: 8px; height: 8px; border-radius: 50%;
@@ -52,13 +52,7 @@ html:not(.hshs-booting) body > *:not(#hshs-boot) {
 }
 .hshs-boot-dots i:nth-child(2) { animation-delay: .16s; background: #3b82f6; }
 .hshs-boot-dots i:nth-child(3) { animation-delay: .32s; }
-.hshs-boot-note {
-  margin: 0;
-  font: 600 .7rem/1.45 "Segoe UI", sans-serif;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: rgba(219,231,255,.58);
-}
+.hshs-boot-note { display: none !important; }
 .hshs-loader, #hshs-loader { display: none !important; }
 .hshs-page-skel { padding: 16px 14px 110px; }
 .hshs-page-skel .sk-hero,
