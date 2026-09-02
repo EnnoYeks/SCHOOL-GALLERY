@@ -17,6 +17,13 @@
     const loadedCss = new Set();
     const loadedPageScripts = new Set();
     const pageCache = window.__hshsPageCache = window.__hshsPageCache || {};
+    const GUEST_PIC = 'data:image/svg+xml,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+        '<circle cx="32" cy="32" r="32" fill="#1d4ed8"/>' +
+        '<circle cx="32" cy="24" r="10" fill="white"/>' +
+        '<path d="M14 54c4-12 14-18 18-18s14 6 18 18" fill="white"/>' +
+        '</svg>'
+    );
 
     function currentFile() {
         return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -77,42 +84,75 @@
     function isAdmin() {
         try { return !!localStorage.getItem('adminToken'); } catch (e) { return false; }
     }
+    function guestMe() {
+        var p = {};
+        try {
+            if (window.profileManager && typeof window.profileManager.getProfile === 'function') {
+                p = window.profileManager.getProfile() || {};
+            }
+        } catch (e) {}
+        try {
+            var stored = JSON.parse(localStorage.getItem('userProfile') || 'null');
+            if (stored) p = Object.assign({}, p, stored);
+        } catch (e) {}
+        try {
+            var settings = JSON.parse(localStorage.getItem('userSettings') || 'null');
+            if (settings && settings.account) p = Object.assign({}, settings.account, p);
+        } catch (e) {}
+        var photo = p.profilePhoto || '';
+        if (!photo || /placeholder/i.test(photo)) photo = GUEST_PIC;
+        var klass = p.className && p.className !== 'N/A' ? p.className : 'Hawthorne Scribner';
+        var role = p.role ? String(p.role) : 'Student';
+        return {
+            name: p.fullName || 'Guest student',
+            line: role.charAt(0).toUpperCase() + role.slice(1) + ' · ' + klass,
+            photo: photo
+        };
+    }
+    function fillMoreMe() {
+        var me = guestMe();
+        var name = document.getElementById('moreMeName');
+        var line = document.getElementById('moreMeLine');
+        var pic = document.getElementById('moreMePic');
+        if (name) name.textContent = me.name;
+        if (line) line.textContent = me.line;
+        if (pic) pic.src = me.photo;
+    }
 
     function routes() {
         const more = [
-            { href: sub('chat.html'), icon: 'fa-comments', label: 'Chat', match: ['chat.html'] },
-            { href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', match: ['spotlight.html'] },
-            { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
-            { href: sub('photos.html'), icon: 'fa-camera', label: 'Photos', match: ['photos.html'] },
-            { href: sub('videos.html'), icon: 'fa-play', label: 'Vibe', match: ['videos.html'] },
-            { href: sub('polls.html'), icon: 'fa-square-poll-vertical', label: 'Polls', match: ['polls.html'] },
-            { href: sub('memories.html'), icon: 'fa-clock-rotate-left', label: 'Memories', match: ['memories.html'] },
-            { href: sub('about.html'), icon: 'fa-circle-info', label: 'About', match: ['about.html'] },
-            { href: sub('contat.html'), icon: 'fa-envelope', label: 'Contact', match: ['contat.html', 'contact.html'] },
-            { href: sub('profile.html'), icon: 'fa-user', label: 'Profile', match: ['profile.html'] },
-            { href: sub('settings.html'), icon: 'fa-gear', label: 'Settings', match: ['settings.html'] }
+            { href: sub('chat.html'), icon: 'fa-comment-dots', label: 'Chat', tone: 'sky', match: ['chat.html'] },
+            { href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', tone: 'gold', match: ['spotlight.html'] },
+            { href: sub('trending.html'), icon: 'fa-arrow-trend-up', label: 'Trending', tone: 'ember', match: ['trending.html'] },
+            { href: sub('photos.html'), icon: 'fa-image', label: 'Photos', tone: 'teal', match: ['photos.html'] },
+            { href: sub('videos.html'), icon: 'fa-clapperboard', label: 'Vibe', tone: 'navy', match: ['videos.html'] },
+            { href: sub('polls.html'), icon: 'fa-chart-simple', label: 'Polls', tone: 'leaf', match: ['polls.html'] },
+            { href: sub('memories.html'), icon: 'fa-book-open', label: 'Memories', tone: 'lilac', match: ['memories.html'] },
+            { href: sub('about.html'), icon: 'fa-school', label: 'About', tone: 'navy', match: ['about.html'] },
+            { href: sub('contat.html'), icon: 'fa-paper-plane', label: 'Contact', tone: 'cyan', match: ['contat.html', 'contact.html'] },
+            { href: sub('settings.html'), icon: 'fa-sliders', label: 'Settings', tone: 'slate', match: ['settings.html'] }
         ];
         if (isAdmin()) {
-            more.push({ href: sub('admin.html'), icon: 'fa-shield-halved', label: 'Staff', match: ['admin.html'] });
+            more.push({ href: sub('admin.html'), icon: 'fa-id-badge', label: 'Staff', tone: 'gold', match: ['admin.html'] });
         }
         return {
             PRIMARY: [
-                { id: 'home', href: homeHref(), icon: 'fa-home', label: 'Home', match: ['index.html', ''] },
-                { id: 'gallery', href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
-                { id: 'buzz', href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html', 'shorts.html'] }
+                { id: 'home', href: homeHref(), icon: 'fa-house', label: 'Home', match: ['index.html', ''] },
+                { id: 'buzz', href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html', 'shorts.html'] },
+                { id: 'gallery', href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] }
             ],
             MORE: more,
             DESKTOP: [
-                { href: homeHref(), icon: 'fa-home', label: 'Home', match: ['index.html', ''] },
+                { href: homeHref(), icon: 'fa-house', label: 'Home', match: ['index.html', ''] },
                 { href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
-                { href: sub('chat.html'), icon: 'fa-comments', label: 'Chat', match: ['chat.html'] },
+                { href: sub('chat.html'), icon: 'fa-comment-dots', label: 'Chat', match: ['chat.html'] },
                 { href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html'] },
-                { href: sub('photos.html'), icon: 'fa-photo-film', label: 'Photos', match: ['photos.html'] },
-                { href: sub('videos.html'), icon: 'fa-video', label: 'Vibe', match: ['videos.html'] },
-                { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
+                { href: sub('photos.html'), icon: 'fa-image', label: 'Photos', match: ['photos.html'] },
+                { href: sub('videos.html'), icon: 'fa-clapperboard', label: 'Vibe', match: ['videos.html'] },
+                { href: sub('trending.html'), icon: 'fa-arrow-trend-up', label: 'Trending', match: ['trending.html'] },
                 { href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', match: ['spotlight.html'] },
-                { href: sub('polls.html'), icon: 'fa-poll', label: 'Polls', match: ['polls.html'] },
-                { href: sub('memories.html'), icon: 'fa-history', label: 'Memories', match: ['memories.html'] }
+                { href: sub('polls.html'), icon: 'fa-chart-simple', label: 'Polls', match: ['polls.html'] },
+                { href: sub('memories.html'), icon: 'fa-book-open', label: 'Memories', match: ['memories.html'] }
             ]
         };
     }
@@ -141,6 +181,7 @@
         addLink('hshs-boot-css', 'hshs-boot.css');
         addLink('hshs-tt-css', 'hshs-tt.css');
         addLink('hshs-mobile-shell-css', 'mobile-shell.css');
+        addLink('hshs-more-css', 'hshs-more.css');
         addLink('hshs-swipe-css', 'hshs-swipe.css');
         addLink('hshs-motion-css', 'gallery-transitions.css');
         addLink('hshs-page-swipe-css', 'page-swipe.css');
@@ -159,7 +200,7 @@
 
     function markActive() {
         const file = currentFile();
-        const moreFiles = ['photos.html','videos.html','polls.html','memories.html','about.html','contat.html','contact.html','profile.html','settings.html','trending.html','spotlight.html','chat.html'];
+        const moreFiles = ['photos.html','videos.html','polls.html','memories.html','about.html','contat.html','contact.html','profile.html','settings.html','trending.html','spotlight.html','chat.html','admin.html'];
         document.querySelectorAll('.mobile-tabbar a').forEach((a) => {
             const tab = a.getAttribute('data-tab');
             if (!tab || tab === 'upload') return;
@@ -188,6 +229,7 @@
         document.body.classList.remove('more-open');
     }
     function openMore() {
+        fillMoreMe();
         const sheet = document.getElementById('moreSheet');
         const backdrop = document.getElementById('moreBackdrop');
         if (sheet) sheet.classList.add('open');
@@ -210,7 +252,7 @@
         if (document.querySelector('.mobile-tabbar')) return;
         document.body.classList.add('has-mobile-shell');
         const r = routes();
-        const moreActive = r.MORE.some(isActive);
+        const moreActive = r.MORE.some(isActive) || currentFile() === 'profile.html';
         const bar = document.createElement('nav');
         bar.className = 'mobile-tabbar';
         bar.setAttribute('aria-label', 'Primary');
@@ -233,7 +275,7 @@
             </a>`).join('') +
             `
             <a href="#more" class="${moreActive ? 'active' : ''}" data-tab="more" id="openMoreSheet">
-                <i class="fas fa-ellipsis"></i><span>More</span>
+                <i class="fas fa-grip"></i><span>More</span>
             </a>`;
 
         const backdrop = document.createElement('div');
@@ -242,12 +284,20 @@
         const sheet = document.createElement('aside');
         sheet.className = 'more-sheet';
         sheet.id = 'moreSheet';
-        sheet.innerHTML = `<div class="more-head"><div><h3>All pages</h3><p>Chat, Spotlight, and the rest</p></div><button type="button" class="more-close" id="closeMoreSheet" aria-label="Close">×</button></div><div class="more-grid">` +
-            r.MORE.map((item) => `<a href="${item.href}" class="${isActive(item) ? 'active' : ''}"><i class="fas ${item.icon}"></i><span>${item.label}</span></a>`).join('') +
+        sheet.innerHTML =
+            `<button type="button" class="more-close" id="closeMoreSheet" aria-label="Close">×</button>` +
+            `<a class="more-me" href="${sub('profile.html')}">` +
+            `<img class="more-me-pic" id="moreMePic" alt="">` +
+            `<span class="more-me-copy"><strong id="moreMeName">Guest student</strong><small id="moreMeLine">Student · Hawthorne Scribner</small></span>` +
+            `<span class="more-me-go">View</span></a>` +
+            `<p class="more-kicker">Campus</p>` +
+            `<div class="more-grid">` +
+            r.MORE.map((item) => `<a href="${item.href}" data-tone="${item.tone}" class="${isActive(item) ? 'active' : ''}"><span class="ico"><i class="fas ${item.icon}"></i></span><span>${item.label}</span></a>`).join('') +
             `</div>`;
         document.body.appendChild(bar);
         document.body.appendChild(backdrop);
         document.body.appendChild(sheet);
+        fillMoreMe();
 
         document.getElementById('openUploadStudio').addEventListener('click', function (e) {
             e.preventDefault();
@@ -266,7 +316,7 @@
         });
         backdrop.addEventListener('click', closeMore);
         sheet.addEventListener('click', function (e) {
-            if (e.target.closest('.more-grid a')) closeMore();
+            if (e.target.closest('.more-grid a') || e.target.closest('.more-me')) closeMore();
         });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMore(); });
     }
