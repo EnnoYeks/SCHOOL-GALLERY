@@ -9,12 +9,9 @@
     }
 
     function escapeHtml(s) {
-        return String(s || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+        return String(s || '').replace(/[&<>"']/g, function (ch) {
+            return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+        });
     }
 
     function inSub() {
@@ -71,11 +68,11 @@
     function peopleCard(user) {
         var s = store();
         if (!s || !user) return '';
-        var counts = (s.followCounts && s.followCounts(user.id)) || { friends: 0, followers: 0 };
+        var counts = s.followCounts(user.id);
         var st = s.friendStatus ? s.friendStatus(user.id) : 'none';
         var online = s.isOnline ? s.isOnline(user.id) : false;
         return (
-            '<article class="hshs-people-card" data-uid="' + escapeHtml(user.id) + '">' +
+            '<article class="hshs-people-card" data-uid="' + user.id + '">' +
             '<a class="hshs-people-main" href="' + profileHref(user) + '">' +
             '<span class="hshs-people-avatar">' +
             (user.avatar ? '<img src="' + escapeHtml(user.avatar) + '" alt="">' : initials(user.name)) +
@@ -83,10 +80,10 @@
             '<span class="hshs-people-meta">' +
             '<strong>' + escapeHtml(user.name) + '</strong>' +
             '<small>@' + escapeHtml(user.username || 'user') + ' · ' + escapeHtml(user.classYear || user.role || 'Student') + '</small>' +
-            '<em>' + (counts.friends || 0) + ' friends · ' + (counts.followers || 0) + ' followers</em>' +
+            '<em>' + counts.friends + ' friends · ' + counts.followers + ' followers</em>' +
             '</span></a>' +
             '<div class="hshs-people-actions">' +
-            '<button type="button" class="hshs-follow-btn' + (st === 'friends' || st === 'outgoing' ? ' is-on' : '') + '" data-friend="' + escapeHtml(user.id) + '">' +
+            '<button type="button" class="hshs-follow-btn' + (st === 'friends' || st === 'outgoing' ? ' is-on' : '') + '" data-friend="' + user.id + '">' +
             friendLabel(st) + '</button>' +
             '<a class="hshs-chat-btn" href="' + chatHref(user) + '" title="Chat" aria-label="Chat with ' + escapeHtml(user.name) + '">' +
             '<i class="fas fa-comment-dots"></i></a>' +
@@ -106,9 +103,8 @@
                 var st = s.friendStatus(uid);
                 var res;
                 if (st === 'incoming') {
-                    var state = s.getState && s.getState();
-                    var req = (state && state.friendRequests || []).find(function (r) {
-                        return r.fromId === uid && r.toId === (s.currentUser && s.currentUser() && s.currentUser().id) && r.status === 'pending';
+                    var req = (s.getState().friendRequests || []).find(function (r) {
+                        return r.fromId === uid && r.toId === s.currentUser().id && r.status === 'pending';
                     });
                     res = req ? s.acceptFriend(req.id) : s.requestFriend(uid);
                 } else if (st === 'friends') {
@@ -132,9 +128,9 @@
                 e.preventDefault();
                 e.stopPropagation();
                 var s = store();
-                if (!s || !s.toggleFollow) return;
+                if (!s) return;
                 var res = s.toggleFollow(btn.getAttribute('data-follow'));
-                if (!res || !res.ok) { alert((res && res.error) || 'Could not follow'); return; }
+                if (!res.ok) { alert(res.error || 'Could not follow'); return; }
                 btn.classList.toggle('is-on', res.following);
                 btn.textContent = res.following ? 'Following' : 'Follow';
             };
@@ -153,8 +149,8 @@
             if (!s) return;
             q = String(q || '').trim();
             if (!q) { box.classList.remove('active'); return; }
-            var people = (s.searchPeople && s.searchPeople(q) || []).slice(0, 6);
-            var posts = (s.search && s.search(q) || []).slice(0, 5);
+            var people = s.searchPeople(q).slice(0, 6);
+            var posts = (s.search(q) || []).slice(0, 5);
             var pages = searchPages(q);
             if (!people.length && !posts.length && !pages.length) {
                 box.innerHTML = '<div class="hshs-search-empty">No students, posts, or pages for "' + escapeHtml(q) + '"</div>';
@@ -180,7 +176,7 @@
                 html += '<div class="hshs-search-section">Pages</div>';
                 pages.forEach(function (p) {
                     html += '<a class="hshs-search-page" href="' + pageHref(p.file) + '">' +
-                        '<i class="fas ' + escapeHtml(p.icon) + '"></i>' +
+                        '<i class="fas ' + p.icon + '"></i>' +
                         '<span><strong>' + escapeHtml(p.label) + '</strong><small>' + escapeHtml(p.hint) + '</small></span></a>';
                 });
             }
@@ -223,9 +219,9 @@
         var s = store();
         var params = new URLSearchParams(location.search);
         var key = params.get('u') || params.get('id');
-        var me = (s.currentUser && s.currentUser()) || null;
+        var me = s.currentUser();
         var user = null;
-        if (key && s.getUserByUsername) user = s.getUserByUsername(key) || (s.getUser && s.getUser(key));
+        if (key) user = s.getUserByUsername(key) || s.getUser(key);
         if (!user) user = me;
         if (!user) {
             root.innerHTML = '<div class="hshs-profile-empty">Sign in to view profiles. Create a local account from Settings or the More sheet.</div>';
@@ -233,8 +229,8 @@
         }
 
         var isMe = me && me.id === user.id;
-        var counts = (s.followCounts && s.followCounts(user.id)) || { friends: 0, followers: 0 };
-        var posts = (s.postsByUser && s.postsByUser(user.id)) || [];
+        var counts = s.followCounts(user.id);
+        var posts = s.postsByUser(user.id);
         var friends = s.friendsOf ? s.friendsOf(user.id) : [];
         var st = !isMe && s.friendStatus ? s.friendStatus(user.id) : 'self';
         var online = s.isOnline ? s.isOnline(user.id) : false;
@@ -255,15 +251,15 @@
             '<p class="hshs-profile-bio">' + escapeHtml(user.bio || '') + '</p>' +
             '<div class="hshs-profile-stats">' +
             '<div><b>' + posts.length + '</b><span>Posts</span></div>' +
-            '<div><b>' + (counts.friends || 0) + '</b><span>Friends</span></div>' +
-            '<div><b>' + (counts.followers || 0) + '</b><span>Followers</span></div>' +
+            '<div><b>' + counts.friends + '</b><span>Friends</span></div>' +
+            '<div><b>' + counts.followers + '</b><span>Followers</span></div>' +
             '</div>' +
             '<div class="hshs-profile-actions">' +
             (isMe
                 ? '<button type="button" class="hshs-btn" id="hshsEditProfileBtn"><i class="fas fa-pen"></i> Edit profile</button>' +
                   '<a class="hshs-btn ghost" href="' + pageHref('chat.html') + '"><i class="fas fa-comments"></i> Messages</a>'
-                : '<button type="button" class="hshs-btn' + (st === 'friends' || st === 'outgoing' ? ' secondary' : '') + '" data-friend="' + escapeHtml(user.id) + '">' + friendLabel(st) + '</button>' +
-                  '<button type="button" class="hshs-btn ghost" data-follow="' + escapeHtml(user.id) + '">' + (s.isFollowing && s.isFollowing(user.id) ? 'Following' : 'Follow') + '</button>' +
+                : '<button type="button" class="hshs-btn' + (st === 'friends' || st === 'outgoing' ? ' secondary' : '') + '" data-friend="' + user.id + '">' + friendLabel(st) + '</button>' +
+                  '<button type="button" class="hshs-btn ghost" data-follow="' + user.id + '">' + (s.isFollowing(user.id) ? 'Following' : 'Follow') + '</button>' +
                   '<a class="hshs-btn ghost" href="' + chatHref(user) + '"><i class="fas fa-comment-dots"></i> Chat</a>') +
             '</div></div></div>' +
 
@@ -276,7 +272,7 @@
                 ? friends.map(function (f) {
                     return '<a class="hshs-friend-chip" href="' + profileHref(f) + '" title="@' + escapeHtml(f.username || '') + '">' +
                         '<span class="av">' + (f.avatar ? '<img src="' + escapeHtml(f.avatar) + '" alt="">' : initials(f.name)) + '</span>' +
-                        '<span class="nm">' + escapeHtml((f.name || '').split(' ')[0]) + '</span></a>';
+                        '<span class="nm">' + escapeHtml(f.name.split(' ')[0]) + '</span></a>';
                 }).join('')
                 : '<p class="hshs-profile-empty">No friends yet — search students and send a request.</p>') +
             '</div></section>' +
