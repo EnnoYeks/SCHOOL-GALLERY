@@ -2,7 +2,8 @@
     if (window.__hshsBoot) return;
     window.__hshsBoot = true;
 
-    var MIN_BOOT = 2800;
+    var MIN_BOOT = 2400;
+    var BADGE = 'https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png';
     var parts = { css: 0, dom: 0, shell: 0, fonts: 0, images: 0, page: 0, site: 0 };
     var done = false;
     var started = Date.now();
@@ -15,32 +16,6 @@
     function coreReady() {
         return parts.css >= 1 && parts.dom >= 1 && parts.shell >= 1 && parts.fonts >= 1 && parts.page >= 1;
     }
-    function badgeSvg() {
-        return '<svg viewBox="0 0 200 200" aria-hidden="true">' +
-            '<path d="M38 96 C36 128 58 158 100 176 C142 158 164 128 162 96 C158 74 148 58 138 48 C126 62 100 68 100 68 C100 68 74 62 62 48 C52 58 42 74 38 96Z" fill="#c9a227"/>' +
-            '<path d="M44 96 C42 126 62 154 100 170 C138 154 158 126 156 96 C152 76 143 62 134 52 C123 64 100 70 100 70 C100 70 77 64 66 52 C57 62 48 76 44 96Z" fill="#8b6914"/>' +
-            '<path d="M72 34 C86 50 100 54 100 54 C100 54 114 50 128 34 C150 48 164 78 160 108 C156 138 132 160 100 176 C68 160 44 138 40 108 C36 78 50 48 72 34Z" fill="#d4af37"/>' +
-            '<path d="M76 40 C88 54 100 58 100 58 C100 58 112 54 124 40 C144 52 156 78 152 106 C148 134 126 154 100 168 C74 154 52 134 48 106 C44 78 56 52 76 40Z" fill="#0b1a3a"/>' +
-            '<path d="M100 58 L100 112 L50 112 C48 86 62 58 100 58Z" fill="#163a7a"/>' +
-            '<path d="M100 58 L150 112 L100 112Z" fill="#b42318"/>' +
-            '<path d="M50 112 L150 112 L150 118 C138 148 118 160 100 168 C82 160 62 148 50 118Z" fill="#f4efe4"/>' +
-            '<path d="M68 138 L86 118 L100 128 L114 118 L132 138 L100 160Z" fill="#1d4ed8"/>' +
-            '<circle cx="100" cy="122" r="10" fill="#eab308"/>' +
-            '<g fill="#fbbf24">' +
-            '<rect x="98" y="104" width="4" height="10" rx="1"/>' +
-            '<rect x="98" y="128" width="4" height="8" rx="1"/>' +
-            '<rect x="86" y="120" width="10" height="4" rx="1"/>' +
-            '<rect x="104" y="120" width="10" height="4" rx="1"/>' +
-            '</g>' +
-            '<polygon points="82,82 88,94 76,90" fill="#f8fafc"/>' +
-            '<polygon points="82,76 86,82 78,82" fill="#f8fafc"/>' +
-            '<g fill="#f8fafc">' +
-            '<rect x="118" y="78" width="18" height="14" rx="1"/>' +
-            '<rect x="116" y="76" width="22" height="3" rx="1"/>' +
-            '<rect x="126" y="78" width="2" height="14" fill="#cbd5e1"/>' +
-            '</g>' +
-            '</svg>';
-    }
     function mountSplash() {
         document.documentElement.classList.add('hshs-booting');
         var box = document.getElementById('hshs-boot');
@@ -51,12 +26,14 @@
         }
         box.innerHTML =
             '<div class="hshs-boot-card">' +
-            '<div class="hshs-boot-badge">' + badgeSvg() + '</div>' +
+            '<img class="hshs-boot-badge" src="' + BADGE + '" alt="">' +
             '<div class="hshs-boot-dots" aria-hidden="true"><i></i><i></i><i></i></div>' +
             '</div>';
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
         document.documentElement.classList.toggle('hshs-device-desktop', !mobile);
+        var cover = document.getElementById('hshs-tt-overlay');
+        if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
     }
     function ensureCss() {
         if (document.getElementById('hshs-boot-css')) return;
@@ -79,15 +56,15 @@
         var left = links.length, marked = 0;
         function one() {
             marked += 1;
-            setPart('css', marked / left);
             if (marked >= left) setPart('css', 1);
+            else setPart('css', marked / left);
         }
         links.forEach(function (link) {
             if (link.sheet) { one(); return; }
             link.addEventListener('load', one, { once: true });
             link.addEventListener('error', one, { once: true });
         });
-        setTimeout(function () { setPart('css', 1); }, 1600);
+        setTimeout(function () { setPart('css', 1); }, 1400);
     }
     function watchImages(scope) {
         var root = scope || document;
@@ -99,15 +76,15 @@
         return new Promise(function (resolve) {
             function one() {
                 marked += 1;
-                setPart('images', marked / left);
                 if (marked >= left) { setPart('images', 1); resolve(); }
+                else setPart('images', marked / left);
             }
             imgs.forEach(function (img) {
                 if (img.complete && img.naturalWidth) { one(); return; }
                 img.addEventListener('load', one, { once: true });
                 img.addEventListener('error', one, { once: true });
             });
-            setTimeout(function () { setPart('images', 1); resolve(); }, 2200);
+            setTimeout(function () { setPart('images', 1); resolve(); }, 1800);
         });
     }
     function fileKey(href) {
@@ -152,7 +129,8 @@
             boot.classList.add('is-off');
             setTimeout(function () { if (boot.parentNode) boot.remove(); }, 380);
         }
-        if (window.__hshsTt) window.__hshsTt.hide();
+        var cover = document.getElementById('hshs-tt-overlay');
+        if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
     }
     function finish() {
         if (done) return;
@@ -194,7 +172,7 @@
     }
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setPart('fonts', 1); });
     else setPart('fonts', 1);
-    setTimeout(function () { setPart('fonts', 1); }, 1400);
+    setTimeout(function () { setPart('fonts', 1); }, 1200);
     var shellTries = 0;
     var shellTimer = setInterval(function () {
         if (window.__hshsMobileShell || ++shellTries > 40) {
@@ -213,5 +191,5 @@
         setPart('fonts', 1); setPart('images', 1); setPart('page', 1); setPart('site', 1);
         if (!done) finish();
         else reveal();
-    }, 5200);
+    }, 4500);
 })();
