@@ -3,7 +3,7 @@
     window.__hshsSwipe = true;
     if (!window.matchMedia('(max-width: 1024px)').matches) return;
 
-    var ORDER = ['index.html','gallery.html','spotlight.html','buzz.html','photos.html','videos.html','trending.html','polls.html','memories.html'];
+    var ORDER = ['index.html','buzz.html','gallery.html','photos.html','videos.html','spotlight.html','trending.html','polls.html','memories.html','chat.html'];
     var startX = 0, startY = 0, lastX = 0, lastT = 0, vx = 0;
     var tracking = false, axis = null, primed = null, pendingNav = null;
     var rot = 0, rotV = 0, rotTarget = 0, rotRun = false;
@@ -65,7 +65,8 @@
         if (!s || !n) return;
         s.next.classList.toggle('is-left', n.dir < 0);
         var cache = window.__hshsPageCache || {};
-        var html = cache[n.href];
+        var key = n.file || n.href;
+        var html = cache[key] || cache[n.href];
         if (html) s.next.innerHTML = extract(html);
         else if (window.__hshsPageSkeleton) s.next.innerHTML = window.__hshsPageSkeleton(n.file);
         else s.next.innerHTML = '';
