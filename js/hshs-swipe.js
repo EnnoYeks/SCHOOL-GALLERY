@@ -5,8 +5,8 @@
 
     var ORDER = ['index.html','buzz.html','gallery.html','photos.html','videos.html','spotlight.html','trending.html','polls.html','memories.html','chat.html'];
     var startX = 0, startY = 0, lastX = 0, lastT = 0, vx = 0;
-    var tracking = false, axis = null, primed = null, pendingNav = null;
-    var rot = 0, rotV = 0, rotTarget = 0, rotRun = false;
+    var tracking = false, axis = null, primed = null, pendingNav = null, dir = 1;
+    var x = 0, v = 0, target = 0, running = false;
 
     function addCss() {
         if (document.getElementById('hshs-swipe-css')) return;
@@ -22,10 +22,7 @@
         link.href = href;
         document.head.appendChild(link);
     }
-    function half() { return (window.innerWidth || 360) / 2; }
-    function sizeCube() {
-        document.documentElement.style.setProperty('--cube-z', half() + 'px');
-    }
+    function width() { return (window.innerWidth || 360); }
     function fileOf() {
         var f = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
         if (!f || f === 'index.html') return 'index.html';
@@ -41,10 +38,10 @@
         if (file === 'index.html') return inSub ? '../index.html' : 'index.html';
         return inSub ? file : 'index/' + file;
     }
-    function neighbor(dir) {
-        var i = indexOf() + dir;
+    function neighbor(d) {
+        var i = indexOf() + d;
         if (i < 0 || i >= ORDER.length) return null;
-        return { file: ORDER[i], href: new URL(hrefFor(ORDER[i]), location.href).href };
+        return { file: ORDER[i], href: new URL(hrefFor(ORDER[i]), location.href).href, dir: d };
     }
     function extract(html) {
         try {
@@ -54,19 +51,17 @@
                 var cls = el.className ? String(el.className) : '';
                 var id = el.id || '';
                 if (el.tagName === 'SCRIPT') return;
-                if (/animated-bg|navbar|mobile-tabbar|more-sheet|more-backdrop|hshs-boot|hshs-cube/.test(cls + ' ' + id)) return;
+                if (/animated-bg|navbar|mobile-tabbar|more-sheet|more-backdrop|hshs-boot|hshs-cube|hshs-swipe/.test(cls + ' ' + id)) return;
                 box.appendChild(el.cloneNode(true));
             });
             return box.innerHTML;
         } catch (e) { return ''; }
     }
-    function fillFace(n) {
+    function fillNext(n) {
         var s = stage();
         if (!s || !n) return;
-        s.next.classList.toggle('is-left', n.dir < 0);
         var cache = window.__hshsPageCache || {};
-        var key = n.file || n.href;
-        var html = cache[key] || cache[n.href];
+        var html = cache[n.file] || cache[n.href];
         if (html) s.next.innerHTML = extract(html);
         else if (window.__hshsPageSkeleton) s.next.innerHTML = window.__hshsPageSkeleton(n.file);
         else s.next.innerHTML = '';
@@ -74,26 +69,31 @@
     function stage() {
         var page = document.getElementById('hshs-page');
         if (!page) return null;
-        if (!document.getElementById('hshs-cube-stage')) {
-            var wrap = document.createElement('div');
-            wrap.id = 'hshs-cube-stage';
-            page.parentNode.insertBefore(wrap, page);
-            var cube = document.createElement('div');
-            cube.id = 'hshs-cube';
-            wrap.appendChild(cube);
-            cube.appendChild(page);
+        var wrap = document.getElementById('hshs-swipe-stage');
+        if (!wrap) {
+            var old = document.getElementById('hshs-cube-stage');
+            wrap = document.createElement('div');
+            wrap.id = 'hshs-swipe-stage';
+            if (old && old.parentNode) {
+                old.parentNode.insertBefore(wrap, old);
+                if (page.parentNode) page.parentNode.removeChild(page);
+                old.parentNode.removeChild(old);
+            } else {
+                page.parentNode.insertBefore(wrap, page);
+            }
+            wrap.appendChild(page);
             var next = document.createElement('div');
-            next.id = 'hshs-cube-next';
-            cube.appendChild(next);
+            next.id = 'hshs-swipe-next';
+            wrap.appendChild(next);
         }
-        sizeCube();
         return {
-            wrap: document.getElementById('hshs-cube-stage'),
-            cube: document.getElementById('hshs-cube'),
-            next: document.getElementById('hshs-cube-next')
+            wrap: wrap,
+            page: document.getElementById('hshs-page'),
+            next: document.getElementById('hshs-swipe-next')
         };
     }
     function blocked(e) {
+        if (!document.documentElement.classList.contains('hshs-ready')) return true;
         if (document.body.classList.contains('search-open')) return true;
         if (document.body.classList.contains('upload-open')) return true;
         if (document.getElementById('moreSheet') && document.getElementById('moreSheet').classList.contains('open')) return true;
@@ -106,62 +106,64 @@
         )) return true;
         return false;
     }
-    function applyRot() {
+    function paint() {
         var s = stage();
         if (!s) return;
-        s.cube.style.transform = 'translateZ(' + (-half()) + 'px) rotateY(' + rot + 'deg)';
+        var w = width();
+        var p = Math.min(1, Math.abs(x) / w);
+        var scale = 1 - p * 0.04;
+        s.page.style.transform = 'translate3d(' + x + 'px,0,0) scale(' + scale + ')';
+        s.next.style.transform = 'translate3d(' + (x + dir * w) + 'px,0,0)';
+        s.next.style.opacity = String(0.55 + p * 0.45);
     }
     function finishNav() {
         if (!pendingNav) return;
         var href = pendingNav;
         pendingNav = null;
+        x = 0; v = 0; target = 0;
+        paint();
         if (window.__hshsNavigate) window.__hshsNavigate(href);
-        rot = 0; rotV = 0; rotTarget = 0;
-        applyRot();
+        requestAnimationFrame(function () {
+            x = 0; v = 0; target = 0;
+            var s = stage();
+            if (s) {
+                s.page.style.transform = '';
+                s.next.style.transform = 'translate3d(' + width() + 'px,0,0)';
+                s.next.innerHTML = '';
+            }
+        });
     }
-    function tickRot() {
-        if (rotRun) return;
-        rotRun = true;
+    function tick() {
+        if (running) return;
+        running = true;
         var last = performance.now();
         function frame(now) {
             var dt = Math.min(0.032, (now - last) / 1000);
             last = now;
             if (window.HshsSpring && !(window.HshsSpring.reduced && window.HshsSpring.reduced())) {
-                var next = window.HshsSpring.step({ x: rot, v: rotV }, rotTarget, dt, 170, 24, 1);
-                rot = next.x; rotV = next.v;
-                applyRot();
+                var next = window.HshsSpring.step({ x: x, v: v }, target, dt, 180, 26, 1);
+                x = next.x; v = next.v;
+                paint();
                 if (next.rest) {
-                    rotRun = false;
-                    if (Math.abs(rotTarget) >= 80) finishNav();
+                    running = false;
+                    x = target; v = 0; paint();
+                    if (Math.abs(target) > width() * 0.5) finishNav();
                     return;
                 }
                 requestAnimationFrame(frame);
                 return;
             }
-            rot = rotTarget; rotV = 0; rotRun = false; applyRot();
-            if (Math.abs(rotTarget) >= 80) finishNav();
+            x = target; v = 0; running = false; paint();
+            if (Math.abs(target) > width() * 0.5) finishNav();
         }
         requestAnimationFrame(frame);
-    }
-    function setCube(deg, dragging) {
-        var s = stage();
-        if (!s) return;
-        s.cube.classList.toggle('is-dragging', !!dragging);
-        s.cube.classList.toggle('is-settle', !dragging);
-        if (dragging) {
-            rotRun = false;
-            rot = deg; rotV = 0; rotTarget = deg;
-            applyRot();
-            return;
-        }
-        rotTarget = deg;
-        tickRot();
     }
     function onStart(e) {
         if (blocked(e)) return;
         var t = e.touches ? e.touches[0] : e;
         tracking = true; axis = null; primed = null;
         startX = lastX = t.clientX; startY = t.clientY; lastT = Date.now(); vx = 0;
+        running = false;
         stage();
     }
     function onMove(e) {
@@ -171,7 +173,7 @@
         var dy = t.clientY - startY;
         if (!axis) {
             if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
-            axis = Math.abs(dx) > Math.abs(dy) * 1.2 ? 'x' : 'y';
+            axis = Math.abs(dx) > Math.abs(dy) * 1.15 ? 'x' : 'y';
             if (axis === 'y') { tracking = false; return; }
         }
         if (axis !== 'x') return;
@@ -179,34 +181,45 @@
         var now = Date.now();
         vx = (t.clientX - lastX) / Math.max(8, now - lastT);
         lastX = t.clientX; lastT = now;
-        var dir = dx < 0 ? 1 : -1;
+        dir = dx < 0 ? 1 : -1;
         var n = neighbor(dir);
-        if (n && (!primed || primed.href !== n.href)) {
-            primed = { href: n.href, file: n.file, dir: dir };
-            fillFace(primed);
+        if (!n) {
+            x = dx * 0.28;
+            paint();
+            return;
         }
-        var deg = Math.max(-88, Math.min(88, (dx / (window.innerWidth || 360)) * 90));
-        setCube(deg, true);
+        if (!primed || primed.href !== n.href) {
+            primed = n;
+            fillNext(n);
+        }
+        var w = width();
+        x = Math.max(-w, Math.min(w, dx));
+        paint();
     }
     function onEnd() {
         if (!tracking) return;
         tracking = false;
-        if (axis !== 'x') { pendingNav = null; setCube(0, false); return; }
-        var dx = lastX - startX;
-        var w = window.innerWidth || 360;
-        var dir = dx < 0 ? 1 : -1;
+        if (axis !== 'x') { pendingNav = null; target = 0; tick(); return; }
+        var w = width();
         var n = neighbor(dir);
-        var should = n && (Math.abs(dx) > w * 0.26 || Math.abs(vx) > 0.5);
-        rotV = (vx / w) * 90 * 1000;
-        if (!should) { pendingNav = null; setCube(0, false); return; }
+        var should = n && (Math.abs(x) > w * 0.28 || Math.abs(vx) > 0.45);
+        v = vx * 1000;
+        if (!should) { pendingNav = null; target = 0; tick(); return; }
         pendingNav = n.href;
-        setCube(dir > 0 ? -90 : 90, false);
+        target = dir > 0 ? -w : w;
+        tick();
     }
+    document.addEventListener('hshs:page', function () {
+        x = 0; v = 0; target = 0; pendingNav = null; running = false;
+        var s = stage();
+        if (s) {
+            s.page.style.transform = '';
+            s.next.style.transform = 'translate3d(' + width() + 'px,0,0)';
+        }
+    });
     function boot() {
         addCss();
-        sizeCube();
         stage();
-        window.addEventListener('resize', sizeCube, { passive: true });
         document.addEventListener('touchstart', onStart, { passive: true });
         document.addEventListener('touchmove', onMove, { passive: false });
         document.addEventListener('touchend', onEnd);
