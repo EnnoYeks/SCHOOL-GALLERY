@@ -13,7 +13,7 @@
         'clips.html', 'shorts.html', 'buzz.html', 'chat.html'
     ];
 
-    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js|hshs-boot\.js|hshs-swipe\.js|hshs-store\.js|hshs-upload\.js|hshs-motion\.js|gallery-transitions\.js|page-swipe\.js/;
+    const SHARED_SCRIPT = /config\.js|db\.js|utils\.js|particles\.js|theme\.js|navigation\.js|mobile-navigation\.js|mobile-shell\.js|search\.js|mobile-search-btn\.js|hshs-boot\.js|hshs-swipe\.js|hshs-store\.js|hshs-upload\.js|hshs-motion\.js|gallery-transitions\.js|page-swipe\.js|hshs-tt\.js/;
     const loadedCss = new Set();
     const loadedPageScripts = new Set();
     const pageCache = window.__hshsPageCache = window.__hshsPageCache || {};
@@ -139,6 +139,7 @@
             document.head.insertBefore(link, document.head.firstChild);
         }
         addLink('hshs-boot-css', 'hshs-boot.css');
+        addLink('hshs-tt-css', 'hshs-tt.css');
         addLink('hshs-mobile-shell-css', 'mobile-shell.css');
         addLink('hshs-swipe-css', 'hshs-swipe.css');
         addLink('hshs-motion-css', 'gallery-transitions.css');
@@ -283,7 +284,8 @@
             document.querySelector('.more-backdrop'),
             document.getElementById('hshs-boot'),
             document.getElementById('hshs-cube-stage'),
-            document.getElementById('hshsUploadStudio')
+            document.getElementById('hshsUploadStudio'),
+            document.getElementById('hshs-tt-overlay')
         ]);
         const move = [];
         Array.from(document.body.children).forEach(function (el) {
@@ -302,7 +304,7 @@
         const box = document.createElement('div');
         Array.from(doc.body.children).forEach(function (el) {
             const cls = el.className ? String(el.className) : '';
-            const skip = el.tagName === 'SCRIPT' || el.id === 'hshs-page' || el.id === 'hshs-boot' || el.id === 'hshsUploadStudio' || keepNames.some(function (name) { return cls.indexOf(name) !== -1; });
+            const skip = el.tagName === 'SCRIPT' || el.id === 'hshs-page' || el.id === 'hshs-boot' || el.id === 'hshsUploadStudio' || el.id === 'hshs-tt-overlay' || keepNames.some(function (name) { return cls.indexOf(name) !== -1; });
             if (!skip) box.appendChild(el.cloneNode(true));
         });
         return box;
@@ -375,6 +377,7 @@
             applyPage(cached, next.href, fromHistory);
             return;
         }
+        if (window.__hshsTt) window.__hshsTt.show();
         if (window.__hshsPageSkeleton) root.innerHTML = window.__hshsPageSkeleton(file);
         try {
             const res = await fetch(next.href, { credentials: 'same-origin' });
@@ -385,6 +388,8 @@
             applyPage(html, next.href, fromHistory);
         } catch (err) {
             location.href = next.href;
+        } finally {
+            if (window.__hshsTt) window.__hshsTt.hide();
         }
     }
 
