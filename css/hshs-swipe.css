@@ -1,50 +1,50 @@
+/* Fixed-size slide deck — same width/height on every page */
 @media (max-width: 1024px) {
-    #hshs-cube-stage {
-        perspective: 1400px;
-        perspective-origin: 50% 45%;
-        overflow: hidden;
-        touch-action: pan-y;
-        min-height: calc(100vh - 148px);
-    }
-    #hshs-cube {
-        position: relative;
-        min-height: calc(100vh - 148px);
-        transform-style: preserve-3d;
-        transform: translateZ(calc(var(--cube-z, 50vw) * -1)) rotateY(0deg);
-        will-change: transform;
-    }
-    #hshs-cube.is-dragging,
-    #hshs-cube.is-settle {
-        transition: none;
-    }
-    #hshs-page,
-    #hshs-cube-next {
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-    }
-    #hshs-page {
-        position: relative;
-        transform: rotateY(0deg) translateZ(var(--cube-z, 50vw));
-    }
-    #hshs-cube-next {
-        position: absolute;
-        inset: 0;
-        overflow: auto;
-        background: var(--bg-primary, #071433);
-        pointer-events: none;
-        transform: rotateY(90deg) translateZ(var(--cube-z, 50vw));
-    }
-    #hshs-cube-next.is-left {
-        transform: rotateY(-90deg) translateZ(var(--cube-z, 50vw));
-    }
-    .mobile-tabbar, .navbar {
-        transform: none !important;
-    }
-    .mobile-tabbar a {
-        transition: transform .22s ease, color .22s ease, background .22s ease;
-    }
-    .mobile-tabbar a.active {
-        transform: translateY(-2px) scale(1.14);
-        color: #eab308;
-    }
+  html.hshs-device-mobile,
+  html.hshs-device-mobile body {
+    overflow: hidden;
+  }
+  #hshs-swipe-stage {
+    position: relative;
+    width: 100%;
+    height: calc(100dvh - 148px);
+    height: calc(100svh - 148px);
+    overflow: hidden;
+    touch-action: pan-y;
+    background: var(--bg-primary, #071433);
+  }
+  #hshs-page,
+  #hshs-swipe-next {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    will-change: transform;
+    backface-visibility: hidden;
+    background: var(--bg-primary, #071433);
+  }
+  #hshs-swipe-next {
+    pointer-events: none;
+    box-shadow: -12px 0 32px rgba(0,0,0,.18);
+  }
+  .mobile-tabbar,
+  .navbar {
+    transform: none !important;
+  }
+  .mobile-tabbar a.active {
+    color: #eab308;
+  }
+}
+@media (min-width: 1025px) {
+  #hshs-swipe-next { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #hshs-page,
+  #hshs-swipe-next {
+    transition: none !important;
+  }
 }
