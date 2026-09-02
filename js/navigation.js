@@ -103,10 +103,12 @@ document.addEventListener('DOMContentLoaded', () => {
         link.href = current.replace(/js\/navigation\.js(\?.*)?$/, 'css/' + file);
         document.head.appendChild(link);
     }
+    addCss('hshs-tt-css', 'hshs-tt.css');
     addCss('hshs-social-css', 'hshs-social.css');
     addCss('hshs-motion-css', 'gallery-transitions.css');
     addCss('hshs-page-swipe-css', 'page-swipe.css');
     addCss('hshs-chat-spring-css', 'hshs-chat-spring.css');
+    add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');
     add('hshs-perf-js', 'hshs-perf.js');
     add('hshs-store-js', 'hshs-store.js');
