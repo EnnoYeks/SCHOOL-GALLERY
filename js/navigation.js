@@ -2,6 +2,9 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
+var HSHS_ASSET_VER = '260902c';
+window.__hshsAssetVer = HSHS_ASSET_VER;
+
 class Navigation {
     constructor() { this.init(); }
     init() {
@@ -71,13 +74,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+(function recoverStaleBoot() {
+    function reveal() {
+        var root = document.documentElement;
+        root.classList.remove('hshs-booting');
+        root.classList.add('hshs-ready');
+        var boot = document.getElementById('hshs-boot');
+        if (boot && boot.parentNode) boot.remove();
+        if (window.__hshsTt) window.__hshsTt.hide();
+    }
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) reveal();
+    });
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+            regs.forEach(function (reg) { reg.unregister(); });
+        }).catch(function () {});
+    }
+    if (window.caches && caches.keys) {
+        caches.keys().then(function (keys) {
+            keys.forEach(function (key) { caches.delete(key); });
+        }).catch(function () {});
+    }
+})();
+
 (function loadHshsMobileShell() {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html,html.hshs-booting,html:not(.hshs-ready){background:#071433!important}html.hshs-booting body>*:not(#hshs-boot),html:not(.hshs-ready) body>*:not(#hshs-boot){opacity:0!important;visibility:hidden!important}html.hshs-booting .nav-links,html:not(.hshs-ready) .nav-links{display:none!important}@media(max-width:1024px){.brand-mark,.brand-mark img,.logo img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
+        st.textContent = 'html.hshs-booting{background:#071433!important}html.hshs-booting body>*:not(#hshs-boot){opacity:0!important;visibility:hidden!important}html.hshs-booting .nav-links{display:none!important}@media(max-width:1024px){.brand-mark,.brand-mark img,.logo img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
         document.documentElement.classList.add('hshs-booting');
-        document.documentElement.classList.remove('hshs-ready');
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
         document.documentElement.classList.toggle('hshs-device-desktop', !mobile);
@@ -91,12 +117,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     if (!current) return;
+    function bust(url) {
+        return url.replace(/(\?.*)?$/, '') + '?v=' + HSHS_ASSET_VER;
+    }
     function add(id, file) {
         if (document.getElementById(id)) return;
         var s = document.createElement('script');
         s.id = id;
         s.async = false;
-        s.src = current.replace(/navigation\.js(\?.*)?$/, file);
+        s.src = bust(current.replace(/navigation\.js(\?.*)?$/, file));
         document.head.appendChild(s);
     }
     function addCss(id, file) {
@@ -104,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var link = document.createElement('link');
         link.id = id;
         link.rel = 'stylesheet';
-        link.href = current.replace(/js\/navigation\.js(\?.*)?$/, 'css/' + file);
+        link.href = bust(current.replace(/js\/navigation\.js(\?.*)?$/, 'css/' + file));
         document.head.appendChild(link);
     }
     addCss('hshs-no-flicker-css', 'hshs-no-flicker.css');
