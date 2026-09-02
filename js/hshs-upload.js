@@ -36,6 +36,16 @@
 
     var CLASS_TAGS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'Campus', 'Sports', 'Choir', 'STEM', 'Houses'];
 
+    // Small HTML-escape helper to avoid XSS when we build innerHTML from user input
+    function escapeHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     var draft = {
         kind: 'photo',
         src: '',
@@ -93,11 +103,11 @@
                 createImageBitmap(file).then(function (bitmap) {
                     var scale = Math.min(1, 1280 / Math.max(bitmap.width, bitmap.height));
                     var canvas = document.createElement('canvas');
-                    canvas.width = Math.round(bitmap.width * scale);
-                    canvas.height = Math.round(bitmap.height * scale);
+                    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+                    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
                     canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
                     resolve({ kind: kind, src: canvas.toDataURL('image/jpeg', 0.78) });
-                }).catch(reject);
+                }).catch(function(err){ reject(err); });
                 return;
             }
             var reader = new FileReader();
@@ -249,6 +259,7 @@
                             createdAt: Date.now()
                         };
                         s.posts.unshift(post);
+                        // Persist to the agreed v2 key used across the app
                         localStorage.setItem('hshsWorldStore_v2', JSON.stringify(s));
                     }
                 } catch (e) {}
@@ -283,7 +294,7 @@
         if (step === 'source') {
             html += '<div class="hshs-upload-body">';
             html += '<p class="hshs-upload-lead">Library, camera, or record — then tag class and pick pages.</p>';
-            if (errorMsg) html += '<p class="hshs-upload-error">' + errorMsg + '</p>';
+            if (errorMsg) html += '<p class="hshs-upload-error">' + escapeHtml(errorMsg) + '</p>';
             html += '<button type="button" class="hshs-source-card" data-action="library"><span class="ico"><i class="fas fa-images"></i></span><span><b>Library</b><small>Photos and videos on this device</small></span></button>';
             html += '<button type="button" class="hshs-source-card" data-action="photo"><span class="ico"><i class="fas fa-camera"></i></span><span><b>Camera</b><small>Take a still right now</small></span></button>';
             html += '<button type="button" class="hshs-source-card" data-action="video"><span class="ico"><i class="fas fa-video"></i></span><span><b>Record</b><small>Clip for Vibe or Buzz</small></span></button>';
@@ -302,7 +313,7 @@
             html += '<span class="hshs-cam-side"></span></div></div>';
         } else {
             html += '<div class="hshs-upload-body hshs-compose">';
-            html += '<div class="hshs-preview"><img src="' + draft.src + '" alt="" style="filter:' + filterCss(draft.filter) + '"></div>';
+            html += '<div class="hshs-preview"><img src="' + escapeHtml(draft.src) + '" alt="" style="filter:' + filterCss(draft.filter) + '"></div>';
             html += '<div class="hshs-section"><label>Filter</label><div class="hshs-chips">';
             FILTERS.forEach(function (f) {
                 html += '<button type="button" class="hshs-chip' + (draft.filter === f.id ? ' on' : '') + '" data-filter="' + f.id + '">' + f.label + '</button>';
@@ -324,7 +335,8 @@
                 html += '<button type="button" class="hshs-dest' + (on ? ' on' : '') + '" data-dest="' + d.id + '"><span><b>' + d.label + '</b><small>' + d.hint + '</small></span>' + (on ? '<i class="fas fa-check"></i>' : '') + '</button>';
             });
             html += '</div></div>';
-            html += '<div class="hshs-section"><label>Caption</label><textarea id="hshsCaption" rows="3" placeholder="What is this moment?">' + (draft.caption || '').replace(/</g, '<') + '</textarea></div>';
+            // Escape caption safely when inserting into innerHTML
+            html += '<div class="hshs-section"><label>Caption</label><textarea id="hshsCaption" rows="3" placeholder="What is this moment?">' + escapeHtml(draft.caption || '') + '</textarea></div>';
             html += '<button type="button" class="hshs-post-btn" id="hshsPublish"' + (!draft.destinations.length ? ' disabled' : '') + '>Post to ' + draft.destinations.length + ' page' + (draft.destinations.length === 1 ? '' : 's') + '</button>';
             html += '</div>';
         }
