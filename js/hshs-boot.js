@@ -18,10 +18,10 @@
         if (done) return;
         parts[name] = Math.max(parts[name], Math.min(1, value));
         paint(note);
-        if (ready()) finish();
+        if (coreReady()) finish();
     }
-    function ready() {
-        return parts.css >= 1 && parts.dom >= 1 && parts.shell >= 1 && parts.fonts >= 1 && parts.images >= 1 && parts.page >= 1 && parts.site >= 1;
+    function coreReady() {
+        return parts.css >= 1 && parts.dom >= 1 && parts.shell >= 1 && parts.fonts >= 1 && parts.page >= 1;
     }
     function paint(note) {
         var pct = total();
@@ -74,7 +74,6 @@
     function mountSplash() {
         if (document.getElementById('hshs-boot')) return;
         document.documentElement.classList.add('hshs-booting');
-        document.documentElement.classList.remove('hshs-ready');
         var box = document.createElement('div');
         box.id = 'hshs-boot';
         box.innerHTML =
@@ -135,7 +134,7 @@
             link.addEventListener('load', one, { once: true });
             link.addEventListener('error', one, { once: true });
         });
-        setTimeout(function () { setPart('css', 1, 'Styles ready'); }, 2500);
+        setTimeout(function () { setPart('css', 1, 'Styles ready'); }, 1800);
     }
     function watchImages(scope) {
         var root = scope || document;
@@ -155,7 +154,7 @@
                 img.addEventListener('load', one, { once: true });
                 img.addEventListener('error', one, { once: true });
             });
-            setTimeout(function () { setPart('images', 1, 'Pictures ready'); resolve(); }, 3500);
+            setTimeout(function () { setPart('images', 1, 'Pictures ready'); resolve(); }, 2500);
         });
     }
     function fileKey(href) {
@@ -191,29 +190,32 @@
             });
         })).then(function () { setPart('site', 1, 'Site ready'); });
     }
+    function reveal() {
+        window.__hshsBootDone = true;
+        document.documentElement.classList.remove('hshs-booting');
+        document.documentElement.classList.add('hshs-ready');
+        var boot = document.getElementById('hshs-boot');
+        if (boot) {
+            boot.classList.add('is-off');
+            setTimeout(function () { if (boot.parentNode) boot.remove(); }, 420);
+        }
+        if (window.__hshsTt) window.__hshsTt.hide();
+    }
     function finish() {
         if (done) return;
         done = true;
         Object.keys(parts).forEach(function (k) { parts[k] = 1; });
         paint('Ready');
         var wait = Math.max(0, MIN_BOOT - (Date.now() - started));
-        setTimeout(function () {
-            document.documentElement.classList.remove('hshs-booting');
-            document.documentElement.classList.add('hshs-ready');
-            var boot = document.getElementById('hshs-boot');
-            if (boot) {
-                boot.classList.add('is-off');
-                setTimeout(function () { if (boot.parentNode) boot.remove(); }, 420);
-            }
-        }, wait);
-    }
-    function repeat(html, n) {
-        var out = '';
-        for (var i = 0; i < n; i++) out += html;
-        return out;
+        setTimeout(reveal, wait);
     }
     function pageSkeleton(file) {
         file = (file || '').toLowerCase();
+        function repeat(html, n) {
+            var out = '';
+            for (var i = 0; i < n; i++) out += html;
+            return out;
+        }
         var tabs = '<div class="sk-tabs"><i></i><i></i><i></i><i></i></div>';
         var playGrid = '<div class="sk-play-grid">' + repeat('<article class="sk-play"><span class="sk-play-btn"></span></article>', 4) + '</div>';
         var playList = '<div class="sk-play-list">' + repeat('<div class="sk-play-row"><div class="thumb"></div><div><div class="sk-line"></div><div class="sk-line s"></div></div></div>', 4) + '</div>';
@@ -251,7 +253,7 @@
     setTimeout(function () { setPart('fonts', 1, 'Text ready'); }, 1800);
     var shellTries = 0;
     var shellTimer = setInterval(function () {
-        if (window.__hshsMobileShell || ++shellTries > 80) {
+        if (window.__hshsMobileShell || ++shellTries > 40) {
             clearInterval(shellTimer);
             setPart('shell', 1, 'App shell ready');
         }
@@ -265,5 +267,7 @@
     setTimeout(function () {
         setPart('css', 1); setPart('dom', 1); setPart('shell', 1);
         setPart('fonts', 1); setPart('images', 1); setPart('page', 1); setPart('site', 1, 'Ready');
-    }, 12000);
+        if (!done) finish();
+        else reveal();
+    }, 6500);
 })();

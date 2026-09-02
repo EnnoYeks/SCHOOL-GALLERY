@@ -1,22 +1,20 @@
-html.hshs-booting,
-html:not(.hshs-ready) { background: #071433; }
-html.hshs-booting body > *:not(#hshs-boot),
-html:not(.hshs-ready) body > *:not(#hshs-boot) {
+html.hshs-booting { background: #071433; }
+html.hshs-booting body > *:not(#hshs-boot) {
     opacity: 0 !important;
     pointer-events: none !important;
 }
-html.hshs-booting .nav-links,
-html:not(.hshs-ready) .nav-links { display: none !important; }
+html.hshs-booting .nav-links { display: none !important; }
 #hshs-boot {
     position: fixed; inset: 0; z-index: 4000;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
     background: #071433;
     color: #f4efe4;
-    transition: opacity .42s ease, filter .42s ease;
+    transition: opacity .42s ease;
 }
-#hshs-boot.is-off { opacity: 0; filter: blur(6px); pointer-events: none; }
-html.hshs-ready body > *:not(#hshs-boot) { opacity: 1 !important; pointer-events: auto !important; }
+#hshs-boot.is-off { opacity: 0; pointer-events: none; }
+html.hshs-ready body > *:not(#hshs-boot),
+html:not(.hshs-booting) body > *:not(#hshs-boot) { opacity: 1 !important; pointer-events: auto !important; }
 
 .hshs-boot-sky {
     position: absolute; inset: 0; pointer-events: none;
@@ -40,23 +38,11 @@ html.hshs-ready body > *:not(#hshs-boot) { opacity: 1 !important; pointer-events
         radial-gradient(1px 1px at 61% 6%, #fff, transparent),
         radial-gradient(1.8px 1.8px at 72% 18%, #fff, transparent),
         radial-gradient(1px 1px at 81% 9%, #fff, transparent),
-        radial-gradient(1.2px 1.2px at 91% 24%, #fff, transparent),
-        radial-gradient(1px 1px at 14% 44%, #fff, transparent),
-        radial-gradient(1.5px 1.5px at 33% 38%, #fff, transparent),
-        radial-gradient(1px 1px at 55% 32%, #fff, transparent),
-        radial-gradient(1.3px 1.3px at 69% 41%, #fff, transparent),
-        radial-gradient(1px 1px at 88% 36%, #fff, transparent),
-        radial-gradient(1.4px 1.4px at 6% 62%, #fff, transparent),
-        radial-gradient(1px 1px at 22% 58%, #fff, transparent),
-        radial-gradient(1.2px 1.2px at 41% 52%, #fff, transparent),
-        radial-gradient(1px 1px at 77% 55%, #fff, transparent),
-        radial-gradient(1.6px 1.6px at 94% 48%, #fff, transparent);
+        radial-gradient(1.2px 1.2px at 91% 24%, #fff, transparent);
     opacity: .7;
     animation: hshsBootTwinkle 3.2s ease-in-out infinite;
 }
-.hshs-boot-aurora {
-    position: absolute; border-radius: 999px; filter: blur(42px);
-}
+.hshs-boot-aurora { position: absolute; border-radius: 999px; filter: blur(42px); }
 .hshs-boot-aurora.a {
     width: 42vw; height: 42vw; max-width: 420px; max-height: 420px;
     left: 6%; top: 14%; background: rgba(234,179,8,.38);
@@ -72,13 +58,8 @@ html.hshs-ready body > *:not(#hshs-boot) { opacity: 1 !important; pointer-events
     background: rgba(29,78,216,.3);
     animation: hshsBootDrift 18s ease-in-out infinite alternate;
 }
-.hshs-boot-campus {
-    position: absolute; left: 0; right: 0; bottom: 0; height: 42%;
-    color: #061028;
-}
-.hshs-boot-campus svg {
-    width: 100%; height: 100%; display: block;
-}
+.hshs-boot-campus { position: absolute; left: 0; right: 0; bottom: 0; height: 42%; color: #061028; }
+.hshs-boot-campus svg { width: 100%; height: 100%; display: block; }
 .hshs-boot-grain {
     position: absolute; inset: 0; opacity: .16; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
@@ -90,9 +71,7 @@ html.hshs-ready body > *:not(#hshs-boot) { opacity: 1 !important; pointer-events
     box-shadow: 0 18px 40px rgba(0,0,0,.42);
     animation: hshsBootFloat 7s ease-in-out infinite;
 }
-.hshs-boot-polaroid i {
-    display: block; aspect-ratio: 3 / 4; border-radius: 2px;
-}
+.hshs-boot-polaroid i { display: block; aspect-ratio: 3 / 4; border-radius: 2px; }
 .hshs-boot-polaroid.p1 { left: 6%; top: 10%; rotate: -11deg; }
 .hshs-boot-polaroid.p1 i { background: linear-gradient(160deg, #12306b, #eab308 80%); }
 .hshs-boot-polaroid.p2 { right: 7%; top: 8%; left: auto; rotate: 9deg; animation-delay: .4s; }
@@ -128,43 +107,19 @@ html.hshs-ready body > *:not(#hshs-boot) { opacity: 1 !important; pointer-events
     filter: drop-shadow(0 10px 18px rgba(0,0,0,.45));
 }
 .hshs-boot-cat svg { width: 108px; height: 92px; display: block; overflow: visible; }
-.hshs-boot-cat .head {
-    transform-origin: 44px 40px;
-    animation: hshsCatHead 2.6s ease-in-out infinite;
-}
-.hshs-boot-cat .tail {
-    transform-origin: 78px 54px;
-    animation: hshsCatTail 1.15s ease-in-out infinite;
-}
-@keyframes hshsCatBreathe {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-}
-@keyframes hshsCatHead {
-    0%,100% { transform: rotate(-6deg); }
-    50% { transform: rotate(7deg); }
-}
-@keyframes hshsCatTail {
-    0%,100% { transform: rotate(-12deg); }
-    50% { transform: rotate(16deg); }
-}
+.hshs-boot-cat .head { transform-origin: 44px 40px; animation: hshsCatHead 2.6s ease-in-out infinite; }
+.hshs-boot-cat .tail { transform-origin: 78px 54px; animation: hshsCatTail 1.15s ease-in-out infinite; }
+@keyframes hshsCatBreathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes hshsCatHead { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(7deg); } }
+@keyframes hshsCatTail { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(16deg); } }
 @keyframes hshsBootSky {
     0% { background-position: 0% 20%, 100% 0%, 80% 100%, 0% 100%, 0% 0%; }
     50% { background-position: 30% 40%, 70% 20%, 60% 70%, 20% 80%, 40% 30%; }
     100% { background-position: 10% 80%, 60% 40%, 90% 20%, 30% 10%, 80% 70%; }
 }
-@keyframes hshsBootTwinkle {
-    0%,100% { opacity: .45; }
-    50% { opacity: .85; }
-}
-@keyframes hshsBootDrift {
-    from { transform: translate(-4%, -3%); }
-    to { transform: translate(6%, 5%); }
-}
-@keyframes hshsBootFloat {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
+@keyframes hshsBootTwinkle { 0%,100% { opacity: .45; } 50% { opacity: .85; } }
+@keyframes hshsBootDrift { from { transform: translate(-4%, -3%); } to { transform: translate(6%, 5%); } }
+@keyframes hshsBootFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 .hshs-boot-copy { margin-top: 8px; font-family: 'Segoe UI', sans-serif; }
 .hshs-boot-copy strong { display: block; color: #f4efe4; font-size: 1.35rem; }
 .hshs-boot-copy small { display: block; margin-top: 4px; color: rgba(244,239,228,.72); font-size: .8rem; }
