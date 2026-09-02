@@ -148,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addCss('hshs-chat-spring-css', 'hshs-chat-spring.css');
     addCss('hshs-account-css', 'hshs-account.css');
     addCss('hshs-settings-css', 'hshs-settings.css');
+    addCss('hshs-school-css', 'hshs-school.css');
     add('hshs-lock-js', 'hshs-lock.js');
     add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');
@@ -168,4 +169,5 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-chat-spring-js', 'hshs-chat-spring.js');
     add('hshs-account-js', 'hshs-account.js');
     add('hshs-settings-js', 'hshs-settings.js');
+    add('hshs-school-js', 'hshs-school.js');
 })();
