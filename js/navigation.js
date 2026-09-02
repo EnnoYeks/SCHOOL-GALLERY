@@ -75,8 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html,html.hshs-booting,html:not(.hshs-ready){background:#071433!important}html.hshs-booting body>*:not(#hshs-boot),html:not(.hshs-ready) body>*:not(#hshs-boot){opacity:0!important}html.hshs-booting .nav-links,html:not(.hshs-ready) .nav-links{display:none!important}@media(max-width:1024px){.brand-mark,.brand-mark img,.logo img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
+        st.textContent = 'html,html.hshs-booting,html:not(.hshs-ready){background:#071433!important}html.hshs-booting body>*:not(#hshs-boot),html:not(.hshs-ready) body>*:not(#hshs-boot){opacity:0!important;visibility:hidden!important}html.hshs-booting .nav-links,html:not(.hshs-ready) .nav-links{display:none!important}@media(max-width:1024px){.brand-mark,.brand-mark img,.logo img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
         document.documentElement.classList.add('hshs-booting');
+        document.documentElement.classList.remove('hshs-ready');
+        var mobile = window.matchMedia('(max-width: 1024px)').matches;
+        document.documentElement.classList.toggle('hshs-device-mobile', mobile);
+        document.documentElement.classList.toggle('hshs-device-desktop', !mobile);
         document.head.appendChild(st);
     }
     var current = document.currentScript && document.currentScript.src;
@@ -103,12 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
         link.href = current.replace(/js\/navigation\.js(\?.*)?$/, 'css/' + file);
         document.head.appendChild(link);
     }
+    addCss('hshs-no-flicker-css', 'hshs-no-flicker.css');
     addCss('hshs-tt-css', 'hshs-tt.css');
     addCss('hshs-social-css', 'hshs-social.css');
     addCss('hshs-motion-css', 'gallery-transitions.css');
     addCss('hshs-page-swipe-css', 'page-swipe.css');
     addCss('hshs-chat-spring-css', 'hshs-chat-spring.css');
     addCss('hshs-account-css', 'hshs-account.css');
+    add('hshs-lock-js', 'hshs-lock.js');
     add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');
     add('hshs-perf-js', 'hshs-perf.js');

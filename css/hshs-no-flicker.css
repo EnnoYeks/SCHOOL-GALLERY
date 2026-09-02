@@ -1,1 +1,29 @@
-/* removed old loader */
+/* Hide the real app until the major loader finishes */
+html {
+  background: #071433 !important;
+}
+html.hshs-booting,
+html:not(.hshs-ready) {
+  background: #071433 !important;
+}
+html.hshs-booting body > *:not(#hshs-boot),
+html:not(.hshs-ready) body > *:not(#hshs-boot) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+html.hshs-ready body > *:not(#hshs-boot) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+html.hshs-device-mobile .nav-links {
+  display: none !important;
+}
+@media (min-width: 1025px) {
+  html.hshs-device-desktop .mobile-tabbar,
+  html.hshs-device-desktop .more-sheet,
+  html.hshs-device-desktop .more-backdrop {
+    display: none !important;
+  }
+}
