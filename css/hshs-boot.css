@@ -1,4 +1,3 @@
-/* Dark professional badge splash */
 html.hshs-booting,
 html.hshs-booting body {
   background: #050d1c !important;
@@ -9,7 +8,8 @@ html.hshs-booting .particles-container,
 html.hshs-booting .floating-shapes,
 html.hshs-booting .navbar,
 html.hshs-booting .hero,
-html.hshs-booting .nav-links {
+html.hshs-booting .nav-links,
+html.hshs-booting #hshs-tt-overlay {
   display: none !important;
 }
 html.hshs-booting body > *:not(#hshs-boot) {
@@ -21,9 +21,8 @@ html.hshs-booting body > *:not(#hshs-boot) {
   position: fixed; inset: 0; z-index: 4000;
   display: flex; align-items: center; justify-content: center;
   background:
-    radial-gradient(640px 420px at 50% 40%, rgba(29,78,216,.2), transparent 64%),
+    radial-gradient(640px 420px at 50% 40%, rgba(29,78,216,.18), transparent 64%),
     #050d1c;
-  color: #dbe7ff;
   transition: opacity .38s ease;
 }
 #hshs-boot.is-off { opacity: 0; pointer-events: none; }
@@ -33,26 +32,27 @@ html:not(.hshs-booting) body > *:not(#hshs-boot) {
   visibility: visible !important;
   pointer-events: auto !important;
 }
-.hshs-boot-card { width: min(260px, 78vw); text-align: center; }
+.hshs-boot-card { width: min(240px, 72vw); text-align: center; }
 .hshs-boot-badge {
-  width: 158px; height: 158px; margin: 0 auto 26px;
-  filter: drop-shadow(0 16px 28px rgba(0,0,0,.4));
+  width: 148px; height: 148px; margin: 0 auto 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 28px rgba(0,0,0,.45));
   animation: hshsBadgeSoft 3.4s ease-in-out infinite;
 }
-.hshs-boot-badge svg { width: 158px; height: 158px; display: block; overflow: visible; }
 .hshs-boot-dots {
   display: flex; justify-content: center; align-items: center;
-  gap: 11px; height: 16px; margin: 2px 0 0;
+  gap: 11px; height: 16px;
 }
 .hshs-boot-dots i {
   width: 8px; height: 8px; border-radius: 50%;
-  background: #1e4fd7;
-  box-shadow: 0 0 12px rgba(59,130,246,.45);
+  background: #2563eb;
+  box-shadow: 0 0 12px rgba(37,99,235,.45);
   animation: hshsDot 1.2s ease-in-out infinite;
 }
 .hshs-boot-dots i:nth-child(2) { animation-delay: .16s; background: #3b82f6; }
 .hshs-boot-dots i:nth-child(3) { animation-delay: .32s; }
 .hshs-boot-note { display: none !important; }
+#hshs-tt-overlay { display: none !important; }
 .hshs-loader, #hshs-loader { display: none !important; }
 .hshs-page-skel { padding: 16px 14px 110px; }
 .hshs-page-skel .sk-hero,
