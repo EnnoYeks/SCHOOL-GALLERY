@@ -30,28 +30,29 @@
     function sizeBadge(logo) {
         var mark = logo.querySelector('.brand-mark');
         var img = logo.querySelector('.brand-mark img');
-        if (mark) { mark.style.width = '42px'; mark.style.height = '42px'; mark.style.flex = '0 0 42px'; }
+        if (mark) { mark.style.width = '44px'; mark.style.height = '44px'; mark.style.flex = '0 0 44px'; }
         if (img) {
-            img.width = 42; img.height = 42; img.decoding = 'async'; img.loading = 'eager';
-            img.style.width = '42px'; img.style.height = '42px'; img.style.objectFit = 'contain'; img.style.display = 'block';
+            img.width = 44; img.height = 44; img.decoding = 'async'; img.loading = 'eager';
+            img.style.width = '44px'; img.style.height = '44px'; img.style.objectFit = 'contain'; img.style.display = 'block';
         }
     }
     function dressLogo() {
         var logo = document.querySelector('.logo');
         if (!logo) return;
+        var copyHtml = '<strong>HSHS World <i class="fas fa-circle-check brand-tick" aria-hidden="true"></i></strong><small>Campus social</small>';
         if (!logo.querySelector('.brand-copy')) {
             var mark = document.createElement('span');
             mark.className = 'brand-mark';
-            mark.innerHTML = '<img src="' + BADGE + '" alt="Hawthorne Scribner High School badge" width="42" height="42" decoding="async">';
+            mark.innerHTML = '<img src="' + BADGE + '" alt="Hawthorne Scribner High School badge" width="44" height="44" decoding="async">';
             var copy = document.createElement('span');
             copy.className = 'brand-copy';
-            copy.innerHTML = '<strong>HSHS World</strong><small>Campus social</small>';
+            copy.innerHTML = copyHtml;
             logo.innerHTML = '';
             logo.appendChild(mark);
             logo.appendChild(copy);
-        } else if (!logo.querySelector('.brand-copy small')) {
+        } else {
             var c = logo.querySelector('.brand-copy');
-            if (c) c.innerHTML = '<strong>HSHS World</strong><small>Campus social</small>';
+            if (c && !c.querySelector('.brand-tick')) c.innerHTML = copyHtml;
         }
         sizeBadge(logo);
         logo.setAttribute('title', APP);
@@ -62,6 +63,8 @@
         nav.classList.add('hshs-topbar');
         var actions = nav.querySelector('.nav-actions');
         if (actions) actions.classList.add('hshs-top-actions');
+        var bar = document.querySelector('.navbar');
+        if (bar) bar.classList.add('hshs-flat-top');
     }
     function dressProfile() {
         var img = document.getElementById('profileImg');

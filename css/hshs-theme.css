@@ -50,19 +50,22 @@ body.dark-mode {
     body.has-mobile-shell .hero-buttons .btn-primary {
         color: #12306b !important;
     }
-    body.has-mobile-shell .navbar {
+    body.has-mobile-shell .navbar,
+    body.has-mobile-shell .navbar.hshs-flat-top {
         background: transparent !important;
+        border: 0 !important;
         border-bottom: none !important;
         box-shadow: none !important;
-        padding: 8px 10px 4px !important;
+        padding: 8px 12px 4px !important;
     }
-    body.has-mobile-shell .navbar-container {
-        background: linear-gradient(135deg, rgba(7,20,51,.94), rgba(18,48,107,.9));
-        border: 1px solid rgba(234,179,8,.38);
-        border-radius: 20px;
-        padding: 8px 12px !important;
+    body.has-mobile-shell .navbar-container,
+    body.has-mobile-shell .navbar-container.hshs-topbar {
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
         gap: 8px !important;
-        box-shadow: 0 10px 24px rgba(0,0,0,.22);
+        box-shadow: none !important;
     }
     body.has-mobile-shell .logo {
         background: none !important;
@@ -71,15 +74,20 @@ body.dark-mode {
         gap: 10px !important;
     }
     body.has-mobile-shell .brand-copy strong {
-        font-size: 1.18rem;
+        font-size: 1.12rem;
         letter-spacing: .02em;
         color: #fff;
+    }
+    body.has-mobile-shell .brand-tick {
+        color: #3b82f6;
+        font-size: .7rem;
     }
     body.has-mobile-shell .hshs-search-btn {
         width: 40px; height: 40px; border: 0; border-radius: 50%;
         background: #ffcc00;
         color: #102047; font-size: 15px; display: inline-flex;
         align-items: center; justify-content: center;
+        box-shadow: none;
     }
     body.has-mobile-shell .theme-toggle,
     body.has-mobile-shell #themeToggle,
@@ -97,6 +105,15 @@ body.dark-mode {
         width: 36px; height: 36px; border: 0; border-radius: 12px;
         background: rgba(15,23,42,.08); color: inherit; font-size: 22px; line-height: 1;
     }
+    .loading-skeleton {
+        background: linear-gradient(90deg, #122044 0%, #1d3d7a 45%, #2a5bd7 50%, #1d3d7a 55%, #122044 100%) !important;
+        background-size: 220% 100% !important;
+        animation: hshsSkelWave 1.15s ease-in-out infinite !important;
+    }
+}
+@keyframes hshsSkelWave {
+    0% { background-position: 120% 0; }
+    100% { background-position: -120% 0; }
 }
 .cta-section,
 .daily-quote-box {
