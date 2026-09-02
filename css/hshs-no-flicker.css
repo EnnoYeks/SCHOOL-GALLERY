@@ -1,18 +1,14 @@
-/* Hide the real app until the major loader finishes */
-html {
+/* Hide the real app only while the splash is running */
+html.hshs-booting {
   background: #071433 !important;
 }
-html.hshs-booting,
-html:not(.hshs-ready) {
-  background: #071433 !important;
-}
-html.hshs-booting body > *:not(#hshs-boot),
-html:not(.hshs-ready) body > *:not(#hshs-boot) {
+html.hshs-booting body > *:not(#hshs-boot) {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
 }
-html.hshs-ready body > *:not(#hshs-boot) {
+html.hshs-ready body > *:not(#hshs-boot),
+html:not(.hshs-booting) body > *:not(#hshs-boot) {
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;

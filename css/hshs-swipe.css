@@ -1,34 +1,36 @@
 /* Fixed-size slide deck — same width/height on every page */
 @media (max-width: 1024px) {
-  html.hshs-device-mobile,
-  html.hshs-device-mobile body {
-    overflow: hidden;
-  }
   #hshs-swipe-stage {
     position: relative;
     width: 100%;
-    height: calc(100dvh - 148px);
-    height: calc(100svh - 148px);
+    min-height: calc(100svh - 148px);
     overflow: hidden;
     touch-action: pan-y;
     background: var(--bg-primary, #071433);
   }
   #hshs-page,
   #hshs-swipe-next {
+    position: relative;
+    width: 100%;
+    min-height: calc(100svh - 148px);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    background: transparent;
+  }
+  #hshs-swipe-next {
+    display: none;
+    pointer-events: none;
+  }
+  #hshs-swipe-stage.is-swiping #hshs-page,
+  #hshs-swipe-stage.is-swiping #hshs-swipe-next {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
     height: 100%;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    will-change: transform;
-    backface-visibility: hidden;
-    background: var(--bg-primary, #071433);
+    overflow: hidden;
   }
-  #hshs-swipe-next {
-    pointer-events: none;
+  #hshs-swipe-stage.is-swiping #hshs-swipe-next {
+    display: block;
     box-shadow: -12px 0 32px rgba(0,0,0,.18);
   }
   .mobile-tabbar,

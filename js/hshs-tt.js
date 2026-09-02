@@ -1,5 +1,6 @@
 (function () {
     if (window.__hshsTt) return;
+    var hideTimer = 0;
 
     function addCss() {
         if (document.getElementById('hshs-tt-css')) return;
@@ -27,13 +28,19 @@
         (document.body || document.documentElement).appendChild(box);
         return box;
     }
-    function show() { overlay().classList.add('is-on'); }
+    function show() {
+        overlay().classList.add('is-on');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(hide, 1600);
+    }
     function hide() {
+        clearTimeout(hideTimer);
         var box = document.getElementById('hshs-tt-overlay');
         if (box) box.classList.remove('is-on');
     }
     function dress(el) {
         if (!el || el.dataset.hshsTt === '1') return;
+        if (el.closest && (el.closest('#hshs-boot') || el.closest('.hshs-page-skel'))) return;
         if (el.querySelector && el.querySelector('.hshs-tt')) {
             el.dataset.hshsTt = '1';
             return;
@@ -47,25 +54,16 @@
     function scan(root) {
         var scope = root || document;
         if (!scope.querySelectorAll) return;
-        scope.querySelectorAll('.fa-spinner, .fa-circle-notch, .spinner, .loading-spinner, .hshs-loader-spin').forEach(dress);
+        scope.querySelectorAll('.fa-spinner, .fa-circle-notch, .loading-spinner, .hshs-loader-spin').forEach(dress);
     }
     function boot() {
         addCss();
         overlay();
         scan(document);
-        var mo = new MutationObserver(function (records) {
-            records.forEach(function (rec) {
-                rec.addedNodes.forEach(function (node) {
-                    if (node.nodeType !== 1) return;
-                    if (node.matches && node.matches('.fa-spinner, .fa-circle-notch, .spinner, .loading-spinner, .hshs-loader-spin')) dress(node);
-                    scan(node);
-                });
-            });
-        });
-        mo.observe(document.documentElement, { childList: true, subtree: true });
     }
 
     window.__hshsTt = { show: show, hide: hide, html: html, scan: scan };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
     else boot();
+    document.addEventListener('hshs:page', function () { hide(); scan(document.getElementById('hshs-page')); });
 })();
