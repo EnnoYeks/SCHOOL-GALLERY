@@ -6,13 +6,10 @@
     var parts = { css: 0, dom: 0, shell: 0, fonts: 0, images: 0, page: 0, site: 0 };
     var done = false;
     var started = Date.now();
-    var labelEl;
-    var notes = ['Detecting device', 'Loading styles', 'Preparing pages', 'Opening HSHS World'];
 
-    function setPart(name, value, note) {
+    function setPart(name, value) {
         if (done) return;
         parts[name] = Math.max(parts[name], Math.min(1, value));
-        if (labelEl && note) labelEl.textContent = note;
         if (coreReady()) finish();
     }
     function coreReady() {
@@ -52,20 +49,14 @@
             box.id = 'hshs-boot';
             (document.body || document.documentElement).appendChild(box);
         }
-        if (!box.querySelector('.hshs-boot-card')) {
-            box.innerHTML =
-                '<div class="hshs-boot-card">' +
-                '<div class="hshs-boot-badge">' + badgeSvg() + '</div>' +
-                '<div class="hshs-boot-dots" aria-hidden="true"><i></i><i></i><i></i></div>' +
-                '<p class="hshs-boot-note" id="hshsBootNote">Detecting device</p>' +
-                '</div>';
-        }
-        labelEl = document.getElementById('hshsBootNote');
+        box.innerHTML =
+            '<div class="hshs-boot-card">' +
+            '<div class="hshs-boot-badge">' + badgeSvg() + '</div>' +
+            '<div class="hshs-boot-dots" aria-hidden="true"><i></i><i></i><i></i></div>' +
+            '</div>';
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
         document.documentElement.classList.toggle('hshs-device-desktop', !mobile);
-        if (labelEl) labelEl.textContent = mobile ? 'Phone layout ready' : 'Desktop layout ready';
-        setTimeout(function () { if (labelEl) labelEl.textContent = 'Loading styles'; }, 500);
     }
     function ensureCss() {
         if (document.getElementById('hshs-boot-css')) return;
@@ -84,39 +75,39 @@
     }
     function watchCss() {
         var links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
-        if (!links.length) { setPart('css', 1, 'Styles ready'); return; }
+        if (!links.length) { setPart('css', 1); return; }
         var left = links.length, marked = 0;
         function one() {
             marked += 1;
-            setPart('css', marked / left, 'Loading styles');
-            if (marked >= left) setPart('css', 1, 'Styles ready');
+            setPart('css', marked / left);
+            if (marked >= left) setPart('css', 1);
         }
         links.forEach(function (link) {
             if (link.sheet) { one(); return; }
             link.addEventListener('load', one, { once: true });
             link.addEventListener('error', one, { once: true });
         });
-        setTimeout(function () { setPart('css', 1, 'Styles ready'); }, 1600);
+        setTimeout(function () { setPart('css', 1); }, 1600);
     }
     function watchImages(scope) {
         var root = scope || document;
         var imgs = Array.from(root.querySelectorAll('img')).filter(function (img) {
             return !img.closest('#hshs-boot');
         });
-        if (!imgs.length) { setPart('images', 1, 'Pictures ready'); return Promise.resolve(); }
+        if (!imgs.length) { setPart('images', 1); return Promise.resolve(); }
         var left = imgs.length, marked = 0;
         return new Promise(function (resolve) {
             function one() {
                 marked += 1;
-                setPart('images', marked / left, 'Loading pictures');
-                if (marked >= left) { setPart('images', 1, 'Pictures ready'); resolve(); }
+                setPart('images', marked / left);
+                if (marked >= left) { setPart('images', 1); resolve(); }
             }
             imgs.forEach(function (img) {
                 if (img.complete && img.naturalWidth) { one(); return; }
                 img.addEventListener('load', one, { once: true });
                 img.addEventListener('error', one, { once: true });
             });
-            setTimeout(function () { setPart('images', 1, 'Pictures ready'); resolve(); }, 2200);
+            setTimeout(function () { setPart('images', 1); resolve(); }, 2200);
         });
     }
     function fileKey(href) {
@@ -145,12 +136,12 @@
                 cache[href] = html;
                 cache[fileKey(href)] = html;
                 marked += 1;
-                setPart('site', marked / left, 'Preparing pages');
+                setPart('site', marked / left);
             }).catch(function () {
                 marked += 1;
-                setPart('site', marked / left, 'Preparing pages');
+                setPart('site', marked / left);
             });
-        })).then(function () { setPart('site', 1, 'Pages ready'); });
+        })).then(function () { setPart('site', 1); });
     }
     function reveal() {
         window.__hshsBootDone = true;
@@ -167,7 +158,6 @@
         if (done) return;
         done = true;
         Object.keys(parts).forEach(function (k) { parts[k] = 1; });
-        if (labelEl) labelEl.textContent = 'Opening HSHS World';
         var wait = Math.max(0, MIN_BOOT - (Date.now() - started));
         setTimeout(reveal, wait);
     }
@@ -194,28 +184,28 @@
     watchCss();
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () {
-            setPart('dom', 1, 'Page structure ready');
+            setPart('dom', 1);
             mountSplash();
             prefetchSite();
         });
     } else {
-        setPart('dom', 1, 'Page structure ready');
+        setPart('dom', 1);
         prefetchSite();
     }
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setPart('fonts', 1, 'Text ready'); });
-    else setPart('fonts', 1, 'Text ready');
-    setTimeout(function () { setPart('fonts', 1, 'Text ready'); }, 1400);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setPart('fonts', 1); });
+    else setPart('fonts', 1);
+    setTimeout(function () { setPart('fonts', 1); }, 1400);
     var shellTries = 0;
     var shellTimer = setInterval(function () {
         if (window.__hshsMobileShell || ++shellTries > 40) {
             clearInterval(shellTimer);
-            setPart('shell', 1, 'App ready');
+            setPart('shell', 1);
         }
     }, 50);
-    watchImages(document).then(function () { setPart('page', 1, 'Content ready'); });
+    watchImages(document).then(function () { setPart('page', 1); });
     window.addEventListener('load', function () {
         setPart('css', 1); setPart('dom', 1); setPart('fonts', 1);
-        setPart('images', 1); setPart('page', 1, 'Opening HSHS World');
+        setPart('images', 1); setPart('page', 1);
         setPart('shell', 1);
     });
     setTimeout(function () {
