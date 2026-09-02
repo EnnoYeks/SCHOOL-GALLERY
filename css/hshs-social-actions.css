@@ -1,0 +1,14 @@
+.side-actions .action-btn.is-active{transform:scale(1.04)}
+.side-actions .like-action.is-active i{color:#ff4d67;filter:drop-shadow(0 0 8px rgba(255,77,103,.35))}
+.side-actions .save-action.is-active i{color:#8b7cff;filter:drop-shadow(0 0 8px rgba(139,124,255,.35))}
+.hshs-comments-panel{position:absolute;left:12px;right:12px;bottom:12px;z-index:20;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:18px;background:rgba(8,13,28,.94);backdrop-filter:blur(18px);box-shadow:0 16px 40px rgba(0,0,0,.35)}
+.post-card,.media-card,.video-card,.buzz-card{position:relative}
+.hshs-comments-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;color:#fff}
+.hshs-comments-close{border:0;background:transparent;color:#fff;font-size:22px;cursor:pointer}
+.hshs-comments-list{max-height:180px;overflow:auto;display:grid;gap:8px;margin-bottom:9px}
+.hshs-comment-row{display:grid;gap:2px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:#fff;font-size:13px}
+.hshs-comment-row b{font-size:12px;opacity:.78}.hshs-comment-row span{overflow-wrap:anywhere}
+.hshs-comments-empty{padding:14px;text-align:center;color:rgba(255,255,255,.62);font-size:13px}
+.hshs-comment-form{display:flex;gap:7px}.hshs-comment-form input{min-width:0;flex:1;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.07);color:#fff;outline:0}.hshs-comment-form button{width:42px;border:0;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
+.hshs-follow-person{font:inherit}
+@media(max-width:600px){.hshs-comments-panel{left:7px;right:7px;bottom:7px;border-radius:15px}.hshs-comments-list{max-height:145px}}
