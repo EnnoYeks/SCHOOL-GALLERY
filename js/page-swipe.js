@@ -3,9 +3,8 @@
   window.__hshsPageSwipe = true;
 
   var ORDER = [
-    'index.html', 'gallery.html', 'spotlight.html', 'buzz.html',
-    'photos.html', 'videos.html', 'trending.html', 'polls.html',
-    'memories.html', 'chat.html'
+    'index.html', 'buzz.html', 'gallery.html', 'photos.html', 'videos.html',
+    'spotlight.html', 'trending.html', 'polls.html', 'memories.html', 'chat.html'
   ];
   var lastFile = fileOf();
   var pendingDir = 0;

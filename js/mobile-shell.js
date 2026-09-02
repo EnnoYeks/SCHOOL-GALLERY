@@ -121,19 +121,19 @@
 
     function routes() {
         const more = [
-            { href: sub('chat.html'), icon: 'fa-comment-dots', label: 'Chat', tone: 'sky', match: ['chat.html'] },
-            { href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', tone: 'gold', match: ['spotlight.html'] },
-            { href: sub('trending.html'), icon: 'fa-arrow-trend-up', label: 'Trending', tone: 'ember', match: ['trending.html'] },
-            { href: sub('photos.html'), icon: 'fa-image', label: 'Photos', tone: 'teal', match: ['photos.html'] },
-            { href: sub('videos.html'), icon: 'fa-clapperboard', label: 'Vibe', tone: 'navy', match: ['videos.html'] },
-            { href: sub('polls.html'), icon: 'fa-chart-simple', label: 'Polls', tone: 'leaf', match: ['polls.html'] },
-            { href: sub('memories.html'), icon: 'fa-book-open', label: 'Memories', tone: 'lilac', match: ['memories.html'] },
-            { href: sub('about.html'), icon: 'fa-school', label: 'About', tone: 'navy', match: ['about.html'] },
-            { href: sub('contat.html'), icon: 'fa-paper-plane', label: 'Contact', tone: 'cyan', match: ['contat.html', 'contact.html'] },
-            { href: sub('settings.html'), icon: 'fa-sliders', label: 'Settings', tone: 'slate', match: ['settings.html'] }
+            { href: sub('chat.html'), icon: 'fa-comments', label: 'Chat', tone: 'sky', match: ['chat.html'] },
+            { href: sub('spotlight.html'), icon: 'fa-trophy', label: 'Spotlight', tone: 'gold', match: ['spotlight.html'] },
+            { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', tone: 'ember', match: ['trending.html'] },
+            { href: sub('photos.html'), icon: 'fa-camera', label: 'Photos', tone: 'teal', match: ['photos.html'] },
+            { href: sub('videos.html'), icon: 'fa-play', label: 'Vibe', tone: 'navy', match: ['videos.html'] },
+            { href: sub('polls.html'), icon: 'fa-square-poll-vertical', label: 'Polls', tone: 'leaf', match: ['polls.html'] },
+            { href: sub('memories.html'), icon: 'fa-clock-rotate-left', label: 'Memories', tone: 'lilac', match: ['memories.html'] },
+            { href: sub('about.html'), icon: 'fa-graduation-cap', label: 'About', tone: 'navy', match: ['about.html'] },
+            { href: sub('contat.html'), icon: 'fa-envelope', label: 'Contact', tone: 'cyan', match: ['contat.html', 'contact.html'] },
+            { href: sub('settings.html'), icon: 'fa-gear', label: 'Settings', tone: 'slate', match: ['settings.html'] }
         ];
         if (isAdmin()) {
-            more.push({ href: sub('admin.html'), icon: 'fa-id-badge', label: 'Staff', tone: 'gold', match: ['admin.html'] });
+            more.push({ href: sub('admin.html'), icon: 'fa-user-shield', label: 'Staff', tone: 'gold', match: ['admin.html'] });
         }
         return {
             PRIMARY: [
@@ -145,14 +145,14 @@
             DESKTOP: [
                 { href: homeHref(), icon: 'fa-house', label: 'Home', match: ['index.html', ''] },
                 { href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] },
-                { href: sub('chat.html'), icon: 'fa-comment-dots', label: 'Chat', match: ['chat.html'] },
+                { href: sub('chat.html'), icon: 'fa-comments', label: 'Chat', match: ['chat.html'] },
                 { href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html'] },
-                { href: sub('photos.html'), icon: 'fa-image', label: 'Photos', match: ['photos.html'] },
-                { href: sub('videos.html'), icon: 'fa-clapperboard', label: 'Vibe', match: ['videos.html'] },
-                { href: sub('trending.html'), icon: 'fa-arrow-trend-up', label: 'Trending', match: ['trending.html'] },
-                { href: sub('spotlight.html'), icon: 'fa-star', label: 'Spotlight', match: ['spotlight.html'] },
-                { href: sub('polls.html'), icon: 'fa-chart-simple', label: 'Polls', match: ['polls.html'] },
-                { href: sub('memories.html'), icon: 'fa-book-open', label: 'Memories', match: ['memories.html'] }
+                { href: sub('photos.html'), icon: 'fa-camera', label: 'Photos', match: ['photos.html'] },
+                { href: sub('videos.html'), icon: 'fa-play', label: 'Vibe', match: ['videos.html'] },
+                { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', match: ['trending.html'] },
+                { href: sub('spotlight.html'), icon: 'fa-trophy', label: 'Spotlight', match: ['spotlight.html'] },
+                { href: sub('polls.html'), icon: 'fa-square-poll-vertical', label: 'Polls', match: ['polls.html'] },
+                { href: sub('memories.html'), icon: 'fa-clock-rotate-left', label: 'Memories', match: ['memories.html'] }
             ]
         };
     }
@@ -248,35 +248,35 @@
         if (typeof window.initHshsChat === 'function' && document.getElementById('hshsChatPage')) window.initHshsChat();
     }
 
+    function rebuildMoreGrid() {
+        const grid = document.querySelector('#moreSheet .more-grid');
+        if (!grid) return;
+        const r = routes();
+        grid.innerHTML = r.MORE.map((item) =>
+            `<a href="${item.href}" data-tone="${item.tone}" class="${isActive(item) ? 'active' : ''}"><span class="ico"><i class="fas ${item.icon}"></i></span><span>${item.label}</span></a>`
+        ).join('');
+    }
+
     function buildBar() {
         if (document.querySelector('.mobile-tabbar')) return;
-        document.body.classList.add('has-mobile-shell');
+        document.body.classList.add('has-mobile-shell', 'hshs-nav-slim');
         const r = routes();
         const moreActive = r.MORE.some(isActive) || currentFile() === 'profile.html';
         const bar = document.createElement('nav');
         bar.className = 'mobile-tabbar';
         bar.setAttribute('aria-label', 'Primary');
 
-        const left = r.PRIMARY.slice(0, 2);
-        const right = r.PRIMARY.slice(2);
-
         bar.innerHTML =
-            left.map((item) => `
-            <a href="${item.href}" class="${isActive(item) ? 'active' : ''}" data-tab="${item.id}">
-                <i class="fas ${item.icon}"></i><span>${item.label}</span>
-            </a>`).join('') +
-            `
-            <button type="button" class="tab-upload" data-tab="upload" id="openUploadStudio" aria-label="Upload">
-                <span class="tab-upload-btn"><i class="fas fa-plus"></i></span>
-            </button>` +
-            right.map((item) => `
-            <a href="${item.href}" class="${isActive(item) ? 'active' : ''}" data-tab="${item.id}">
-                <i class="fas ${item.icon}"></i><span>${item.label}</span>
-            </a>`).join('') +
-            `
-            <a href="#more" class="${moreActive ? 'active' : ''}" data-tab="more" id="openMoreSheet">
-                <i class="fas fa-grip"></i><span>More</span>
-            </a>`;
+            `<a href="${r.PRIMARY[0].href}" class="${isActive(r.PRIMARY[0]) ? 'active' : ''}" data-tab="home">` +
+            `<i class="fas fa-house"></i><span>Home</span></a>` +
+            `<a href="${r.PRIMARY[1].href}" class="${isActive(r.PRIMARY[1]) ? 'active' : ''}" data-tab="buzz">` +
+            `<i class="fas fa-bolt"></i><span>Buzz</span></a>` +
+            `<button type="button" class="tab-upload" data-tab="upload" id="openUploadStudio" aria-label="Upload">` +
+            `<span class="tab-upload-btn"><i class="fas fa-plus"></i></span></button>` +
+            `<a href="${r.PRIMARY[2].href}" class="${isActive(r.PRIMARY[2]) ? 'active' : ''}" data-tab="gallery">` +
+            `<i class="fas fa-images"></i><span>Gallery</span></a>` +
+            `<a href="#more" class="${moreActive ? 'active' : ''}" data-tab="more" id="openMoreSheet">` +
+            `<i class="fas fa-ellipsis"></i><span>More</span></a>`;
 
         const backdrop = document.createElement('div');
         backdrop.className = 'more-backdrop';
@@ -285,18 +285,19 @@
         sheet.className = 'more-sheet';
         sheet.id = 'moreSheet';
         sheet.innerHTML =
+            `<div class="more-handle" aria-hidden="true"></div>` +
             `<button type="button" class="more-close" id="closeMoreSheet" aria-label="Close">×</button>` +
-            `<a class="more-me" href="${sub('profile.html')}">` +
-            `<img class="more-me-pic" id="moreMePic" alt="">` +
-            `<span class="more-me-copy"><strong id="moreMeName">Guest student</strong><small id="moreMeLine">Student · Hawthorne Scribner</small></span>` +
-            `<span class="more-me-go">View</span></a>` +
-            `<p class="more-kicker">Campus</p>` +
-            `<div class="more-grid">` +
-            r.MORE.map((item) => `<a href="${item.href}" data-tone="${item.tone}" class="${isActive(item) ? 'active' : ''}"><span class="ico"><i class="fas ${item.icon}"></i></span><span>${item.label}</span></a>`).join('') +
-            `</div>`;
+            `<a class="more-me" href="${sub('profile.html')}" id="moreMeCard">` +
+            `<img class="more-me-pic" id="moreMePic" alt="Your profile">` +
+            `<span class="more-me-copy"><strong id="moreMeName">Guest student</strong>` +
+            `<small id="moreMeLine">Student · Hawthorne Scribner</small></span>` +
+            `<span class="more-me-go">View profile</span></a>` +
+            `<p class="more-kicker">All pages</p>` +
+            `<div class="more-grid"></div>`;
         document.body.appendChild(bar);
         document.body.appendChild(backdrop);
         document.body.appendChild(sheet);
+        rebuildMoreGrid();
         fillMoreMe();
 
         document.getElementById('openUploadStudio').addEventListener('click', function (e) {
