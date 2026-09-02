@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260902e';
+var HSHS_ASSET_VER = '260902g';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -81,7 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
         root.classList.add('hshs-ready');
         var boot = document.getElementById('hshs-boot');
         if (boot && boot.parentNode) boot.remove();
-        if (window.__hshsTt) window.__hshsTt.hide();
+        var cover = document.getElementById('hshs-tt-overlay');
+        if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
     }
     window.addEventListener('pageshow', function (e) {
         if (e.persisted) reveal();
@@ -102,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-booting .hero{display:none!important}html.hshs-booting body>*:not(#hshs-boot){opacity:0!important;visibility:hidden!important}html.hshs-booting .nav-links{display:none!important}@media(max-width:1024px){.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
+        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-booting .hero,#hshs-tt-overlay{display:none!important}html.hshs-booting body>*:not(#hshs-boot){opacity:0!important;visibility:hidden!important}html.hshs-booting .nav-links{display:none!important}@media(max-width:1024px){.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
         document.documentElement.classList.add('hshs-booting');
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
