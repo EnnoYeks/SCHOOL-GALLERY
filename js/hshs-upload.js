@@ -34,13 +34,16 @@
         { id: 'rain', label: 'Campus Rain', artist: 'Field Recording' }
     ];
 
+    var CLASS_TAGS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'Campus', 'Sports', 'Choir', 'STEM', 'Houses'];
+
     var draft = {
         kind: 'photo',
         src: '',
         filter: 'original',
         soundId: 'none',
         destinations: ['gallery', 'photos'],
-        caption: ''
+        caption: '',
+        classTag: ''
     };
     var step = 'source';
     var facing = 'environment';
@@ -76,6 +79,13 @@
         return kind === 'video' ? ['vibe', 'buzz', 'gallery'] : ['gallery', 'photos'];
     }
 
+    function defaultClassTag() {
+        try {
+            var u = window.HshsStore && window.HshsStore.currentUser && window.HshsStore.currentUser();
+            return (u && u.classYear) || 'Campus';
+        } catch (e) { return 'Campus'; }
+    }
+
     function fileToDataUrl(file) {
         return new Promise(function (resolve, reject) {
             var kind = file.type.indexOf('video') === 0 ? 'video' : 'photo';
@@ -99,7 +109,15 @@
 
     function open() {
         step = 'source';
-        draft = { kind: 'photo', src: '', filter: 'original', soundId: 'none', destinations: ['gallery', 'photos'], caption: '' };
+        draft = {
+            kind: 'photo',
+            src: '',
+            filter: 'original',
+            soundId: 'none',
+            destinations: ['gallery', 'photos'],
+            caption: '',
+            classTag: defaultClassTag()
+        };
         stopCam();
         var root = ensureRoot();
         root.hidden = false;
@@ -200,6 +218,7 @@
             title: title,
             description: draft.caption || '',
             category: 'events',
+            classTag: draft.classTag || defaultClassTag(),
             image: draft.src,
             destinations: draft.destinations.slice(),
             filter: draft.filter,
@@ -208,7 +227,6 @@
         if (window.HshsStore && typeof window.HshsStore.addPost === 'function') {
             var res = window.HshsStore.addPost(payload);
             if (res && res.ok === false) {
-                // Guest fallback: still save locally without account gate
                 try {
                     var s = window.HshsStore.getState();
                     if (s && s.posts) {
@@ -218,6 +236,7 @@
                             title: payload.title,
                             description: payload.description,
                             category: payload.category,
+                            classTag: payload.classTag,
                             image: payload.image,
                             imageUrl: payload.image,
                             thumbnailUrl: payload.image,
@@ -230,7 +249,7 @@
                             createdAt: Date.now()
                         };
                         s.posts.unshift(post);
-                        localStorage.setItem('hshsWorldStore_v1', JSON.stringify(s));
+                        localStorage.setItem('hshsWorldStore_v2', JSON.stringify(s));
                     }
                 } catch (e) {}
             }
@@ -263,7 +282,7 @@
 
         if (step === 'source') {
             html += '<div class="hshs-upload-body">';
-            html += '<p class="hshs-upload-lead">Library, camera, or record — then choose the pages that should show it.</p>';
+            html += '<p class="hshs-upload-lead">Library, camera, or record — then tag class and pick pages.</p>';
             if (errorMsg) html += '<p class="hshs-upload-error">' + errorMsg + '</p>';
             html += '<button type="button" class="hshs-source-card" data-action="library"><span class="ico"><i class="fas fa-images"></i></span><span><b>Library</b><small>Photos and videos on this device</small></span></button>';
             html += '<button type="button" class="hshs-source-card" data-action="photo"><span class="ico"><i class="fas fa-camera"></i></span><span><b>Camera</b><small>Take a still right now</small></span></button>';
@@ -294,13 +313,18 @@
                 html += '<button type="button" class="hshs-chip sound' + (draft.soundId === s.id ? ' on' : '') + '" data-sound="' + s.id + '"><b>' + s.label + '</b><small>' + s.artist + '</small></button>';
             });
             html += '</div></div>';
+            html += '<div class="hshs-section"><label>Class tag</label><p class="hshs-hint">Who this moment belongs to (S1–S6, club, or campus).</p><div class="hshs-chips">';
+            CLASS_TAGS.forEach(function (c) {
+                html += '<button type="button" class="hshs-chip' + (draft.classTag === c ? ' on' : '') + '" data-class="' + c + '">' + c + '</button>';
+            });
+            html += '</div></div>';
             html += '<div class="hshs-section"><label>Show this on</label><p class="hshs-hint">Pick every page that should carry this file.</p><div class="hshs-dest-grid">';
             DESTINATIONS.filter(function (d) { return d.kinds.indexOf(draft.kind) !== -1; }).forEach(function (d) {
                 var on = draft.destinations.indexOf(d.id) !== -1;
                 html += '<button type="button" class="hshs-dest' + (on ? ' on' : '') + '" data-dest="' + d.id + '"><span><b>' + d.label + '</b><small>' + d.hint + '</small></span>' + (on ? '<i class="fas fa-check"></i>' : '') + '</button>';
             });
             html += '</div></div>';
-            html += '<div class="hshs-section"><label>Caption</label><textarea id="hshsCaption" rows="3" placeholder="What is this moment?">' + (draft.caption || '').replace(/</g, '&lt;') + '</textarea></div>';
+            html += '<div class="hshs-section"><label>Caption</label><textarea id="hshsCaption" rows="3" placeholder="What is this moment?">' + (draft.caption || '').replace(/</g, '<') + '</textarea></div>';
             html += '<button type="button" class="hshs-post-btn" id="hshsPublish"' + (!draft.destinations.length ? ' disabled' : '') + '>Post to ' + draft.destinations.length + ' page' + (draft.destinations.length === 1 ? '' : 's') + '</button>';
             html += '</div>';
         }
@@ -330,6 +354,7 @@
                 draft.kind = data.kind;
                 draft.src = data.src;
                 draft.destinations = suggested(data.kind);
+                if (!draft.classTag) draft.classTag = defaultClassTag();
                 step = 'compose';
                 render();
             }).catch(function () { render('Could not read that file.'); });
@@ -351,6 +376,9 @@
         });
         root.querySelectorAll('[data-sound]').forEach(function (b) {
             b.onclick = function () { draft.soundId = b.getAttribute('data-sound'); render(); };
+        });
+        root.querySelectorAll('[data-class]').forEach(function (b) {
+            b.onclick = function () { draft.classTag = b.getAttribute('data-class'); render(); };
         });
         root.querySelectorAll('[data-dest]').forEach(function (b) {
             b.onclick = function () {
