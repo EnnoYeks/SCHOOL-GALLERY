@@ -18,6 +18,41 @@
         var s = store();
         return s && s.getState ? (s.getState().posts || []).find(function (p) { return p.id === card.getAttribute('data-post-id'); }) : null;
     }
+    function localStateSave(s) {
+        try { localStorage.setItem('hshsWorldStore_v2', JSON.stringify(s)); window.__hshsState = s; } catch (e) {}
+    }
+    function ensureLocalPost(card) {
+        var s = store();
+        if (!s || !s.getState) return null;
+        var existing = postFor(card);
+        if (existing) return existing;
+        var id = card.getAttribute('data-post-id');
+        if (!id) return null;
+        var titleNode = card.querySelector('h1,h2,h3,h4,.post-title,.card-title');
+        var descNode = card.querySelector('.post-description,.description,.card-description,p');
+        var media = card.querySelector('img,video');
+        var shadow = {
+            id: id,
+            type: card.querySelector('video') ? 'video' : 'photo',
+            title: titleNode ? titleNode.textContent.trim() : 'School post',
+            description: descNode ? descNode.textContent.trim() : '',
+            category: card.getAttribute('data-category') || 'events',
+            image: media ? (media.poster || media.currentSrc || media.src || '') : '',
+            imageUrl: media ? (media.poster || media.currentSrc || media.src || '') : '',
+            thumbnailUrl: media ? (media.poster || media.currentSrc || media.src || '') : '',
+            author: (card.querySelector('.author-row strong,.author,.post-author') || {}).textContent || 'HSHS World',
+            authorId: '',
+            likes: Number((card.getAttribute('data-likes') || 0)),
+            views: Number((card.getAttribute('data-views') || 0)),
+            comments: Number((card.getAttribute('data-comments') || 0)),
+            shares: Number((card.getAttribute('data-shares') || 0)),
+            createdAt: Date.now()
+        };
+        s.posts = s.posts || [];
+        s.posts.unshift(shadow);
+        localStateSave(s);
+        return shadow;
+    }
     function setAction(button, active, iconOn, iconOff, label) {
         if (!button) return;
         button.classList.toggle('is-active', !!active);
@@ -27,6 +62,17 @@
             var count = button.querySelector('.action-count');
             if (count) count.textContent = formatCount(label);
         }
+    }
+    function makeActionBar(card) {
+        var actions = card.querySelector('.side-actions');
+        if (actions) return actions;
+        actions = document.createElement('div');
+        actions.className = 'side-actions hshs-generated-actions';
+        actions.innerHTML = '<button class="action-btn like-action" type="button" aria-label="Like"><i class="far fa-heart"></i><div class="action-count">0</div></button>' +
+            '<button class="action-btn comment-action" type="button" aria-label="Comment"><i class="far fa-comment"></i><div class="action-count">0</div></button>' +
+            '<button class="action-btn save-action" type="button" aria-label="Save"><i class="far fa-bookmark"></i><div class="action-count"></div></button>';
+        card.appendChild(actions);
+        return actions;
     }
     function ensureComments(card, post) {
         if (!card || card.querySelector('.hshs-comments-panel')) return;
@@ -59,10 +105,11 @@
     }
     function wireCard(card) {
         var s = store();
-        var post = postFor(card);
-        if (!s || !post || card.__hshsActionsWired) return;
+        if (!s || !card || card.__hshsActionsWired) return;
+        var post = postFor(card) || ensureLocalPost(card);
+        if (!post) return;
         var actions = card.querySelector('.side-actions');
-        if (!actions) return;
+        if (!actions) actions = makeActionBar(card);
         card.__hshsActionsWired = true;
         var like = actions.querySelector('.like-action');
         var comment = actions.querySelector('.comment-action');
@@ -111,24 +158,20 @@
             var user = s.getUser(uid);
             if (!user) return;
             var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'hshs-follow-btn hshs-follow-person';
-            btn.setAttribute('data-follow', uid);
-            btn.textContent = s.isFollowing(uid) ? 'Following' : 'Follow';
-            btn.classList.toggle('is-on', s.isFollowing(uid));
+            btn.type = 'button'; btn.className = 'hshs-follow-btn hshs-follow-person'; btn.setAttribute('data-follow', uid);
+            btn.textContent = s.isFollowing(uid) ? 'Following' : 'Follow'; btn.classList.toggle('is-on', s.isFollowing(uid));
             actions.insertBefore(btn, actions.firstChild);
             btn.onclick = function (e) {
                 e.preventDefault(); e.stopPropagation();
                 var result = s.toggleFollow(uid);
                 if (!result.ok) { if (window.Utils && Utils.showToast) Utils.showToast(result.error, 'info'); return; }
-                btn.textContent = result.following ? 'Following' : 'Follow';
-                btn.classList.toggle('is-on', result.following);
+                btn.textContent = result.following ? 'Following' : 'Follow'; btn.classList.toggle('is-on', result.following);
             };
         });
     }
     function scan(root) {
         var scope = root || document;
-        scope.querySelectorAll('.post-card[data-post-id], [data-post-id].media-card, [data-post-id].video-card, [data-post-id].buzz-card').forEach(wireCard);
+        scope.querySelectorAll('[data-post-id]').forEach(wireCard);
         wirePeople(scope);
     }
     function init() {
