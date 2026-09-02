@@ -1,6 +1,14 @@
-/* Hide the real app only while the splash is running */
-html.hshs-booting {
-  background: #071433 !important;
+html.hshs-booting,
+html.hshs-booting body {
+  background: #050d1c !important;
+}
+html.hshs-booting .animated-bg,
+html.hshs-booting .gradient-bg,
+html.hshs-booting .particles-container,
+html.hshs-booting .floating-shapes,
+html.hshs-booting .navbar,
+html.hshs-booting .hero {
+  display: none !important;
 }
 html.hshs-booting body > *:not(#hshs-boot) {
   opacity: 0 !important;
