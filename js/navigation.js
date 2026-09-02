@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-booting .hero,#hshs-tt-overlay{display:none!important}html.hshs-booting body>*:not(#hshs-boot){opacity:0!important;visibility:hidden!important}html.hshs-booting .nav-links{display:none!important}@media(max-width:1024px){.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
+        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-b[...]';
         document.documentElement.classList.add('hshs-booting');
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');
     add('hshs-perf-js', 'hshs-perf.js');
+    add('hshs-store-bridge-js', 'hshs-store-bridge.js');
     add('hshs-store-js', 'hshs-store.js');
     add('hshs-social-js', 'hshs-social.js');
     add('hshs-social-actions-js', 'hshs-social-actions.js');
