@@ -2,6 +2,16 @@
     if (window.__hshsAccount) return;
     window.__hshsAccount = true;
 
+    var BADGE = 'https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png';
+    var HERO_KEY = 'hshsHeroSlides';
+    var DEFAULT_HERO = [
+        BADGE,
+        'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=70',
+        'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=70',
+        'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=1200&q=70',
+        'https://images.unsplash.com/photo-1577896852618-01fff3891965?auto=format&fit=crop&w=1200&q=70'
+    ];
+
     function fileName() {
         return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     }
@@ -14,7 +24,7 @@
     function store() { return window.HshsStore; }
     function escapeHtml(s) {
         return String(s || '').replace(/[&<>"']/g, function (ch) {
-            return ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' })[ch];
+            return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
         });
     }
     function ago(ts) {
@@ -113,6 +123,41 @@
         if (email) email.textContent = info.email;
         if (role) role.textContent = info.role;
         if (pic) pic.src = info.photo || guestPic();
+        buildMoreMenu();
+    }
+    function menuItem(href, icon, title, copy) {
+        return '<a class="hshs-menu-item" href="' + href + '"><i class="fas ' + icon + '"></i><span><b>' + title + '</b><small>' + copy + '</small></span><i class="fas fa-chevron-right"></i></a>';
+    }
+    function buildMoreMenu() {
+        var box = document.getElementById('hshsMoreMenu');
+        if (!box) return;
+        var html = '';
+        html += '<p class="hshs-menu-kicker">You</p>';
+        html += menuItem(sub('profile.html'), 'fa-user', 'Profile', 'View and edit your profile');
+        html += menuItem(sub('chat.html'), 'fa-envelope', 'Messages', 'Chats with friends and clubs');
+        html += menuItem(sub('notifications.html'), 'fa-bell', 'Notifications', 'Alerts, mentions and school updates');
+        html += menuItem(sub('saved.html'), 'fa-star', 'Saved', 'Saved and interacted posts');
+        html += '<p class="hshs-menu-kicker">Campus</p>';
+        html += menuItem(sub('gallery.html'), 'fa-image', 'Gallery', 'All photos and videos');
+        html += menuItem(sub('photos.html'), 'fa-camera', 'Photos', 'School photo albums');
+        html += menuItem(sub('videos.html'), 'fa-play', 'Vibe', 'Campus videos');
+        html += menuItem(sub('buzz.html'), 'fa-bolt', 'Buzz', 'Short clips from around school');
+        html += '<p class="hshs-menu-kicker">Discover</p>';
+        html += menuItem(sub('trending.html'), 'fa-fire', 'Trending', 'What the school is talking about');
+        html += menuItem(sub('spotlight.html'), 'fa-trophy', 'Spotlight', 'Featured students and moments');
+        html += menuItem(sub('polls.html'), 'fa-square-poll-vertical', 'Polls', 'Vote on school questions');
+        html += menuItem(sub('memories.html'), 'fa-clock-rotate-left', 'Memories', 'Past events and school history');
+        html += '<p class="hshs-menu-kicker">Account</p>';
+        html += menuItem(sub('settings.html'), 'fa-gear', 'Settings', 'Theme, account and preferences');
+        html += menuItem(sub('settings.html') + '#privacy', 'fa-shield-halved', 'Privacy', 'Privacy settings and controls');
+        html += menuItem(sub('about.html'), 'fa-graduation-cap', 'About', 'About HSHS World');
+        html += menuItem(sub('contat.html'), 'fa-circle-question', 'Help & Support', 'Get help and contact support');
+        try {
+            if (localStorage.getItem('adminToken')) {
+                html += menuItem(sub('admin.html'), 'fa-user-shield', 'Staff desk', 'Admin tools');
+            }
+        } catch (e) {}
+        box.innerHTML = html;
     }
     function renderSaved() {
         var box = document.getElementById('hshsSavedList');
@@ -232,17 +277,27 @@
             else location.href = sub('more.html');
         };
         var grid = document.querySelector('#moreSheet .more-grid');
-        if (grid && !grid.getAttribute('data-account-links')) {
+        if (grid) {
             grid.setAttribute('data-account-links', '1');
-            grid.insertAdjacentHTML('afterbegin',
-                '<a href="' + sub('notifications.html') + '" data-tone="sky"><span class="ico"><i class="fas fa-bell"></i></span><span>Alerts</span></a>' +
-                '<a href="' + sub('saved.html') + '" data-tone="gold"><span class="ico"><i class="fas fa-star"></i></span><span>Saved</span></a>' +
-                '<a href="' + sub('more.html') + '" data-tone="navy"><span class="ico"><i class="fas fa-ellipsis"></i></span><span>Account</span></a>'
-            );
+            var extra = [
+                { href: sub('notifications.html'), tone: 'sky', icon: 'fa-bell', label: 'Alerts' },
+                { href: sub('saved.html'), tone: 'gold', icon: 'fa-star', label: 'Saved' },
+                { href: sub('more.html'), tone: 'navy', icon: 'fa-ellipsis', label: 'Account' }
+            ];
+            extra.reverse().forEach(function (item) {
+                if (grid.querySelector('a[href="' + item.href + '"]')) return;
+                grid.insertAdjacentHTML('afterbegin',
+                    '<a href="' + item.href + '" data-tone="' + item.tone + '"><span class="ico"><i class="fas ' + item.icon + '"></i></span><span>' + item.label + '</span></a>'
+                );
+            });
         }
         document.querySelectorAll('.mobile-tabbar a[data-tab="more"]').forEach(function (a) {
             var file = fileName();
-            a.classList.toggle('active', ['more.html', 'saved.html', 'notifications.html', 'profile.html', 'settings.html'].indexOf(file) !== -1);
+            a.classList.toggle('active', [
+                'more.html', 'saved.html', 'notifications.html', 'profile.html', 'settings.html',
+                'about.html', 'contat.html', 'contact.html', 'chat.html', 'photos.html',
+                'videos.html', 'trending.html', 'spotlight.html', 'polls.html', 'memories.html'
+            ].indexOf(file) !== -1);
         });
     }
     function wireTopBar() {
@@ -268,6 +323,77 @@
                 else location.href = sub('more.html');
             }, true);
         }
+    }
+    function readHeroSlides() {
+        var custom = [];
+        try { custom = JSON.parse(localStorage.getItem(HERO_KEY) || '[]') || []; } catch (e) { custom = []; }
+        var fromStore = [];
+        try {
+            var s = store();
+            if (s && s.listPosts) {
+                fromStore = s.listPosts().map(function (p) { return p.image || p.imageUrl; }).filter(Boolean);
+            }
+        } catch (e) {}
+        var list = [].concat(custom, fromStore, DEFAULT_HERO).filter(function (url, i, arr) {
+            return url && arr.indexOf(url) === i;
+        });
+        if (list.indexOf(BADGE) === -1) list.unshift(BADGE);
+        return list.slice(0, 12);
+    }
+    function dressHero() {
+        var hero = document.querySelector('.hero-text');
+        if (!hero) return;
+        hero.classList.add('hshs-welcome-card');
+        if (!hero.querySelector('.hshs-welcome-pill')) {
+            var pill = document.createElement('span');
+            pill.className = 'hshs-welcome-pill';
+            pill.textContent = 'Welcome to';
+            hero.insertBefore(pill, hero.firstChild);
+        }
+        if (!hero.querySelector('.hshs-hero-slides')) {
+            var slides = document.createElement('div');
+            slides.className = 'hshs-hero-slides';
+            slides.setAttribute('aria-hidden', 'true');
+            hero.appendChild(slides);
+        }
+        if (!hero.querySelector('.hshs-hero-badge')) {
+            var badge = document.createElement('img');
+            badge.className = 'hshs-hero-badge';
+            badge.src = BADGE;
+            badge.alt = '';
+            hero.appendChild(badge);
+        }
+        var box = hero.querySelector('.hshs-hero-slides');
+        var urls = readHeroSlides();
+        box.innerHTML = urls.map(function (url, i) {
+            return '<img src="' + escapeHtml(url) + '" alt="" class="' + (i === 0 ? 'on' : '') + '">';
+        }).join('');
+        if (box.__heroTimer) clearInterval(box.__heroTimer);
+        var i = 0;
+        box.__heroTimer = setInterval(function () {
+            var imgs = box.querySelectorAll('img');
+            if (imgs.length < 2) return;
+            imgs[i].classList.remove('on');
+            i = (i + 1) % imgs.length;
+            imgs[i].classList.add('on');
+        }, 5200);
+    }
+    function addProfileExtras() {
+        var root = document.getElementById('hshsProfileRoot');
+        if (!root || root.querySelector('.hshs-profile-more')) return;
+        var meUser = store() && store().currentUser ? store().currentUser() : null;
+        var params = new URLSearchParams(location.search);
+        var key = params.get('u') || params.get('id');
+        var lookingAtSelf = !key || (meUser && (key === meUser.id || key === meUser.username));
+        if (!lookingAtSelf) return;
+        var sheet = root.querySelector('.hshs-profile-sheet') || root;
+        var extras = document.createElement('div');
+        extras.className = 'hshs-profile-more';
+        extras.innerHTML =
+            menuItem(sub('settings.html'), 'fa-gear', 'Settings', 'Theme and account') +
+            menuItem(sub('settings.html') + '#privacy', 'fa-shield-halved', 'Privacy', 'Privacy controls') +
+            menuItem(sub('about.html'), 'fa-graduation-cap', 'About', 'About HSHS World');
+        sheet.appendChild(extras);
     }
     function wireSettingsTheme() {
         var account = document.getElementById('accountTab');
@@ -299,14 +425,15 @@
         paint();
         if (location.hash === '#theme' || location.hash === '#privacy') {
             var tab = location.hash.replace('#', '');
-            var btn = document.querySelector('.tab-btn[data-tab="' + tab + '"]');
+            var btn = document.querySelector('.tab-btn[data-tab="' + tab + '"]') || document.querySelector('.tab-btn[data-tab="account"]');
+            if (tab === 'privacy') btn = document.querySelector('.tab-btn[data-tab="privacy"]') || btn;
             if (btn) btn.click();
         }
     }
     function boot() {
         wrapNavigate();
         retargetMore();
-        ['more.html', 'saved.html', 'notifications.html'].forEach(function (f) {
+        ['more.html', 'saved.html', 'notifications.html', 'about.html', 'settings.html', 'chat.html'].forEach(function (f) {
             var cache = window.__hshsPageCache = window.__hshsPageCache || {};
             if (cache[f]) return;
             var href = new URL(sub(f), location.href).href;
@@ -326,11 +453,17 @@
         wireNotifTabs();
         wireTopBar();
         wireSettingsTheme();
+        dressHero();
+        addProfileExtras();
         syncBadge();
     }
 
     window.__hshsToggleSave = toggleSave;
     window.__hshsIsSaved = function (id) { return readSaves().indexOf(id) !== -1; };
+    window.__hshsSetHeroSlides = function (urls) {
+        localStorage.setItem(HERO_KEY, JSON.stringify(urls || []));
+        dressHero();
+    };
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
     else boot();
