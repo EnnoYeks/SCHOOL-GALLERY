@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addCss('hshs-tt-css', 'hshs-tt.css');
     addCss('hshs-social-css', 'hshs-social.css');
     addCss('hshs-social-loop-css', 'hshs-social-loop.css');
+    addCss('hshs-social-actions-css', 'hshs-social-actions.css');
     addCss('hshs-motion-css', 'gallery-transitions.css');
     addCss('hshs-page-swipe-css', 'page-swipe.css');
     addCss('hshs-chat-spring-css', 'hshs-chat-spring.css');
@@ -153,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-perf-js', 'hshs-perf.js');
     add('hshs-store-js', 'hshs-store.js');
     add('hshs-social-js', 'hshs-social.js');
+    add('hshs-social-actions-js', 'hshs-social-actions.js');
     add('hshs-notify-js', 'hshs-notify.js');
     add('hshs-mobile-shell-js', 'mobile-shell.js');
     add('hshs-upload-js', 'hshs-upload.js');
