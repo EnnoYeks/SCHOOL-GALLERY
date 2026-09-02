@@ -81,6 +81,20 @@
     white-space: nowrap;
 }
 .hshs-menu-list { display: flex; flex-direction: column; gap: 8px; }
+.hshs-menu-kicker {
+    margin: 10px 6px 2px;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-secondary, #8b97b3);
+}
+.hshs-profile-more {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 14px 8px;
+}
 .hshs-menu-item {
     display: flex;
     align-items: center;
@@ -183,6 +197,23 @@
     body.has-mobile-shell .mobile-menu-toggle {
         display: none !important;
     }
+    body.has-mobile-shell .navbar,
+    body.has-mobile-shell .navbar.hshs-flat-top {
+        background: transparent !important;
+        border: 0 !important;
+        border-bottom: 0 !important;
+        box-shadow: none !important;
+        padding: 6px 12px 2px !important;
+    }
+    body.has-mobile-shell .navbar-container,
+    body.has-mobile-shell .navbar-container.hshs-topbar {
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        min-height: 52px;
+    }
     body.has-mobile-shell .profile-icon,
     body.has-mobile-shell .notification-icon,
     body.has-mobile-shell .hshs-profile,
@@ -197,7 +228,7 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: rgba(12, 18, 36, .72);
+        background: rgba(12, 18, 36, .55);
         align-items: center;
         justify-content: center;
         color: #fff;
@@ -235,6 +266,162 @@
         border-radius: 50% !important;
         background: #ffcc00 !important;
         color: #111 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+    }
+    body.has-mobile-shell .brand-copy strong {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #fff !important;
+    }
+    body.has-mobile-shell .brand-tick {
+        color: #3b82f6 !important;
+        font-size: .72rem;
+    }
+    body.has-mobile-shell .brand-copy small {
+        display: block;
+        font-size: .58rem !important;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #d7e3ff !important;
+        font-weight: 700;
+    }
+    body.has-mobile-shell .hero-text,
+    body.has-mobile-shell .hshs-welcome-card {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+        min-height: 268px;
+        padding: 18px 18px 20px !important;
+        border: 0 !important;
+        box-shadow: none !important;
+    }
+    .hshs-welcome-pill {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(13, 42, 102, .72);
+        color: #d7e8ff;
+        font-size: .62rem;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        padding: 6px 10px;
+        border-radius: 999px;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 2;
+    }
+    .hshs-hero-slides {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+    }
+    .hshs-hero-slides img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transform: scale(1.04);
+        transition: opacity .9s ease, transform 6s ease;
+    }
+    .hshs-hero-slides img.on {
+        opacity: .34;
+        transform: scale(1.12);
+    }
+    .hshs-hero-badge {
+        position: absolute;
+        right: -8px;
+        top: 18px;
+        width: 168px;
+        height: 168px;
+        object-fit: contain;
+        opacity: .42;
+        pointer-events: none;
+        z-index: 1;
+    }
+    body.has-mobile-shell .hero-title,
+    body.has-mobile-shell .hero-subtitle,
+    body.has-mobile-shell .hero-description,
+    body.has-mobile-shell .hero-buttons {
+        position: relative;
+        z-index: 2;
     }
     .hshs-account-page { margin-top: 12px; }
+    .loading-skeleton,
+    .hshs-page-skel .sk-tabs i,
+    .hshs-page-skel .sk-hero,
+    .hshs-page-skel .sk-photo,
+    .hshs-page-skel .sk-play,
+    .hshs-page-skel .sk-row,
+    .hshs-page-skel .sk-stat,
+    .hshs-page-skel .sk-avatar,
+    .hshs-page-skel .sk-buzz,
+    .hshs-page-skel .sk-line,
+    .hshs-page-skel .sk-play-row .thumb {
+        background: linear-gradient(90deg, #122044 0%, #1d3d7a 42%, #2a5bd7 50%, #1d3d7a 58%, #122044 100%) !important;
+        background-size: 220% 100% !important;
+        animation: hshsSkelWave 1.15s ease-in-out infinite !important;
+    }
+}
+
+.hshs-tt i:first-child,
+.hshs-tt i:last-child,
+.fa-spinner::before,
+.fa-spinner::after,
+.fa-circle-notch::before,
+.fa-circle-notch::after,
+.spinner::before,
+.spinner::after,
+.loading-spinner::before,
+.loading-spinner::after {
+    mix-blend-mode: normal !important;
+    animation-play-state: running !important;
+}
+.hshs-tt i:first-child {
+    background: #25f4ee !important;
+    animation: hshsTtA .72s cubic-bezier(.4,0,.2,1) infinite !important;
+}
+.hshs-tt i:last-child {
+    background: #eab308 !important;
+    animation: hshsTtB .72s cubic-bezier(.4,0,.2,1) infinite !important;
+}
+#hshs-tt-overlay .hshs-tt {
+    --tt-box: 72px;
+    --tt-dot: 28px;
+    --tt-travel: 18px;
+}
+.hshs-boot-cat,
+.hshs-boot-cat svg,
+.hshs-boot-cat .head,
+.hshs-boot-cat .tail,
+.hshs-boot-cat .body {
+    transform-box: fill-box;
+    animation-play-state: running !important;
+}
+.hshs-boot-cat .head { transform-origin: 44px 36px; }
+.hshs-boot-cat .tail { transform-origin: 82px 58px; }
+.hshs-boot-fill {
+    animation: hshsBootFillGlow 1.1s ease-in-out infinite !important;
+}
+.hshs-boot-campus {
+    animation: hshsBootCampus 8s ease-in-out infinite alternate !important;
+}
+.hshs-boot-polaroid {
+    animation: hshsBootFloat 7s ease-in-out infinite !important;
+}
+@keyframes hshsBootFillGlow {
+    0%,100% { filter: brightness(1); box-shadow: 0 0 16px rgba(234,179,8,.7); }
+    50% { filter: brightness(1.35); box-shadow: 0 0 26px rgba(234,179,8,1); }
+}
+@keyframes hshsBootCampus {
+    from { transform: translateY(6px); }
+    to { transform: translateY(0); }
+}
+@keyframes hshsSkelWave {
+    0% { background-position: 120% 0; }
+    100% { background-position: -120% 0; }
 }
