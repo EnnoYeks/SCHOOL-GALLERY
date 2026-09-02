@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addCss('hshs-motion-css', 'gallery-transitions.css');
     addCss('hshs-page-swipe-css', 'page-swipe.css');
     addCss('hshs-chat-spring-css', 'hshs-chat-spring.css');
+    addCss('hshs-account-css', 'hshs-account.css');
     add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');
     add('hshs-perf-js', 'hshs-perf.js');
@@ -124,4 +125,5 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-swipe-js', 'hshs-swipe.js');
     add('hshs-page-swipe-js', 'page-swipe.js');
     add('hshs-chat-spring-js', 'hshs-chat-spring.js');
+    add('hshs-account-js', 'hshs-account.js');
 })();
