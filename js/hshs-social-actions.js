@@ -14,44 +14,33 @@
         if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'K';
         return String(n);
     }
-
     function postFor(card) {
         var s = store();
-        return s && s.getState ? (s.getState().posts || []).find(function (p) {
-            return p.id === card.getAttribute('data-post-id');
-        }) : null;
+        return s && s.getState ? (s.getState().posts || []).find(function (p) { return p.id === card.getAttribute('data-post-id'); }) : null;
     }
-
     function setAction(button, active, iconOn, iconOff, label) {
         if (!button) return;
         button.classList.toggle('is-active', !!active);
         var icon = button.querySelector('i');
-        if (icon) icon.className = (active ? iconOn : iconOff);
+        if (icon) icon.className = active ? iconOn : iconOff;
         if (label !== undefined) {
             var count = button.querySelector('.action-count');
             if (count) count.textContent = formatCount(label);
         }
     }
-
     function ensureComments(card, post) {
         if (!card || card.querySelector('.hshs-comments-panel')) return;
         var panel = document.createElement('div');
         panel.className = 'hshs-comments-panel';
         panel.hidden = true;
-        panel.innerHTML = '<div class="hshs-comments-head"><strong>Comments</strong><button type="button" class="hshs-comments-close" aria-label="Close comments">×</button></div>' +
-            '<div class="hshs-comments-list"></div>' +
-            '<form class="hshs-comment-form"><input type="text" maxlength="240" placeholder="Write a school-safe comment…" autocomplete="off"><button type="submit"><i class="fas fa-paper-plane"></i></button></form>';
+        panel.innerHTML = '<div class="hshs-comments-head"><strong>Comments</strong><button type="button" class="hshs-comments-close" aria-label="Close comments">×</button></div><div class="hshs-comments-list"></div><form class="hshs-comment-form"><input type="text" maxlength="240" placeholder="Write a school-safe comment…" autocomplete="off"><button type="submit"><i class="fas fa-paper-plane"></i></button></form>';
         card.appendChild(panel);
-
         function render() {
             var s = store();
             var rows = s && s.getState ? (s.getState().comments || []).filter(function (c) { return c.postId === post.id; }).slice(0, 30) : [];
             var list = panel.querySelector('.hshs-comments-list');
-            list.innerHTML = rows.length ? rows.map(function (c) {
-                return '<div class="hshs-comment-row"><b>' + escapeHtml(c.author || 'Student') + '</b><span>' + escapeHtml(c.text) + '</span></div>';
-            }).join('') : '<div class="hshs-comments-empty">No comments yet. Start the conversation.</div>';
+            list.innerHTML = rows.length ? rows.map(function (c) { return '<div class="hshs-comment-row"><b>' + escapeHtml(c.author || 'Student') + '</b><span>' + escapeHtml(c.text) + '</span></div>'; }).join('') : '<div class="hshs-comments-empty">No comments yet. Start the conversation.</div>';
         }
-
         panel.querySelector('.hshs-comments-close').onclick = function () { panel.hidden = true; };
         panel.querySelector('.hshs-comment-form').onsubmit = function (e) {
             e.preventDefault();
@@ -61,7 +50,6 @@
             var result = s.addComment(post.id, input.value);
             if (!result.ok) { if (window.Utils && Utils.showToast) Utils.showToast(result.error, 'info'); return; }
             input.value = '';
-            post.comments = Number(post.comments || 0) + 1;
             var count = card.querySelector('.comment-action .action-count');
             if (count) count.textContent = formatCount(post.comments);
             render();
@@ -69,20 +57,16 @@
         panel.__render = render;
         render();
     }
-
     function wireCard(card) {
         var s = store();
         var post = postFor(card);
         if (!s || !post || card.__hshsActionsWired) return;
-        card.__hshsActionsWired = true;
-
         var actions = card.querySelector('.side-actions');
         if (!actions) return;
-
+        card.__hshsActionsWired = true;
         var like = actions.querySelector('.like-action');
         var comment = actions.querySelector('.comment-action');
         var save = actions.querySelector('.save-action');
-
         if (like) {
             like.removeAttribute('onclick');
             like.onclick = function (e) {
@@ -93,7 +77,6 @@
             };
             setAction(like, s.isLiked(post.id), 'fas fa-heart', 'far fa-heart', post.likes);
         }
-
         if (save) {
             save.removeAttribute('onclick');
             save.onclick = function (e) {
@@ -105,7 +88,6 @@
             };
             setAction(save, s.isSaved(post.id), 'fas fa-bookmark', 'far fa-bookmark');
         }
-
         if (comment) {
             comment.onclick = function (e) {
                 e.preventDefault(); e.stopPropagation();
@@ -119,7 +101,6 @@
         }
         ensureComments(card, post);
     }
-
     function wirePeople(root) {
         var s = store();
         if (!s) return;
@@ -145,27 +126,22 @@
             };
         });
     }
-
     function scan(root) {
         var scope = root || document;
         scope.querySelectorAll('.post-card[data-post-id], [data-post-id].media-card, [data-post-id].video-card, [data-post-id].buzz-card').forEach(wireCard);
         wirePeople(scope);
     }
-
     function init() {
         scan(document);
         var observer = new MutationObserver(function (records) {
             records.forEach(function (record) {
-                record.addedNodes.forEach(function (node) {
-                    if (node.nodeType === 1) scan(node);
-                });
+                record.addedNodes.forEach(function (node) { if (node.nodeType === 1) scan(node); });
             });
         });
         observer.observe(document.body, { childList: true, subtree: true });
         document.addEventListener('hshs:storechange', function () { scan(document); });
         document.addEventListener('hshs:notify', function () { scan(document); });
     }
-
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 })();
