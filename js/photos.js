@@ -6,7 +6,7 @@ class PhotosPage {
     constructor() {
         this.currentFilter = 'all';
         this.currentPage = 0;
-        this.photosPerPage = CONFIG.pagination.photosPerPage;
+        this.photosPerPage = (window.CONFIG && CONFIG.pagination && CONFIG.pagination.photosPerPage) || 20;
         this.init();
     }
 
@@ -34,7 +34,10 @@ class PhotosPage {
         const grid = document.getElementById('masonryGrid');
         if (!grid) return;
 
-        let photos = await db.getPhotos(this.photosPerPage * (this.currentPage + 1), 0);
+        let photos = [];
+        try {
+            photos = await (window.db && db.getPhotos ? db.getPhotos(this.photosPerPage * (this.currentPage + 1), 0) : []);
+        } catch (e) { photos = []; }
 
         // Apply filter
         if (this.currentFilter === 'popular') {
@@ -54,10 +57,12 @@ class PhotosPage {
             grid.innerHTML = '';
         }
 
+        const frag = document.createDocumentFragment();
         pagePhotos.forEach((photo) => {
             const card = this.createPhotoCard(photo);
-            grid.appendChild(card);
+            frag.appendChild(card);
         });
+        grid.appendChild(frag);
 
         this.currentPage++;
     }
@@ -65,32 +70,53 @@ class PhotosPage {
     createPhotoCard(photo) {
         const card = document.createElement('div');
         card.className = 'photo-card';
-        card.setAttribute('data-photo-id', photo.id);
-        card.innerHTML = `
-            <img src="${photo.image}" alt="${photo.title}" class="photo-image">
-            <div class="photo-overlay">
-                <div class="photo-header">
-                    <div class="photo-author">
-                        <img src="${photo.authorAvatar || 'https://via.placeholder.com/32'}" alt="${photo.author}" class="author-avatar">
-                        <div class="author-name">${photo.author}</div>
-                    </div>
-                    <button class="photo-like-btn" onclick="event.stopPropagation(); reactionManager.toggleLike('${photo.id}')">
-                        <i class="far fa-heart"></i>
-                    </button>
-                </div>
-                <div class="photo-footer">
-                    <div class="photo-title">${photo.title}</div>
-                    <div class="photo-stats">
-                        <div class="stat">
-                            <i class="fas fa-heart"></i> ${Utils.formatNumber(photo.likes || 0)}
-                        </div>
-                        <div class="stat">
-                            <i class="fas fa-eye"></i> ${Utils.formatNumber(photo.views || 0)}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        try { card.setAttribute('data-photo-id', String(photo.id)); } catch (e) {}
+        try { card.setAttribute('data-post-id', String(photo.id)); } catch (e) {}
+
+        // preview image
+        const img = document.createElement('img');
+        img.className = 'photo-image';
+        try { img.setAttribute('src', photo.image || ''); } catch (e) { img.src = ''; }
+        img.setAttribute('alt', photo.title || 'Photo');
+
+        const overlay = document.createElement('div'); overlay.className = 'photo-overlay';
+
+        // header
+        const header = document.createElement('div'); header.className = 'photo-header';
+        const author = document.createElement('div'); author.className = 'photo-author';
+        const av = document.createElement('img'); av.className = 'author-avatar';
+        av.setAttribute('alt', photo.author || '');
+        try { av.setAttribute('src', photo.authorAvatar || 'https://via.placeholder.com/32'); } catch (e) { av.src = 'https://via.placeholder.com/32'; }
+        const authorName = document.createElement('div'); authorName.className = 'author-name'; authorName.textContent = photo.author || '';
+        author.appendChild(av); author.appendChild(authorName);
+
+        const likeBtn = document.createElement('button'); likeBtn.className = 'photo-like-btn'; likeBtn.type = 'button';
+        likeBtn.setAttribute('aria-label', 'Like');
+        const likeIcon = document.createElement('i'); likeIcon.className = 'far fa-heart';
+        likeBtn.appendChild(likeIcon);
+        // wire reactionManager if present
+        likeBtn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            try { if (window.reactionManager && typeof reactionManager.toggleLike === 'function') reactionManager.toggleLike(String(photo.id)); } catch (e) {}
+        });
+
+        header.appendChild(author);
+        header.appendChild(likeBtn);
+
+        // footer
+        const footer = document.createElement('div'); footer.className = 'photo-footer';
+        const title = document.createElement('div'); title.className = 'photo-title'; title.textContent = photo.title || '';
+        const stats = document.createElement('div'); stats.className = 'photo-stats';
+        const statLikes = document.createElement('div'); statLikes.className = 'stat'; statLikes.innerHTML = '<i class="fas fa-heart"></i> ' + (window.Utils && Utils.formatNumber ? Utils.formatNumber(photo.likes || 0) : String(photo.likes || 0));
+        const statViews = document.createElement('div'); statViews.className = 'stat'; statViews.innerHTML = '<i class="fas fa-eye"></i> ' + (window.Utils && Utils.formatNumber ? Utils.formatNumber(photo.views || 0) : String(photo.views || 0));
+        stats.appendChild(statLikes); stats.appendChild(statViews);
+        footer.appendChild(title); footer.appendChild(stats);
+
+        overlay.appendChild(header);
+        overlay.appendChild(footer);
+
+        card.appendChild(img);
+        card.appendChild(overlay);
 
         card.addEventListener('click', () => {
             this.openModal(photo);
@@ -103,32 +129,40 @@ class PhotosPage {
         const searchBtn = document.querySelector('.search-submit');
         if (searchBtn) {
             searchBtn.addEventListener('click', async () => {
-                const query = document.getElementById('photoSearchInput').value;
+                const input = document.getElementById('photoSearchInput');
+                const query = input ? input.value : '';
                 await this.search(query);
             });
         }
     }
 
     async search(query) {
-        const results = await db.search(query, 'photos');
         const grid = document.getElementById('masonryGrid');
-        grid.innerHTML = results.map(photo => {
-            const card = document.createElement('div');
-            card.className = 'photo-card';
-            card.innerHTML = `
-                <img src="${photo.image}" alt="${photo.title}" class="photo-image">
-                <div class="photo-overlay">
-                    <div class="photo-title">${photo.title}</div>
-                </div>
-            `;
+        if (!grid) return;
+        let results = [];
+        try { results = await (window.db && db.search ? db.search(query, 'photos') : []); } catch (e) { results = []; }
+        grid.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        results.forEach(photo => {
+            const card = document.createElement('div'); card.className = 'photo-card';
+            try { card.setAttribute('data-photo-id', String(photo.id)); } catch (e) {}
+            try { card.setAttribute('data-post-id', String(photo.id)); } catch (e) {}
+            const img = document.createElement('img'); img.className = 'photo-image'; img.setAttribute('src', photo.image || ''); img.setAttribute('alt', photo.title || '');
+            const overlay = document.createElement('div'); overlay.className = 'photo-overlay';
+            const ptitle = document.createElement('div'); ptitle.className = 'photo-title'; ptitle.textContent = photo.title || '';
+            overlay.appendChild(ptitle);
+            card.appendChild(img); card.appendChild(overlay);
             card.addEventListener('click', () => this.openModal(photo));
-            return card.outerHTML;
-        }).join('');
+            frag.appendChild(card);
+        });
+        grid.appendChild(frag);
     }
 
     setupModal() {
         const modal = document.getElementById('photoModal');
         const closeBtn = document.getElementById('modalClose');
+
+        if (!modal) return;
 
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
@@ -145,12 +179,13 @@ class PhotosPage {
 
     openModal(photo) {
         const modal = document.getElementById('photoModal');
+        if (!modal) return;
         const modalImage = document.getElementById('modalImage');
         const modalTitle = document.getElementById('modalTitle');
         const modalDescription = document.getElementById('modalDescription');
 
-        if (modalImage) modalImage.src = photo.image;
-        if (modalTitle) modalTitle.textContent = photo.title;
+        if (modalImage) { try { modalImage.setAttribute('src', photo.image || ''); } catch (e) { modalImage.src = ''; } }
+        if (modalTitle) modalTitle.textContent = photo.title || '';
         if (modalDescription) modalDescription.textContent = photo.description || 'Amazing moment captured!';
 
         modal.classList.add('active');

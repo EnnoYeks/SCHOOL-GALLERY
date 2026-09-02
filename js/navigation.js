@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260902j';
+var HSHS_ASSET_VER = '260902k';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-booting .hero,#hshs-tt-overlay{display:none!important}html.hshs-booting body>*:not(#hshs-boot){opacity:0!important;visibility:hidden!important}html.hshs-booting .nav-links{display:none!important}@media(max-width:1024px){.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
+        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-b[...]';
         document.documentElement.classList.add('hshs-booting');
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
@@ -141,17 +141,22 @@ document.addEventListener('DOMContentLoaded', () => {
     addCss('hshs-no-flicker-css', 'hshs-no-flicker.css');
     addCss('hshs-tt-css', 'hshs-tt.css');
     addCss('hshs-social-css', 'hshs-social.css');
+    addCss('hshs-social-loop-css', 'hshs-social-loop.css');
+    addCss('hshs-social-actions-css', 'hshs-social-actions.css');
     addCss('hshs-motion-css', 'gallery-transitions.css');
     addCss('hshs-page-swipe-css', 'page-swipe.css');
     addCss('hshs-chat-spring-css', 'hshs-chat-spring.css');
     addCss('hshs-account-css', 'hshs-account.css');
     addCss('hshs-settings-css', 'hshs-settings.css');
+    addCss('hshs-school-css', 'hshs-school.css');
     add('hshs-lock-js', 'hshs-lock.js');
     add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');
     add('hshs-perf-js', 'hshs-perf.js');
+    add('hshs-store-bridge-js', 'hshs-store-bridge.js');
     add('hshs-store-js', 'hshs-store.js');
     add('hshs-social-js', 'hshs-social.js');
+    add('hshs-social-actions-js', 'hshs-social-actions.js');
     add('hshs-notify-js', 'hshs-notify.js');
     add('hshs-mobile-shell-js', 'mobile-shell.js');
     add('hshs-upload-js', 'hshs-upload.js');
@@ -165,4 +170,5 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-chat-spring-js', 'hshs-chat-spring.js');
     add('hshs-account-js', 'hshs-account.js');
     add('hshs-settings-js', 'hshs-settings.js');
+    add('hshs-school-js', 'hshs-school.js');
 })();
