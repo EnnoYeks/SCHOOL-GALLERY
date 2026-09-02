@@ -3,7 +3,7 @@
     window.__hshsSwipe = true;
     if (!window.matchMedia('(max-width: 1024px)').matches) return;
 
-    var ORDER = ['index.html','gallery.html','spotlight.html','buzz.html','photos.html','videos.html','trending.html','polls.html','memories.html','chat.html'];
+    var ORDER = ['index.html','buzz.html','gallery.html','photos.html','videos.html','spotlight.html','trending.html','polls.html','memories.html','chat.html'];
     var startX = 0, startY = 0, lastX = 0, lastT = 0, vx = 0;
     var tracking = false, axis = null, primed = null, pendingNav = null, dir = 1;
     var x = 0, v = 0, target = 0, running = false;
@@ -61,7 +61,7 @@
         var s = stage();
         if (!s || !n) return;
         var cache = window.__hshsPageCache || {};
-        var html = cache[n.href] || cache[n.file];
+        var html = cache[n.file] || cache[n.href];
         if (html) s.next.innerHTML = extract(html);
         else if (window.__hshsPageSkeleton) s.next.innerHTML = window.__hshsPageSkeleton(n.file);
         else s.next.innerHTML = '';
