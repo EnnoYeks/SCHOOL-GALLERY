@@ -36,6 +36,9 @@
         s.friendRequests = s.friendRequests || [];
         s.friends = s.friends || [];
         s.notifications = s.notifications || [];
+        s.likes = s.likes || [];
+        s.saves = s.saves || [];
+        s.comments = s.comments || [];
         s.users = (s.users || []).map(function (u) {
             u.username = u.username || slugify(u.name);
             u.bio = u.bio || 'HSHS World member.';
@@ -64,11 +67,11 @@
             { id: 'u-brian', name: 'Brian Kato', username: 'brian_k', classYear: 'S3', role: 'Student', bio: 'Football and Friday vibes.', avatar: '', pin: pinHash('6666'), chatTheme: 'mint', bubbleStyle: 'rounded', lastSeen: now() - 180000, createdAt: now() - 86400000 * 8 }
         ];
         var posts = [
-            { id: 'p1', type: 'photo', title: 'Sports Day 2026', description: 'Track finals on the main field.', category: 'sports', image: PICS[0], imageUrl: PICS[0], thumbnailUrl: PICS[0], author: 'Amina Namukasa', authorId: 'u-demo', likes: 42, views: 310, comments: 6, shares: 4, createdAt: now() - 86400000 * 2 },
-            { id: 'p2', type: 'photo', title: 'Morning Assembly', description: 'House announcements and the school anthem.', category: 'events', image: PICS[1], imageUrl: PICS[1], thumbnailUrl: PICS[1], author: 'Joel Wambede', authorId: 'u-prefect', likes: 28, views: 190, comments: 3, shares: 2, createdAt: now() - 86400000 * 1 },
-            { id: 'p3', type: 'photo', title: 'Science Fair', description: 'Robotics and chemistry stands in the hall.', category: 'academics', image: PICS[3], imageUrl: PICS[3], thumbnailUrl: PICS[3], author: 'Amina Namukasa', authorId: 'u-demo', likes: 61, views: 420, comments: 9, shares: 7, createdAt: now() - 86400000 * 5 },
-            { id: 'p4', type: 'video', title: 'HSHS Sports Day 2026', description: 'Best moments from the field.', category: 'sports', image: PICS[0], imageUrl: PICS[0], thumbnailUrl: PICS[0], author: 'Sports Club', authorId: 'u-sports', likes: 180, views: 2400, comments: 24, duration: '04:35', featured: true, createdAt: now() - 86400000 * 2 },
-            { id: 'p5', type: 'video', title: 'Graduation Ceremony', description: 'S6 send-off in the main hall.', category: 'events', image: PICS[2], imageUrl: PICS[2], thumbnailUrl: PICS[2], author: 'Prefects', authorId: 'u-prefect', likes: 210, views: 2600, comments: 41, duration: '04:18', featured: true, createdAt: now() - 86400000 * 3 }
+            { id: 'p1', type: 'photo', title: 'Sports Day 2026', description: 'Track finals on the main field.', category: 'sports', classTag: 'S4', image: PICS[0], imageUrl: PICS[0], thumbnailUrl: PICS[0], author: 'Amina Namukasa', authorId: 'u-demo', likes: 42, views: 310, comments: 6, shares: 4, createdAt: now() - 86400000 * 2 },
+            { id: 'p2', type: 'photo', title: 'Morning Assembly', description: 'House announcements and the school anthem.', category: 'events', classTag: 'Campus', image: PICS[1], imageUrl: PICS[1], thumbnailUrl: PICS[1], author: 'Joel Wambede', authorId: 'u-prefect', likes: 28, views: 190, comments: 3, shares: 2, createdAt: now() - 86400000 * 1 },
+            { id: 'p3', type: 'photo', title: 'Science Fair', description: 'Robotics and chemistry stands in the hall.', category: 'academics', classTag: 'S4', image: PICS[3], imageUrl: PICS[3], thumbnailUrl: PICS[3], author: 'Amina Namukasa', authorId: 'u-demo', likes: 61, views: 420, comments: 9, shares: 7, createdAt: now() - 86400000 * 5 },
+            { id: 'p4', type: 'video', title: 'HSHS Sports Day 2026', description: 'Best moments from the field.', category: 'sports', classTag: 'Campus', image: PICS[0], imageUrl: PICS[0], thumbnailUrl: PICS[0], author: 'Sports Club', authorId: 'u-sports', likes: 180, views: 2400, comments: 24, duration: '04:35', featured: true, createdAt: now() - 86400000 * 2 },
+            { id: 'p5', type: 'video', title: 'Graduation Ceremony', description: 'S6 send-off in the main hall.', category: 'events', classTag: 'S6', image: PICS[2], imageUrl: PICS[2], thumbnailUrl: PICS[2], author: 'Prefects', authorId: 'u-prefect', likes: 210, views: 2600, comments: 41, duration: '04:18', featured: true, createdAt: now() - 86400000 * 3 }
         ];
         return save({
             users: users,
@@ -88,6 +91,7 @@
                 { id: 'n-seed1', userId: 'u-demo', type: 'friend_request', title: 'Friend request', message: 'Maya Okello (@maya_lens) wants to be friends', data: { requestId: 'fr-seed1', fromId: 'u-maya' }, read: false, createdAt: now() - 900000 }
             ],
             likes: [],
+            saves: [],
             comments: [{ id: 'c1', postId: 'p1', author: 'Joel Wambede', text: 'What a race!', createdAt: now() - 3600000 }]
         });
     }
@@ -99,6 +103,9 @@
         if (!s.friendRequests) s.friendRequests = [];
         if (!s.friends) s.friends = [];
         if (!s.notifications) s.notifications = [];
+        if (!s.likes) s.likes = [];
+        if (!s.saves) s.saves = [];
+        if (!s.comments) s.comments = [];
         window.__hshsState = s;
         return s;
     }
@@ -148,6 +155,12 @@
                 if (u.id === me) return false;
                 if (!q) return true;
                 return (u.name + ' ' + (u.username || '') + ' ' + (u.role || '') + ' ' + (u.classYear || '') + ' ' + (u.bio || '')).toLowerCase().indexOf(q) !== -1;
+            });
+        },
+        usersByClass: function (klass) {
+            var k = String(klass || '').toLowerCase();
+            return api.listUsers().filter(function (u) {
+                return String(u.classYear || '').toLowerCase() === k;
             });
         },
         signup: function (data) {
@@ -267,6 +280,13 @@
                 friends: s.friends.filter(function (f) { return f.a === uid || f.b === uid; }).length
             };
         },
+        friendsOf: function (uid) {
+            return state().friends.filter(function (f) {
+                return f.a === uid || f.b === uid;
+            }).map(function (f) {
+                return userById(f.a === uid ? f.b : f.a);
+            }).filter(Boolean).map(ensureUsername);
+        },
         isFriend: function (uid) {
             var me = state().sessionUserId;
             if (!me || !uid) return false;
@@ -375,6 +395,7 @@
             var post = {
                 id: id('p'), type: data.type === 'video' ? 'video' : 'photo', title: title,
                 description: data.description || '', category: data.category || 'events',
+                classTag: data.classTag || user.classYear || '',
                 image: data.image || PICS[Math.floor(Math.random() * PICS.length)],
                 author: user.name, authorId: user.id, likes: 0, views: 1, comments: 0, shares: 0,
                 destinations: data.destinations || [], filter: data.filter, soundId: data.soundId,
@@ -393,6 +414,11 @@
             save(s);
             return { ok: true };
         },
+        isLiked: function (itemId) {
+            var s = state();
+            var uid = s.sessionUserId || 'guest';
+            return s.likes.indexOf(uid + ':' + itemId) !== -1;
+        },
         toggleLike: function (itemId) {
             var s = state();
             var uid = s.sessionUserId || 'guest';
@@ -401,9 +427,40 @@
             var post = s.posts.find(function (p) { return p.id === itemId; });
             if (!post) return { ok: false, liked: false, likes: 0 };
             if (i >= 0) { s.likes.splice(i, 1); post.likes = Math.max(0, (post.likes || 0) - 1); }
-            else { s.likes.push(key); post.likes = (post.likes || 0) + 1; }
+            else {
+                s.likes.push(key);
+                post.likes = (post.likes || 0) + 1;
+                if (post.authorId && post.authorId !== uid) {
+                    var me = userById(uid);
+                    pushNotify(post.authorId, 'like', 'New like', (me ? me.name : 'Someone') + ' liked "' + post.title + '"', { postId: itemId });
+                }
+            }
             save(s);
             return { ok: true, liked: i < 0, likes: post.likes };
+        },
+        isSaved: function (itemId) {
+            var s = state();
+            var uid = s.sessionUserId || 'guest';
+            return (s.saves || []).indexOf(uid + ':' + itemId) !== -1;
+        },
+        toggleSave: function (itemId) {
+            var s = state();
+            if (!s.saves) s.saves = [];
+            var uid = s.sessionUserId || 'guest';
+            var key = uid + ':' + itemId;
+            var i = s.saves.indexOf(key);
+            var post = s.posts.find(function (p) { return p.id === itemId; });
+            if (!post) return { ok: false, saved: false };
+            if (i >= 0) s.saves.splice(i, 1);
+            else s.saves.push(key);
+            save(s);
+            return { ok: true, saved: i < 0 };
+        },
+        listSaved: function () {
+            var s = state();
+            var uid = s.sessionUserId || 'guest';
+            var ids = (s.saves || []).filter(function (k) { return k.indexOf(uid + ':') === 0; }).map(function (k) { return k.split(':')[1]; });
+            return api.listPosts().filter(function (p) { return ids.indexOf(p.id) !== -1; });
         },
         addComment: function (postId, text) {
             var s = state();
@@ -413,7 +470,12 @@
             var row = { id: id('c'), postId: postId, author: user ? user.name : 'Guest', text: clean, createdAt: now() };
             s.comments.unshift(row);
             var post = s.posts.find(function (p) { return p.id === postId; });
-            if (post) post.comments = (post.comments || 0) + 1;
+            if (post) {
+                post.comments = (post.comments || 0) + 1;
+                if (post.authorId && user && post.authorId !== user.id) {
+                    pushNotify(post.authorId, 'mention', 'New comment', user.name + ' commented on "' + post.title + '"', { postId: postId });
+                }
+            }
             save(s);
             return { ok: true, comment: row };
         },
@@ -421,7 +483,7 @@
             q = String(q || '').toLowerCase().trim();
             if (!q) return api.listPosts();
             return api.listPosts().filter(function (p) {
-                return (p.title + ' ' + (p.description || '') + ' ' + (p.author || '') + ' ' + (p.category || '')).toLowerCase().indexOf(q) !== -1;
+                return (p.title + ' ' + (p.description || '') + ' ' + (p.author || '') + ' ' + (p.category || '') + ' ' + (p.classTag || '')).toLowerCase().indexOf(q) !== -1;
             });
         },
         trending: function (n) {
