@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260902j';
+var HSHS_ASSET_VER = '260902k';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addCss('hshs-no-flicker-css', 'hshs-no-flicker.css');
     addCss('hshs-tt-css', 'hshs-tt.css');
     addCss('hshs-social-css', 'hshs-social.css');
+    addCss('hshs-social-loop-css', 'hshs-social-loop.css');
     addCss('hshs-motion-css', 'gallery-transitions.css');
     addCss('hshs-page-swipe-css', 'page-swipe.css');
     addCss('hshs-chat-spring-css', 'hshs-chat-spring.css');
