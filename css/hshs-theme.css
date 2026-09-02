@@ -76,19 +76,16 @@ body.dark-mode {
         color: #fff;
     }
     body.has-mobile-shell .hshs-search-btn {
-        width: 40px; height: 40px; border: 0; border-radius: 13px;
-        background: linear-gradient(135deg, #eab308, #f59e0b);
+        width: 40px; height: 40px; border: 0; border-radius: 50%;
+        background: #ffcc00;
         color: #102047; font-size: 15px; display: inline-flex;
         align-items: center; justify-content: center;
     }
-    body.has-mobile-shell .profile-icon,
-    body.has-mobile-shell .notification-icon,
-    body.has-mobile-shell .hshs-profile,
-    body.has-mobile-shell .profile-img,
-    body.has-mobile-shell .hshs-avatar {
+    body.has-mobile-shell .theme-toggle,
+    body.has-mobile-shell #themeToggle,
+    body.has-mobile-shell .mobile-menu-toggle {
         display: none !important;
     }
-    body.has-mobile-shell .theme-toggle { color: #fff; }
     body.search-open .search-container {
         display: block !important;
         position: absolute; left: 12px; right: 12px; top: 62px; z-index: 40;
