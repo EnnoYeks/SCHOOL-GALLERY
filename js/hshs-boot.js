@@ -2,109 +2,70 @@
     if (window.__hshsBoot) return;
     window.__hshsBoot = true;
 
-    var MIN_BOOT = 4000;
+    var MIN_BOOT = 2800;
     var parts = { css: 0, dom: 0, shell: 0, fonts: 0, images: 0, page: 0, site: 0 };
-    var weight = { css: 12, dom: 8, shell: 14, fonts: 8, images: 18, page: 10, site: 30 };
     var done = false;
     var started = Date.now();
-    var labelEl, fillEl, pctEl;
+    var labelEl;
+    var notes = ['Detecting device', 'Loading styles', 'Preparing pages', 'Opening HSHS World'];
 
-    function total() {
-        var n = 0;
-        Object.keys(parts).forEach(function (k) { n += parts[k] * weight[k]; });
-        return Math.max(2, Math.min(100, Math.round(n)));
-    }
     function setPart(name, value, note) {
         if (done) return;
         parts[name] = Math.max(parts[name], Math.min(1, value));
-        paint(note);
+        if (labelEl && note) labelEl.textContent = note;
         if (coreReady()) finish();
     }
     function coreReady() {
         return parts.css >= 1 && parts.dom >= 1 && parts.shell >= 1 && parts.fonts >= 1 && parts.page >= 1;
     }
-    function paint(note) {
-        var pct = total();
-        if (fillEl) fillEl.style.width = pct + '%';
-        if (pctEl) pctEl.textContent = pct + '%';
-        if (labelEl && note) labelEl.textContent = note;
-    }
-    function catSvg() {
-        return '<svg viewBox="0 0 120 100" aria-hidden="true">' +
-            '<g class="tail"><path d="M78 52 C98 48 108 72 94 88 C88 94 78 88 82 78 C86 68 88 62 78 60" fill="#1a1a1e"/></g>' +
-            '<ellipse class="body" cx="62" cy="56" rx="26" ry="17" fill="#1a1a1e"/>' +
-            '<g class="head">' +
-            '<circle cx="44" cy="36" r="16" fill="#1a1a1e"/>' +
-            '<path d="M32 28 L29 12 L43 24Z" fill="#1a1a1e"/>' +
-            '<path d="M46 24 L59 12 L56 28Z" fill="#1a1a1e"/>' +
-            '<ellipse cx="40" cy="35" rx="3.3" ry="3.7" fill="#f4efe4"/>' +
-            '<ellipse cx="50" cy="35" rx="3.3" ry="3.7" fill="#f4efe4"/>' +
-            '<circle cx="40.5" cy="35.5" r="1.15" fill="#1a1a1e"/>' +
-            '<circle cx="50.5" cy="35.5" r="1.15" fill="#1a1a1e"/>' +
+    function badgeSvg() {
+        return '<svg viewBox="0 0 200 200" aria-hidden="true">' +
+            '<path d="M38 96 C36 128 58 158 100 176 C142 158 164 128 162 96 C158 74 148 58 138 48 C126 62 100 68 100 68 C100 68 74 62 62 48 C52 58 42 74 38 96Z" fill="#c9a227"/>' +
+            '<path d="M44 96 C42 126 62 154 100 170 C138 154 158 126 156 96 C152 76 143 62 134 52 C123 64 100 70 100 70 C100 70 77 64 66 52 C57 62 48 76 44 96Z" fill="#8b6914"/>' +
+            '<path d="M72 34 C86 50 100 54 100 54 C100 54 114 50 128 34 C150 48 164 78 160 108 C156 138 132 160 100 176 C68 160 44 138 40 108 C36 78 50 48 72 34Z" fill="#d4af37"/>' +
+            '<path d="M76 40 C88 54 100 58 100 58 C100 58 112 54 124 40 C144 52 156 78 152 106 C148 134 126 154 100 168 C74 154 52 134 48 106 C44 78 56 52 76 40Z" fill="#0b1a3a"/>' +
+            '<path d="M100 58 L100 112 L50 112 C48 86 62 58 100 58Z" fill="#163a7a"/>' +
+            '<path d="M100 58 L150 112 L100 112Z" fill="#b42318"/>' +
+            '<path d="M50 112 L150 112 L150 118 C138 148 118 160 100 168 C82 160 62 148 50 118Z" fill="#f4efe4"/>' +
+            '<path d="M68 138 L86 118 L100 128 L114 118 L132 138 L100 160Z" fill="#1d4ed8"/>' +
+            '<circle cx="100" cy="122" r="10" fill="#eab308"/>' +
+            '<g fill="#fbbf24">' +
+            '<rect x="98" y="104" width="4" height="10" rx="1"/>' +
+            '<rect x="98" y="128" width="4" height="8" rx="1"/>' +
+            '<rect x="86" y="120" width="10" height="4" rx="1"/>' +
+            '<rect x="104" y="120" width="10" height="4" rx="1"/>' +
             '</g>' +
-            '<path d="M36 54 C28 56 24 62 30 64 C38 66 44 62 46 58" fill="#1a1a1e"/>' +
-            '</svg>';
-    }
-    function campusSvg() {
-        function win(x, y) {
-            return '<rect x="' + x + '" y="' + y + '" width="10" height="14" rx="1"/>';
-        }
-        var windows = '';
-        var cols = [52, 78, 104, 130, 156, 236, 262, 288, 380, 410, 440, 470, 500, 600, 710, 740, 770, 800, 900, 930, 960, 1060, 1090, 1120];
-        cols.forEach(function (x, i) {
-            windows += win(x, i % 3 === 0 ? 148 : 168);
-            if (i % 2 === 0) windows += win(x, 188);
-        });
-        return '<svg viewBox="0 0 1200 280" preserveAspectRatio="xMidYMax slice" aria-hidden="true">' +
-            '<rect y="218" width="1200" height="62" fill="#061028"/>' +
-            '<g fill="#0a1733">' +
-            '<rect x="40" y="120" width="160" height="110"/>' +
-            '<rect x="220" y="90" width="120" height="140"/>' +
-            '<polygon points="220,90 280,48 340,90"/>' +
-            '<rect x="360" y="130" width="200" height="100"/>' +
-            '<rect x="580" y="70" width="90" height="160"/>' +
-            '<rect x="690" y="110" width="170" height="120"/>' +
-            '<rect x="880" y="95" width="140" height="135"/>' +
-            '<polygon points="880,95 950,52 1020,95"/>' +
-            '<rect x="1040" y="125" width="130" height="105"/>' +
+            '<polygon points="82,82 88,94 76,90" fill="#f8fafc"/>' +
+            '<polygon points="82,76 86,82 78,82" fill="#f8fafc"/>' +
+            '<g fill="#f8fafc">' +
+            '<rect x="118" y="78" width="18" height="14" rx="1"/>' +
+            '<rect x="116" y="76" width="22" height="3" rx="1"/>' +
+            '<rect x="126" y="78" width="2" height="14" fill="#cbd5e1"/>' +
             '</g>' +
-            '<g fill="#eab308" opacity=".88">' + windows + '</g>' +
             '</svg>';
     }
     function mountSplash() {
-        if (document.getElementById('hshs-boot')) return;
         document.documentElement.classList.add('hshs-booting');
-        var box = document.createElement('div');
-        box.id = 'hshs-boot';
-        box.innerHTML =
-            '<div class="hshs-boot-sky" aria-hidden="true">' +
-            '<div class="hshs-boot-stars"></div>' +
-            '<div class="hshs-boot-aurora a"></div>' +
-            '<div class="hshs-boot-aurora b"></div>' +
-            '<div class="hshs-boot-aurora c"></div>' +
-            '<div class="hshs-boot-campus">' + campusSvg() + '</div>' +
-            '<div class="hshs-boot-memories">' +
-            '<figure class="hshs-boot-polaroid p1"><i></i></figure>' +
-            '<figure class="hshs-boot-polaroid p2"><i></i></figure>' +
-            '<figure class="hshs-boot-polaroid p3"><i></i></figure>' +
-            '<figure class="hshs-boot-polaroid p4"><i></i></figure>' +
-            '</div>' +
-            '<div class="hshs-boot-grain"></div>' +
-            '</div>' +
-            '<div class="hshs-boot-stage">' +
-            '<p class="hshs-boot-kicker">Hawthorne Scribner</p>' +
-            '<div class="hshs-boot-track-wrap">' +
-            '<div class="hshs-boot-cat" id="hshsBootCat">' + catSvg() + '</div>' +
-            '<div class="hshs-boot-track"><div class="hshs-boot-fill" id="hshsBootFill"></div></div>' +
-            '</div>' +
-            '<div class="hshs-boot-copy"><strong>HSHS World</strong>' +
-            '<small><span id="hshsBootNote">Opening the courtyard</span> · <span id="hshsBootPct">2%</span></small>' +
-            '</div></div>';
-        (document.body || document.documentElement).appendChild(box);
-        fillEl = document.getElementById('hshsBootFill');
+        var box = document.getElementById('hshs-boot');
+        if (!box) {
+            box = document.createElement('div');
+            box.id = 'hshs-boot';
+            (document.body || document.documentElement).appendChild(box);
+        }
+        if (!box.querySelector('.hshs-boot-card')) {
+            box.innerHTML =
+                '<div class="hshs-boot-card">' +
+                '<div class="hshs-boot-badge">' + badgeSvg() + '</div>' +
+                '<div class="hshs-boot-dots" aria-hidden="true"><i></i><i></i><i></i></div>' +
+                '<p class="hshs-boot-note" id="hshsBootNote">Detecting device</p>' +
+                '</div>';
+        }
         labelEl = document.getElementById('hshsBootNote');
-        pctEl = document.getElementById('hshsBootPct');
-        paint('Opening the courtyard');
+        var mobile = window.matchMedia('(max-width: 1024px)').matches;
+        document.documentElement.classList.toggle('hshs-device-mobile', mobile);
+        document.documentElement.classList.toggle('hshs-device-desktop', !mobile);
+        if (labelEl) labelEl.textContent = mobile ? 'Phone layout ready' : 'Desktop layout ready';
+        setTimeout(function () { if (labelEl) labelEl.textContent = 'Loading styles'; }, 500);
     }
     function ensureCss() {
         if (document.getElementById('hshs-boot-css')) return;
@@ -114,6 +75,7 @@
         var href = guess
             ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-boot.css')
             : (location.pathname.indexOf('/index/') !== -1 ? '../css/hshs-boot.css' : 'css/hshs-boot.css');
+        if (href.indexOf('?') === -1 && window.__hshsAssetVer) href += '?v=' + window.__hshsAssetVer;
         var link = document.createElement('link');
         link.id = 'hshs-boot-css';
         link.rel = 'stylesheet';
@@ -126,7 +88,7 @@
         var left = links.length, marked = 0;
         function one() {
             marked += 1;
-            setPart('css', marked / left, 'Gathering memories');
+            setPart('css', marked / left, 'Loading styles');
             if (marked >= left) setPart('css', 1, 'Styles ready');
         }
         links.forEach(function (link) {
@@ -134,7 +96,7 @@
             link.addEventListener('load', one, { once: true });
             link.addEventListener('error', one, { once: true });
         });
-        setTimeout(function () { setPart('css', 1, 'Styles ready'); }, 1800);
+        setTimeout(function () { setPart('css', 1, 'Styles ready'); }, 1600);
     }
     function watchImages(scope) {
         var root = scope || document;
@@ -146,7 +108,7 @@
         return new Promise(function (resolve) {
             function one() {
                 marked += 1;
-                setPart('images', marked / left, 'Warming the lights');
+                setPart('images', marked / left, 'Loading pictures');
                 if (marked >= left) { setPart('images', 1, 'Pictures ready'); resolve(); }
             }
             imgs.forEach(function (img) {
@@ -154,7 +116,7 @@
                 img.addEventListener('load', one, { once: true });
                 img.addEventListener('error', one, { once: true });
             });
-            setTimeout(function () { setPart('images', 1, 'Pictures ready'); resolve(); }, 2500);
+            setTimeout(function () { setPart('images', 1, 'Pictures ready'); resolve(); }, 2200);
         });
     }
     function fileKey(href) {
@@ -183,12 +145,12 @@
                 cache[href] = html;
                 cache[fileKey(href)] = html;
                 marked += 1;
-                setPart('site', marked / left, 'Loading pages');
+                setPart('site', marked / left, 'Preparing pages');
             }).catch(function () {
                 marked += 1;
-                setPart('site', marked / left, 'Loading pages');
+                setPart('site', marked / left, 'Preparing pages');
             });
-        })).then(function () { setPart('site', 1, 'Site ready'); });
+        })).then(function () { setPart('site', 1, 'Pages ready'); });
     }
     function reveal() {
         window.__hshsBootDone = true;
@@ -197,7 +159,7 @@
         var boot = document.getElementById('hshs-boot');
         if (boot) {
             boot.classList.add('is-off');
-            setTimeout(function () { if (boot.parentNode) boot.remove(); }, 420);
+            setTimeout(function () { if (boot.parentNode) boot.remove(); }, 380);
         }
         if (window.__hshsTt) window.__hshsTt.hide();
     }
@@ -205,7 +167,7 @@
         if (done) return;
         done = true;
         Object.keys(parts).forEach(function (k) { parts[k] = 1; });
-        paint('Ready');
+        if (labelEl) labelEl.textContent = 'Opening HSHS World';
         var wait = Math.max(0, MIN_BOOT - (Date.now() - started));
         setTimeout(reveal, wait);
     }
@@ -216,17 +178,9 @@
             for (var i = 0; i < n; i++) out += html;
             return out;
         }
-        var tabs = '<div class="sk-tabs"><i></i><i></i><i></i><i></i></div>';
-        var playGrid = '<div class="sk-play-grid">' + repeat('<article class="sk-play"><span class="sk-play-btn"></span></article>', 4) + '</div>';
-        var playList = '<div class="sk-play-list">' + repeat('<div class="sk-play-row"><div class="thumb"></div><div><div class="sk-line"></div><div class="sk-line s"></div></div></div>', 4) + '</div>';
-        var photos = '<div class="sk-photo-grid">' + repeat('<article class="sk-photo"></article>', 6) + '</div>';
-        var rows = repeat('<div class="sk-row"></div>', 4);
-        if (file.indexOf('videos') !== -1) return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + tabs + playGrid + playList + '</div>';
         if (file.indexOf('buzz') !== -1 || file.indexOf('clips') !== -1) return '<div class="hshs-page-skel"><div class="sk-buzz"></div></div>';
-        if (file.indexOf('gallery') !== -1 || file.indexOf('photos') !== -1) return '<div class="hshs-page-skel">' + tabs + photos + '</div>';
-        if (file.indexOf('spotlight') !== -1 || file.indexOf('polls') !== -1 || file.indexOf('memories') !== -1) return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + rows + '</div>';
-        if (file.indexOf('profile') !== -1) return '<div class="hshs-page-skel"><div class="sk-avatar"></div>' + rows + '</div>';
-        return '<div class="hshs-page-skel"><div class="sk-hero"></div><div class="sk-stats"><div class="sk-stat"></div><div class="sk-stat"></div><div class="sk-stat"></div><div class="sk-stat"></div></div>' + photos + '</div>';
+        if (file.indexOf('gallery') !== -1 || file.indexOf('photos') !== -1) return '<div class="hshs-page-skel"><div class="sk-photo-grid">' + repeat('<article class="sk-photo"></article>', 6) + '</div></div>';
+        return '<div class="hshs-page-skel"><div class="sk-hero"></div>' + repeat('<div class="sk-row"></div>', 4) + '</div>';
     }
     window.__hshsBootMark = setPart;
     window.__hshsPageSkeleton = pageSkeleton;
@@ -250,24 +204,24 @@
     }
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setPart('fonts', 1, 'Text ready'); });
     else setPart('fonts', 1, 'Text ready');
-    setTimeout(function () { setPart('fonts', 1, 'Text ready'); }, 1800);
+    setTimeout(function () { setPart('fonts', 1, 'Text ready'); }, 1400);
     var shellTries = 0;
     var shellTimer = setInterval(function () {
         if (window.__hshsMobileShell || ++shellTries > 40) {
             clearInterval(shellTimer);
-            setPart('shell', 1, 'App shell ready');
+            setPart('shell', 1, 'App ready');
         }
     }, 50);
     watchImages(document).then(function () { setPart('page', 1, 'Content ready'); });
     window.addEventListener('load', function () {
         setPart('css', 1); setPart('dom', 1); setPart('fonts', 1);
-        setPart('images', 1); setPart('page', 1, 'Ready');
-        setPart('shell', 1, 'Ready');
+        setPart('images', 1); setPart('page', 1, 'Opening HSHS World');
+        setPart('shell', 1);
     });
     setTimeout(function () {
         setPart('css', 1); setPart('dom', 1); setPart('shell', 1);
-        setPart('fonts', 1); setPart('images', 1); setPart('page', 1); setPart('site', 1, 'Ready');
+        setPart('fonts', 1); setPart('images', 1); setPart('page', 1); setPart('site', 1);
         if (!done) finish();
         else reveal();
-    }, 6500);
+    }, 5200);
 })();
