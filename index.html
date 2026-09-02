@@ -4,6 +4,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
     <meta name="description" content="HSHS World - Share school moments, Vibe, Buzz and memories">
     <meta name="theme-color" content="#071433">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script>
@@ -12,23 +14,27 @@
             var m = window.matchMedia('(max-width:1024px)').matches;
             r.classList.add('hshs-booting');
             r.classList.add(m ? 'hshs-device-mobile' : 'hshs-device-desktop');
+            window.addEventListener('pageshow', function (e) {
+                if (!e.persisted) return;
+                r.classList.remove('hshs-booting');
+                r.classList.add('hshs-ready');
+            });
         })();
     </script>
     <style>
-        html, html.hshs-booting, html:not(.hshs-ready) { background: #071433 !important; }
-        html.hshs-booting body > *:not(#hshs-boot),
-        html:not(.hshs-ready) body > *:not(#hshs-boot) {
+        html.hshs-booting { background: #071433 !important; }
+        html.hshs-booting body > *:not(#hshs-boot) {
             opacity: 0 !important; visibility: hidden !important;
         }
         input[type="text"], input[type="email"], textarea, select { font-size: 16px !important; }
     </style>
     <meta charset="UTF-8">
     <title>HSHS World</title>
-    <link rel="stylesheet" href="css/hshs-no-flicker.css">
+    <link rel="stylesheet" href="css/hshs-no-flicker.css?v=260902c">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/style.css?v=260902c">
+    <link rel="stylesheet" href="css/animations.css?v=260902c">
+    <link rel="stylesheet" href="css/responsive.css?v=260902c">
 </head>
 <body class="light-mode">
     <div class="animated-bg">
@@ -213,12 +219,12 @@
         </div>
     </footer>
 
-    <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/db.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/particles.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/mobile-navigation.js"></script>
+    <script type="module" src="js/config.js?v=260902c"></script>
+    <script type="module" src="js/db.js?v=260902c"></script>
+    <script src="js/utils.js?v=260902c"></script>
+    <script src="js/particles.js?v=260902c"></script>
+    <script src="js/theme.js?v=260902c"></script>
+    <script src="js/navigation.js?v=260902c"></script>
+    <script src="js/mobile-navigation.js?v=260902c"></script>
 </body>
 </html>
