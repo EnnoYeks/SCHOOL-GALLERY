@@ -1,10 +1,4 @@
 @media (max-width: 1024px) {
-    body.has-mobile-shell .profile-icon,
-    body.has-mobile-shell .notification-icon,
-    body.has-mobile-shell .hshs-profile,
-    body.has-mobile-shell #profileImg {
-        display: none !important;
-    }
     body.has-mobile-shell .navbar-container {
         min-height: 56px;
         padding: 8px 12px !important;
@@ -24,14 +18,9 @@
         font-weight: 700;
     }
     body.has-mobile-shell .nav-actions { gap: 8px !important; }
-    body.has-mobile-shell .theme-toggle {
-        width: 40px; height: 40px; border-radius: 13px;
-        background: rgba(255,255,255,.12); color: #fff;
-    }
     body.has-mobile-shell .hshs-search-btn {
-        width: 40px; height: 40px; border-radius: 13px;
+        width: 40px; height: 40px; border-radius: 50%;
     }
-
     .more-backdrop {
         background: rgba(7, 16, 40, .55) !important;
         backdrop-filter: blur(8px);
@@ -117,7 +106,6 @@
     .more-grid a[data-tone="cyan"] .ico { background: linear-gradient(135deg,#67e8f9,#0891b2); }
     .more-grid a[data-tone="slate"] .ico { background: linear-gradient(135deg,#94a3b8,#475569); }
     .more-grid a.active { outline: 2px solid #eab308; }
-
     .mobile-tabbar a i { font-size: 17px; transition: transform .18s ease, color .18s ease; }
     .mobile-tabbar a.active {
         color: #eab308 !important;
