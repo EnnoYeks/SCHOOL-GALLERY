@@ -14,6 +14,16 @@
         if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'K';
         return String(n);
     }
+    function stableLegacyId(card) {
+        if (card.getAttribute('data-post-id')) return card.getAttribute('data-post-id');
+        var raw = card.getAttribute('data-photo-id') || card.querySelector('.post-title,.photo-title,.vibe-feat .meta b,.vibe-row .copy b,h1,h2,h3,h4')?.textContent || '';
+        raw = String(raw).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        if (!raw) return null;
+        var prefix = card.classList.contains('vibe-feat') || card.classList.contains('vibe-row') ? 'legacy-video-' : 'legacy-post-';
+        var id = prefix + raw;
+        card.setAttribute('data-post-id', id);
+        return id;
+    }
     function postFor(card) {
         var s = store();
         return s && s.getState ? (s.getState().posts || []).find(function (p) { return p.id === card.getAttribute('data-post-id'); }) : null;
@@ -26,9 +36,9 @@
         if (!s || !s.getState) return null;
         var existing = postFor(card);
         if (existing) return existing;
-        var id = card.getAttribute('data-post-id');
+        var id = stableLegacyId(card);
         if (!id) return null;
-        var titleNode = card.querySelector('h1,h2,h3,h4,.post-title,.card-title');
+        var titleNode = card.querySelector('h1,h2,h3,h4,.post-title,.card-title,.photo-title,.meta b,.copy b');
         var descNode = card.querySelector('.post-description,.description,.card-description,p');
         var media = card.querySelector('img,video');
         var shadow = {
@@ -40,7 +50,7 @@
             image: media ? (media.poster || media.currentSrc || media.src || '') : '',
             imageUrl: media ? (media.poster || media.currentSrc || media.src || '') : '',
             thumbnailUrl: media ? (media.poster || media.currentSrc || media.src || '') : '',
-            author: (card.querySelector('.author-row strong,.author,.post-author') || {}).textContent || 'HSHS World',
+            author: (card.querySelector('.author-row strong,.author,.post-author,.author-name') || {}).textContent || 'HSHS World',
             authorId: '',
             likes: Number((card.getAttribute('data-likes') || 0)),
             views: Number((card.getAttribute('data-views') || 0)),
@@ -171,7 +181,10 @@
     }
     function scan(root) {
         var scope = root || document;
-        scope.querySelectorAll('[data-post-id]').forEach(wireCard);
+        scope.querySelectorAll('[data-post-id], [data-photo-id], .vibe-feat, .vibe-row').forEach(function (card) {
+            if (!card.getAttribute('data-post-id')) stableLegacyId(card);
+            wireCard(card);
+        });
         wirePeople(scope);
     }
     function init() {
