@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260902c';
+var HSHS_ASSET_VER = '260902e';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html.hshs-booting{background:#071433!important}html.hshs-booting body>*:not(#hshs-boot){opacity:0!important;visibility:hidden!important}html.hshs-booting .nav-links{display:none!important}@media(max-width:1024px){.brand-mark,.brand-mark img,.logo img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
+        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-booting .hero{display:none!important}html.hshs-booting body>*:not(#hshs-boot){opacity:0!important;visibility:hidden!important}html.hshs-booting .nav-links{display:none!important}@media(max-width:1024px){.particles-container,.floating-shapes,.parallax-shapes{display:none!important}}';
         document.documentElement.classList.add('hshs-booting');
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
@@ -136,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         link.href = bust(current.replace(/js\/navigation\.js(\?.*)?$/, 'css/' + file));
         document.head.appendChild(link);
     }
+    addCss('hshs-boot-css', 'hshs-boot.css');
     addCss('hshs-no-flicker-css', 'hshs-no-flicker.css');
     addCss('hshs-tt-css', 'hshs-tt.css');
     addCss('hshs-social-css', 'hshs-social.css');
