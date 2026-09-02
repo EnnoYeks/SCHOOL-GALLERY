@@ -66,6 +66,7 @@ class PhotosPage {
         const card = document.createElement('div');
         card.className = 'photo-card';
         card.setAttribute('data-photo-id', photo.id);
+        card.setAttribute('data-post-id', photo.id);
         card.innerHTML = `
             <img src="${photo.image}" alt="${photo.title}" class="photo-image">
             <div class="photo-overlay">
@@ -115,6 +116,8 @@ class PhotosPage {
         grid.innerHTML = results.map(photo => {
             const card = document.createElement('div');
             card.className = 'photo-card';
+            card.setAttribute('data-photo-id', photo.id);
+            card.setAttribute('data-post-id', photo.id);
             card.innerHTML = `
                 <img src="${photo.image}" alt="${photo.title}" class="photo-image">
                 <div class="photo-overlay">
