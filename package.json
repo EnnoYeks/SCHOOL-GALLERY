@@ -1,0 +1,12 @@
+{
+  "name": "school-gallery-smoke",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "smoke": "node scripts/smoke-test.js"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "playwright": "^1.40.0"
+  }
+}
