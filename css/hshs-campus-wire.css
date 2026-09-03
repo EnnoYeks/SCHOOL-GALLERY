@@ -1,0 +1,43 @@
+/* Shared campus wiring — More-era dark app chrome */
+html, body {
+  background: #071433 !important;
+}
+body.has-mobile-shell {
+  color: #e8eefc;
+}
+body.has-mobile-shell .navbar.hshs-flat-top,
+body.has-mobile-shell .navbar {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+body.has-mobile-shell .hshs-account-page {
+  margin-top: 10px !important;
+  margin-bottom: 110px !important;
+}
+body.has-mobile-shell[data-hshs-page="more"] .navbar {
+  display: none !important;
+}
+.hshs-me-copy strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.hshs-me-copy strong .brand-tick,
+.hshs-me-copy strong .fa-circle-check {
+  color: #3b82f6;
+  font-size: .78rem;
+}
+.hshs-menu-list {
+  gap: 8px;
+}
+.hshs-menu-item {
+  min-height: 62px;
+}
+@media (max-width: 1024px) {
+  body.has-mobile-shell .footer,
+  body.has-mobile-shell .mobile-menu-toggle,
+  body.has-mobile-shell .theme-toggle {
+    display: none !important;
+  }
+}
