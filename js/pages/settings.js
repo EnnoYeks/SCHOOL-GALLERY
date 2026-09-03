@@ -1,19 +1,3 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/settings.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('settings.render error', e);
-    return '';
-  }
-}
-
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-}
+import { renderPage } from '../components/page-templates.js';
+export function render() { return renderPage('settings', `<div class="settings-list" id="settingsList"><button class="settings-item" data-setting="theme"><i class="fas fa-palette"></i><span>Appearance</span></button><button class="settings-item" data-setting="notifications"><i class="fas fa-bell"></i><span>Notifications</span></button><button class="settings-item" data-setting="privacy"><i class="fas fa-lock"></i><span>Privacy</span></button></div>`); }
+export function init() { if (window.hshsNavigation?.init) window.hshsNavigation.init(); }
