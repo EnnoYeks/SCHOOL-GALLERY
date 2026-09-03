@@ -35,7 +35,10 @@ async function fromStore(method, limit, offset) {
 
 async function fromDb(method, limit, offset) {
   try {
-    if (window.db && typeof window.db[method] === 'function') return await window.db[method](limit, offset);
+    if (window.db && typeof window.db[method] === 'function') {
+      const result = await window.db[method](limit, offset);
+      return Array.isArray(result) ? result : [];
+    }
   } catch (error) {
     console.warn(`Database ${method} failed:`, error);
   }
