@@ -20,7 +20,7 @@ function fileName(path) {
 
 function routeKey(path) {
   const file = fileName(path);
-  if (file === 'index.html' || file === 'index') return '/index.html';
+  if (file === 'index.html' || file === 'index' || file === '') return '/index.html';
   return '/index/' + file;
 }
 
@@ -40,10 +40,10 @@ const ROUTES = {
   '/index/buzz.html': 'pages/buzz.js',
   '/index/saved.html': 'pages/saved.js',
   '/index/more.html': 'pages/more.js',
-  '/index/clips.html': 'pages/clips.js',
+  '/index/clips.html': 'pages/buzz.js',
   '/index/notifications.html': 'pages/notifications.js',
   '/index/about.html': 'pages/about.js',
-  '/index/contact.html': 'pages/contact.js',
+  '/index/contact.html': 'pages/contat.js',
   '/index/contat.html': 'pages/contat.js',
   '/index/chat.html': 'pages/chat.js'
 };
@@ -92,17 +92,15 @@ function releaseBoot() {
   const r = document.documentElement;
   r.classList.remove('hshs-booting');
   r.classList.add('hshs-ready');
-  if (document.body) document.body.classList.add('has-mobile-shell');
+  if (document.body) document.body.classList.add('has-mobile-shell', 'dark-mode');
 }
 
 function alreadyPainted(root, module) {
   if (!root) return false;
-  if (root.getAttribute('data-hydrated') === '1' && root.children.length) return true;
-  const ids = (module && module.rootIds) || [];
-  if (ids.length && ids.every(function (id) { return document.getElementById(id); })) return true;
-  if (root.getAttribute('data-page') && root.children.length > 0) return true;
-  const text = (root.textContent || '').replace(/\s+/g, ' ').trim();
-  if (text.length > 40 && !/^loading/i.test(text)) return true;
+  const page = module && module.pageId;
+  const shown = root.getAttribute('data-page');
+  if (page && shown && shown !== page) return false;
+  if (page && shown === page && root.children.length) return true;
   return false;
 }
 
@@ -111,12 +109,11 @@ const App = {
   root: null,
   async init() {
     try { loaderInit(); } catch (e) {}
-    loadStyles(['css/hshs-no-flicker.css?v=260903c','css/style.css','css/animations.css','css/responsive.css','css/mobile-shell.css?v=260903c','css/hshs-theme.css?v=260903c']).catch(function () {});
+    loadStyles(['css/style.css','css/animations.css','css/responsive.css','css/mobile-shell.css?v=260903g','css/hshs-theme.css?v=260903g','css/hshs-campus-wire.css?v=260903g']).catch(function () {});
     this.root = document.getElementById(this.rootId);
     if (!this.root) {
       this.root = document.createElement('main');
       this.root.id = this.rootId;
-      this.root.setAttribute('aria-live', 'polite');
       const nav = document.querySelector('nav.navbar');
       if (nav && nav.parentNode) nav.parentNode.insertBefore(this.root, nav.nextSibling);
       else document.body.insertBefore(this.root, document.body.firstChild);
@@ -159,9 +156,6 @@ const App = {
       this.root.setAttribute('data-hydrated', '1');
       if (m.scripts) await loadScriptsOnce(m.scripts);
       if (m.init) { try { await m.init({ root: this.root, path: path, hydrated: painted }); } catch (e) { console.warn(e); } }
-      try { navbarInit(); } catch (e) {}
-      try { footerInit(); } catch (e) {}
-      try { notificationsInit(); } catch (e) {}
       releaseBoot();
       window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path: path, hydrated: painted } }));
       if (!initial) {
@@ -171,13 +165,11 @@ const App = {
     } catch (err) {
       console.error('router loadRoute error', err);
       releaseBoot();
-      if (!initial) window.location.href = path;
     } finally {
       try { hideLoader(); } catch (e) {}
     }
   },
   bindLinkIntercepts() {
-    if (window.__hshsMobileShell) return;
     document.addEventListener('click', (ev) => {
       if (ev.defaultPrevented) return;
       const a = ev.target.closest && ev.target.closest('a');
@@ -191,10 +183,13 @@ const App = {
       if (!ROUTES[key]) return;
       if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return;
       ev.preventDefault();
+      ev.stopPropagation();
       this.loadRoute(url.pathname + url.search + url.hash);
-    });
+    }, true);
   }
 };
+
+window.HshsApp = App;
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { App.init(); });
 else setTimeout(function () { App.init(); }, 0);
