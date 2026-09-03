@@ -1,1 +1,3 @@
-export { firestore, auth, storage, analytics, supabase, CONFIG } from '../config.js';
+export * from './firebase.js';
+export * from './supabase.js';
+export { CONFIG } from '../config.js';
