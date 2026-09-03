@@ -6,28 +6,47 @@ import { init as notificationsInit } from './components/notifications.js';
 import { connectRealtime } from './services/realtime.js';
 /* router-enabled app.js (migration) — extended routes + component hooks */
 
-function loadStylesAndWait(files, timeout = 5000) {
+function loadStylesAndWait(files, timeout = 10000) {
+  const results = [];
   const promises = files.map(href => {
+    const start = performance.now();
     // If a stylesheet with the exact href exists or a stylesheet with same path is already in document.styleSheets, resolve immediately
     const existingLink = document.querySelector(`link[href="${href}"]`);
-    if (existingLink) return Promise.resolve(href);
+    if (existingLink) {
+      const dur = performance.now() - start;
+      results.push({ href, status: 'already-linked', duration: dur });
+      return Promise.resolve(href);
+    }
     const alreadyLoaded = Array.from(document.styleSheets).some(s => s.href && s.href.includes(href.split('?')[0]));
-    if (alreadyLoaded) return Promise.resolve(href);
+    if (alreadyLoaded) {
+      const dur = performance.now() - start;
+      results.push({ href, status: 'already-loaded', duration: dur });
+      return Promise.resolve(href);
+    }
 
     return new Promise(resolve => {
       const l = document.createElement('link');
       l.rel = 'stylesheet';
       l.href = href;
       let resolved = false;
-      const done = () => { if (!resolved) { resolved = true; resolve(href); } };
+      const done = () => { if (!resolved) { resolved = true; const dur = performance.now() - start; results.push({ href, status: 'loaded', duration: dur }); resolve(href); } };
       l.onload = done;
-      l.onerror = done; // resolve on error to avoid blocking
+      l.onerror = () => { results.push({ href, status: 'error', duration: performance.now() - start }); done(); };
       document.head.appendChild(l);
       // safety timeout
-      setTimeout(done, timeout);
+      setTimeout(() => { if (!resolved) { results.push({ href, status: 'timeout', duration: performance.now() - start }); done(); } }, timeout);
     });
   });
-  return Promise.all(promises);
+
+  return Promise.all(promises).then((res) => {
+    // expose diagnostics
+    try {
+      window.__hshs_styles_report = results.slice();
+      console.info('HSHS styles load report:');
+      console.table(window.__hshs_styles_report.map(r => ({ href: r.href, status: r.status, duration_ms: Math.round(r.duration) })));
+    } catch (e) { /* ignore */ }
+    return res;
+  });
 }
 
 const ROUTES = {
@@ -71,7 +90,7 @@ const App = {
 
     // Wait for styles to load (or timeout) before initializing other components
     try {
-      await loadStylesAndWait(styleFiles, 5000);
+      await loadStylesAndWait(styleFiles, 10000);
     } catch (e) { console.warn('style load wait failed', e); }
 
     this.root = document.getElementById(this.rootId);
@@ -126,8 +145,9 @@ const App = {
       if (html) this.root.innerHTML = html;
 
       try {
-        if (m.init && typeof m.init === 'function') m.init({ root: this.root, path });
-        else if (m.default && m.default.init && typeof m.default.init === 'function') m.default.init({ root: this.root, path });
+        // If the page init returns a promise, await it so loader stays until page wiring completes
+        if (m.init && typeof m.init === 'function') await m.init({ root: this.root, path });
+        else if (m.default && m.default.init && typeof m.default.init === 'function') await m.default.init({ root: this.root, path });
       } catch (e) { console.warn('page module init error', e); }
 
       // Let shared components re-run any page-specific wiring
