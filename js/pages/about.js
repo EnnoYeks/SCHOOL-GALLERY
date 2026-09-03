@@ -1,15 +1,3 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/about.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('about.render error', e);
-    return '';
-  }
-}
-
-export function init({ root } = {}) {}
+import { renderPage } from '../components/page-templates.js';
+export function render() { return renderPage('about', `<article class="info-card"><h2>Our school, our stories</h2><p>HSHS World brings photos, videos, achievements, conversations and memories together in one school community.</p><p>Built for students and the school community to celebrate everyday moments.</p></article>`); }
+export function init() { if (window.hshsNavigation?.init) window.hshsNavigation.init(); }
