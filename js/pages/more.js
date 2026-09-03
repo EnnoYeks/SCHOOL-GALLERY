@@ -1,19 +1,3 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/more.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('more.render error', e);
-    return '';
-  }
-}
-
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-}
+import { renderPage } from '../components/page-templates.js';
+export function render() { return renderPage('more', `<div class="more-grid" id="moreGrid"><button class="feature-card"><i class="fas fa-upload"></i><span>Upload</span></button><button class="feature-card"><i class="fas fa-search"></i><span>Search</span></button><button class="feature-card"><i class="fas fa-users"></i><span>Community</span></button></div>`); }
+export function init() { if (window.hshsNavigation?.init) window.hshsNavigation.init(); }
