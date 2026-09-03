@@ -6,12 +6,11 @@
 <meta name="theme-color" content="#071433">
 <title>HSHS World</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="css/style.css?v=260904a">
-<link rel="stylesheet" href="css/mobile-shell.css?v=260904a">
-<link rel="stylesheet" href="css/hshs-theme.css?v=260904a">
-<link rel="stylesheet" href="css/hshs-school.css?v=260904a">
-<link rel="stylesheet" href="css/hshs-campus-wire.css?v=260904a">
-<link rel="stylesheet" href="css/hshs-home.css?v=260904a">
+<link rel="stylesheet" href="css/mobile-shell.css?v=260904b">
+<link rel="stylesheet" href="css/hshs-theme.css?v=260904b">
+<link rel="stylesheet" href="css/hshs-account.css?v=260904b">
+<link rel="stylesheet" href="css/hshs-campus-wire.css?v=260904b">
+<link rel="stylesheet" href="css/hshs-home.css?v=260904b">
 </head>
 <body class="dark-mode has-mobile-shell">
 <nav class="navbar hshs-flat-top"><div class="navbar-container hshs-topbar">
@@ -20,14 +19,17 @@
     <span class="brand-copy"><strong>HSHS World <i class="fas fa-circle-check brand-tick"></i></strong><small>Campus social</small></span>
   </div>
   <div class="nav-actions hshs-top-actions">
-    <a class="notification-icon" href="index/notifications.html" aria-label="Notifications"><i class="fas fa-bell"></i></a>
-    <a class="profile-icon" href="index/profile.html" aria-label="Profile"><img class="profile-img hshs-avatar" id="profileImg" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231d4ed8'/%3E%3Ccircle cx='32' cy='24' r='10' fill='white'/%3E%3Cpath d='M14 54c4-12 14-18 18-18s14 6 18 18' fill='white'/%3E%3C/svg%3E"></a>
+    <a class="notification-icon" href="index/notifications.html"><i class="fas fa-bell"></i></a>
+    <a class="profile-icon" href="index/profile.html"><img class="profile-img hshs-avatar" id="profileImg" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231d4ed8'/%3E%3Ccircle cx='32' cy='24' r='10' fill='white'/%3E%3Cpath d='M14 54c4-12 14-18 18-18s14 6 18 18' fill='white'/%3E%3C/svg%3E"></a>
   </div>
 </div></nav>
-
 <main id="app-root" data-page="home">
   <section class="home-welcome">
-    <div class="home-welcome-slides" id="welcomeSlides"></div>
+    <div class="home-welcome-slides" id="welcomeSlides">
+      <img class="on" alt="" src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=60">
+      <img alt="" src="https://images.unsplash.com/photo-1577896850726-33fa89c64723?auto=format&fit=crop&w=1200&q=60">
+      <img alt="" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=60">
+    </div>
     <div class="home-welcome-copy">
       <span class="kicker">WELCOME TO</span>
       <h1>HSHS WORLD</h1>
@@ -38,61 +40,52 @@
       </div>
     </div>
   </section>
-
   <section class="home-block">
     <h2><i class="fas fa-crown"></i> Featured Today</h2>
-    <div class="featured-grid" id="featuredGrid"></div>
+    <div class="featured-grid" id="featuredGrid">
+      <a class="featured-card" href="index/gallery.html"><span class="tag">Campus</span><img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=60" alt=""><span>Assembly highlights</span></a>
+      <a class="featured-card" href="index/videos.html"><span class="tag">Sports</span><img src="https://images.unsplash.com/photo-1577896850726-33fa89c64723?auto=format&fit=crop&w=800&q=60" alt=""><span>Inter-house training</span></a>
+      <a class="featured-card" href="index/photos.html"><span class="tag">Photos</span><img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=60" alt=""><span>Class photo day</span></a>
+      <a class="featured-card" href="index/spotlight.html"><span class="tag">Clubs</span><img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=60" alt=""><span>STEM club meetup</span></a>
+    </div>
   </section>
-
   <section class="home-block">
     <div class="stats-grid">
-      <a class="stat-card" href="index/photos.html"><div class="stat-icon"><i class="fas fa-images"></i></div><div><div class="stat-number" id="totalPhotos">128</div><div class="stat-label">Photos</div></div></a>
-      <a class="stat-card" href="index/videos.html"><div class="stat-icon"><i class="fas fa-video"></i></div><div><div class="stat-number" id="totalVideos">46</div><div class="stat-label">Vibe</div></div></a>
-      <a class="stat-card" href="index/spotlight.html"><div class="stat-icon"><i class="fas fa-users"></i></div><div><div class="stat-number" id="totalStudents">860</div><div class="stat-label">Students</div></div></a>
-      <a class="stat-card" href="index/trending.html"><div class="stat-icon"><i class="fas fa-heart"></i></div><div><div class="stat-number" id="totalLikes">3.2k</div><div class="stat-label">Likes</div></div></a>
+      <a class="stat-card" href="index/photos.html"><div class="stat-icon"><i class="fas fa-images"></i></div><div><div class="stat-number">128</div><div class="stat-label">Photos</div></div></a>
+      <a class="stat-card" href="index/videos.html"><div class="stat-icon"><i class="fas fa-video"></i></div><div><div class="stat-number">46</div><div class="stat-label">Vibe</div></div></a>
+      <a class="stat-card" href="index/spotlight.html"><div class="stat-icon"><i class="fas fa-users"></i></div><div><div class="stat-number">860</div><div class="stat-label">Students</div></div></a>
+      <a class="stat-card" href="index/trending.html"><div class="stat-icon"><i class="fas fa-heart"></i></div><div><div class="stat-number">3.2k</div><div class="stat-label">Likes</div></div></a>
     </div>
   </section>
-
-  <section class="home-block hshs-school-hub" id="hshsSchoolHub">
-    <h2><i class="fas fa-school"></i> School Hub</h2>
-    <article class="hshs-school-card">
-      <div class="hshs-card-title"><i class="fas fa-trophy"></i><span>House Points</span></div>
-      <div id="hshsHouseList">
-        <div class="house-row-live"><b>1</b><div>House A<div class="house-bar-live"><span style="width:100%"></span></div></div><b>420</b></div>
-        <div class="house-row-live"><b>2</b><div>House B<div class="house-bar-live"><span style="width:92%"></span></div></div><b>385</b></div>
-        <div class="house-row-live"><b>3</b><div>House C<div class="house-bar-live"><span style="width:86%"></span></div></div><b>360</b></div>
-        <div class="house-row-live"><b>4</b><div>House D<div class="house-bar-live"><span style="width:79%"></span></div></div><b>330</b></div>
-      </div>
-    </article>
+  <section class="home-block">
+    <h2><i class="fas fa-trophy"></i> House Points</h2>
+    <div class="house-row-live"><b>1</b><div>House A<div class="house-bar-live"><span style="width:100%"></span></div></div><b>420</b></div>
+    <div class="house-row-live"><b>2</b><div>House B<div class="house-bar-live"><span style="width:92%"></span></div></div><b>385</b></div>
+    <div class="house-row-live"><b>3</b><div>House C<div class="house-bar-live"><span style="width:86%"></span></div></div><b>360</b></div>
+    <div class="house-row-live"><b>4</b><div>House D<div class="house-bar-live"><span style="width:79%"></span></div></div><b>330</b></div>
   </section>
-
   <section class="home-block">
     <h2><i class="fas fa-fire"></i> Trending Today</h2>
-    <div class="home-list" id="trendingToday"></div>
-  </section>
-
-  <section class="home-block">
-    <div class="quote-card">
-      <i class="fas fa-quote-left"></i>
-      <p id="dailyQuote">Your school. One world. Share the moment.</p>
-      <small id="quoteAuthor">HSHS World</small>
+    <div class="home-list">
+      <a class="home-row" href="index/trending.html"><i class="fas fa-fire"></i><span><strong>House A takes the lead</strong><small>420 house points</small></span></a>
+      <a class="home-row" href="index/buzz.html"><i class="fas fa-bolt"></i><span><strong>New Buzz clips this week</strong><small>Campus shorts</small></span></a>
+      <a class="home-row" href="index/polls.html"><i class="fas fa-square-poll-vertical"></i><span><strong>Vote the spirit poll</strong><small>Polls close Friday</small></span></a>
     </div>
   </section>
-
+  <section class="home-block">
+    <div class="quote-card"><i class="fas fa-quote-left"></i><p>Your school. One world. Share the moment.</p><small>HSHS World</small></div>
+  </section>
   <section class="home-block">
     <h2><i class="fas fa-calendar-alt"></i> Upcoming Events</h2>
-    <div class="home-list" id="upcomingEvents"></div>
-  </section>
-
-  <section class="home-block">
-    <h2><i class="far fa-calendar-alt"></i> School Calendar</h2>
-    <div class="home-list" id="hshsCalendarList"></div>
+    <div class="home-list">
+      <a class="home-row" href="index/memories.html"><i class="fas fa-bullhorn"></i><span><strong>Friday Assembly</strong><small>Fri · Main hall</small></span></a>
+      <a class="home-row" href="index/videos.html"><i class="fas fa-running"></i><span><strong>Inter-house Training</strong><small>Sat · Field</small></span></a>
+      <a class="home-row" href="index/gallery.html"><i class="fas fa-flask"></i><span><strong>STEM Club Meetup</strong><small>Mon · Lab 2</small></span></a>
+    </div>
   </section>
 </main>
-
-<script src="js/hshs-brand.js?v=260904a"></script>
-<script src="js/hshs-home.js?v=260904a"></script>
-<script src="js/hshs-school.js?v=260904a"></script>
-<script src="js/mobile-shell.js?v=260904a"></script>
-<script src="js/hshs-tab-order.js?v=260904a"></script>
+<script src="js/hshs-brand.js?v=260904b"></script>
+<script src="js/hshs-home.js?v=260904b"></script>
+<script src="js/mobile-shell.js?v=260904b"></script>
+<script src="js/hshs-tab-order.js?v=260904b"></script>
 </body></html>
