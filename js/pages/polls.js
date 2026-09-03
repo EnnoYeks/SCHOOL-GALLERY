@@ -1,9 +1,17 @@
-const seed=[{id:'school-event',question:'Which school event are you most excited for?',options:['Sports Day','Talent Show','Science Fair','Cultural Day'],votes:[12,9,7,6],closed:false},{id:'buzz-topic',question:'What should HSHS World feature next?',options:['Class highlights','House rankings','Club stories','Student creators'],votes:[8,6,11,10],closed:false},{id:'old-poll',question:'Favorite school activity?',options:['Sports','Music','Clubs','Trips'],votes:[18,14,9,12],closed:true}];
-const KEY='hshsWorldPolls_v1';
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function ensureStyle(){if(document.querySelector('link[data-hshs-page-css="polls"]'))return;const l=document.createElement('link');l.rel='stylesheet';l.href='../css/polls.css?v=260902c';l.dataset.hshsPageCss='polls';document.head.appendChild(l)}
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');return Array.isArray(x)&&x.length?x:seed;}catch(e){return seed;}}
-function save(x){try{localStorage.setItem(KEY,JSON.stringify(x));}catch(e){}}
-function card(p){const total=p.votes.reduce((a,b)=>a+b,0)||1;return `<article class="poll-card" data-poll="${esc(p.id)}"><h3>${esc(p.question)}</h3><div class="poll-options">${p.options.map((o,i)=>{const pct=Math.round((p.votes[i]||0)*100/total);return `<button type="button" class="poll-option" data-option="${i}"><span>${esc(o)}</span><b>${pct}%</b><i style="width:${pct}%"></i></button>`}).join('')}</div><small>${total} vote${total===1?'':'s'} · ${p.closed?'Closed':'Live'}</small></article>`;}
-export function render(){return `<main class="hshs-polls-page" id="hshsPollsRoot"><section class="polls-hero"><div><span class="eyebrow">HSHS WORLD</span><h1><i class="fas fa-poll"></i> Live Polls</h1><p>Have your say on what matters around HSHS.</p></div></section><section class="polls-content container"><div class="polls-heading"><div><span class="eyebrow">YOUR VOICE</span><h2>Active Polls</h2></div><button id="createPollBtn" class="poll-create" type="button"><i class="fas fa-plus"></i> Create Poll</button></div><div id="activePollsList" class="poll-grid"></div><div class="polls-heading closed-heading"><div><span class="eyebrow">ARCHIVE</span><h2>Closed Polls</h2></div></div><div id="closedPollsList" class="poll-grid"></div></section></main>`;}
-export function init({root}={}){ensureStyle();const r=root?.querySelector('#hshsPollsRoot');if(!r)return;const renderLists=()=>{const polls=load();r.querySelector('#activePollsList').innerHTML=polls.filter(p=>!p.closed).map(card).join('')||'<p class="empty-state">No active polls yet.</p>';r.querySelector('#closedPollsList').innerHTML=polls.filter(p=>p.closed).map(card).join('')||'<p class="empty-state">No closed polls yet.</p>';r.querySelectorAll('.poll-option').forEach(btn=>btn.addEventListener('click',()=>{const polls=load(),p=polls.find(x=>x.id===btn.closest('[data-poll]').dataset.poll);if(!p||p.closed)return;p.votes[+btn.dataset.option]=(p.votes[+btn.dataset.option]||0)+1;save(polls);renderLists();}));};r.querySelector('#createPollBtn').addEventListener('click',()=>{const q=prompt('Poll question');if(!q?.trim())return;const opts=(prompt('Options, separated by commas')||'').split(',').map(x=>x.trim()).filter(Boolean).slice(0,6);if(opts.length<2){alert('Add at least two options.');return;}const polls=load();polls.unshift({id:'poll-'+Date.now(),question:q.trim(),options:opts,votes:opts.map(()=>0),closed:false});save(polls);renderLists();});renderLists();}
+export const pageId = "polls";
+export const styles = ["css/mobile-shell.css", "css/hshs-theme.css"];
+export const scripts = [];
+export const rootIds = ["activePollsList", "createPollBtn"];
+export const bodyClass = "light-mode";
+export function render() {
+  return `<div class="container" style="padding:2rem;position:relative;z-index:10;margin-top:60px;max-width:800px">
+    <div style="background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));border-radius:20px;padding:3rem;color:white;margin-bottom:3rem;text-align:center">
+      <h1 style="font-size:2.5rem;font-weight:800;margin-bottom:1rem"><i class="fas fa-poll"></i> Live Polls</h1>
+      <p>Vote on your favorite events, people, and things!</p>
+    </div>
+    <div id="activePollsList"></div>
+    <button style="width:100%;padding:1rem;margin-top:2rem;border:none;border-radius:10px;background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));color:white;font-weight:600" id="createPollBtn" type="button"><i class="fas fa-plus"></i> Create New Poll</button>
+    <div style="margin-top:4rem"><h2 class="section-title"><i class="fas fa-history"></i> Closed Polls</h2><div id="closedPollsList"></div></div>
+  </div>`;
+}
+export async function init() {}

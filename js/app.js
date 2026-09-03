@@ -4,49 +4,24 @@ import { init as navbarInit } from './components/navbar.js';
 import { init as footerInit } from './components/footer.js';
 import { init as notificationsInit } from './components/notifications.js';
 import { connectRealtime } from './services/realtime.js';
-/* router-enabled app.js (migration) — extended routes + component hooks */
 
-function loadStylesAndWait(files, timeout = 10000) {
-  const results = [];
-  const promises = files.map(href => {
-    const start = performance.now();
-    // If a stylesheet with the exact href exists or a stylesheet with same path is already in document.styleSheets, resolve immediately
-    const existingLink = document.querySelector(`link[href="${href}"]`);
-    if (existingLink) {
-      const dur = performance.now() - start;
-      results.push({ href, status: 'already-linked', duration: dur });
-      return Promise.resolve(href);
-    }
-    const alreadyLoaded = Array.from(document.styleSheets).some(s => s.href && s.href.includes(href.split('?')[0]));
-    if (alreadyLoaded) {
-      const dur = performance.now() - start;
-      results.push({ href, status: 'already-loaded', duration: dur });
-      return Promise.resolve(href);
-    }
+function assetPrefix() {
+  return location.pathname.indexOf('/index/') !== -1 ? '../' : '';
+}
 
-    return new Promise(resolve => {
-      const l = document.createElement('link');
-      l.rel = 'stylesheet';
-      l.href = href;
-      let resolved = false;
-      const done = () => { if (!resolved) { resolved = true; const dur = performance.now() - start; results.push({ href, status: 'loaded', duration: dur }); resolve(href); } };
-      l.onload = done;
-      l.onerror = () => { results.push({ href, status: 'error', duration: performance.now() - start }); done(); };
-      document.head.appendChild(l);
-      // safety timeout
-      setTimeout(() => { if (!resolved) { results.push({ href, status: 'timeout', duration: performance.now() - start }); done(); } }, timeout);
-    });
-  });
+function fileName(path) {
+  const raw = (path || location.pathname).split('?')[0];
+  let file = (raw.split('/').pop() || 'index.html').toLowerCase();
+  if (!file) file = 'index.html';
+  if (file === 'clips.html' || file === 'shorts.html') file = 'buzz.html';
+  if (file === 'contact.html') file = 'contat.html';
+  return file;
+}
 
-  return Promise.all(promises).then((res) => {
-    // expose diagnostics
-    try {
-      window.__hshs_styles_report = results.slice();
-      console.info('HSHS styles load report:');
-      console.table(window.__hshs_styles_report.map(r => ({ href: r.href, status: r.status, duration_ms: Math.round(r.duration) })));
-    } catch (e) { /* ignore */ }
-    return res;
-  });
+function routeKey(path) {
+  const file = fileName(path);
+  if (file === 'index.html' || file === 'index') return '/index.html';
+  return '/index/' + file;
 }
 
 const ROUTES = {
@@ -69,30 +44,74 @@ const ROUTES = {
   '/index/notifications.html': 'pages/notifications.js',
   '/index/about.html': 'pages/about.js',
   '/index/contact.html': 'pages/contact.js',
-  '/index/contat.html': 'pages/contat.js'
+  '/index/contat.html': 'pages/contat.js',
+  '/index/chat.html': 'pages/chat.js'
 };
+
+function loadStyles(files, timeout) {
+  timeout = timeout || 8000;
+  const prefix = assetPrefix();
+  return Promise.all((files || []).map(function (href) {
+    const url = href.indexOf('http') === 0 || href.indexOf('/') === 0 || href.indexOf('../') === 0 ? href : prefix + href;
+    const bare = url.split('?')[0];
+    if (document.querySelector('link[href="' + url + '"], link[href="' + bare + '"]')) return Promise.resolve(url);
+    return new Promise(function (resolve) {
+      const l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.href = url;
+      const done = function () { resolve(url); };
+      l.onload = done;
+      l.onerror = done;
+      document.head.appendChild(l);
+      setTimeout(done, timeout);
+    });
+  }));
+}
+
+function loadScriptsOnce(files) {
+  const prefix = assetPrefix();
+  return (files || []).reduce(function (chain, src) {
+    return chain.then(function () {
+      const url = src.indexOf('http') === 0 || src.indexOf('/') === 0 || src.indexOf('../') === 0 ? src : prefix + src;
+      const bare = url.split('?')[0];
+      const name = bare.split('/').pop();
+      if ([].slice.call(document.scripts).some(function (s) { return (s.src || '').indexOf(name) !== -1; })) return;
+      return new Promise(function (resolve) {
+        const el = document.createElement('script');
+        if (/hshs-chat\.js$/.test(name)) el.type = 'module';
+        el.src = url;
+        el.onload = resolve;
+        el.onerror = resolve;
+        document.body.appendChild(el);
+      });
+    });
+  }, Promise.resolve());
+}
+
+function releaseBoot() {
+  const r = document.documentElement;
+  r.classList.remove('hshs-booting');
+  r.classList.add('hshs-ready');
+  if (document.body) document.body.classList.add('has-mobile-shell');
+}
+
+function alreadyPainted(root, module) {
+  if (!root) return false;
+  if (root.getAttribute('data-hydrated') === '1' && root.children.length) return true;
+  const ids = (module && module.rootIds) || [];
+  if (ids.length && ids.every(function (id) { return document.getElementById(id); })) return true;
+  if (root.getAttribute('data-page') && root.children.length > 0) return true;
+  const text = (root.textContent || '').replace(/\s+/g, ' ').trim();
+  if (text.length > 40 && !/^loading/i.test(text)) return true;
+  return false;
+}
 
 const App = {
   rootId: 'app-root',
   root: null,
-
   async init() {
-    const styleFiles = [
-      'css/hshs-no-flicker.css?v=260902c',
-      'css/style.css?v=260902c',
-      'css/animations.css?v=260902c',
-      'css/responsive.css?v=260902c'
-    ];
-
-    // Ensure loader is available so we can show a visual while waiting for styles
-    try { loaderInit(); } catch (e) { console.warn('loader init failed', e); }
-    try { showLoader(); } catch (e) { /* ignore */ }
-
-    // Wait for styles to load (or timeout) before initializing other components
-    try {
-      await loadStylesAndWait(styleFiles, 10000);
-    } catch (e) { console.warn('style load wait failed', e); }
-
+    try { loaderInit(); } catch (e) {}
+    loadStyles(['css/hshs-no-flicker.css?v=260903c','css/style.css','css/animations.css','css/responsive.css','css/mobile-shell.css?v=260903c','css/hshs-theme.css?v=260903c']).catch(function () {});
     this.root = document.getElementById(this.rootId);
     if (!this.root) {
       this.root = document.createElement('main');
@@ -102,112 +121,82 @@ const App = {
       if (nav && nav.parentNode) nav.parentNode.insertBefore(this.root, nav.nextSibling);
       else document.body.insertBefore(this.root, document.body.firstChild);
     }
-
-    // Initialize shared components that rely on styles
-    try { navbarInit(); } catch (e) { console.warn('navbar init failed', e); }
-    try { footerInit(); } catch (e) { console.warn('footer init failed', e); }
-    try { notificationsInit(); } catch (e) { console.warn('notifications init failed', e); }
-    try { connectRealtime(); } catch (e) { console.warn('realtime connect failed', e); }
-
-    this.injectHideStyles();
+    releaseBoot();
+    try { navbarInit(); } catch (e) {}
+    try { footerInit(); } catch (e) {}
+    try { notificationsInit(); } catch (e) {}
+    try { connectRealtime(); } catch (e) {}
     this.bindLinkIntercepts();
     window.addEventListener('popstate', () => {
       const path = location.pathname === '/' ? '/index.html' : location.pathname;
       this.loadRoute(path, { replaceState: true });
     });
-
     const startPath = location.pathname === '/' ? '/index.html' : location.pathname;
-    this.loadRoute(startPath, { replaceState: true }).catch(() => {});
+    this.loadRoute(startPath, { replaceState: true, initial: true }).catch(function () {});
   },
-
-  injectHideStyles() {
-    if (document.getElementById('app-legacy-hide-style')) return;
-    const style = document.createElement('style');
-    style.id = 'app-legacy-hide-style';
-    style.textContent = `\n      .legacy-hidden { display: none !important; opacity: 0 !important; visibility: hidden !important; }\n      html.hshs-loading { cursor: progress; }\n    `;
-    document.head.appendChild(style);
-  },
-
-  async loadRoute(path, { replaceState = false } = {}) {
-    const key = (path === '/' || path === '') ? '/index.html' : path;
+  async loadRoute(path, opts) {
+    opts = opts || {};
+    const initial = !!opts.initial;
+    const replaceState = !!opts.replaceState;
+    const key = routeKey(path);
     const modulePath = ROUTES[key];
-    if (!modulePath) return Promise.reject(new Error('no-route'));
-
+    if (!modulePath) return;
     try {
-      showLoader();
-      const m = await import(`./${modulePath}`);
-      let html = '';
-      if (m.render && typeof m.render === 'function') html = await m.render();
-      else if (m.default && typeof m.default === 'function') html = await m.default();
-      else if (typeof m.default === 'string') html = m.default;
-      else if (typeof m.html === 'string') html = m.html;
-
-      if (html) this.root.innerHTML = html;
-
-      try {
-        // If the page init returns a promise, await it so loader stays until page wiring completes
-        if (m.init && typeof m.init === 'function') await m.init({ root: this.root, path });
-        else if (m.default && m.default.init && typeof m.default.init === 'function') await m.default.init({ root: this.root, path });
-      } catch (e) { console.warn('page module init error', e); }
-
-      // Let shared components re-run any page-specific wiring
-      try { navbarInit(); } catch (e) { /* ignore */ }
-      try { footerInit(); } catch (e) { /* ignore */ }
-      try { notificationsInit(); } catch (e) { /* ignore */ }
-
-      window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path } }));
-      if (replaceState) history.replaceState({}, '', path); else history.pushState({}, '', path);
-      return Promise.resolve();
+      const m = await import('./' + modulePath);
+      if (m.styles) await loadStyles(m.styles);
+      if (m.bodyClass && document.body) m.bodyClass.split(/\s+/).forEach(function (cls) { if (cls) document.body.classList.add(cls); });
+      const painted = alreadyPainted(this.root, m);
+      if (!painted) {
+        if (!initial) { try { showLoader(); } catch (e) {} }
+        let html = '';
+        if (typeof m.render === 'function') html = await m.render();
+        else if (typeof m.html === 'string') html = m.html;
+        if (html) {
+          this.root.innerHTML = html;
+          this.root.setAttribute('data-page', m.pageId || fileName(path).replace('.html', ''));
+        }
+      }
+      this.root.setAttribute('data-hydrated', '1');
+      if (m.scripts) await loadScriptsOnce(m.scripts);
+      if (m.init) { try { await m.init({ root: this.root, path: path, hydrated: painted }); } catch (e) { console.warn(e); } }
+      try { navbarInit(); } catch (e) {}
+      try { footerInit(); } catch (e) {}
+      try { notificationsInit(); } catch (e) {}
+      releaseBoot();
+      window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path: path, hydrated: painted } }));
+      if (!initial) {
+        if (replaceState) history.replaceState({}, '', path);
+        else history.pushState({}, '', path);
+      }
     } catch (err) {
       console.error('router loadRoute error', err);
-      // Try static fallback
-      try {
-        const fallbackFetch = await fetch(key.startsWith('/') ? key.slice(1) : key, { cache: 'no-store' });
-        if (fallbackFetch.ok) {
-          const htmlText = await fallbackFetch.text();
-          const parsed = new DOMParser().parseFromString(htmlText, 'text/html');
-          const newRoot = parsed.querySelector('main') || parsed.body;
-          if (newRoot) {
-            this.root.innerHTML = newRoot.innerHTML;
-            try { navbarInit(); } catch (e) {}
-            try { footerInit(); } catch (e) {}
-            try { notificationsInit(); } catch (e) {}
-            window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path } }));
-            if (replaceState) history.replaceState({}, '', path); else history.pushState({}, '', path);
-            return Promise.resolve();
-          }
-        }
-      } catch (fallbackErr) {
-        console.warn('fallback fetch failed', fallbackErr);
-      }
-
-      window.location.href = path;
-      return Promise.reject(err);
-    } finally { hideLoader(); }
+      releaseBoot();
+      if (!initial) window.location.href = path;
+    } finally {
+      try { hideLoader(); } catch (e) {}
+    }
   },
-
   bindLinkIntercepts() {
+    if (window.__hshsMobileShell) return;
     document.addEventListener('click', (ev) => {
       if (ev.defaultPrevented) return;
       const a = ev.target.closest && ev.target.closest('a');
       if (!a) return;
       const href = a.getAttribute('href') || '';
-      if (!href) return;
-      const url = new URL(href, location.href);
+      if (!href || href.charAt(0) === '#') return;
+      let url;
+      try { url = new URL(href, location.href); } catch (e) { return; }
       if (url.origin !== location.origin) return;
-      const pathname = url.pathname === '/' ? '/index.html' : url.pathname;
-      if (!ROUTES[pathname]) return;
+      const key = routeKey(url.pathname);
+      if (!ROUTES[key]) return;
       if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return;
       ev.preventDefault();
-      this.loadRoute(pathname + url.search);
+      this.loadRoute(url.pathname + url.search + url.hash);
     });
-  },
-
-  showLoader() { showLoader(); },
-  hideLoader() { hideLoader(); }
+  }
 };
 
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => App.init());
-else setTimeout(() => App.init(), 0);
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { App.init(); });
+else setTimeout(function () { App.init(); }, 0);
 
 export default App;

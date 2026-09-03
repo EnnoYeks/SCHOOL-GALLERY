@@ -1,19 +1,9 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/more.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('more.render error', e);
-    return '';
-  }
+export const pageId = "more";
+export const styles = ["css/hshs-account.css", "css/mobile-shell.css"];
+export const scripts = [];
+export const rootIds = ["hshsMoreMenu", "morePageMe"];
+export const bodyClass = "light-mode";
+export function render() {
+  return document.getElementById("app-root") ? document.getElementById("app-root").innerHTML : "";
 }
-
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-}
+export async function init() {}

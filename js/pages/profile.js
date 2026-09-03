@@ -1,19 +1,7 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/profile.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('profile.render error', e);
-    return '';
-  }
-}
-
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-}
+export const pageId = "profile";
+export const styles = ["css/hshs-social.css", "css/mobile-shell.css"];
+export const scripts = ["js/hshs-store.js", "js/hshs-social.js"];
+export const rootIds = ["hshsProfileRoot"];
+export const bodyClass = "light-mode";
+export function render() { return `<div id="hshsProfileRoot"><div class="hshs-profile-empty">Loading profile…</div></div>`; }
+export async function init() {}

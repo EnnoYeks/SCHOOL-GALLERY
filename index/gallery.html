@@ -1,2 +1,69 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5"><meta name="description" content="HSHS World gallery"><title>Gallery - HSHS World</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/animations.css"><link rel="stylesheet" href="../css/responsive.css"><link rel="stylesheet" href="../css/gallery.css"></head><body class="dark-mode"><div class="animated-bg"><div class="gradient-bg"></div><div class="particles-container" id="particlesContainer"></div></div><nav class="navbar"><div class="navbar-container"><a class="logo" href="../index.html"><i class="fas fa-graduation-cap"></i><span>HSHS World</span></a><div class="search-container"><i class="fas fa-search"></i><input id="searchInput" class="search-input" placeholder="Search posts, students, events..."><div id="searchResults" class="search-results"></div></div><div class="nav-links"></div><div class="nav-actions"><button class="theme-toggle" id="themeToggle" type="button"><i class="fas fa-moon"></i></button></div></div></nav><div id="hshsGalleryRoot"><div class="hshs-profile-empty">Loading…</div></div><script type="module" src="../js/config.js"></script><script type="module" src="../js/db.js"></script><script src="../js/utils.js"></script><script src="../js/theme.js"></script><script src="../js/navigation.js"></script><script src="../js/pages/gallery.js"></script><script src="../js/hshs-store.js"></script><script src="../js/hshs-social.js"></script><script src="../js/mobile-navigation.js"></script><script src="../js/gallery.js"></script></body></html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+<meta name="theme-color" content="#071433">
+<title>For You Feed - HSHS World</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/animations.css">
+<link rel="stylesheet" href="../css/responsive.css">
+<link rel="stylesheet" href="../css/gallery.css">
+<link rel="stylesheet" href="../css/hshs-no-flicker.css?v=260903b">
+<link rel="stylesheet" href="../css/mobile-shell.css?v=260903b">
+<link rel="stylesheet" href="../css/hshs-theme.css?v=260903b">
+<style>input, textarea, select { font-size: 16px !important; }</style>
+</head>
+<body class="light-mode">
+<div class="animated-bg"><div class="gradient-bg"></div><div class="particles-container" id="particlesContainer"></div><div class="floating-shapes"><div class="shape shape-1"></div><div class="shape shape-2"></div><div class="shape shape-3"></div><div class="shape shape-4"></div></div></div>
+<nav class="navbar"><div class="navbar-container">
+<div class="logo"><i class="fas fa-graduation-cap"></i><span>HSHS World</span></div>
+<div class="search-container"><i class="fas fa-search"></i><input type="text" placeholder="Search posts, students, events..." class="search-input" id="searchInput"><div class="search-results" id="searchResults"></div></div>
+<div class="nav-links">
+<a href="../index.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+<a href="gallery.html" class="nav-link active"><i class="fas fa-images"></i><span>Gallery</span></a>
+<a href="photos.html" class="nav-link"><i class="fas fa-photo-video"></i><span>Photos</span></a>
+<a href="videos.html" class="nav-link"><i class="fas fa-video"></i><span>Vibe</span></a>
+<a href="trending.html" class="nav-link"><i class="fas fa-fire"></i><span>Trending</span></a>
+<a href="spotlight.html" class="nav-link"><i class="fas fa-star"></i><span>Spotlight</span></a>
+</div>
+<div class="nav-actions">
+<div class="notification-icon"><i class="fas fa-bell"></i><span class="notification-badge" id="notificationBadge">0</span></div>
+<button class="theme-toggle" id="themeToggle" type="button"><i class="fas fa-moon"></i></button>
+<div class="profile-icon"><img src="https://via.placeholder.com/40" alt="Profile" class="profile-img" id="profileImg"></div>
+<button class="mobile-menu-toggle" id="mobileMenuToggle" type="button"><i class="fas fa-bars"></i></button>
+</div></div></nav>
+<div id="app-root" data-page="gallery" aria-live="polite">
+<div class="gallery-container">
+<div class="category-filter" id="categoryFilter">
+<button class="category-btn active" data-category="all"><i class="fas fa-th"></i> All</button>
+<button class="category-btn" data-category="academics"><i class="fas fa-book"></i> Academics</button>
+<button class="category-btn" data-category="sports"><i class="fas fa-basketball-ball"></i> Sports</button>
+<button class="category-btn" data-category="clubs"><i class="fas fa-users"></i> Clubs</button>
+<button class="category-btn" data-category="trips"><i class="fas fa-bus"></i> Trips</button>
+<button class="category-btn" data-category="graduation"><i class="fas fa-graduation-cap"></i> Graduation</button>
+<button class="category-btn" data-category="arts"><i class="fas fa-palette"></i> Arts</button>
+<button class="category-btn" data-category="music"><i class="fas fa-music"></i> Music</button>
+<button class="category-btn" data-category="events"><i class="fas fa-calendar"></i> Events</button>
+</div>
+<div class="story-bar" id="storyBar"><div class="story-item"><i class="fas fa-plus"></i></div></div>
+<div class="gallery-feed" id="galleryFeed"><div class="post-loading"><div class="loading-spinner"></div></div></div>
+<div class="swipe-indicator" id="swipeIndicator"><div class="swipe-arrow"><i class="fas fa-arrow-down"></i></div><div class="swipe-text">Scroll to explore</div></div>
+</div>
+<div class="double-tap-overlay" id="doubleTapOverlay"><i class="fas fa-heart"></i></div>
+</div>
+<script type="module" src="../js/config.js"></script>
+<script type="module" src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/particles.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/navigation.js"></script>
+<script src="../js/search.js"></script>
+<script src="../js/mobile-navigation.js"></script>
+<script src="../js/gallery.js?v=260903b"></script>
+<script src="../js/mobile-shell.js?v=260903b"></script>
+<script src="../js/mobile-search-btn.js?v=260903b"></script>
+<script type="module" src="../js/app.js?v=260903b"></script>
+<script>(function(){var r=document.documentElement;r.classList.remove('hshs-booting');r.classList.add('hshs-ready');if(document.body)document.body.classList.add('has-mobile-shell');window.dispatchEvent(new CustomEvent('app:page:loaded'));})();</script>
+</body></html>
