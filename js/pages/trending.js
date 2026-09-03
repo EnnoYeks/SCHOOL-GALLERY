@@ -1,19 +1,7 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/trending.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('trending.render error', e);
-    return '';
-  }
+import { renderPage } from '../components/page-templates.js';
+
+export function render() {
+  return renderPage('trending', `<div class="trending-list" id="trendingList"><div class="loading-skeleton"></div><div class="loading-skeleton"></div><div class="loading-skeleton"></div></div>`);
 }
 
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-}
+export function init() { if (window.hshsNavigation?.init) window.hshsNavigation.init(); }
