@@ -1,19 +1,9 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/saved.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('saved.render error', e);
-    return '';
-  }
+export const pageId = "saved";
+export const styles = ["css/hshs-account.css", "css/mobile-shell.css"];
+export const scripts = [];
+export const rootIds = ["hshsSavedList"];
+export const bodyClass = "light-mode";
+export function render() {
+  return `<main class="hshs-account-page"><div class="hshs-page-head"><a class="hshs-back" href="more.html"><i class="fas fa-chevron-left"></i></a><h1>Saved</h1></div><div class="hshs-tabs"><button type="button" class="hshs-tab on" data-saved-tab="saved">Saved posts</button><button type="button" class="hshs-tab" data-saved-tab="interacted">Interacted</button></div><div id="hshsSavedList"></div><div id="hshsInteractedList" hidden></div></main>`;
 }
-
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-}
+export async function init() {}
