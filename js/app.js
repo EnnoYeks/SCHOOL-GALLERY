@@ -1,5 +1,5 @@
 import './compat/adapter.js';
-/* router-enabled app.js (extends previous hydrator) */
+/* router-enabled app.js (migration) — extended routes */
 const ROUTES = {
   '/': 'pages/home.js',
   '/index.html': 'pages/home.js',
@@ -13,7 +13,14 @@ const ROUTES = {
   '/index/profile.html': 'pages/profile.js',
   '/index/settings.html': 'pages/settings.js',
   '/index/admin.html': 'pages/admin.js',
-  '/index/buzz.html': 'pages/buzz.js'
+  '/index/buzz.html': 'pages/buzz.js',
+  '/index/saved.html': 'pages/saved.js',
+  '/index/more.html': 'pages/more.js',
+  '/index/clips.html': 'pages/clips.js',
+  '/index/notifications.html': 'pages/notifications.js',
+  '/index/about.html': 'pages/about.js',
+  '/index/contact.html': 'pages/contact.js',
+  '/index/contat.html': 'pages/contat.js'
 };
 
 const App = {
@@ -76,6 +83,25 @@ const App = {
       return Promise.resolve();
     } catch (err) {
       console.error('router loadRoute error', err);
+      // As a last resort, try fetching the static file and injecting its main content (helps local file layouts)
+      try {
+        const fallbackFetch = await fetch(key.startsWith('/') ? key.slice(1) : key, { cache: 'no-store' });
+        if (fallbackFetch.ok) {
+          const htmlText = await fallbackFetch.text();
+          const parsed = new DOMParser().parseFromString(htmlText, 'text/html');
+          const newRoot = parsed.querySelector('main') || parsed.body;
+          if (newRoot) {
+            this.root.innerHTML = newRoot.innerHTML;
+            window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path } }));
+            if (replaceState) history.replaceState({}, '', path); else history.pushState({}, '', path);
+            return Promise.resolve();
+          }
+        }
+      } catch (fallbackErr) {
+        console.warn('fallback fetch failed', fallbackErr);
+      }
+
+      // fallback to full navigation
       window.location.href = path;
       return Promise.reject(err);
     } finally { this.hideLoader(); }
