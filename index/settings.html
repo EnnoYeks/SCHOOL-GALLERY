@@ -1,40 +1,13 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Account · HSHS World</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/hshs-account.css"><link rel="stylesheet" href="../css/mobile-shell.css?v=260903c"></head>
-<body class="light-mode"><nav class="navbar"><div class="navbar-container"><div class="logo"><i class="fas fa-graduation-cap"></i><span>HSHS World</span></div></div></nav>
-<div id="app-root" data-page="settings">
-<div class="hshs-settings" id="hshsSettingsRoot">
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Account · HSHS World</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/hshs-account.css"><link rel="stylesheet" href="../css/mobile-shell.css?v=260903e"><link rel="stylesheet" href="../css/hshs-theme.css?v=260903e"><link rel="stylesheet" href="../css/hshs-campus-wire.css?v=260903e"></head>
+<body class="dark-mode has-mobile-shell"><nav class="navbar"><div class="navbar-container"><div class="logo"><span>HSHS World</span></div></div></nav>
+<div id="app-root" data-page="settings"><div class="hshs-settings" id="hshsSettingsRoot">
 <section class="hshs-set-hero"><div class="hshs-set-photo"><img id="setHeroPic" alt=""><button type="button" id="setPhotoBtn">Change</button><input id="setPhotoFile" type="file" accept="image/*" hidden></div><h1 id="setHeroName">Guest student</h1><p id="setHeroUser">@guest</p><p id="setHeroMeta">HSHS Student</p></section>
-<div class="hshs-tabs">
-<button type="button" class="hshs-tab on" data-tab="account">Account</button>
-<button type="button" class="hshs-tab" data-tab="privacy">Privacy</button>
-<button type="button" class="hshs-tab" data-tab="notifications">Notifications</button>
-<button type="button" class="hshs-tab" data-tab="theme">Theme</button>
-</div>
-<section id="accountTab">
-<div id="setSignedState">
-<label>Full name<input id="setFullName"></label>
-<label>Username<input id="setUsername"></label>
-<label>Email<input id="setEmail"></label>
-<label>Class<input id="setClass"></label>
-<label>Role<input id="setRole"></label>
-<label>Bio<textarea id="setBio"></textarea></label>
-<button type="button" id="setSaveAccount">Save account</button>
-<button type="button" id="setSignOut">Sign out</button>
-</div>
-<div id="setGuestState">
-<label>Full name<input id="newFullName"></label>
-<label>Username<input id="newUsername"></label>
-<label>Class<input id="newClass"></label>
-<label>PIN<input id="newPin" type="password"></label>
-<button type="button" id="setCreateAccount">Create account</button>
-<label>Login name<input id="loginName"></label>
-<label>PIN<input id="loginPin" type="password"></label>
-<button type="button" id="setLoginAccount">Log in</button>
-</div>
-</section>
+<div class="hshs-tabs"><button type="button" class="hshs-tab on" data-tab="account">Account</button><button type="button" class="hshs-tab" data-tab="privacy">Privacy</button><button type="button" class="hshs-tab" data-tab="notifications">Notifications</button><button type="button" class="hshs-tab" data-tab="theme">Theme</button></div>
+<section id="accountTab"><div id="setSignedState"><label>Full name<input id="setFullName"></label><label>Username<input id="setUsername"></label><label>Email<input id="setEmail"></label><label>Class<input id="setClass"></label><label>Role<input id="setRole"></label><label>Bio<textarea id="setBio"></textarea></label><button type="button" id="setSaveAccount">Save account</button><button type="button" id="setSignOut">Sign out</button></div><div id="setGuestState"><label>Full name<input id="newFullName"></label><label>Username<input id="newUsername"></label><label>Class<input id="newClass"></label><label>PIN<input id="newPin" type="password"></label><button type="button" id="setCreateAccount">Create account</button><label>Login name<input id="loginName"></label><label>PIN<input id="loginPin" type="password"></label><button type="button" id="setLoginAccount">Log in</button></div></section>
 <section id="privacyTab" hidden><h2>Privacy</h2><p>Control who can see your profile and posts.</p></section>
 <section id="notificationsTab" hidden><h2>Notifications</h2><p>Choose which school alerts you receive.</p></section>
-<section id="themeTab" hidden><h2>Theme</h2><p>Switch light or dark from the moon button in the header.</p></section>
+<section id="themeTab" hidden><h2>Theme</h2><p>Use the campus dark theme on phones.</p></section>
 </div></div>
-<script src="../js/hshs-settings.js"></script><script src="../js/mobile-shell.js?v=260903c"></script><script type="module" src="../js/app.js?v=260903c"></script>
-<script>(function(){document.documentElement.classList.remove('hshs-booting');document.documentElement.classList.add('hshs-ready');})();</script></body></html>
+<script src="../js/hshs-settings.js"></script><script src="../js/hshs-brand.js?v=260903e"></script><script src="../js/mobile-shell.js?v=260903e"></script><script src="../js/hshs-tab-order.js?v=260903e"></script><script type="module" src="../js/app.js?v=260903e"></script>
+</body></html>
