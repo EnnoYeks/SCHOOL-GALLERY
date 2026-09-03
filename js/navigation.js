@@ -2,175 +2,18 @@
 // ============================================
 // NAVIGATION & UI INTERACTIONS
 // ============================================
-
 var HSHS_ASSET_VER = '260902k';
 window.__hshsAssetVer = HSHS_ASSET_VER;
-
-class Navigation {
-    constructor() { this.init(); }
-    init() {
-        this.setupDropdowns();
-        this.setupMobileMenu();
-        this.setupScrollEffects();
-    }
-    setupDropdowns() {
-        const notificationIcon = document.querySelector('.notification-icon');
-        const notificationDropdown = document.getElementById('notificationDropdown');
-        if (notificationIcon && notificationDropdown) {
-            notificationIcon.addEventListener('click', (e) => {
-                e.stopPropagation();
-                notificationDropdown.classList.toggle('active');
-            });
-        }
-        const profileIcon = document.querySelector('.profile-icon');
-        const profileDropdown = document.getElementById('profileDropdown');
-        if (profileIcon && profileDropdown) {
-            profileIcon.addEventListener('click', (e) => {
-                e.stopPropagation();
-                profileDropdown.classList.toggle('active');
-            });
-        }
-        document.addEventListener('click', () => {
-            if (notificationDropdown) notificationDropdown.classList.remove('active');
-            if (profileDropdown) profileDropdown.classList.remove('active');
-        });
-    }
-    setupMobileMenu() {
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const navLinks = document.querySelector('.nav-links');
-        if (mobileMenuToggle && navLinks) {
-            mobileMenuToggle.addEventListener('click', () => {
-                navLinks.classList.toggle('mobile-visible');
-                mobileMenuToggle.classList.toggle('active');
-            });
-        }
-    }
-    setupScrollEffects() {
-        const navbar = document.querySelector('.navbar');
-        if (!navbar) return;
-        var ticking = false;
-        window.addEventListener('scroll', function () {
-            if (ticking) return;
-            ticking = true;
-            requestAnimationFrame(function () {
-                navbar.classList.toggle('scrolled', window.pageYOffset > 100);
-                ticking = false;
-            });
-        }, { passive: true });
-    }
-}
-
-// Expose navigation instance safely so it can be re-used by the compat adapter
-window.hshsNavigation = window.hshsNavigation || new Navigation();
-
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    const selectedTab = document.getElementById(tabName + 'Tab');
-    if (selectedTab) selectedTab.classList.add('active');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
-    });
-});
-
-(function recoverStaleBoot() {
-    function reveal() {
-        var root = document.documentElement;
-        root.classList.remove('hshs-booting');
-        root.classList.add('hshs-ready');
-        var boot = document.getElementById('hshs-boot');
-        if (boot && boot.parentNode) boot.remove();
-        var cover = document.getElementById('hshs-tt-overlay');
-        if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
-    }
-    window.addEventListener('pageshow', function (e) {
-        if (e.persisted) reveal();
-    });
-    if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-        navigator.serviceWorker.getRegistrations().then(function (regs) {
-            regs.forEach(function (reg) { reg.unregister(); });
-        }).catch(function () {});
-    }
-    if (window.caches && caches.keys) {
-        caches.keys().then(function (keys) {
-            keys.forEach(function (key) { caches.delete(key); });
-        }).catch(function () {});
-    }
-})();
-
-(function loadHshsMobileShell() {
-    if (!document.getElementById('hshs-boot-critical')) {
-        var st = document.createElement('style');
-        st.id = 'hshs-boot-critical';
-        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-b[...]';
-        document.documentElement.classList.add('hshs-booting');
-        var mobile = window.matchMedia('(max-width: 1024px)').matches;
-        document.documentElement.classList.toggle('hshs-device-mobile', mobile);
-        document.documentElement.classList.toggle('hshs-device-desktop', !mobile);
-        document.head.appendChild(st);
-    }
-    var current = document.currentScript && document.currentScript.src;
-    if (!current) {
-        var list = document.querySelectorAll('script[src*="navigation.js"]');
-        for (var i = 0; i < list.length; i++) {
-            if (list[i].src.indexOf('mobile-navigation') === -1) current = list[i].src;
-        }
-    }
-    if (!current) return;
-    function bust(url) {
-        return url.replace(/(\?.*)?$/, '') + '?v=' + HSHS_ASSET_VER;
-    }
-    function add(id, file) {
-        if (document.getElementById(id)) return;
-        var s = document.createElement('script');
-        s.id = id;
-        s.async = false;
-        s.src = bust(current.replace(/navigation\.js(\?.*)?$/, file));
-        document.head.appendChild(s);
-    }
-    function addCss(id, file) {
-        if (document.getElementById(id)) return;
-        var link = document.createElement('link');
-        link.id = id;
-        link.rel = 'stylesheet';
-        link.href = bust(current.replace(/js\/navigation\.js(\?.*)?$/, 'css/' + file));
-        document.head.appendChild(link);
-    }
-    addCss('hshs-boot-css', 'hshs-boot.css');
-    addCss('hshs-no-flicker-css', 'hshs-no-flicker.css');
-    addCss('hshs-tt-css', 'hshs-tt.css');
-    addCss('hshs-social-css', 'hshs-social.css');
-    addCss('hshs-social-loop-css', 'hshs-social-loop.css');
-    addCss('hshs-social-actions-css', 'hshs-social-actions.css');
-    addCss('hshs-motion-css', 'gallery-transitions.css');
-    addCss('hshs-page-swipe-css', 'page-swipe.css');
-    addCss('hshs-chat-spring-css', 'hshs-chat-spring.css');
-    addCss('hshs-account-css', 'hshs-account.css');
-    addCss('hshs-settings-css', 'hshs-settings.css');
-    addCss('hshs-school-css', 'hshs-school.css');
-    add('hshs-lock-js', 'hshs-lock.js');
-    add('hshs-tt-js', 'hshs-tt.js');
-    add('hshs-boot-js', 'hshs-boot.js');
-    add('hshs-perf-js', 'hshs-perf.js');
-    add('hshs-store-bridge-js', 'hshs-store-bridge.js');
-    add('hshs-store-js', 'hshs-store.js');
-    add('hshs-social-js', 'hshs-social.js');
-    add('hshs-social-actions-js', 'hshs-social-actions.js');
-    add('hshs-notify-js', 'hshs-notify.js');
-    add('hshs-mobile-shell-js', 'mobile-shell.js');
-    add('hshs-upload-js', 'hshs-upload.js');
-    add('hshs-search-btn-js', 'mobile-search-btn.js');
-    add('hshs-brand-js', 'hshs-brand.js');
-    add('hshs-spring-js', 'hshs-spring.js');
-    add('hshs-motion-js', 'hshs-motion.js');
-    add('hshs-gallery-transitions-js', 'gallery-transitions.js');
-    add('hshs-swipe-js', 'hshs-swipe.js');
-    add('hshs-page-swipe-js', 'page-swipe.js');
-    add('hshs-chat-spring-js', 'hshs-chat-spring.js');
-    add('hshs-account-js', 'hshs-account.js');
-    add('hshs-settings-js', 'hshs-settings.js');
-    add('hshs-school-js', 'hshs-school.js');
-})();
+class Navigation { constructor(){this.init()} init(){this.setupDropdowns();this.setupMobileMenu();this.setupScrollEffects()} setupDropdowns(){const n=document.querySelector('.notification-icon'),d=document.getElementById('notificationDropdown');if(n&&d)n.addEventListener('click',e=>{e.stopPropagation();d.classList.toggle('active')});const p=document.querySelector('.profile-icon'),q=document.getElementById('profileDropdown');if(p&&q)p.addEventListener('click',e=>{e.stopPropagation();q.classList.toggle('active')});document.addEventListener('click',()=>{if(d)d.classList.remove('active');if(q)q.classList.remove('active')})} setupMobileMenu(){const t=document.getElementById('mobileMenuToggle'),l=document.querySelector('.nav-links');if(t&&l)t.addEventListener('click',()=>{l.classList.toggle('mobile-visible');t.classList.toggle('active')})} setupScrollEffects(){const n=document.querySelector('.navbar');if(!n)return;let t=false;window.addEventListener('scroll',()=>{if(t)return;t=true;requestAnimationFrame(()=>{n.classList.toggle('scrolled',window.pageYOffset>100);t=false})},{passive:true})}}
+window.hshsNavigation=window.hshsNavigation||new Navigation();
+function switchTab(t){document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));const s=document.getElementById(t+'Tab');if(s)s.classList.add('active')}
+document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>switchTab(b.getAttribute('data-tab'))));
+(function recoverStaleBoot(){function reveal(){document.documentElement.classList.remove('hshs-booting');document.documentElement.classList.add('hshs-ready');const b=document.getElementById('hshs-boot');if(b?.parentNode)b.remove();const c=document.getElementById('hshs-tt-overlay');if(c?.parentNode)c.parentNode.removeChild(c)}window.addEventListener('pageshow',e=>{if(e.persisted)reveal()});if(navigator.serviceWorker?.getRegistrations)navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister())).catch(()=>{});if(window.caches?.keys)caches.keys().then(k=>k.forEach(x=>caches.delete(x))).catch(()=>{})})();
+(function loadHshsMobileShell(){if(!document.getElementById('hshs-boot-critical')){const st=document.createElement('style');st.id='hshs-boot-critical';st.textContent='html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-booting .hshs-mobile-shell{visibility:hidden!important}html.hshs-ready .animated-bg,html.hshs-ready .gradient-bg,html.hshs-ready .navbar,html.hshs-ready .hshs-mobile-shell{visibility:visible!important}';document.documentElement.classList.add('hshs-booting');const mobile=window.matchMedia('(max-width:1024px)').matches;document.documentElement.classList.toggle('hshs-device-mobile',mobile);document.documentElement.classList.toggle('hshs-device-desktop',!mobile);document.head.appendChild(st)}
+// Standalone legacy pages do not run the JS router, so they must never remain in boot mode.
+// The router-enabled root page will reveal itself through app:page:loaded (with its own timeout fallback).
+const hasAppRouter=!!document.querySelector('script[src*="/app.js"],script[src$="app.js"]');
+if(!hasAppRouter){const revealStandalone=()=>{document.documentElement.classList.remove('hshs-booting');document.documentElement.classList.add('hshs-ready')};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',revealStandalone,{once:true});else revealStandalone();window.addEventListener('load',revealStandalone,{once:true})}
+let current=document.currentScript?.src;if(!current){const list=document.querySelectorAll('script[src*="navigation.js"]');for(let i=0;i<list.length;i++)if(!list[i].src.includes('mobile-navigation'))current=list[i].src}if(!current)return;const bust=u=>u.replace(/(\?.*)?$/,'')+'?v='+HSHS_ASSET_VER;function hasScript(file){return Array.from(document.querySelectorAll('script[src]')).some(s=>(s.src||'').replace(/\?.*$/,'').endsWith('/'+file))}function hasStyle(file){return Array.from(document.querySelectorAll('link[rel="stylesheet"][href]')).some(s=>(s.href||'').replace(/\?.*$/,'').endsWith('/'+file))}function add(id,file){if(document.getElementById(id)||hasScript(file))return;const s=document.createElement('script');s.id=id;s.async=false;s.src=bust(current.replace(/navigation\.js(\?.*)?$/,file));document.head.appendChild(s)}function addCss(id,file){if(document.getElementById(id)||hasStyle(file))return;const l=document.createElement('link');l.id=id;l.rel='stylesheet';l.href=bust(current.replace(/js\/navigation\.js(\?.*)?$/,'css/'+file));document.head.appendChild(l)}
+['hshs-boot.css','hshs-no-flicker.css','hshs-tt.css','hshs-social.css','hshs-social-loop.css','hshs-social-actions.css','gallery-transitions.css','page-swipe.css','hshs-chat-spring.css','hshs-account.css','hshs-settings.css','hshs-school.css','clips.css','polls.css','spotlight.css'].forEach((f,i)=>addCss('hshs-page-css-'+i,f));
+[['hshs-lock-js','hshs-lock.js'],['hshs-tt-js','hshs-tt.js'],['hshs-boot-js','hshs-boot.js'],['hshs-perf-js','hshs-perf.js'],['hshs-store-bridge-js','hshs-store-bridge.js'],['hshs-store-js','hshs-store.js'],['hshs-social-js','hshs-social.js'],['hshs-social-actions-js','hshs-social-actions.js'],['hshs-notify-js','hshs-notify.js'],['hshs-mobile-shell-js','mobile-shell.js'],['hshs-upload-js','hshs-upload.js'],['hshs-search-btn-js','mobile-search-btn.js'],['hshs-brand-js','hshs-brand.js'],['hshs-spring-js','hshs-spring.js'],['hshs-motion-js','hshs-motion.js'],['hshs-gallery-transitions-js','gallery-transitions.js'],['hshs-swipe-js','hshs-swipe.js'],['hshs-page-swipe-js','page-swipe.js'],['hshs-chat-spring-js','hshs-chat-spring.js'],['hshs-account-js','hshs-account.js'],['hshs-settings-js','hshs-settings.js'],['hshs-school-js','hshs-school.js'],['hshs-clips-js','clips.js']].forEach(x=>add(x[0],x[1]))})();
