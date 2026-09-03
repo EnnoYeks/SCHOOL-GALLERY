@@ -5,6 +5,24 @@
   function file() {
     return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   }
+  function cssBase() {
+    return location.pathname.indexOf('/index/') !== -1 ? '../css/' : 'css/';
+  }
+  function injectCampusCss() {
+    if (document.getElementById('hshs-campus-wire-css')) return;
+    var link = document.createElement('link');
+    link.id = 'hshs-campus-wire-css';
+    link.rel = 'stylesheet';
+    link.href = cssBase() + 'hshs-campus-wire.css?v=260903e';
+    document.head.appendChild(link);
+    if (!document.getElementById('hshs-theme-css-link')) {
+      var theme = document.createElement('link');
+      theme.id = 'hshs-theme-css-link';
+      theme.rel = 'stylesheet';
+      theme.href = cssBase() + 'hshs-theme.css?v=260903e';
+      document.head.appendChild(theme);
+    }
+  }
 
   function reorderTabs() {
     var bar = document.querySelector('.mobile-tabbar');
@@ -52,6 +70,7 @@
   }
 
   function boot() {
+    injectCampusCss();
     fillMorePage();
     reorderTabs();
   }
