@@ -2,6 +2,8 @@ import './compat/adapter.js';
 import { init as loaderInit, show as showLoader, hide as hideLoader } from './components/loader.js';
 import { init as navbarInit } from './components/navbar.js';
 import { init as footerInit } from './components/footer.js';
+import { init as notificationsInit } from './components/notifications.js';
+import { connectRealtime } from './services/realtime.js';
 /* router-enabled app.js (migration) — extended routes + component hooks */
 const ROUTES = {
   '/': 'pages/home.js',
@@ -45,6 +47,8 @@ const App = {
     try { loaderInit(); } catch (e) { console.warn('loader init failed', e); }
     try { navbarInit(); } catch (e) { console.warn('navbar init failed', e); }
     try { footerInit(); } catch (e) { console.warn('footer init failed', e); }
+    try { notificationsInit(); } catch (e) { console.warn('notifications init failed', e); }
+    try { connectRealtime(); } catch (e) { console.warn('realtime connect failed', e); }
 
     this.injectHideStyles();
     this.bindLinkIntercepts();
@@ -89,6 +93,7 @@ const App = {
       // Let shared components re-run any page-specific wiring
       try { navbarInit(); } catch (e) { /* ignore */ }
       try { footerInit(); } catch (e) { /* ignore */ }
+      try { notificationsInit(); } catch (e) { /* ignore */ }
 
       window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path } }));
       if (replaceState) history.replaceState({}, '', path); else history.pushState({}, '', path);
@@ -106,6 +111,7 @@ const App = {
             this.root.innerHTML = newRoot.innerHTML;
             try { navbarInit(); } catch (e) {}
             try { footerInit(); } catch (e) {}
+            try { notificationsInit(); } catch (e) {}
             window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path } }));
             if (replaceState) history.replaceState({}, '', path); else history.pushState({}, '', path);
             return Promise.resolve();
