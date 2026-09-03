@@ -1,3 +1,5 @@
+window.__hshsJsApp = true;
+
 import './compat/adapter.js';
 import { init as loaderInit, show as showLoader, hide as hideLoader } from './components/loader.js';
 import { init as navbarInit } from './components/navbar.js';
