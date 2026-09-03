@@ -1,6 +1,4 @@
-// ============================================
-// PHOTOS PAGE LOGIC
-// ============================================
+import { getPhotos } from './services/page-data.js';
 
 class PhotosPage {
     constructor() {
@@ -18,188 +16,125 @@ class PhotosPage {
     }
 
     setupFilters() {
-        const buttons = document.querySelectorAll('.filter-btn');
-        buttons.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                buttons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.currentFilter = btn.getAttribute('data-filter');
-                this.currentPage = 0;
-                await this.loadPhotos();
-            });
-        });
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', async () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.currentFilter = btn.dataset.filter || 'all';
+            this.currentPage = 0;
+            await this.loadPhotos();
+        }));
     }
 
     async loadPhotos() {
         const grid = document.getElementById('masonryGrid');
         if (!grid) return;
+        let photos = await getPhotos(this.photosPerPage * (this.currentPage + 1), 0);
+        if (this.currentFilter === 'popular') photos.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        if (this.currentFilter === 'trending') photos.sort((a, b) => ((b.likes || 0) + (b.comments || 0) + (b.views || 0)) - ((a.likes || 0) + (a.comments || 0) + (a.views || 0)));
+        if (this.currentFilter === 'recent') photos.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-        let photos = [];
-        try {
-            photos = await (window.db && db.getPhotos ? db.getPhotos(this.photosPerPage * (this.currentPage + 1), 0) : []);
-        } catch (e) { photos = []; }
-
-        // Apply filter
-        if (this.currentFilter === 'popular') {
-            photos = photos.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-        } else if (this.currentFilter === 'trending') {
-            const engagement = (p) => (p.likes || 0) + (p.comments || 0);
-            photos = photos.sort((a, b) => engagement(b) - engagement(a));
-        } else if (this.currentFilter === 'recent') {
-            photos = photos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        }
-
-        const startIndex = this.currentPage * this.photosPerPage;
-        const endIndex = startIndex + this.photosPerPage;
-        const pagePhotos = photos.slice(startIndex, endIndex);
-
-        if (this.currentPage === 0) {
-            grid.innerHTML = '';
-        }
-
-        const frag = document.createDocumentFragment();
-        pagePhotos.forEach((photo) => {
-            const card = this.createPhotoCard(photo);
-            frag.appendChild(card);
-        });
-        grid.appendChild(frag);
-
+        const start = this.currentPage * this.photosPerPage;
+        const pagePhotos = photos.slice(start, start + this.photosPerPage);
+        if (this.currentPage === 0) grid.innerHTML = '';
+        pagePhotos.forEach(photo => grid.appendChild(this.createPhotoCard(photo)));
         this.currentPage++;
+        if (!pagePhotos.length && this.currentPage === 1) grid.innerHTML = '<div class="empty-state"><i class="fas fa-camera"></i><h2>No photos yet</h2><p>School moments will appear here when they are shared.</p></div>';
     }
 
     createPhotoCard(photo) {
         const card = document.createElement('div');
         card.className = 'photo-card';
-        try { card.setAttribute('data-photo-id', String(photo.id)); } catch (e) {}
-        try { card.setAttribute('data-post-id', String(photo.id)); } catch (e) {}
-
-        // preview image
+        card.dataset.photoId = String(photo.id ?? '');
+        card.dataset.postId = String(photo.id ?? '');
         const img = document.createElement('img');
         img.className = 'photo-image';
-        try { img.setAttribute('src', photo.image || ''); } catch (e) { img.src = ''; }
-        img.setAttribute('alt', photo.title || 'Photo');
+        img.src = photo.image || photo.imageUrl || photo.mediaUrl || '';
+        img.alt = photo.title || 'Photo';
+        img.loading = 'lazy';
 
-        const overlay = document.createElement('div'); overlay.className = 'photo-overlay';
+        const overlay = document.createElement('div');
+        overlay.className = 'photo-overlay';
+        const header = document.createElement('div');
+        header.className = 'photo-header';
+        const author = document.createElement('div');
+        author.className = 'photo-author';
+        const av = document.createElement('img');
+        av.className = 'author-avatar';
+        av.src = photo.authorAvatar || photo.avatar || '';
+        av.alt = photo.author || '';
+        const authorName = document.createElement('div');
+        authorName.className = 'author-name';
+        authorName.textContent = photo.author || 'HSHS Student';
+        author.append(av, authorName);
+        const likeBtn = document.createElement('button');
+        likeBtn.className = 'photo-like-btn';
+        likeBtn.type = 'button';
+        likeBtn.setAttribute('aria-label', 'Like photo');
+        likeBtn.innerHTML = '<i class="far fa-heart"></i>';
+        likeBtn.addEventListener('click', ev => { ev.stopPropagation(); try { window.reactionManager?.toggleLike(String(photo.id)); } catch (_) {} });
+        header.append(author, likeBtn);
 
-        // header
-        const header = document.createElement('div'); header.className = 'photo-header';
-        const author = document.createElement('div'); author.className = 'photo-author';
-        const av = document.createElement('img'); av.className = 'author-avatar';
-        av.setAttribute('alt', photo.author || '');
-        try { av.setAttribute('src', photo.authorAvatar || 'https://via.placeholder.com/32'); } catch (e) { av.src = 'https://via.placeholder.com/32'; }
-        const authorName = document.createElement('div'); authorName.className = 'author-name'; authorName.textContent = photo.author || '';
-        author.appendChild(av); author.appendChild(authorName);
-
-        const likeBtn = document.createElement('button'); likeBtn.className = 'photo-like-btn'; likeBtn.type = 'button';
-        likeBtn.setAttribute('aria-label', 'Like');
-        const likeIcon = document.createElement('i'); likeIcon.className = 'far fa-heart';
-        likeBtn.appendChild(likeIcon);
-        // wire reactionManager if present
-        likeBtn.addEventListener('click', function (ev) {
-            ev.stopPropagation();
-            try { if (window.reactionManager && typeof reactionManager.toggleLike === 'function') reactionManager.toggleLike(String(photo.id)); } catch (e) {}
-        });
-
-        header.appendChild(author);
-        header.appendChild(likeBtn);
-
-        // footer
-        const footer = document.createElement('div'); footer.className = 'photo-footer';
-        const title = document.createElement('div'); title.className = 'photo-title'; title.textContent = photo.title || '';
-        const stats = document.createElement('div'); stats.className = 'photo-stats';
-        const statLikes = document.createElement('div'); statLikes.className = 'stat'; statLikes.innerHTML = '<i class="fas fa-heart"></i> ' + (window.Utils && Utils.formatNumber ? Utils.formatNumber(photo.likes || 0) : String(photo.likes || 0));
-        const statViews = document.createElement('div'); statViews.className = 'stat'; statViews.innerHTML = '<i class="fas fa-eye"></i> ' + (window.Utils && Utils.formatNumber ? Utils.formatNumber(photo.views || 0) : String(photo.views || 0));
-        stats.appendChild(statLikes); stats.appendChild(statViews);
-        footer.appendChild(title); footer.appendChild(stats);
-
-        overlay.appendChild(header);
-        overlay.appendChild(footer);
-
-        card.appendChild(img);
-        card.appendChild(overlay);
-
-        card.addEventListener('click', () => {
-            this.openModal(photo);
-        });
-
+        const footer = document.createElement('div');
+        footer.className = 'photo-footer';
+        const title = document.createElement('div');
+        title.className = 'photo-title';
+        title.textContent = photo.title || 'Untitled moment';
+        const stats = document.createElement('div');
+        stats.className = 'photo-stats';
+        stats.innerHTML = `<div class="stat"><i class="fas fa-heart"></i> ${photo.likes || 0}</div><div class="stat"><i class="fas fa-eye"></i> ${photo.views || 0}</div>`;
+        footer.append(title, stats);
+        overlay.append(header, footer);
+        card.append(img, overlay);
+        card.addEventListener('click', () => this.openModal(photo));
         return card;
     }
 
     setupSearch() {
-        const searchBtn = document.querySelector('.search-submit');
-        if (searchBtn) {
-            searchBtn.addEventListener('click', async () => {
-                const input = document.getElementById('photoSearchInput');
-                const query = input ? input.value : '';
-                await this.search(query);
-            });
-        }
+        const btn = document.getElementById('photoSearchBtn');
+        const input = document.getElementById('photoSearchInput');
+        if (!btn || !input) return;
+        btn.addEventListener('click', () => this.search(input.value));
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') this.search(input.value); });
     }
 
     async search(query) {
         const grid = document.getElementById('masonryGrid');
         if (!grid) return;
-        let results = [];
-        try { results = await (window.db && db.search ? db.search(query, 'photos') : []); } catch (e) { results = []; }
+        const term = String(query || '').trim().toLowerCase();
+        const all = await getPhotos(100, 0);
+        const results = term ? all.filter(p => `${p.title || ''} ${p.description || ''} ${p.author || ''}`.toLowerCase().includes(term)) : all;
         grid.innerHTML = '';
-        const frag = document.createDocumentFragment();
-        results.forEach(photo => {
-            const card = document.createElement('div'); card.className = 'photo-card';
-            try { card.setAttribute('data-photo-id', String(photo.id)); } catch (e) {}
-            try { card.setAttribute('data-post-id', String(photo.id)); } catch (e) {}
-            const img = document.createElement('img'); img.className = 'photo-image'; img.setAttribute('src', photo.image || ''); img.setAttribute('alt', photo.title || '');
-            const overlay = document.createElement('div'); overlay.className = 'photo-overlay';
-            const ptitle = document.createElement('div'); ptitle.className = 'photo-title'; ptitle.textContent = photo.title || '';
-            overlay.appendChild(ptitle);
-            card.appendChild(img); card.appendChild(overlay);
-            card.addEventListener('click', () => this.openModal(photo));
-            frag.appendChild(card);
-        });
-        grid.appendChild(frag);
+        results.forEach(photo => grid.appendChild(this.createPhotoCard(photo)));
+        if (!results.length) grid.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><h2>No photos found</h2><p>Try another search.</p></div>';
     }
 
     setupModal() {
         const modal = document.getElementById('photoModal');
-        const closeBtn = document.getElementById('modalClose');
-
         if (!modal) return;
-
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                modal.classList.remove('active');
-            });
-        }
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
+        document.getElementById('modalClose')?.addEventListener('click', () => modal.classList.remove('active'));
+        modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
     }
 
     openModal(photo) {
         const modal = document.getElementById('photoModal');
         if (!modal) return;
-        const modalImage = document.getElementById('modalImage');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalDescription = document.getElementById('modalDescription');
-
-        if (modalImage) { try { modalImage.setAttribute('src', photo.image || ''); } catch (e) { modalImage.src = ''; } }
-        if (modalTitle) modalTitle.textContent = photo.title || '';
-        if (modalDescription) modalDescription.textContent = photo.description || 'Amazing moment captured!';
-
+        modal.innerHTML = `<div class="photo-modal-content"><button type="button" class="modal-close" aria-label="Close">&times;</button><img alt=""><div class="photo-modal-caption"><h2></h2><p></p></div></div>`;
+        const image = modal.querySelector('img');
+        image.src = photo.image || photo.imageUrl || photo.mediaUrl || '';
+        image.alt = photo.title || 'Photo';
+        modal.querySelector('h2').textContent = photo.title || 'Photo';
+        modal.querySelector('p').textContent = photo.description || '';
+        modal.querySelector('.modal-close').addEventListener('click', () => modal.classList.remove('active'));
         modal.classList.add('active');
     }
 }
 
-// Initialize photos page when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('masonryGrid')) {
-        new PhotosPage();
-    }
-});
+window.PhotosPage = PhotosPage;
+window.initPhotos = function () {
+    if (!document.getElementById('masonryGrid')) return;
+    if (window.__hshsPhotosInstance) return window.__hshsPhotosInstance;
+    window.__hshsPhotosInstance = new PhotosPage();
+    return window.__hshsPhotosInstance;
+};
 
-// Export for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PhotosPage;
-}
+document.addEventListener('DOMContentLoaded', () => window.initPhotos?.());

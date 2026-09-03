@@ -1,9 +1,14 @@
-/* Structure for Trending. Data/interaction logic remains in ../trending.js. */
-(function(){
-  function boot(){
-    const root=document.getElementById('hshsTrendingRoot');
-    if(!root)return;
-    root.innerHTML=`<main class="trending-page"><div class="container"><header class="trending-header"><div class="trending-title-row"><div><span class="trending-kicker"><i class="fas fa-arrow-trend-up"></i> HSHS NOW</span><h1>Trending</h1><p>What's hot in our school right now 🔥</p></div><label class="period-picker"><i class="fas fa-calendar-days"></i><select id="periodSelect" aria-label="Trending period"><option value="today">Today</option><option value="week" selected>This Week</option><option value="month">This Month</option></select></label></div></header><div class="trending-filters" data-content-filter><button class="content-filter active" data-filter="all" type="button">🔥 All</button><button class="content-filter" data-filter="video" type="button">Videos</button><button class="content-filter" data-filter="image" type="button">Photos</button><button class="content-filter" data-filter="events" type="button">Events</button><button class="content-filter" data-filter="buzz" type="button">Buzz</button></div><section class="top-trending"><div id="topTrendingHero"></div><div id="topTrendingSide"></div></section><section class="trending-section"><div class="section-heading"><div><span class="section-icon">⚡</span><h2>Trending Now</h2></div><button class="view-all-btn" id="viewAllTrending" type="button">View all <i class="fas fa-chevron-right"></i></button></div><div class="trending-grid" id="trendingGrid"></div></section><section class="hot-topics-section"><div class="section-heading"><div><span class="section-icon">🔥</span><h2>Hot Topics</h2></div><div class="hot-topics" id="hotTopics"></div></section><section class="desktop-insights"><div class="insight-card"><h3>Top Categories</h3><div id="topCategoriesGrid"></div></div><div class="insight-card"><h3>Top Liked</h3><ol class="leaderboard-list" id="topLikedList"></ol></div><div class="insight-card"><h3>Most Viewed</h3><ol class="leaderboard-list" id="topViewedList"></ol></div><div class="insight-card"><h3>Most Discussed</h3><ol class="leaderboard-list" id="topCommentedList"></ol></div></section></div></main>`;
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
-})();
+import { renderPage } from '../components/page-templates.js';
+
+export function render() {
+  return renderPage('trending', `
+    <section class="trending-hero"><div><span class="eyebrow">HSHS WORLD</span><h1>What's Trending 🔥</h1><p>See the moments getting the most attention across school.</p></div></section>
+    <div class="trending-search-wrap"><input id="searchInput" type="search" placeholder="Search trending posts..." aria-label="Search trending posts"><div id="searchResults" class="search-results"></div></div>
+    <div class="trending-tabs" data-trending-tabs role="tablist" aria-label="Trending period"><button type="button" data-period="today">Today</button><button class="active" type="button" data-period="week">This Week</button><button type="button" data-period="month">This Month</button></div>
+    <div class="trending-layout"><main><div class="trending-list" id="trendingGrid"><div class="loading-skeleton"></div><div class="loading-skeleton"></div><div class="loading-skeleton"></div></div></main><aside class="trending-sidebar"><section><h2>Top Categories</h2><div id="topCategoriesGrid" class="top-categories-grid"></div></section><section><h2>Most Liked</h2><ol id="topLikedList" class="leaderboard-list"></ol></section><section><h2>Most Viewed</h2><ol id="topViewedList" class="leaderboard-list"></ol></section><section><h2>Most Commented</h2><ol id="topCommentedList" class="leaderboard-list"></ol></section></aside></div>`);
+}
+
+export async function init() {
+  if (window.hshsNavigation?.init) window.hshsNavigation.init();
+  try { await import('../trending.js'); } catch (error) { console.error('Trending module failed to load:', error); }
+}

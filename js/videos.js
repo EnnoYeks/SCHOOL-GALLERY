@@ -13,32 +13,100 @@ const DEMO = [
 ];
 
 class VideosPage {
-    constructor() { this.videos = []; this.filtered = []; this.index = 0; this.filter = "all"; this.search = ""; this.pageSize = 12; this.loading = false; this.hasMore = true; this.init(); }
-    async init() { this.bindFilters(); this.bindSearch(); this.bindLoadMore(); this.bindPlayer(); document.getElementById("uploadVideoBtn")?.addEventListener("click", () => { window.location.href = "photos.html"; }); await this.load(false); }
+    constructor() {
+        this.videos = [];
+        this.filtered = [];
+        this.index = 0;
+        this.filter = "all";
+        this.search = "";
+        this.pageSize = 12;
+        this.loading = false;
+        this.hasMore = true;
+        this.init();
+    }
+    async init() {
+        this.bindFilters(); this.bindSearch(); this.bindLoadMore(); this.bindPlayer();
+        document.getElementById("uploadVideoBtn")?.addEventListener("click", () => { window.location.href = "photos.html"; });
+        await this.load(false);
+    }
     async load(append = false) {
         if (this.loading || (!this.hasMore && append)) return;
-        const container = document.getElementById("videosContainer"); if (!container) return;
-        this.loading = true; if (!append) container.innerHTML = this.skeletons();
-        try { const batch = await db.getVideos(this.pageSize, this.videos.length) || []; this.videos = append ? [...this.videos, ...batch] : batch; if (!this.videos.length) this.videos = DEMO; this.hasMore = batch.length === this.pageSize; this.apply(); }
-        catch (error) { console.error("Videos load failed:", error); this.videos = DEMO; this.hasMore = false; this.apply(); }
-        finally { this.loading = false; const loadMore = document.getElementById("loadMoreVideos"); if (loadMore) { loadMore.hidden = !this.hasMore || !this.filtered.length; loadMore.disabled = false; } }
+        const container = document.getElementById("videosContainer");
+        if (!container) return;
+        this.loading = true;
+        if (!append) container.innerHTML = this.skeletons();
+        try {
+            const batch = await db.getVideos(this.pageSize, this.videos.length) || [];
+            this.videos = append ? [...this.videos, ...batch] : batch;
+            if (!this.videos.length) this.videos = DEMO;
+            this.hasMore = batch.length === this.pageSize;
+            this.apply();
+        } catch (error) {
+            console.error("Videos load failed:", error);
+            this.videos = DEMO;
+            this.hasMore = false;
+            this.apply();
+        } finally {
+            this.loading = false;
+            const loadMore = document.getElementById("loadMoreVideos");
+            if (loadMore) { loadMore.hidden = !this.hasMore || !this.filtered.length; loadMore.disabled = false; }
+        }
     }
-    apply() { let videos = [...this.videos]; if (this.filter === "latest") videos.sort((a,b) => this.date(b.createdAt) - this.date(a.createdAt)); else if (this.filter === "trending") videos.sort((a,b) => this.score(b) - this.score(a)); else if (this.filter !== "all") videos = videos.filter(v => String(v.category || "").toLowerCase().replace(/\s+/g,"-") === this.filter); if (this.search) videos = videos.filter(v => [v.title,v.description,v.category,v.author].join(" ").toLowerCase().includes(this.search)); this.filtered = videos; this.render(); }
+    apply() {
+        let videos = [...this.videos];
+        if (this.filter === "latest") videos.sort((a,b) => this.date(b.createdAt) - this.date(a.createdAt));
+        else if (this.filter === "trending") videos.sort((a,b) => this.score(b) - this.score(a));
+        else if (this.filter !== "all") videos = videos.filter(v => String(v.category || "").toLowerCase().replace(/\s+/g,"-") === this.filter);
+        if (this.search) videos = videos.filter(v => [v.title,v.description,v.category,v.author].join(" ").toLowerCase().includes(this.search));
+        this.filtered = videos; this.render();
+    }
     render() {
-        const container = document.getElementById("videosContainer"), hero = document.getElementById("featuredVideo"), title = document.getElementById("videoSectionTitle"), section = document.getElementById("featuredVideoSection"); if (!container) return;
+        const container = document.getElementById("videosContainer"), hero = document.getElementById("featuredVideo"), title = document.getElementById("videoSectionTitle"), section = document.getElementById("featuredVideoSection");
+        if (!container) return;
         if (!this.filtered.length) { if (hero) hero.innerHTML = ""; if (section) section.hidden = true; container.innerHTML = `<div class="empty-state"><i class="fas fa-video"></i><h3>No videos found</h3><p>Try another filter.</p></div>`; return; }
-        if (section) section.hidden = false; const featured = this.filtered.filter(v => v.featured).slice(0, 2), featuredIds = new Set(featured.map(v => v.id)), rest = this.filtered.filter(v => !featuredIds.has(v.id)); const featureCards = (featured.length ? featured : this.filtered.slice(0, 2)), list = featured.length ? rest : this.filtered.slice(2); if (hero) hero.innerHTML = featureCards.map((v, i) => this.featCard(v, this.filtered.indexOf(v), i === 0)).join(""); container.innerHTML = list.map(v => this.rowCard(v, this.filtered.indexOf(v))).join(""); if (title) title.textContent = this.filter === "trending" ? "Trending Videos" : this.filter === "latest" ? "Latest Videos" : this.filter === "all" ? "Latest Videos" : this.label(this.filter) + " Videos";
+        if (section) section.hidden = false;
+        const featured = this.filtered.filter(v => v.featured).slice(0, 2), featuredIds = new Set(featured.map(v => v.id)), rest = this.filtered.filter(v => !featuredIds.has(v.id));
+        const featureCards = featured.length ? featured : this.filtered.slice(0, 2), list = featured.length ? rest : this.filtered.slice(2);
+        if (hero) hero.innerHTML = featureCards.map((v, i) => this.featCard(v, this.filtered.indexOf(v), i === 0)).join("");
+        container.innerHTML = list.map(v => this.rowCard(v, this.filtered.indexOf(v))).join("");
+        if (title) title.textContent = this.filter === "trending" ? "Trending Videos" : this.filter === "latest" ? "Latest Videos" : this.filter === "all" ? "Latest Videos" : this.label(this.filter) + " Videos";
         document.querySelectorAll("[data-video-index]").forEach(el => { el.onclick = () => this.play(Number(el.dataset.videoIndex)); });
     }
-    featCard(v, index, first) { const title = this.escape(v.title || "Untitled"), thumb = this.attr(v.thumbnailUrl || ""), dur = this.escape(v.duration || ""); return `<article class="vibe-feat" data-video-index="${index}">${thumb ? `<img src="${thumb}" alt="${title}">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}${first ? `<span class="badge">FEATURED</span>` : ""}<span class="play"><i class="fas fa-play"></i></span>${dur ? `<span class="dur">${dur}</span>` : ""}<div class="meta"><b>${title}</b><small>${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div></article>`; }
-    rowCard(v, index) { const title = this.escape(v.title || "Untitled"), thumb = this.attr(v.thumbnailUrl || ""), dur = this.escape(v.duration || ""); return `<article class="vibe-row" data-video-index="${index}"><div class="shot">${thumb ? `<img src="${thumb}" alt="${title}">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}<span class="play"><i class="fas fa-play"></i></span>${dur ? `<span class="dur">${dur}</span>` : ""}</div><div class="copy"><b>${title}</b><small>${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div><button class="more" type="button" aria-label="More">⋮</button></article>`; }
+    featCard(v, index, first) {
+        const title = this.escape(v.title || "Untitled"), thumb = this.attr(v.thumbnailUrl || ""), dur = this.escape(v.duration || "");
+        return `<article class="vibe-feat" data-video-index="${index}">${thumb ? `<img src="${thumb}" alt="${title}">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}${first ? `<span class="badge">FEATURED</span>` : ""}<span class="play"><i class="fas fa-play"></i></span>${dur ? `<span class="dur">${dur}</span>` : ""}<div class="meta"><b>${title}</b><small>${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div></article>`;
+    }
+    rowCard(v, index) {
+        const title = this.escape(v.title || "Untitled"), thumb = this.attr(v.thumbnailUrl || ""), dur = this.escape(v.duration || "");
+        return `<article class="vibe-row" data-video-index="${index}"><div class="shot">${thumb ? `<img src="${thumb}" alt="${title}">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}<span class="play"><i class="fas fa-play"></i></span>${dur ? `<span class="dur">${dur}</span>` : ""}</div><div class="copy"><b>${title}</b><small>${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div><button class="more" type="button" aria-label="More">⋮</button></article>`;
+    }
     skeletons(){ return "<div class=\"video-skeleton\"></div><div class=\"video-skeleton\"></div><div class=\"video-skeleton\"></div>"; }
-    bindFilters(){ document.querySelectorAll(".video-tab").forEach(tab => tab.addEventListener("click", () => { document.querySelectorAll(".video-tab").forEach(x => x.classList.remove("active")); tab.classList.add("active"); this.filter = tab.dataset.filter || "all"; this.apply(); })); document.querySelectorAll("[data-filter-jump]").forEach(btn => btn.addEventListener("click", () => { const name = btn.getAttribute("data-filter-jump"), tab = document.querySelector('.video-tab[data-filter="' + name + '"]'); tab?.click(); })); }
+    bindFilters(){
+        document.querySelectorAll(".video-tab").forEach(tab => tab.addEventListener("click", () => { document.querySelectorAll(".video-tab").forEach(x => x.classList.remove("active")); tab.classList.add("active"); this.filter = tab.dataset.filter || "all"; this.apply(); }));
+        document.querySelectorAll("[data-filter-jump]").forEach(btn => btn.addEventListener("click", () => document.querySelector('.video-tab[data-filter="' + btn.getAttribute("data-filter-jump") + '"]')?.click()));
+    }
     bindSearch(){ document.getElementById("searchInput")?.addEventListener("input", e => { this.search = e.target.value.toLowerCase().trim(); this.apply(); }); }
     bindLoadMore(){ document.getElementById("loadMoreVideos")?.addEventListener("click", () => this.load(true)); }
-    bindPlayer(){ const modal = document.getElementById("videoPlayerModal"), player = document.getElementById("videoPlayer"); const close = () => { player?.pause(); if (player) player.removeAttribute("src"); modal?.classList.remove("active"); }; document.getElementById("playerClose")?.addEventListener("click", close); modal?.addEventListener("click", e => { if (e.target === modal) close(); }); document.getElementById("playPauseBtn")?.addEventListener("click", () => { if (player) player.paused ? player.play().catch(()=>{}) : player.pause(); }); document.getElementById("fullscreenBtn")?.addEventListener("click", () => player?.requestFullscreen?.()); document.getElementById("prevVideo")?.addEventListener("click", () => this.play(this.index - 1)); document.getElementById("nextVideo")?.addEventListener("click", () => this.play(this.index + 1)); }
-    play(index){ const video = this.filtered[index], player = document.getElementById("videoPlayer"), modal = document.getElementById("videoPlayerModal"); if (index < 0 || index >= this.filtered.length || !player || !modal) return; this.index = index; if (!video.videoUrl) return; player.src = video.videoUrl; player.poster = video.thumbnailUrl || ""; modal.classList.add("active"); player.play().catch(()=>{}); this.updateViews(video); }
-    async updateViews(video){ if (!video?.id || String(video.id).startsWith("d")) return; try { await updateDoc(doc(firestore, "videos", video.id), { views: increment(1) }); video.views = (+video.views || 0) + 1; } catch (e) {} }
+    bindPlayer(){
+        const modal = document.getElementById("videoPlayerModal"), player = document.getElementById("videoPlayer");
+        const close = () => { player?.pause(); if (player) player.removeAttribute("src"); modal?.classList.remove("active"); };
+        document.getElementById("playerClose")?.addEventListener("click", close);
+        modal?.addEventListener("click", e => { if (e.target === modal) close(); });
+        document.getElementById("playPauseBtn")?.addEventListener("click", () => { if (player) player.paused ? player.play().catch(()=>{}) : player.pause(); });
+        document.getElementById("fullscreenBtn")?.addEventListener("click", () => player?.requestFullscreen?.());
+        document.getElementById("prevVideo")?.addEventListener("click", () => this.play(this.index - 1));
+        document.getElementById("nextVideo")?.addEventListener("click", () => this.play(this.index + 1));
+    }
+    play(index){
+        if (index < 0 || index >= this.filtered.length) return;
+        const video = this.filtered[index], player = document.getElementById("videoPlayer"), modal = document.getElementById("videoPlayerModal");
+        if (!player || !modal || !video.videoUrl) return;
+        this.index = index; player.src = video.videoUrl; player.poster = video.thumbnailUrl || ""; modal.classList.add("active"); player.play().catch(()=>{}); this.updateViews(video);
+    }
+    async updateViews(video){
+        if (!video?.id || String(video.id).startsWith("d")) return;
+        try { await updateDoc(doc(firestore, "videos", video.id), { views: increment(1) }); video.views = (+video.views || 0) + 1; } catch (_) {}
+    }
     score(v){ return ((+v.likes||0)+(+v.comments||0))*4 + (+v.views||0); }
     date(v){ if (!v) return 0; if (typeof v.toMillis === "function") return v.toMillis(); if (v.seconds) return v.seconds * 1000; const n = new Date(v).getTime(); return Number.isFinite(n) ? n : 0; }
     ago(v){ const n = this.date(v); if (!n) return "recently"; const d = Math.max(1, Math.round((Date.now() - n) / 86400000)); return d + " day" + (d === 1 ? "" : "s") + " ago"; }
@@ -47,6 +115,16 @@ class VideosPage {
     escape(v){ return String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
     attr(v){ return this.escape(v); }
 }
-function startVideos() { if (document.getElementById("videosContainer")) new VideosPage(); }
-if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startVideos); else startVideos();
+
+window.VideosPage = VideosPage;
+window.initVideos = function () {
+    if (!document.getElementById("videosContainer")) return;
+    if (window.__hshsVideosInstance) return window.__hshsVideosInstance;
+    window.__hshsVideosInstance = new VideosPage();
+    return window.__hshsVideosInstance;
+};
+
+function startVideos() { window.initVideos?.(); }
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startVideos);
+else startVideos();
 export { VideosPage };

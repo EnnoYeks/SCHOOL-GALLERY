@@ -1,2 +1,20 @@
-/* HSHS World photos structure. Data logic remains in ../photos.js. */
-(function(){function boot(){const root=document.getElementById('hshsPhotosRoot');if(!root)return;root.innerHTML=`<main class="photos-container"><div class="photos-search"><input type="text" class="search-input-field" id="photoSearchInput" placeholder="Search photos by title, category..."><button class="search-submit" type="button"><i class="fas fa-search"></i> Search</button></div><div class="filter-bar" id="filterBar"><button class="filter-btn active" data-filter="all">All Photos</button><button class="filter-btn" data-filter="popular">Most Popular</button><button class="filter-btn" data-filter="recent">Most Recent</button><button class="filter-btn" data-filter="trending">Trending</button></div><div class="masonry-grid" id="masonryGrid"><div class="loading-skeleton"></div><div class="loading-skeleton"></div><div class="loading-skeleton"></div></div></main><div class="photo-modal" id="photoModal"><div class="modal-content"><button class="modal-close" id="modalClose" aria-label="Close"><i class="fas fa-times"></i></button><img src="" alt="Full Photo" class="modal-image" id="modalImage"><div class="modal-info"><div class="modal-title" id="modalTitle"></div><div class="modal-description" id="modalDescription"></div></div></div></div><div class="photo-details" id="photoDetails" hidden></div>`;}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();})();
+import { renderPage } from '../components/page-templates.js';
+import { getPhotos } from '../services/page-data.js';
+
+export function render() {
+  return renderPage('photos', `
+    <div class="photos-search"><input id="photoSearchInput" type="search" placeholder="Search photos..." aria-label="Search photos"><button id="photoSearchBtn" class="btn btn-primary"><i class="fas fa-search"></i> Search</button></div>
+    <div class="filter-bar" role="tablist" aria-label="Photo filters"><button class="filter-btn active" data-filter="all">All Photos</button><button class="filter-btn" data-filter="popular">Most Popular</button><button class="filter-btn" data-filter="recent">Most Recent</button><button class="filter-btn" data-filter="trending">Trending</button></div>
+    <div class="masonry-grid" id="masonryGrid"><div class="loading-skeleton"></div><div class="loading-skeleton"></div><div class="loading-skeleton"></div><div class="loading-skeleton"></div></div>
+    <div class="photo-modal" id="photoModal" hidden></div><aside class="photo-details" id="photoDetails" hidden></aside>`);
+}
+
+export async function init({ root } = {}) {
+  if (window.hshsNavigation?.init) window.hshsNavigation.init();
+  try {
+    const items = await getPhotos(20, 0);
+    window.__hshsPageData = window.__hshsPageData || {};
+    window.__hshsPageData.photos = items;
+  } catch (_) {}
+  if (typeof window.initPhotos === 'function') window.initPhotos(root);
+}

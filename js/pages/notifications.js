@@ -1,22 +1,3 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/notifications.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('notifications.render error', e);
-    return '';
-  }
-}
-
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-  if (typeof window.initNotifications === 'function') {
-    try { window.initNotifications(root); } catch (e) { console.warn(e); }
-  }
-}
+import { renderPage } from '../components/page-templates.js';
+export function render() { return renderPage('notifications', `<div class="notifications-list" id="notificationsList"><div class="loading-skeleton"></div><div class="loading-skeleton"></div><div class="loading-skeleton"></div></div>`); }
+export function init({ root } = {}) { if (window.hshsNavigation?.init) window.hshsNavigation.init(); if (typeof window.initNotifications === 'function') window.initNotifications(root); }
