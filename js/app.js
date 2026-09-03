@@ -19,11 +19,21 @@ const ROUTES = {
 
 function routeKey(pathname) { return !pathname || pathname === '/' ? '/index.html' : pathname; }
 
+function ensureMobilePageStyles() {
+  if (document.getElementById('hshsMobileJsPageStyles')) return;
+  const link = document.createElement('link');
+  link.id = 'hshsMobileJsPageStyles';
+  link.rel = 'stylesheet';
+  link.href = '/css/mobile-js-pages.css?v=260903b';
+  document.head.appendChild(link);
+}
+
 const App = {
   rootId: 'app-root', root: null, linkHandlerBound: false,
   init() {
     this.root = document.getElementById(this.rootId);
     if (!this.root) { this.root = document.createElement('main'); this.root.id = this.rootId; this.root.setAttribute('aria-live', 'polite'); document.body.appendChild(this.root); }
+    ensureMobilePageStyles();
     try { loaderInit(); } catch (e) { console.warn('loader init failed', e); }
     try { navbarInit(); } catch (e) { console.warn('navbar init failed', e); }
     try { footerInit(); } catch (e) { console.warn('footer init failed', e); }
