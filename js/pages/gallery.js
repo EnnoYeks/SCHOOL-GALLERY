@@ -1,22 +1,2 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/gallery.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('gallery.render error', e);
-    return '';
-  }
-}
-
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-  if (typeof window.initGallery === 'function') {
-    try { window.initGallery(root); } catch (e) { console.warn(e); }
-  }
-}
+/* HSHS World gallery structure. Feed logic remains in ../gallery.js. */
+(function(){function boot(){const root=document.getElementById('hshsGalleryRoot');if(!root)return;root.innerHTML=`<main class="gallery-container"><div class="category-filter" id="categoryFilter"><button class="category-btn active" data-category="all">All</button><button class="category-btn" data-category="academics">Academics</button><button class="category-btn" data-category="sports">Sports</button><button class="category-btn" data-category="clubs">Clubs</button><button class="category-btn" data-category="trips">Trips</button><button class="category-btn" data-category="graduation">Graduation</button><button class="category-btn" data-category="arts">Arts</button><button class="category-btn" data-category="music">Music</button><button class="category-btn" data-category="events">Events</button></div><div class="story-bar" id="storyBar"></div><div class="gallery-feed" id="galleryFeed"><div class="post-loading"><div class="loading-spinner"></div></div></div><div class="swipe-indicator" id="swipeIndicator"><div class="swipe-arrow"><i class="fas fa-arrow-down"></i></div><div class="swipe-text">Scroll to explore</div></div></main><div class="double-tap-overlay" id="doubleTapOverlay"><i class="fas fa-heart"></i></div>`;}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();})();
