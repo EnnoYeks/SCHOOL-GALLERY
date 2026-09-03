@@ -1,22 +1,4 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/spotlight.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('spotlight.render error', e);
-    return '';
-  }
-}
+import { renderPage } from '../components/page-templates.js';
 
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-  if (typeof window.initSpotlight === 'function') {
-    try { window.initSpotlight(root); } catch (e) { console.warn(e); }
-  }
-}
+export function render() { return renderPage('spotlight', `<div class="spotlight-grid" id="spotlightGrid"><div class="loading-skeleton"></div><div class="loading-skeleton"></div></div>`); }
+export function init({ root } = {}) { if (window.hshsNavigation?.init) window.hshsNavigation.init(); if (typeof window.initSpotlight === 'function') window.initSpotlight(root); }
