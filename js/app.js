@@ -44,7 +44,8 @@ const ROUTES = {
   '/index/notifications.html': 'pages/notifications.js',
   '/index/about.html': 'pages/about.js',
   '/index/contact.html': 'pages/contact.js',
-  '/index/contat.html': 'pages/contat.js'
+  '/index/contat.html': 'pages/contat.js',
+  '/index/chat.html': 'pages/chat.js'
 };
 
 function loadStyles(files, timeout) {
@@ -53,9 +54,7 @@ function loadStyles(files, timeout) {
   return Promise.all((files || []).map(function (href) {
     const url = href.indexOf('http') === 0 || href.indexOf('/') === 0 || href.indexOf('../') === 0 ? href : prefix + href;
     const bare = url.split('?')[0];
-    if (document.querySelector('link[href="' + url + '"], link[href="' + bare + '"]')) {
-      return Promise.resolve(url);
-    }
+    if (document.querySelector('link[href="' + url + '"], link[href="' + bare + '"]')) return Promise.resolve(url);
     return new Promise(function (resolve) {
       const l = document.createElement('link');
       l.rel = 'stylesheet';
@@ -76,9 +75,7 @@ function loadScriptsOnce(files) {
       const url = src.indexOf('http') === 0 || src.indexOf('/') === 0 || src.indexOf('../') === 0 ? src : prefix + src;
       const bare = url.split('?')[0];
       const name = bare.split('/').pop();
-      if ([].slice.call(document.scripts).some(function (s) { return (s.src || '').indexOf(name) !== -1; })) {
-        return;
-      }
+      if ([].slice.call(document.scripts).some(function (s) { return (s.src || '').indexOf(name) !== -1; })) return;
       return new Promise(function (resolve) {
         const el = document.createElement('script');
         if (/hshs-chat\.js$/.test(name)) el.type = 'module';
@@ -112,18 +109,9 @@ function alreadyPainted(root, module) {
 const App = {
   rootId: 'app-root',
   root: null,
-
   async init() {
     try { loaderInit(); } catch (e) {}
-    loadStyles([
-      'css/hshs-no-flicker.css?v=260903a',
-      'css/style.css?v=260903a',
-      'css/animations.css?v=260903a',
-      'css/responsive.css?v=260903a',
-      'css/mobile-shell.css?v=260903a',
-      'css/hshs-theme.css?v=260903a'
-    ]).catch(function () {});
-
+    loadStyles(['css/hshs-no-flicker.css?v=260903c','css/style.css','css/animations.css','css/responsive.css','css/mobile-shell.css?v=260903c','css/hshs-theme.css?v=260903c']).catch(function () {});
     this.root = document.getElementById(this.rootId);
     if (!this.root) {
       this.root = document.createElement('main');
@@ -133,23 +121,19 @@ const App = {
       if (nav && nav.parentNode) nav.parentNode.insertBefore(this.root, nav.nextSibling);
       else document.body.insertBefore(this.root, document.body.firstChild);
     }
-
     releaseBoot();
     try { navbarInit(); } catch (e) {}
     try { footerInit(); } catch (e) {}
     try { notificationsInit(); } catch (e) {}
     try { connectRealtime(); } catch (e) {}
-
     this.bindLinkIntercepts();
     window.addEventListener('popstate', () => {
       const path = location.pathname === '/' ? '/index.html' : location.pathname;
       this.loadRoute(path, { replaceState: true });
     });
-
     const startPath = location.pathname === '/' ? '/index.html' : location.pathname;
     this.loadRoute(startPath, { replaceState: true, initial: true }).catch(function () {});
   },
-
   async loadRoute(path, opts) {
     opts = opts || {};
     const initial = !!opts.initial;
@@ -157,19 +141,13 @@ const App = {
     const key = routeKey(path);
     const modulePath = ROUTES[key];
     if (!modulePath) return;
-
     try {
       const m = await import('./' + modulePath);
       if (m.styles) await loadStyles(m.styles);
-      if (m.bodyClass && document.body) {
-        m.bodyClass.split(/\s+/).forEach(function (cls) { if (cls) document.body.classList.add(cls); });
-      }
-
+      if (m.bodyClass && document.body) m.bodyClass.split(/\s+/).forEach(function (cls) { if (cls) document.body.classList.add(cls); });
       const painted = alreadyPainted(this.root, m);
       if (!painted) {
-        if (!initial) {
-          try { showLoader(); } catch (e) {}
-        }
+        if (!initial) { try { showLoader(); } catch (e) {} }
         let html = '';
         if (typeof m.render === 'function') html = await m.render();
         else if (typeof m.html === 'string') html = m.html;
@@ -179,12 +157,8 @@ const App = {
         }
       }
       this.root.setAttribute('data-hydrated', '1');
-
       if (m.scripts) await loadScriptsOnce(m.scripts);
-      if (m.init) {
-        try { await m.init({ root: this.root, path: path, hydrated: painted }); } catch (e) { console.warn(e); }
-      }
-
+      if (m.init) { try { await m.init({ root: this.root, path: path, hydrated: painted }); } catch (e) { console.warn(e); } }
       try { navbarInit(); } catch (e) {}
       try { footerInit(); } catch (e) {}
       try { notificationsInit(); } catch (e) {}
@@ -202,7 +176,6 @@ const App = {
       try { hideLoader(); } catch (e) {}
     }
   },
-
   bindLinkIntercepts() {
     if (window.__hshsMobileShell) return;
     document.addEventListener('click', (ev) => {
