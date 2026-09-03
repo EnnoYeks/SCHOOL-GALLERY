@@ -1,22 +1,2 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/photos.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('photos.render error', e);
-    return '';
-  }
-}
-
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-  if (typeof window.initPhotos === 'function') {
-    try { window.initPhotos(root); } catch (e) { console.warn(e); }
-  }
-}
+/* HSHS World photos structure. Data logic remains in ../photos.js. */
+(function(){function boot(){const root=document.getElementById('hshsPhotosRoot');if(!root)return;root.innerHTML=`<main class="photos-container"><div class="photos-search"><input type="text" class="search-input-field" id="photoSearchInput" placeholder="Search photos by title, category..."><button class="search-submit" type="button"><i class="fas fa-search"></i> Search</button></div><div class="filter-bar" id="filterBar"><button class="filter-btn active" data-filter="all">All Photos</button><button class="filter-btn" data-filter="popular">Most Popular</button><button class="filter-btn" data-filter="recent">Most Recent</button><button class="filter-btn" data-filter="trending">Trending</button></div><div class="masonry-grid" id="masonryGrid"><div class="loading-skeleton"></div><div class="loading-skeleton"></div><div class="loading-skeleton"></div></div></main><div class="photo-modal" id="photoModal"><div class="modal-content"><button class="modal-close" id="modalClose" aria-label="Close"><i class="fas fa-times"></i></button><img src="" alt="Full Photo" class="modal-image" id="modalImage"><div class="modal-info"><div class="modal-title" id="modalTitle"></div><div class="modal-description" id="modalDescription"></div></div></div></div><div class="photo-details" id="photoDetails" hidden></div>`;}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();})();
