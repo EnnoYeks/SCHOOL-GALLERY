@@ -1,4 +1,3 @@
-
 // ============================================
 // GALLERY/FEED PAGE LOGIC
 // ============================================
@@ -23,203 +22,111 @@ class GalleryPage {
 
     setupCategoryFilter() {
         const buttons = document.querySelectorAll('.category-btn');
-        buttons.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                buttons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.currentCategory = btn.getAttribute('data-category');
-                this.currentPage = 0;
-                if (this.observer) {
-                    this.observer.disconnect();
-                }
-                await this.loadPosts();
-            });
-        });
+        buttons.forEach(btn => btn.addEventListener('click', async () => {
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.currentCategory = btn.getAttribute('data-category');
+            this.currentPage = 0;
+            if (this.observer) this.observer.disconnect();
+            await this.loadPosts();
+        }));
     }
 
     async loadPosts() {
         const feed = document.getElementById('galleryFeed');
         if (!feed || this.currentlyLoading) return;
-
         this.currentlyLoading = true;
-        const allPosts = await db.getPosts(this.postsPerPage * (this.currentPage + 1), 0);
-        const filteredPosts = this.currentCategory === 'all'
-            ? allPosts
-            : allPosts.filter(p => p.category === this.currentCategory);
-
-        const startIndex = this.currentPage * this.postsPerPage;
-        const endIndex = startIndex + this.postsPerPage;
-        const pagePosts = filteredPosts.slice(startIndex, endIndex);
-
-        if (this.currentPage === 0) {
-            feed.innerHTML = '';
+        try {
+            const allPosts = await db.getPosts(this.postsPerPage * (this.currentPage + 1), 0);
+            const filteredPosts = this.currentCategory === 'all' ? allPosts : allPosts.filter(p => p.category === this.currentCategory);
+            const startIndex = this.currentPage * this.postsPerPage;
+            const pagePosts = filteredPosts.slice(startIndex, startIndex + this.postsPerPage);
+            if (this.currentPage === 0) feed.innerHTML = '';
+            pagePosts.forEach((post, index) => feed.appendChild(this.createPostCard(post, index)));
+            this.currentPage++;
+            this.currentlyLoading = false;
+            this.updateObserver?.();
+        } catch (error) {
+            console.error('Gallery load failed:', error);
+            feed.innerHTML = '<div class="empty-state"><i class="fas fa-images"></i><h3>Gallery is taking a moment</h3><p>Please try again shortly.</p></div>';
+            this.currentlyLoading = false;
         }
-
-        pagePosts.forEach((post, index) => {
-            const card = this.createPostCard(post, index);
-            feed.appendChild(card);
-        });
-
-        this.currentPage++;
-        this.currentlyLoading = false;
-        this.updateObserver();
     }
 
-    createPostCard(post, index) {
+    createPostCard(post) {
         const card = document.createElement('div');
         card.className = 'post-card';
         card.setAttribute('data-post-id', post.id);
+        const image = post.image || post.imageUrl || post.thumbnailUrl || '';
         card.innerHTML = `
             <div class="post-content">
-                <img src="${post.image}" alt="${post.title}" class="post-media">
+                ${image ? `<img src="${image}" alt="${post.title || 'HSHS World post'}" class="post-media">` : '<div class="post-media thumb-fallback"><i class="fas fa-image"></i></div>'}
                 <div class="post-overlay"></div>
-                
                 <div class="post-info">
-                    <h2 class="post-title">${post.title}</h2>
-                    <p class="post-description">${Utils.truncateText(post.description, 150)}</p>
-                    <div class="post-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-user"></i> ${post.author}
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-calendar"></i> ${Utils.formatDate(post.createdAt)}
-                        </div>
-                    </div>
+                    <h2 class="post-title">${this.escape(post.title || 'Untitled')}</h2>
+                    <p class="post-description">${this.escape((post.description || '').slice(0, 150))}</p>
+                    <div class="post-meta"><div class="meta-item"><i class="fas fa-user"></i> ${this.escape(post.author || 'HSHS World')}</div></div>
                 </div>
-
-                <!-- Side Actions -->
                 <div class="side-actions">
-                    <button class="action-btn like-action" onclick="reactionManager.toggleLike('${post.id}')">
-                        <i class="far fa-heart"></i>
-                        <div class="action-count">${Utils.formatNumber(post.likes)}</div>
-                    </button>
-                    <button class="action-btn comment-action">
-                        <i class="far fa-comment"></i>
-                        <div class="action-count">${Utils.formatNumber(post.comments)}</div>
-                    </button>
-                    <button class="action-btn share-action" onclick="reactionManager.sharePost('${post.id}')">
-                        <i class="fas fa-share"></i>
-                        <div class="action-count">${Utils.formatNumber(post.shares)}</div>
-                    </button>
-                    <button class="action-btn save-action">
-                        <i class="far fa-bookmark"></i>
-                        <div class="action-count">${Utils.formatNumber(post.saves || 0)}</div>
-                    </button>
+                    <button class="action-btn like-action" data-action="like"><i class="far fa-heart"></i><div class="action-count">${post.likes || 0}</div></button>
+                    <button class="action-btn comment-action" data-action="comment"><i class="far fa-comment"></i><div class="action-count">${post.comments || 0}</div></button>
+                    <button class="action-btn share-action" data-action="share"><i class="fas fa-share"></i><div class="action-count">${post.shares || 0}</div></button>
+                    <button class="action-btn save-action" data-action="save"><i class="far fa-bookmark"></i><div class="action-count">${post.saves || 0}</div></button>
                 </div>
-            </div>
-        `;
-
+            </div>`;
+        card.querySelectorAll('.action-btn').forEach(btn => btn.addEventListener('click', e => {
+            e.stopPropagation();
+            const manager = window.reactionManager;
+            if (!manager) return;
+            const action = btn.dataset.action;
+            if (action === 'like') manager.toggleLike?.(post.id);
+            if (action === 'share') manager.sharePost?.(post.id);
+        }));
         return card;
     }
 
     setupInfiniteScroll() {
         const feed = document.getElementById('galleryFeed');
-        if (!feed) return;
-
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                this.loadPosts();
-            }
-        }, { threshold: 0.1 });
-
-        // Observe last element
-        this.observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                this.loadPosts();
-            }
-        }, { threshold: 0.1 });
-
+        if (!feed || !('IntersectionObserver' in window)) return;
+        this.observer = new IntersectionObserver(entries => { if (entries[0].isIntersecting) this.loadPosts(); }, { threshold: 0.1 });
         this.updateObserver = () => {
-            const lastElement = feed.lastElementChild;
-            if (lastElement) {
-                this.observer.disconnect();
-                this.observer.observe(lastElement);
-            }
+            const last = feed.lastElementChild;
+            if (last) { this.observer.disconnect(); this.observer.observe(last); }
         };
-
         this.updateObserver();
     }
 
     setupSwipeNavigation() {
-        let touchStartX = 0;
-        let touchEndX = 0;
-
         const feed = document.getElementById('galleryFeed');
         if (!feed) return;
-
-        feed.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, false);
-
-        feed.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            this.handleSwipe();
-        }, false);
-
-        const handleSwipe = () => {
-            if (touchEndX < touchStartX - 50) {
-                // Swiped left - next post
-                this.nextPost();
-            }
-            if (touchEndX > touchStartX + 50) {
-                // Swiped right - previous post
-                this.previousPost();
-            }
-        };
-
-        this.handleSwipe = handleSwipe;
+        let start = 0;
+        feed.addEventListener('touchstart', e => { start = e.changedTouches[0].screenX; }, { passive: true });
+        feed.addEventListener('touchend', e => { if (e.changedTouches[0].screenX < start - 50) this.nextPost(); }, { passive: true });
     }
 
     setupDoubleClick() {
         const feed = document.getElementById('galleryFeed');
         if (!feed) return;
-
-        feed.addEventListener('dblclick', (e) => {
-            if (e.target.classList.contains('post-media')) {
-                const card = e.target.closest('.post-card');
-                const postId = card.getAttribute('data-post-id');
-                
-                reactionManager.toggleLike(postId);
-                this.showDoubleTapLike();
-            }
+        feed.addEventListener('dblclick', e => {
+            if (!e.target.classList.contains('post-media')) return;
+            const card = e.target.closest('.post-card');
+            const overlay = document.getElementById('doubleTapOverlay');
+            window.reactionManager?.toggleLike?.(card?.dataset.postId);
+            overlay?.classList.add('active');
+            setTimeout(() => overlay?.classList.remove('active'), 600);
         });
     }
 
-    showDoubleTapLike() {
-        const overlay = document.getElementById('doubleTapOverlay');
-        if (overlay) {
-            overlay.classList.add('active');
-            setTimeout(() => {
-                overlay.classList.remove('active');
-            }, 600);
-        }
-    }
-
-    nextPost() {
-        const feed = document.getElementById('galleryFeed');
-        const firstCard = feed.querySelector('.post-card');
-        if (firstCard) {
-            firstCard.style.animation = 'slideLeft 0.5s ease';
-            setTimeout(() => {
-                firstCard.remove();
-                this.loadPosts();
-            }, 500);
-        }
-    }
-
-    previousPost() {
-        Utils.showToast('Already at the beginning', 'info');
-    }
+    nextPost() { document.getElementById('galleryFeed')?.firstElementChild?.scrollIntoView({ behavior: 'smooth' }); }
+    escape(value) { return String(value).replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c])); }
 }
 
-// Initialize gallery when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('galleryFeed')) {
-        new GalleryPage();
-    }
-});
+window.GalleryPage = GalleryPage;
+window.initGallery = function () {
+    if (!document.getElementById('galleryFeed')) return;
+    if (window.__hshsGalleryInstance) return window.__hshsGalleryInstance;
+    window.__hshsGalleryInstance = new GalleryPage();
+    return window.__hshsGalleryInstance;
+};
 
-// Export for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GalleryPage;
-}
+document.addEventListener('DOMContentLoaded', () => window.initGallery());
