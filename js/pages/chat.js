@@ -1,0 +1,29 @@
+/* HSHS World Chat page renderer. The feature controller stays in hshs-chat.js. */
+(function () {
+  function markup() {
+    return `
+      <div class="hshs-chat-page" id="hshsChatPage" data-theme="ocean" data-bubbles="rounded">
+        <div id="hshsChatBanner" class="hshs-chat-banner" hidden></div>
+        <div class="hshs-chat-layout">
+          <aside class="hshs-chat-side" id="hshsChatSide">
+            <div class="hshs-side-head"><h1>Chats</h1><div class="hshs-side-actions"><select id="hshsThemeSelect" aria-label="Chat theme"><option value="ocean">Ocean</option><option value="grape">Grape</option><option value="mint">Mint</option><option value="sunset">Sunset</option><option value="rose">Rose</option><option value="slate">Slate</option></select><span class="hshs-chat-me" id="hshsChatMe" style="display:none">You</span></div></div>
+            <div class="hshs-chat-search"><i class="fas fa-search"></i><input type="search" id="hshsChatSearch" placeholder="Search or start new chat" autocomplete="off"></div>
+            <div class="hshs-chat-list" id="hshsChatList"><div class="hshs-chat-empty">Loading chats…</div></div>
+          </aside>
+          <section class="hshs-chat-main" id="hshsChatMain">
+            <div class="hshs-chat-empty-main" id="hshsChatEmptyMain"><div class="hshs-empty-art" aria-hidden="true">💬</div><h2>HSHS World Chat</h2><p>Pick a classmate on the left. Messages stay live with receipts, emojis, photos and voice notes.</p></div>
+            <div class="hshs-thread" id="hshsThread" hidden>
+              <div class="hshs-thread-head"><button type="button" class="hshs-thread-back" id="hshsThreadBack" aria-label="Back"><i class="fas fa-arrow-left"></i></button><div class="hshs-thread-avatar" id="hshsThreadAvatar">?</div><div class="hshs-thread-who"><strong id="hshsThreadName">Contact</strong><small id="hshsThreadMeta">tap for info</small></div><div class="hshs-thread-tools"><button type="button" class="hshs-head-icon" aria-label="More"><i class="fas fa-ellipsis-vertical"></i></button></div></div>
+              <div class="hshs-thread-msgs" id="hshsThreadMsgs"></div>
+              <div class="hshs-attach-preview" id="hshsAttachPreview" hidden><img src="" alt=""><button type="button" id="hshsClearAttach" aria-label="Remove">×</button></div>
+              <div class="hshs-emoji-sheet" id="hshsEmojiPanel" hidden></div>
+              <div class="hshs-compose-wrap" id="hshsComposeWrap"><div class="hshs-rec-bar" id="hshsRecBar" hidden><span class="hshs-rec-dot"></span><span class="hshs-rec-timer" id="hshsRecTimer">0:00</span><span class="hshs-rec-slide" id="hshsRecSlide">Slide to cancel</span><button type="button" class="hshs-rec-trash" id="hshsRecCancel" aria-label="Cancel recording"><i class="fas fa-trash"></i></button></div>
+                <form class="hshs-thread-compose" id="hshsThreadForm"><div class="hshs-compose-pill"><button type="button" class="hshs-compose-icon" id="hshsEmojiBtn" aria-label="Emoji"><i class="far fa-face-smile"></i></button><input type="text" id="hshsThreadInput" placeholder="Message" maxlength="800" autocomplete="off"><button type="button" class="hshs-compose-icon" id="hshsAttachBtn" aria-label="Attach"><i class="fas fa-paperclip"></i></button><button type="button" class="hshs-compose-icon" id="hshsCameraBtn" aria-label="Camera"><i class="fas fa-camera"></i></button></div><button type="button" class="hshs-fab" id="hshsVoiceBtn" aria-label="Voice note"><i class="fas fa-microphone"></i></button><button type="submit" class="hshs-fab" id="hshsSendBtn" hidden aria-label="Send"><i class="fas fa-paper-plane"></i></button><input type="file" id="hshsAttachInput" accept="image/*" hidden><input type="file" id="hshsCameraInput" accept="image/*" capture="environment" hidden></form></div>
+            </div>
+          </section>
+        </div>
+      </div>`;
+  }
+  function boot() { const root = document.getElementById('hshsChatRoot'); if (root && !root.querySelector('#hshsChatPage')) root.innerHTML = markup(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
