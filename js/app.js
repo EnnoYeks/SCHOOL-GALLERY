@@ -1,5 +1,8 @@
 import './compat/adapter.js';
-/* router-enabled app.js (migration) — extended routes */
+import { init as loaderInit, show as showLoader, hide as hideLoader } from './components/loader.js';
+import { init as navbarInit } from './components/navbar.js';
+import { init as footerInit } from './components/footer.js';
+/* router-enabled app.js (migration) — extended routes + component hooks */
 const ROUTES = {
   '/': 'pages/home.js',
   '/index.html': 'pages/home.js',
@@ -38,6 +41,11 @@ const App = {
       else document.body.insertBefore(this.root, document.body.firstChild);
     }
 
+    // Initialize shared components
+    try { loaderInit(); } catch (e) { console.warn('loader init failed', e); }
+    try { navbarInit(); } catch (e) { console.warn('navbar init failed', e); }
+    try { footerInit(); } catch (e) { console.warn('footer init failed', e); }
+
     this.injectHideStyles();
     this.bindLinkIntercepts();
     window.addEventListener('popstate', () => {
@@ -63,7 +71,7 @@ const App = {
     if (!modulePath) return Promise.reject(new Error('no-route'));
 
     try {
-      this.showLoader();
+      showLoader();
       const m = await import(`./${modulePath}`);
       let html = '';
       if (m.render && typeof m.render === 'function') html = await m.render();
@@ -78,12 +86,16 @@ const App = {
         else if (m.default && m.default.init && typeof m.default.init === 'function') m.default.init({ root: this.root, path });
       } catch (e) { console.warn('page module init error', e); }
 
+      // Let shared components re-run any page-specific wiring
+      try { navbarInit(); } catch (e) { /* ignore */ }
+      try { footerInit(); } catch (e) { /* ignore */ }
+
       window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path } }));
       if (replaceState) history.replaceState({}, '', path); else history.pushState({}, '', path);
       return Promise.resolve();
     } catch (err) {
       console.error('router loadRoute error', err);
-      // As a last resort, try fetching the static file and injecting its main content (helps local file layouts)
+      // Try static fallback
       try {
         const fallbackFetch = await fetch(key.startsWith('/') ? key.slice(1) : key, { cache: 'no-store' });
         if (fallbackFetch.ok) {
@@ -92,6 +104,8 @@ const App = {
           const newRoot = parsed.querySelector('main') || parsed.body;
           if (newRoot) {
             this.root.innerHTML = newRoot.innerHTML;
+            try { navbarInit(); } catch (e) {}
+            try { footerInit(); } catch (e) {}
             window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path } }));
             if (replaceState) history.replaceState({}, '', path); else history.pushState({}, '', path);
             return Promise.resolve();
@@ -101,10 +115,9 @@ const App = {
         console.warn('fallback fetch failed', fallbackErr);
       }
 
-      // fallback to full navigation
       window.location.href = path;
       return Promise.reject(err);
-    } finally { this.hideLoader(); }
+    } finally { hideLoader(); }
   },
 
   bindLinkIntercepts() {
@@ -124,8 +137,8 @@ const App = {
     });
   },
 
-  showLoader() { document.documentElement.classList.add('hshs-loading'); },
-  hideLoader() { document.documentElement.classList.remove('hshs-loading'); }
+  showLoader() { showLoader(); },
+  hideLoader() { hideLoader(); }
 };
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => App.init());
