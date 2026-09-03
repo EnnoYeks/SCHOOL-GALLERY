@@ -1,15 +1,3 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/contact.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('contact.render error', e);
-    return '';
-  }
-}
-
-export function init({ root } = {}) {}
+import { renderPage } from '../components/page-templates.js';
+export function render() { return renderPage('contact', `<form class="contact-form" id="contactForm"><label for="contactName">Name</label><input id="contactName" name="name" autocomplete="name" required><label for="contactMessage">Message</label><textarea id="contactMessage" name="message" rows="6" required></textarea><button class="btn btn-primary" type="submit"><i class="fas fa-paper-plane"></i> Send message</button></form>`); }
+export function init({ root } = {}) { if (window.hshsNavigation?.init) window.hshsNavigation.init(); const form = root?.querySelector('#contactForm'); form?.addEventListener('submit', e => { e.preventDefault(); window.dispatchEvent(new CustomEvent('hshs:contact:submit', { detail: Object.fromEntries(new FormData(form)) })); }); }
