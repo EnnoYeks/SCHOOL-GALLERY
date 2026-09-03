@@ -5,6 +5,26 @@ import { init as footerInit } from './components/footer.js';
 import { init as notificationsInit } from './components/notifications.js';
 import { connectRealtime } from './services/realtime.js';
 /* router-enabled app.js (migration) — extended routes + component hooks */
+
+function ensureStylesheets() {
+  const files = [
+    'css/hshs-no-flicker.css?v=260902c',
+    'css/style.css?v=260902c',
+    'css/animations.css?v=260902c',
+    'css/responsive.css?v=260902c'
+  ];
+  files.forEach(href => {
+    try {
+      if (!document.querySelector(`link[href="${href}"]`)) {
+        const l = document.createElement('link');
+        l.rel = 'stylesheet';
+        l.href = href;
+        document.head.appendChild(l);
+      }
+    } catch (e) { /* ignore */ }
+  });
+}
+
 const ROUTES = {
   '/': 'pages/home.js',
   '/index.html': 'pages/home.js',
@@ -33,6 +53,9 @@ const App = {
   root: null,
 
   init() {
+    // Ensure CSS is present so components render correctly
+    ensureStylesheets();
+
     this.root = document.getElementById(this.rootId);
     if (!this.root) {
       this.root = document.createElement('main');
