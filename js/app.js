@@ -15,6 +15,8 @@ const ROUTES = {
   '/index/contact.html': 'pages/contact.js', '/index/contat.html': 'pages/contat.js'
 };
 
+function routeKey(pathname) { return !pathname || pathname === '/' ? '/index.html' : pathname; }
+
 const App = {
   rootId: 'app-root', root: null, linkHandlerBound: false,
   init() {
@@ -26,31 +28,36 @@ const App = {
     try { notificationsInit(); } catch (e) { console.warn('notifications init failed', e); }
     try { connectRealtime(); } catch (e) { console.warn('realtime connect failed', e); }
     this.bindLinkIntercepts();
-    window.addEventListener('popstate', () => this.loadRoute(location.pathname, { replaceState: true }));
-    this.loadRoute(location.pathname, { replaceState: true }).catch(() => {});
+    window.addEventListener('popstate', () => this.loadRoute(location.pathname + location.search, { replaceState: true }));
+    this.loadRoute(location.pathname + location.search, { replaceState: true }).catch(() => {});
   },
-  async loadRoute(pathname, { replaceState = false } = {}) {
-    const key = (!pathname || pathname === '/') ? '/index.html' : pathname;
+  async loadRoute(urlPath, { replaceState = false } = {}) {
+    const url = new URL(urlPath || '/', location.origin);
+    const key = routeKey(url.pathname);
     const modulePath = ROUTES[key];
-    if (!modulePath) { this.render404(pathname); return; }
+    if (!modulePath) { this.render404(url.pathname); return; }
     try {
       showLoader();
       const m = await import(`./${modulePath}`);
       const html = typeof m.render === 'function' ? await m.render() : (typeof m.default === 'function' ? await m.default() : (m.html || ''));
       this.root.innerHTML = html || '<div class="empty-state"><h1>Page is empty</h1></div>';
-      if (typeof m.init === 'function') await m.init({ root: this.root, path: key });
+      if (typeof m.init === 'function') await m.init({ root: this.root, path: key, search: url.search });
       try { navbarInit(); } catch (e) {}
       try { footerInit(); } catch (e) {}
       try { notificationsInit(); } catch (e) {}
-      window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path: key } }));
-      if (replaceState) history.replaceState({}, '', key); else if (location.pathname !== key) history.pushState({}, '', key);
+      window.dispatchEvent(new CustomEvent('app:page:loaded', { detail: { path: key, search: url.search } }));
+      const target = key + url.search;
+      if (replaceState) history.replaceState({}, '', target); else if (location.pathname + location.search !== target) history.pushState({}, '', target);
     } catch (err) {
       console.error('Router error:', err);
-      this.renderError(err);
+      this.renderError();
       throw err;
     } finally { hideLoader(); }
   },
-  render404(pathname) { this.root.innerHTML = `<section class="page-container hshs-page"><div class="empty-state"><i class="fas fa-map-signs"></i><h1>Page not found</h1><p>We couldn't find <strong>${String(pathname || '').replace(/[<>]/g, '')}</strong>.</p><a class="btn btn-primary" href="/">Back home</a></div></section>`; },
+  render404(pathname) {
+    const safe = String(pathname || '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    this.root.innerHTML = `<section class="page-container hshs-page"><div class="empty-state"><i class="fas fa-map-signs"></i><h1>Page not found</h1><p>We couldn't find <strong>${safe}</strong>.</p><a class="btn btn-primary" href="/index.html">Back home</a></div></section>`;
+  },
   renderError() { this.root.innerHTML = '<section class="page-container hshs-page"><div class="empty-state"><i class="fas fa-triangle-exclamation"></i><h1>Something went wrong</h1><p>HSHS World could not load this page. Please try again.</p><button class="btn btn-primary" onclick="location.reload()">Retry</button></div></section>'; },
   bindLinkIntercepts() {
     if (this.linkHandlerBound) return; this.linkHandlerBound = true;
@@ -58,8 +65,8 @@ const App = {
       if (ev.defaultPrevented || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return;
       const a = ev.target.closest?.('a'); if (!a) return;
       const url = new URL(a.href, location.href); if (url.origin !== location.origin) return;
-      const pathname = url.pathname === '/' ? '/index.html' : url.pathname; if (!ROUTES[pathname]) return;
-      ev.preventDefault(); this.loadRoute(pathname);
+      const pathname = routeKey(url.pathname); if (!ROUTES[pathname]) return;
+      ev.preventDefault(); this.loadRoute(pathname + url.search);
     });
   },
   showLoader, hideLoader
