@@ -1,5 +1,4 @@
-// js/compat/adapter.js
-// Compatibility adapter: safely re-run legacy module init functions after app injection
+// compat adapter extended: re-run more guarded init functions
 function safeCall(fn) {
   try { if (typeof fn === 'function') fn(); } catch (e) { console.warn('compat init failed', e); }
 }
@@ -15,4 +14,9 @@ window.addEventListener('app:page:loaded', () => {
   safeCall(window.initGallery);
   safeCall(window.initPhotos);
   safeCall(window.initVideos);
+  safeCall(window.initSpotlight);
+  safeCall(window.initPolls);
+  safeCall(window.initMemories);
+  safeCall(window.initNotifications);
+  // other common inits
 });
