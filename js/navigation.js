@@ -1,3 +1,4 @@
+// Modified navigation instantiation to expose instance for compat adapter
 // ============================================
 // NAVIGATION & UI INTERACTIONS
 // ============================================
@@ -59,7 +60,8 @@ class Navigation {
     }
 }
 
-const navigation = new Navigation();
+// Expose navigation instance safely so it can be re-used by the compat adapter
+window.hshsNavigation = window.hshsNavigation || new Navigation();
 
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
