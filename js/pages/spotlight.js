@@ -1,22 +1,2 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/spotlight.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('spotlight.render error', e);
-    return '';
-  }
-}
-
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-  if (typeof window.initSpotlight === 'function') {
-    try { window.initSpotlight(root); } catch (e) { console.warn(e); }
-  }
-}
+/* HSHS World Spotlight, local-first until shared student data is enabled. */
+(function(){const students=[{name:'HSHS Student of the Week',role:'Achievement spotlight',points:100,photo:'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=700&q=70'},{name:'Student Creators',role:'Creativity',points:92,photo:'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=700&q=70'},{name:'Sports Stars',role:'Sports',points:88,photo:'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=700&q=70'}];function boot(){const root=document.getElementById('hshsSpotlightRoot');if(!root)return;root.innerHTML=`<main class="spotlight-main"><section class="spotlight-hero"><div class="hero-content"><h1 class="hero-title"><i class="fas fa-star"></i> Student Spotlight</h1><p class="hero-subtitle">Celebrating the achievements and talents of HSHS students.</p></div></section><section class="featured-spotlight"><div class="container"><h2 class="section-title">Featured Student of the Week</h2><div class="featured-student-card" id="featuredStudent"></div></div></section><section class="students-section"><div class="container"><h2 class="section-title">Spotlight Gallery</h2><div class="spotlightGrid" id="spotlightGrid">${students.map(s=>`<article class="spotlight-card"><img src="${s.photo}" alt=""><h3>${s.name}</h3><p>${s.role}</p><strong>${s.points} points</strong></article>`).join('')}</div></div></section><section class="hall-of-fame-section"><div class="container"><h2 class="section-title"><i class="fas fa-trophy"></i> Hall of Fame</h2><div id="hallOfFameList" class="leaderboard-list">${students.map((s,i)=>`<div class="leaderboard-item"><b>#${i+1}</b><span>${s.name}</span><strong>${s.points}</strong></div>`).join('')}</div></div></section><section class="achievements-section"><div class="container"><h2 class="section-title">Top Achievements</h2><div id="achievementsList" class="achievements-grid"><div class="achievement-card">Academic excellence</div><div class="achievement-card">Sports leadership</div><div class="achievement-card">Creative arts</div></div></div></section><section class="categories-section"><div class="container"><h2 class="section-title">Categories</h2><div class="categories-grid"><div class="category-card"><h3>Academic Excellence</h3><p>0</p></div><div class="category-card"><h3>Sports</h3><p>0</p></div><div class="category-card"><h3>Arts & Culture</h3><p>0</p></div><div class="category-card"><h3>Community Service</h3><p>0</p></div><div class="category-card"><h3>Leadership</h3><p>0</p></div></div></div></section><section class="spotlight-cta"><div class="container"><div class="cta-content"><h2>Be Featured in the Spotlight!</h2><p>Share an achievement and inspire your peers.</p><button class="btn btn-primary" id="nomineateBtn" type="button"><i class="fas fa-star"></i> Nominate a Student</button></div></div></section></main>`;const f=root.querySelector('#featuredStudent');f.innerHTML=`<article class="featured-student"><img src="${students[0].photo}" alt=""><div><h3>${students[0].name}</h3><p>${students[0].role}</p><strong>${students[0].points} points</strong></div></article>`;root.querySelector('#nomineateBtn')?.addEventListener('click',()=>alert('Nomination flow will be connected to the school moderation system.'));}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();})();
