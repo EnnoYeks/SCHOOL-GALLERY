@@ -1,63 +1,55 @@
 // HSHS WORLD — LOCAL-FIRST PAGE DATA SERVICE
-// Reads cached local data first, then refreshes from the existing database bridge.
+// Store -> local cache -> existing database bridge.
 
 const CACHE_PREFIX = 'hshs:cache:';
 const CACHE_TTL = 5 * 60 * 1000;
 
-function cacheKey(collection) {
-  return `${CACHE_PREFIX}${collection}`;
-}
-
+function cacheKey(collection) { return `${CACHE_PREFIX}${collection}`; }
 function readCache(collection) {
   try {
-    const raw = localStorage.getItem(cacheKey(collection));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!parsed || !Array.isArray(parsed.items)) return [];
-    return parsed.items;
-  } catch (_) {
-    return [];
-  }
+    const parsed = JSON.parse(localStorage.getItem(cacheKey(collection)) || 'null');
+    return Array.isArray(parsed?.items) ? parsed.items : [];
+  } catch (_) { return []; }
 }
-
 function writeCache(collection, items) {
-  try {
-    localStorage.setItem(cacheKey(collection), JSON.stringify({
-      savedAt: Date.now(),
-      items: Array.isArray(items) ? items : []
-    }));
-  } catch (_) {
-    // localStorage can be unavailable/full; remote data should still work.
-  }
+  try { localStorage.setItem(cacheKey(collection), JSON.stringify({ savedAt: Date.now(), items: Array.isArray(items) ? items : [] })); } catch (_) {}
 }
-
 function freshEnough(collection) {
   try {
-    const raw = localStorage.getItem(cacheKey(collection));
-    if (!raw) return false;
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(localStorage.getItem(cacheKey(collection)) || 'null');
     return Boolean(parsed?.savedAt && Date.now() - parsed.savedAt < CACHE_TTL);
-  } catch (_) {
-    return false;
+  } catch (_) { return false; }
+}
+
+async function fromStore(method, limit, offset) {
+  const store = window.HshsStore;
+  if (!store || typeof store[method] !== 'function') return [];
+  try {
+    const result = await store[method](limit, offset);
+    return Array.isArray(result) ? result : [];
+  } catch (error) {
+    console.warn(`HshsStore ${method} failed:`, error);
+    return [];
   }
 }
 
 async function fromDb(method, limit, offset) {
   try {
-    if (window.db && typeof window.db[method] === 'function') {
-      return await window.db[method](limit, offset);
-    }
+    if (window.db && typeof window.db[method] === 'function') return await window.db[method](limit, offset);
   } catch (error) {
-    console.warn(`HSHS data refresh failed for ${method}:`, error);
+    console.warn(`Database ${method} failed:`, error);
   }
   return [];
 }
 
 async function getCollection(collection, method, limit = 20, offset = 0) {
   const cached = readCache(collection);
+  if (freshEnough(collection) && offset === 0) return cached.slice(0, limit);
 
-  if (freshEnough(collection) && offset === 0) {
-    return cached.slice(0, limit);
+  const storeItems = await fromStore(method, limit, offset);
+  if (storeItems.length) {
+    if (offset === 0) writeCache(collection, storeItems);
+    return storeItems;
   }
 
   const remote = await fromDb(method, limit, offset);
@@ -65,41 +57,18 @@ async function getCollection(collection, method, limit = 20, offset = 0) {
     if (offset === 0) writeCache(collection, remote);
     return remote;
   }
-
   return cached.slice(offset, offset + limit);
 }
 
-export async function getPosts(limit = 20, offset = 0) {
-  return getCollection('posts', 'getPosts', limit, offset);
-}
-
-export async function getPhotos(limit = 20, offset = 0) {
-  return getCollection('photos', 'getPhotos', limit, offset);
-}
-
-export async function getVideos(limit = 20, offset = 0) {
-  return getCollection('videos', 'getVideos', limit, offset);
-}
-
-export function getCached(collection) {
-  return readCache(collection);
-}
-
+export const getPosts = (limit = 20, offset = 0) => getCollection('posts', 'getPosts', limit, offset);
+export const getPhotos = (limit = 20, offset = 0) => getCollection('photos', 'getPhotos', limit, offset);
+export const getVideos = (limit = 20, offset = 0) => getCollection('videos', 'getVideos', limit, offset);
+export function getCached(collection) { return readCache(collection); }
 export function saveLocal(collection, item) {
   const items = readCache(collection);
-  const id = item?.id;
-  const next = id == null
-    ? [item, ...items]
-    : [item, ...items.filter(existing => String(existing?.id) !== String(id))];
+  const next = item?.id == null ? [item, ...items] : [item, ...items.filter(x => String(x?.id) !== String(item.id))];
   writeCache(collection, next);
   return item;
 }
-
-export function removeLocal(collection, id) {
-  const next = readCache(collection).filter(item => String(item?.id) !== String(id));
-  writeCache(collection, next);
-}
-
-export function clearCache(collection) {
-  try { localStorage.removeItem(cacheKey(collection)); } catch (_) {}
-}
+export function removeLocal(collection, id) { writeCache(collection, readCache(collection).filter(x => String(x?.id) !== String(id))); }
+export function clearCache(collection) { try { localStorage.removeItem(cacheKey(collection)); } catch (_) {} }
