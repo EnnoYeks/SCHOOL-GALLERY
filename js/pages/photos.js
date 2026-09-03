@@ -1,4 +1,5 @@
 import { renderPage } from '../components/page-templates.js';
+import { getPhotos } from '../services/page-data.js';
 
 export function render() {
   return renderPage('photos', `
@@ -8,7 +9,12 @@ export function render() {
     <div class="photo-modal" id="photoModal" hidden></div><aside class="photo-details" id="photoDetails" hidden></aside>`);
 }
 
-export function init({ root } = {}) {
+export async function init({ root } = {}) {
   if (window.hshsNavigation?.init) window.hshsNavigation.init();
+  try {
+    const items = await getPhotos(20, 0);
+    window.__hshsPageData = window.__hshsPageData || {};
+    window.__hshsPageData.photos = items;
+  } catch (_) {}
   if (typeof window.initPhotos === 'function') window.initPhotos(root);
 }
