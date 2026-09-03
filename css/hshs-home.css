@@ -1,0 +1,158 @@
+/* HSHS campus social home — mobile-first visual structure */
+:root {
+  --hshs-navy: #07111f;
+  --hshs-card: #0d1b33;
+  --hshs-gold: #f5c518;
+  --hshs-blue: #1d4ed8;
+}
+
+body.dark-mode,
+html.hshs-device-mobile body {
+  background: #070d1c !important;
+  color: #eef3ff;
+}
+
+html.hshs-device-mobile body .footer,
+html.hshs-device-mobile body .animated-bg .floating-shapes,
+html.hshs-device-mobile body .hero-visual,
+html.hshs-device-mobile body .parallax-shapes {
+  display: none !important;
+}
+
+html.hshs-device-mobile .navbar,
+html.hshs-device-mobile .navbar.hshs-flat-top {
+  background: #070d1c !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+html.hshs-device-mobile .navbar-container {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  min-height: 62px;
+  padding: 10px 14px 6px !important;
+}
+html.hshs-device-mobile .nav-links,
+html.hshs-device-mobile .mobile-menu-toggle,
+html.hshs-device-mobile .theme-toggle {
+  display: none !important;
+}
+html.hshs-device-mobile .search-container { display: none !important; }
+html.hshs-device-mobile body.search-open .search-container {
+  display: block !important;
+  position: absolute; left: 12px; right: 12px; top: 64px; z-index: 60;
+}
+html.hshs-device-mobile .logo {
+  display: flex; align-items: center; gap: 10px;
+  background: none !important;
+  -webkit-text-fill-color: #fff !important;
+  color: #fff !important;
+}
+html.hshs-device-mobile .brand-mark,
+html.hshs-device-mobile .logo img {
+  width: 42px; height: 42px; border-radius: 50%; object-fit: cover;
+}
+html.hshs-device-mobile .brand-copy strong,
+html.hshs-device-mobile .logo span {
+  display: block; color: #fff; font-size: 1.12rem; font-weight: 800; line-height: 1.1;
+}
+html.hshs-device-mobile .brand-copy small {
+  display: block; margin-top: 2px; color: #f5c518; font-size: .62rem;
+  letter-spacing: .16em; text-transform: uppercase; font-weight: 700;
+}
+html.hshs-device-mobile .nav-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.hshs-search-btn {
+  width: 40px; height: 40px; border: 0; border-radius: 50%;
+  background: #f5c518; color: #102047; display: inline-flex;
+  align-items: center; justify-content: center; font-size: 15px;
+}
+.hshs-bell-btn {
+  width: 40px; height: 40px; border: 0; border-radius: 50%;
+  background: #15233d; color: #dbe7ff; display: inline-flex;
+  align-items: center; justify-content: center;
+}
+html.hshs-device-mobile .profile-icon { width: 40px; height: 40px; }
+html.hshs-device-mobile .profile-img {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid #3b82f6; object-fit: cover;
+}
+
+.hshs-campus-home {
+  padding: 8px 14px 110px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.welcome-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 26px;
+  padding: 22px 18px 20px;
+  background:
+    radial-gradient(220px 180px at 92% 18%, rgba(245,197,24,.28), transparent 62%),
+    linear-gradient(160deg, #0b1d3d 0%, #102a62 46%, #0b3b5a 78%, #16325c 100%);
+  box-shadow: 0 18px 40px rgba(0,0,0,.28);
+  min-height: 290px;
+}
+.welcome-card .welcome-crest {
+  position: absolute; right: -8px; top: 18px; width: 168px; height: 168px;
+  object-fit: contain; opacity: .22; pointer-events: none;
+}
+.welcome-kicker {
+  display: inline-block; padding: 6px 10px; border-radius: 999px;
+  background: rgba(15, 28, 56, .72); color: #d7e6ff;
+  font-size: .68rem; font-weight: 800; letter-spacing: .08em;
+}
+.welcome-card h1 {
+  margin: 14px 0 10px; color: #fff; font-size: 2rem; line-height: 1.05; letter-spacing: -.02em;
+}
+.welcome-card .lead,
+.welcome-card .sub {
+  margin: 0 0 8px; max-width: 68%; color: rgba(255,255,255,.88); font-size: .95rem; line-height: 1.4;
+}
+.welcome-card .sub { color: rgba(255,255,255,.72); font-size: .86rem; margin-bottom: 18px; }
+.welcome-actions { display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
+.welcome-actions .btn {
+  border: 0; min-height: 44px; padding: 0 16px; border-radius: 999px; font-weight: 800;
+}
+.welcome-actions .btn-primary { background: #fff; color: #102047; }
+.welcome-actions .btn-secondary {
+  background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.35);
+}
+
+.featured-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 22px 2px 12px;
+}
+.featured-head h2 {
+  margin: 0; color: #fff; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;
+}
+.featured-head h2 i { color: #3b82f6; }
+.featured-head a {
+  color: #7dd3fc; text-decoration: none; font-weight: 700; font-size: .9rem;
+}
+.home-tiles {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.home-tile {
+  display: flex; align-items: center; gap: 12px;
+  min-height: 88px; padding: 14px;
+  border-radius: 20px; text-decoration: none; color: #fff;
+  background: #101c33; border: 1px solid rgba(255,255,255,.06);
+}
+.home-tile .ico {
+  width: 46px; height: 46px; border-radius: 14px;
+  display: grid; place-items: center; background: #1d4ed8; color: #fff; font-size: 18px;
+}
+.home-tile b { display: block; font-size: 1.35rem; line-height: 1; }
+.home-tile small { color: #9bb0d3; font-size: .82rem; }
+.home-tile .go { margin-left: auto; color: #7b8bab; }
+
+@media (min-width: 1025px) {
+  .hshs-campus-home { max-width: 980px; padding-top: 24px; }
+  .welcome-card { min-height: 320px; padding: 36px 40px; }
+  .welcome-card h1 { font-size: 3rem; }
+  .welcome-card .lead, .welcome-card .sub { max-width: 52%; }
+}
