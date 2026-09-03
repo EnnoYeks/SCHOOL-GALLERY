@@ -6,23 +6,28 @@ import { init as notificationsInit } from './components/notifications.js';
 import { connectRealtime } from './services/realtime.js';
 /* router-enabled app.js (migration) — extended routes + component hooks */
 
-function ensureStylesheets() {
-  const files = [
-    'css/hshs-no-flicker.css?v=260902c',
-    'css/style.css?v=260902c',
-    'css/animations.css?v=260902c',
-    'css/responsive.css?v=260902c'
-  ];
-  files.forEach(href => {
-    try {
-      if (!document.querySelector(`link[href="${href}"]`)) {
-        const l = document.createElement('link');
-        l.rel = 'stylesheet';
-        l.href = href;
-        document.head.appendChild(l);
-      }
-    } catch (e) { /* ignore */ }
+function loadStylesAndWait(files, timeout = 5000) {
+  const promises = files.map(href => {
+    // If a stylesheet with the exact href exists or a stylesheet with same path is already in document.styleSheets, resolve immediately
+    const existingLink = document.querySelector(`link[href="${href}"]`);
+    if (existingLink) return Promise.resolve(href);
+    const alreadyLoaded = Array.from(document.styleSheets).some(s => s.href && s.href.includes(href.split('?')[0]));
+    if (alreadyLoaded) return Promise.resolve(href);
+
+    return new Promise(resolve => {
+      const l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.href = href;
+      let resolved = false;
+      const done = () => { if (!resolved) { resolved = true; resolve(href); } };
+      l.onload = done;
+      l.onerror = done; // resolve on error to avoid blocking
+      document.head.appendChild(l);
+      // safety timeout
+      setTimeout(done, timeout);
+    });
   });
+  return Promise.all(promises);
 }
 
 const ROUTES = {
@@ -52,9 +57,22 @@ const App = {
   rootId: 'app-root',
   root: null,
 
-  init() {
-    // Ensure CSS is present so components render correctly
-    ensureStylesheets();
+  async init() {
+    const styleFiles = [
+      'css/hshs-no-flicker.css?v=260902c',
+      'css/style.css?v=260902c',
+      'css/animations.css?v=260902c',
+      'css/responsive.css?v=260902c'
+    ];
+
+    // Ensure loader is available so we can show a visual while waiting for styles
+    try { loaderInit(); } catch (e) { console.warn('loader init failed', e); }
+    try { showLoader(); } catch (e) { /* ignore */ }
+
+    // Wait for styles to load (or timeout) before initializing other components
+    try {
+      await loadStylesAndWait(styleFiles, 5000);
+    } catch (e) { console.warn('style load wait failed', e); }
 
     this.root = document.getElementById(this.rootId);
     if (!this.root) {
@@ -66,8 +84,7 @@ const App = {
       else document.body.insertBefore(this.root, document.body.firstChild);
     }
 
-    // Initialize shared components
-    try { loaderInit(); } catch (e) { console.warn('loader init failed', e); }
+    // Initialize shared components that rely on styles
     try { navbarInit(); } catch (e) { console.warn('navbar init failed', e); }
     try { footerInit(); } catch (e) { console.warn('footer init failed', e); }
     try { notificationsInit(); } catch (e) { console.warn('notifications init failed', e); }
