@@ -1,22 +1,10 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/videos.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('videos.render error', e);
-    return '';
-  }
+import { renderPage } from '../components/page-templates.js';
+
+export function render() {
+  return renderPage('videos', `<div class="videos-toolbar"><input id="videoSearchInput" type="search" placeholder="Search videos..." aria-label="Search videos"><div class="video-filters"><button class="filter-btn active" data-filter="all">All</button><button class="filter-btn" data-filter="popular">Popular</button><button class="filter-btn" data-filter="recent">Recent</button></div></div><div class="videos-grid" id="videosGrid"><div class="loading-skeleton"></div><div class="loading-skeleton"></div><div class="loading-skeleton"></div></div>`);
 }
 
 export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-  if (typeof window.initVideos === 'function') {
-    try { window.initVideos(root); } catch (e) { console.warn(e); }
-  }
+  if (window.hshsNavigation?.init) window.hshsNavigation.init();
+  if (typeof window.initVideos === 'function') window.initVideos(root);
 }
