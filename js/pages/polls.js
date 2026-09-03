@@ -1,22 +1,16 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/polls.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('polls.render error', e);
-    return '';
-  }
-}
-
-export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-  if (typeof window.initPolls === 'function') {
-    try { window.initPolls(root); } catch (e) { console.warn(e); }
-  }
-}
+/* HSHS World polls. Polls are local-first until a shared poll backend is enabled. */
+(function () {
+  const KEY='hshsWorldPolls_v1';
+  const seed=[
+    {id:'school-event',question:'Which school event are you most excited for?',options:['Sports Day','Talent Show','Science Fair','Cultural Day'],votes:[12,9,7,6],closed:false},
+    {id:'buzz-topic',question:'What should HSHS World feature next?',options:['Class highlights','House rankings','Club stories','Student creators'],votes:[8,6,11,10],closed:false},
+    {id:'old-poll',question:'Favorite school activity?',options:['Sports','Music','Clubs','Trips'],votes:[18,14,9,12],closed:true}
+  ];
+  function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');return Array.isArray(x)&&x.length?x:seed;}catch(e){return seed;}}
+  function save(x){localStorage.setItem(KEY,JSON.stringify(x));}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function card(p){const total=p.votes.reduce((a,b)=>a+b,0)||1;return `<article class="poll-card" data-poll="${esc(p.id)}"><h3>${esc(p.question)}</h3><div class="poll-options">${p.options.map((o,i)=>{const pct=Math.round((p.votes[i]||0)*100/total);return `<button type="button" class="poll-option" data-option="${i}"><span>${esc(o)}</span><b>${pct}%</b><i style="width:${pct}%"></i></button>`}).join('')}</div><small>${total} vote${total===1?'':'s'} · ${p.closed?'Closed':'Live'}</small></article>`;}
+  function wire(root){root.querySelectorAll('.poll-option').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.closest('[data-poll]').dataset.poll;const i=+btn.dataset.option;const polls=load();const p=polls.find(x=>x.id===id);if(!p||p.closed)return;p.votes[i]=(p.votes[i]||0)+1;save(polls);render();}));root.querySelector('#createPollBtn')?.addEventListener('click',()=>{const q=prompt('Poll question');if(!q)return;const opts=(prompt('Options, separated by commas')||'').split(',').map(x=>x.trim()).filter(Boolean).slice(0,6);if(opts.length<2){alert('Add at least two options.');return;}const polls=load();polls.unshift({id:'poll-'+Date.now(),question:q.trim(),options:opts,votes:opts.map(()=>0),closed:false});save(polls);render();});}
+  function render(){const root=document.getElementById('hshsPollsRoot');if(!root)return;const polls=load();root.innerHTML=`<main class="container" style="padding:2rem;position:relative;z-index:10;margin-top:60px;max-width:900px"><section style="background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));border-radius:20px;padding:3rem 2rem;color:white;text-align:center;margin-bottom:2rem"><h1><i class="fas fa-poll"></i> Live Polls</h1><p>Have your say on what matters around HSHS.</p></section><section><h2 class="section-title"><i class="fas fa-bolt"></i> Active Polls</h2><div id="activePollsList">${polls.filter(p=>!p.closed).map(card).join('')||'<p class="empty-state">No active polls yet.</p>'}</div><button id="createPollBtn" class="hshs-set-btn" type="button" style="width:100%;margin-top:1.5rem"><i class="fas fa-plus"></i> Create New Poll</button></section><section style="margin-top:3rem"><h2 class="section-title"><i class="fas fa-history"></i> Closed Polls</h2><div id="closedPollsList">${polls.filter(p=>p.closed).map(card).join('')||'<p class="empty-state">No closed polls yet.</p>'}</div></section></main>`;wire(root);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render);else render();
+})();
