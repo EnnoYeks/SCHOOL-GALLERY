@@ -1,22 +1,14 @@
-export async function render() {
-  try {
-    const resp = await fetch('index/photos.html', { cache: 'no-store' });
-    if (!resp.ok) return '';
-    const html = await resp.text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const main = doc.querySelector('main') || doc.body;
-    return main.innerHTML;
-  } catch (e) {
-    console.error('photos.render error', e);
-    return '';
-  }
+import { renderPage } from '../components/page-templates.js';
+
+export function render() {
+  return renderPage('photos', `
+    <div class="photos-search"><input id="photoSearchInput" type="search" placeholder="Search photos..." aria-label="Search photos"><button id="photoSearchBtn" class="btn btn-primary"><i class="fas fa-search"></i> Search</button></div>
+    <div class="filter-bar" role="tablist" aria-label="Photo filters"><button class="filter-btn active" data-filter="all">All Photos</button><button class="filter-btn" data-filter="popular">Most Popular</button><button class="filter-btn" data-filter="recent">Most Recent</button><button class="filter-btn" data-filter="trending">Trending</button></div>
+    <div class="masonry-grid" id="masonryGrid"><div class="loading-skeleton"></div><div class="loading-skeleton"></div><div class="loading-skeleton"></div><div class="loading-skeleton"></div></div>
+    <div class="photo-modal" id="photoModal" hidden></div><aside class="photo-details" id="photoDetails" hidden></aside>`);
 }
 
 export function init({ root } = {}) {
-  if (window.hshsNavigation && typeof window.hshsNavigation.init === 'function') {
-    try { window.hshsNavigation.init(); } catch (e) { console.warn(e); }
-  }
-  if (typeof window.initPhotos === 'function') {
-    try { window.initPhotos(root); } catch (e) { console.warn(e); }
-  }
+  if (window.hshsNavigation?.init) window.hshsNavigation.init();
+  if (typeof window.initPhotos === 'function') window.initPhotos(root);
 }
