@@ -23,13 +23,11 @@ export function renderNotificationsList(list) {
 }
 
 export function initNotifications() {
-  // Expose init globally for compat adapter
   window.initNotifications = initNotifications;
 
   const icon = document.querySelector(NOTIF_ICON_SELECTOR);
   const dropdown = document.getElementById(NOTIF_DROPDOWN_ID);
 
-  // Subscribe to store updates
   subscribe('state:notifications', (notifications) => {
     renderNotificationsList(notifications);
     const badge = document.getElementById('notificationBadge');
@@ -47,35 +45,32 @@ export function initNotifications() {
     });
   }
 
-  // Try to connect to realtime notifications via Supabase if available
   try {
     const supabase = getSupabase();
     if (supabase && typeof supabase.from === 'function') {
-      // subscribe to INSERTs on notifications table (if available)
       try {
         supabase.from('notifications').on('INSERT', payload => {
           const n = payload.new;
-          // Push to store
           const current = getState('notifications') || [];
-          const updated = [n].concat(current).slice(0, 50); // keep last 50
+          const updated = [n].concat(current).slice(0, 50);
           setState('notifications', updated);
           emit('notification', n);
         }).subscribe();
       } catch (e) {
-        // Older supabase client may require channel API; skip if fails
         console.warn('supabase realtime subscribe failed', e);
       }
     }
-  } catch (e) {
-    // ignore
-  }
+  } catch (e) {}
+}
+
+export function init() {
+  return initNotifications();
 }
 
 export function notifyTest(payload) {
-  // Helper for dev/testing: add a notification to the store
   const current = getState('notifications') || [];
   const n = Object.assign({ id: Date.now(), title: payload.title || payload.text || 'Notification', time: new Date().toLocaleTimeString() }, payload);
-  const updated = [n].concat(current).slice(0,50);
+  const updated = [n].concat(current).slice(0, 50);
   setState('notifications', updated);
   emit('notification', n);
 }
