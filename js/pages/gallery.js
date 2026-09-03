@@ -21,10 +21,8 @@ export function render() {
     <div class="double-tap-overlay" id="doubleTapOverlay"><i class="fas fa-heart"></i></div>`);
 }
 
-export function init({ root } = {}) {
+export async function init({ root } = {}) {
   if (window.hshsNavigation?.init) window.hshsNavigation.init();
-  if (typeof window.initGallery === 'function') window.initGallery(root);
-  if (!window.GalleryPage && document.getElementById('galleryFeed') && typeof window.db !== 'undefined') {
-    try { new window.GalleryPage(); } catch (e) { console.warn('Gallery initializer failed', e); }
-  }
+  try { await import('../gallery.js'); } catch (e) { console.warn('Gallery feature module failed to load', e); }
+  if (typeof window.initGallery === 'function') return window.initGallery(root);
 }
