@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-b[...]';
+        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-booting .hshs-mobile-shell{visibility:hidden!important}html.hshs-ready .hshs-booting{visibility:visible!important}';
         document.documentElement.classList.add('hshs-booting');
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
@@ -123,8 +123,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function bust(url) {
         return url.replace(/(\?.*)?$/, '') + '?v=' + HSHS_ASSET_VER;
     }
+    function hasScriptSource(file) {
+        var scripts = document.querySelectorAll('script[src]');
+        for (var i = 0; i < scripts.length; i++) {
+            var src = scripts[i].src || '';
+            if (src.replace(/\?.*$/, '').endsWith('/' + file)) return true;
+        }
+        return false;
+    }
+    function hasStyleSource(file) {
+        var links = document.querySelectorAll('link[rel="stylesheet"][href]');
+        for (var i = 0; i < links.length; i++) {
+            var href = links[i].href || '';
+            if (href.replace(/\?.*$/, '').endsWith('/' + file)) return true;
+        }
+        return false;
+    }
     function add(id, file) {
-        if (document.getElementById(id)) return;
+        if (document.getElementById(id) || hasScriptSource(file)) return;
         var s = document.createElement('script');
         s.id = id;
         s.async = false;
@@ -132,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(s);
     }
     function addCss(id, file) {
-        if (document.getElementById(id)) return;
+        if (document.getElementById(id) || hasStyleSource(file)) return;
         var link = document.createElement('link');
         link.id = id;
         link.rel = 'stylesheet';
