@@ -5,22 +5,13 @@
   function file() {
     return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   }
-  function inSub() {
-    return location.pathname.indexOf('/index/') !== -1;
-  }
-  function cssBase() {
-    return inSub() ? '../css/' : 'css/';
-  }
-  function moreHref() {
-    return inSub() ? 'more.html' : 'index/more.html';
-  }
 
   function injectCampusCss() {
     if (document.getElementById('hshs-campus-wire-css')) return;
     var link = document.createElement('link');
     link.id = 'hshs-campus-wire-css';
     link.rel = 'stylesheet';
-    link.href = cssBase() + 'hshs-campus-wire.css?v=260903f';
+    link.href = '/css/hshs-campus-wire.css?v=260903h';
     document.head.appendChild(link);
   }
 
@@ -29,12 +20,8 @@
     if (!bar) return;
     var old = bar.querySelector('[data-tab="more"]');
     if (!old) return;
-    if (old.tagName === 'A' && (old.getAttribute('href') || '').indexOf('more.html') !== -1) {
-      if (file() === 'more.html') old.classList.add('active');
-      return;
-    }
     var a = document.createElement('a');
-    a.href = moreHref();
+    a.href = '/index/more.html';
     a.className = old.className || '';
     a.setAttribute('data-tab', 'more');
     a.innerHTML = '<i class="fas fa-ellipsis"></i><span>More</span>';
@@ -42,10 +29,22 @@
     old.replaceWith(a);
   }
 
+  function fixTabHrefs() {
+    var bar = document.querySelector('.mobile-tabbar');
+    if (!bar) return;
+    var home = bar.querySelector('[data-tab="home"]');
+    var gallery = bar.querySelector('[data-tab="gallery"]');
+    var buzz = bar.querySelector('[data-tab="buzz"]');
+    if (home) home.setAttribute('href', '/index.html');
+    if (gallery) gallery.setAttribute('href', '/index/gallery.html');
+    if (buzz) buzz.setAttribute('href', '/index/buzz.html');
+  }
+
   function reorderTabs() {
     var bar = document.querySelector('.mobile-tabbar');
     if (!bar) return;
     wireMoreLink();
+    fixTabHrefs();
     var home = bar.querySelector('[data-tab="home"]');
     var gallery = bar.querySelector('[data-tab="gallery"]');
     var buzz = bar.querySelector('[data-tab="buzz"]');
@@ -62,7 +61,6 @@
     if (f === 'index.html' || f === '') home.classList.add('active');
     else if (f === 'gallery.html') gallery.classList.add('active');
     else if (f === 'buzz.html' || f === 'clips.html') buzz.classList.add('active');
-    else if (f === 'more.html') more.classList.add('active');
     else more.classList.add('active');
   }
 
