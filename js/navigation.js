@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-booting .hshs-mobile-shell{visibility:hidden!important}html.hshs-ready .hshs-booting{visibility:visible!important}';
+        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-booting .hshs-mobile-shell{visibility:hidden!important}html.hshs-ready .animated-bg,html.hshs-ready .gradient-bg,html.hshs-ready .navbar,html.hshs-ready .hshs-mobile-shell{visibility:visible!important}';
         document.documentElement.classList.add('hshs-booting');
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
