@@ -1,27 +1,35 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Gallery - HSHS World</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="../css/style.css?v=260903i">
-<link rel="stylesheet" href="../css/gallery.css?v=260903i">
-<link rel="stylesheet" href="../css/mobile-shell.css?v=260903i">
-<link rel="stylesheet" href="../css/hshs-theme.css?v=260903i">
-<link rel="stylesheet" href="../css/hshs-campus-wire.css?v=260903i">
+<link rel="stylesheet" href="../css/style.css?v=260904a">
+<link rel="stylesheet" href="../css/gallery.css?v=260904a">
+<link rel="stylesheet" href="../css/mobile-shell.css?v=260904a">
+<link rel="stylesheet" href="../css/hshs-theme.css?v=260904a">
+<link rel="stylesheet" href="../css/hshs-campus-wire.css?v=260904a">
+<link rel="stylesheet" href="../css/hshs-home.css?v=260904a">
 </head>
 <body class="dark-mode has-mobile-shell">
-<nav class="navbar"><div class="navbar-container"><div class="logo"><span>HSHS World</span></div></div></nav>
+<nav class="navbar hshs-flat-top"><div class="navbar-container hshs-topbar">
+  <div class="logo"><span class="brand-copy"><strong>Gallery</strong><small>For You</small></span></div>
+</div></nav>
 <div id="app-root" data-page="gallery">
-<div class="gallery-container">
-  <div class="category-filter" id="categoryFilter">
-    <button class="category-btn active" data-category="all">All</button>
-    <button class="category-btn" data-category="academics">Academics</button>
-    <button class="category-btn" data-category="sports">Sports</button>
-    <button class="category-btn" data-category="clubs">Clubs</button>
-    <button class="category-btn" data-category="events">Events</button>
+  <div class="home-block">
+    <div class="category-filter" id="categoryFilter" style="display:flex;gap:8px;overflow:auto;padding-bottom:8px">
+      <button class="category-btn active" data-category="all">All</button>
+      <button class="category-btn" data-category="academics">Academics</button>
+      <button class="category-btn" data-category="sports">Sports</button>
+      <button class="category-btn" data-category="clubs">Clubs</button>
+      <button class="category-btn" data-category="events">Events</button>
+    </div>
+    <div class="featured-grid" id="galleryFeed">
+      <a class="featured-card" href="photos.html"><span class="tag">Photos</span><img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=60" alt=""><span>Campus photos</span></a>
+      <a class="featured-card" href="videos.html"><span class="tag">Vibe</span><img src="https://images.unsplash.com/photo-1577896850726-33fa89c64723?auto=format&fit=crop&w=800&q=60" alt=""><span>Campus videos</span></a>
+      <a class="featured-card" href="buzz.html"><span class="tag">Buzz</span><img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=60" alt=""><span>Short clips</span></a>
+      <a class="featured-card" href="trending.html"><span class="tag">Trending</span><img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=60" alt=""><span>What is popping</span></a>
+    </div>
   </div>
-  <div class="gallery-feed" id="galleryFeed"></div>
 </div>
-</div>
-<script src="../js/gallery.js?v=260903i"></script>
-<script src="../js/mobile-shell.js?v=260903i"></script>
-<script src="../js/hshs-tab-order.js?v=260903i"></script>
+<script src="../js/gallery.js?v=260904a"></script>
+<script src="../js/mobile-shell.js?v=260904a"></script>
+<script src="../js/hshs-tab-order.js?v=260904a"></script>
 </body></html>
