@@ -43,30 +43,34 @@
         if (sheet) sheet.classList.add('open');
         if (dim) dim.classList.add('open');
     }
+
     function closeSheets() {
-        document.querySelectorAll('.clip-sheet').forEach(function (el) { el.classList.remove('open'); });
+        document.querySelectorAll('.clip-sheet.open').forEach(function (el) { el.classList.remove('open'); });
         var dim = document.getElementById('clipDim');
         if (dim) dim.classList.remove('open');
     }
+
     function showComments(id) {
         activeId = id;
         var clip = CLIPS.find(function (c) { return c.id === id; });
+        if (!clip) return;
         var list = document.getElementById('commentList');
-        if (!clip || !list) return;
-        list.innerHTML = clip.comments.map(function (text) {
-            return '<div class="comment-item">' + text + '</div>';
-        }).join('') || '<div class="comment-item">Be the first to comment.</div>';
+        if (list) {
+            list.innerHTML = clip.comments.map(function (c) {
+                return '<div class="clip-comment"><strong>Student</strong><span>' + c + '</span></div>';
+            }).join('') || '<p class="empty">No comments yet</p>';
+        }
         openSheet('commentSheet');
     }
+
     function showMusic(id) {
         activeId = id;
-        var clip = CLIPS.find(function (c) { return c.id === id; });
         var list = document.getElementById('musicList');
-        if (!clip || !list) return;
-        list.innerHTML = MIX.map(function (track) {
-            var on = clip.music === track.name;
-            return '<div class="music-item"><span>' + track.name + '</span><button data-track="' + track.name + '">' + (on ? 'On' : 'Use') + '</button></div>';
-        }).join('');
+        if (list) {
+            list.innerHTML = MIX.map(function (m) {
+                return '<button type="button" data-track="' + m.name + '">' + m.name + '</button>';
+            }).join('');
+        }
         openSheet('musicSheet');
     }
 
@@ -118,10 +122,12 @@
     }
 
     function initHshsClips() {
+        if (!document.getElementById('clipFeed')) return;
         bindOnce();
         renderFeed();
     }
     window.initHshsClips = initHshsClips;
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initHshsClips);
     else initHshsClips();
+    document.addEventListener('hshs:page', initHshsClips);
 })();
