@@ -1,5 +1,5 @@
 // ============================================
-// HSHS WORLD - CONFIGURATION (guarded initialization)
+// HSHS WORLD - CONFIGURATION
 // ============================================
 
 // Firebase
@@ -22,28 +22,22 @@ const firebaseConfig = {
   measurementId: "G-5W89YVBV6J"
 };
 
-// Use existing window instances when available to avoid duplicate initialization
-const app = window.firebaseApp || initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
-const firestore = window.firestore || getFirestore(app);
-const auth = window.auth || getAuth(app);
-const storage = window.storage || getStorage(app);
-
-// getAnalytics may throw in some environments (e.g. if not available), so guard it
-let analytics;
-try {
-  analytics = window.analytics || getAnalytics(app);
-} catch (e) {
-  // Analytics isn't critical for runtime; keep null and continue
-  analytics = window.analytics || null;
-}
+export const firestore = getFirestore(app);
+export const auth = getAuth(app);
+export const storage = getStorage(app);
+export const analytics = getAnalytics(app);
 
 const supabaseUrl = "https://hhlogdqpgjiajeufwnop.supabase.co";
-const supabaseKey = window.SUPABASE_ANON_KEY || "sb_publishable_RVPCBfzNQ5OvdPp96MUqVA_AG5wazGk";
 
-const supabase = window.supabase || createClient(supabaseUrl, supabaseKey);
+const supabaseKey =
+  window.SUPABASE_ANON_KEY || "sb_publishable_RVPCBfzNQ5OvdPp96MUqVA_AG5wazGk";
 
-export { firestore, auth, storage, analytics, supabase };
+export const supabase = createClient(
+  supabaseUrl,
+  supabaseKey
+);
 
 export const CONFIG = {
   app: {
@@ -84,7 +78,6 @@ export const CONFIG = {
   }
 };
 
-// Expose singletons to window to avoid duplicate initializations across modules
 window.firebaseApp = app;
 window.firestore = firestore;
 window.auth = auth;

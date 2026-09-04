@@ -1,11 +1,70 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Saved - HSHS World</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="../css/style.css?v=260903i"><link rel="stylesheet" href="../css/hshs-account.css?v=260903i">
-<link rel="stylesheet" href="../css/mobile-shell.css?v=260903i"><link rel="stylesheet" href="../css/hshs-theme.css?v=260903i"><link rel="stylesheet" href="../css/hshs-campus-wire.css?v=260903i">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+    <meta name="theme-color" content="#071433">
+    <title>Saved - HSHS World</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=260904r">
+    <link rel="stylesheet" href="../css/animations.css?v=260904r">
+    <link rel="stylesheet" href="../css/responsive.css?v=260904r">
+    <link rel="stylesheet" href="../css/hshs-account.css?v=260904r">
+    <link rel="stylesheet" href="../css/hshs-no-flicker.css?v=260904r">
+    <link rel="stylesheet" href="../css/theme.css?v=260904r">
+    <link rel="stylesheet" href="../css/mobile-shell.css?v=260904r">
+    <link rel="stylesheet" href="../css/hshs-polish.css?v=260904r">
 </head>
-<body class="dark-mode has-mobile-shell">
-<nav class="navbar"><div class="navbar-container"><div class="logo"><span>HSHS World</span></div></div></nav>
-<div id="app-root" data-page="saved"><main class="hshs-account-page"><div class="hshs-page-head"><a class="hshs-back" href="more.html"><i class="fas fa-chevron-left"></i></a><h1>Saved</h1></div><div id="hshsSavedList"></div></main></div>
-<script src="../js/mobile-shell.js?v=260903i"></script><script src="../js/hshs-tab-order.js?v=260903i"></script>
-</body></html>
+<body class="light-mode">
+    <div class="animated-bg">
+        <div class="gradient-bg"></div>
+        <div class="particles-container" id="particlesContainer"></div>
+    </div>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo"><i class="fas fa-graduation-cap"></i><span>HSHS World</span></div>
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search..." class="search-input" id="searchInput">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+                <a href="gallery.html" class="nav-link"><i class="fas fa-images"></i><span>Gallery</span></a>
+                <a href="saved.html" class="nav-link active"><i class="fas fa-star"></i><span>Saved</span></a>
+            </div>
+            <div class="nav-actions">
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </div>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <div class="profile-icon">
+                    <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img" id="profileImg">
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main class="hshs-account-page">
+        <div class="hshs-page-head">
+            <a class="hshs-back" href="more.html" aria-label="Back"><i class="fas fa-chevron-left"></i></a>
+            <h1>Saved</h1>
+        </div>
+        <div class="hshs-tabs">
+            <button type="button" class="hshs-tab on" data-saved-tab="saved">Saved posts</button>
+            <button type="button" class="hshs-tab" data-saved-tab="interacted">Interacted</button>
+        </div>
+        <div id="hshsSavedList"></div>
+        <div id="hshsInteractedList" hidden></div>
+    </main>
+    <script type="module" src="../js/config.js?v=260904r"></script>
+    <script type="module" src="../js/db.js?v=260904r"></script>
+    <script src="../js/utils.js?v=260904r"></script>
+    <script src="../js/particles.js?v=260904r"></script>
+    <script src="../js/theme.js?v=260904r"></script>
+    <script src="../js/navigation.js?v=260904r"></script>
+    <script src="../js/mobile-navigation.js?v=260904r"></script>
+    <script src="../js/search.js?v=260904r"></script>
+    <script src="../js/mobile-shell.js?v=260904r"></script>
+</body>
+</html>

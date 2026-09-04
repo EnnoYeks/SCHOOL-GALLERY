@@ -1,7 +1,0 @@
-export const pageId = "about";
-export const styles = ["css/mobile-shell.css"];
-export const scripts = [];
-export const rootIds = [];
-export const bodyClass = "light-mode";
-export function render() { return document.getElementById("app-root") ? document.getElementById("app-root").innerHTML : ""; }
-export async function init() {}

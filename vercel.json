@@ -2,19 +2,224 @@
   "headers": [
     {
       "source": "/",
-      "headers": [{ "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, max-age=0"
+        }
+      ]
     },
     {
       "source": "/(.*).html",
-      "headers": [{ "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/index/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, max-age=0"
+        }
+      ]
     },
     {
       "source": "/js/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
     },
     {
       "source": "/css/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
     }
-  ]
+  ],
+  "rewrites": [
+    {
+      "source": "/gallery.html",
+      "destination": "/index/gallery.html"
+    },
+    {
+      "source": "/gallery",
+      "destination": "/index/gallery.html"
+    },
+    {
+      "source": "/photos.html",
+      "destination": "/index/photos.html"
+    },
+    {
+      "source": "/photos",
+      "destination": "/index/photos.html"
+    },
+    {
+      "source": "/videos.html",
+      "destination": "/index/videos.html"
+    },
+    {
+      "source": "/videos",
+      "destination": "/index/videos.html"
+    },
+    {
+      "source": "/vibe",
+      "destination": "/index/videos.html"
+    },
+    {
+      "source": "/vibe.html",
+      "destination": "/index/videos.html"
+    },
+    {
+      "source": "/buzz.html",
+      "destination": "/index/buzz.html"
+    },
+    {
+      "source": "/buzz",
+      "destination": "/index/buzz.html"
+    },
+    {
+      "source": "/clips.html",
+      "destination": "/index/buzz.html"
+    },
+    {
+      "source": "/clips",
+      "destination": "/index/buzz.html"
+    },
+    {
+      "source": "/shorts.html",
+      "destination": "/index/buzz.html"
+    },
+    {
+      "source": "/trending.html",
+      "destination": "/index/trending.html"
+    },
+    {
+      "source": "/trending",
+      "destination": "/index/trending.html"
+    },
+    {
+      "source": "/spotlight.html",
+      "destination": "/index/spotlight.html"
+    },
+    {
+      "source": "/spotlight",
+      "destination": "/index/spotlight.html"
+    },
+    {
+      "source": "/polls.html",
+      "destination": "/index/polls.html"
+    },
+    {
+      "source": "/polls",
+      "destination": "/index/polls.html"
+    },
+    {
+      "source": "/memories.html",
+      "destination": "/index/memories.html"
+    },
+    {
+      "source": "/memories",
+      "destination": "/index/memories.html"
+    },
+    {
+      "source": "/about.html",
+      "destination": "/index/about.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/index/about.html"
+    },
+    {
+      "source": "/more.html",
+      "destination": "/index/more.html"
+    },
+    {
+      "source": "/more",
+      "destination": "/index/more.html"
+    },
+    {
+      "source": "/chat.html",
+      "destination": "/index/chat.html"
+    },
+    {
+      "source": "/chat",
+      "destination": "/index/chat.html"
+    },
+    {
+      "source": "/profile.html",
+      "destination": "/index/profile.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/index/profile.html"
+    },
+    {
+      "source": "/settings.html",
+      "destination": "/index/settings.html"
+    },
+    {
+      "source": "/settings",
+      "destination": "/index/settings.html"
+    },
+    {
+      "source": "/notifications.html",
+      "destination": "/index/notifications.html"
+    },
+    {
+      "source": "/notifications",
+      "destination": "/index/notifications.html"
+    },
+    {
+      "source": "/saved.html",
+      "destination": "/index/saved.html"
+    },
+    {
+      "source": "/saved",
+      "destination": "/index/saved.html"
+    },
+    {
+      "source": "/admin.html",
+      "destination": "/index/admin.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/index/admin.html"
+    },
+    {
+      "source": "/contact.html",
+      "destination": "/index/contat.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/index/contat.html"
+    },
+    {
+      "source": "/contat.html",
+      "destination": "/index/contat.html"
+    },
+    {
+      "source": "/contat",
+      "destination": "/index/contat.html"
+    },
+    {
+      "source": "/index/contact.html",
+      "destination": "/index/contat.html"
+    },
+    {
+      "source": "/index/clips.html",
+      "destination": "/index/buzz.html"
+    }
+  ],
+  "cleanUrls": false,
+  "trailingSlash": false
 }

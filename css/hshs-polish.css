@@ -1,0 +1,33 @@
+/* HSHS layout polish — keeps the golden look, stops overflow and 404-era drift */
+html, body { max-width: 100%; overflow-x: hidden; }
+img, video { max-width: 100%; height: auto; }
+a { cursor: pointer; }
+.navbar { z-index: 40; }
+.featured-grid, .masonry-grid, .gallery-feed, .stats-grid {
+  display: grid;
+  gap: 16px;
+}
+.featured-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.gallery-feed { min-height: 40vh; }
+.loading-skeleton {
+  min-height: 18px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,.18), rgba(255,255,255,.08));
+  background-size: 200% 100%;
+  animation: hshsSkel 1.2s ease-in-out infinite;
+}
+@keyframes hshsSkel { 50% { background-position: 100% 0; } }
+body.has-mobile-shell, body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 1025px) {
+  body { padding-bottom: 0; }
+}
+.hero-buttons .btn, a.btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+#galleryFeed:empty::after,
+#masonryGrid:empty::after,
+#trendingGrid:empty::after {
+  content: "Loading campus posts…";
+  display: block;
+  padding: 24px;
+  opacity: .7;
+}
