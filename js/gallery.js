@@ -141,11 +141,11 @@ class GalleryPage {
     }
 
     setupSwipeNavigation() {
-        let touchStartX = 0;
-        let touchEndX = 0;
-
         const feed = document.getElementById('galleryFeed');
         if (!feed) return;
+
+        let touchStartX = 0;
+        let touchEndX = 0;
 
         feed.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
@@ -158,11 +158,9 @@ class GalleryPage {
 
         const handleSwipe = () => {
             if (touchEndX < touchStartX - 50) {
-                // Swiped left - next post
                 this.nextPost();
             }
             if (touchEndX > touchStartX + 50) {
-                // Swiped right - previous post
                 this.previousPost();
             }
         };
@@ -220,8 +218,6 @@ class GalleryPage {
 }
 
 // Boot for full page load AND for SPA page swaps (hshs:page).
-// DOMContentLoaded alone is not enough: in-app navigation injects Gallery
-// HTML after that event has already fired, which left the feed empty.
 function startGallery() {
     if (!document.getElementById('galleryFeed')) return;
     try {
@@ -238,8 +234,8 @@ if (document.readyState === 'loading') {
     startGallery();
 }
 document.addEventListener('hshs:page', startGallery);
+window.startGallery = startGallery;
 
-// Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = GalleryPage;
 }
