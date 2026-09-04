@@ -243,9 +243,15 @@
     }
 
     function bootPageWidgets() {
-        if (typeof window.initHshsClips === 'function') window.initHshsClips();
-        if (typeof window.startVideos === 'function') window.startVideos();
-        if (typeof window.initHshsChat === 'function' && document.getElementById('hshsChatPage')) window.initHshsChat();
+        // Re-run page-specific starters after SPA swaps. Each starter no-ops
+        // when its page root is not present.
+        try { if (typeof window.initHshsClips === 'function') window.initHshsClips(); } catch (e) {}
+        try { if (typeof window.startVideos === 'function') window.startVideos(); } catch (e) {}
+        try { if (typeof window.startPhotos === 'function') window.startPhotos(); } catch (e) {}
+        try { if (typeof window.startGallery === 'function') window.startGallery(); } catch (e) {}
+        try { if (typeof window.startTrending === 'function') window.startTrending(); } catch (e) {}
+        try { if (typeof window.startProfile === 'function') window.startProfile(); } catch (e) {}
+        try { if (typeof window.initHshsChat === 'function' && document.getElementById('hshsChatPage')) window.initHshsChat(); } catch (e) {}
     }
 
     function rebuildMoreGrid() {
@@ -491,8 +497,6 @@
         syncDesktopNav();
         buildBar();
         // Snapshot the original page HTML BEFORE wrapping into #hshs-page.
-        // This lets SPA return-to-Home reconstruct from the existing static structure
-        // instead of an empty post-wrap tree or a forced network fetch.
         try {
             var snap = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
             var f = currentFile() || 'index.html';
