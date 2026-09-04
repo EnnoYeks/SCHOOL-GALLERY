@@ -2,6 +2,7 @@
    Keeps the existing ranking engine intact and presents its real results
    in the approved desktop/mobile layout. */
 (function(){
+  function runTrendingUI(){
   const grid=document.getElementById('trendingGrid');
   const hero=document.getElementById('topTrendingHero');
   const side=document.getElementById('topTrendingSide');
@@ -32,4 +33,11 @@
 
   const observer=new MutationObserver(()=>{if(grid.querySelector('.trending-card')){observer.disconnect();build();}});
   observer.observe(grid,{childList:true,subtree:true});
+  // If cards already present (cached SPA content), build immediately
+  if(grid.querySelector('.trending-card')) build();
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', runTrendingUI);
+  else runTrendingUI();
+  document.addEventListener('hshs:page', runTrendingUI);
 })();
