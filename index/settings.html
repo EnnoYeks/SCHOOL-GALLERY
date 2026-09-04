@@ -1,12 +1,218 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Settings - HSHS World</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="../css/style.css?v=260903i"><link rel="stylesheet" href="../css/hshs-account.css?v=260903i">
-<link rel="stylesheet" href="../css/mobile-shell.css?v=260903i"><link rel="stylesheet" href="../css/hshs-theme.css?v=260903i"><link rel="stylesheet" href="../css/hshs-campus-wire.css?v=260903i">
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+    <meta name="description" content="HSHS World account settings">
+    <meta name="theme-color" content="#0b1220">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        textarea,
+        select { font-size: 16px !important; }
+    </style>
+    <meta charset="UTF-8">
+    <title>Account · HSHS World</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=260904r">
+    <link rel="stylesheet" href="../css/animations.css?v=260904r">
+    <link rel="stylesheet" href="../css/responsive.css?v=260904r">
+    <link rel="stylesheet" href="../css/hshs-account.css?v=260904r">
+    <link rel="stylesheet" href="../css/hshs-no-flicker.css?v=260904r">
+    <link rel="stylesheet" href="../css/theme.css?v=260904r">
+    <link rel="stylesheet" href="../css/mobile-shell.css?v=260904r">
+    <link rel="stylesheet" href="../css/hshs-polish.css?v=260904r">
+    <link rel="stylesheet" href="../css/hshs-settings.css?v=260904r">
 </head>
-<body class="dark-mode has-mobile-shell">
-<nav class="navbar"><div class="navbar-container"><div class="logo"><span>HSHS World</span></div></div></nav>
-<div id="app-root" data-page="settings"><div class="hshs-settings" id="hshsSettingsRoot"><h1>Settings</h1><section id="privacyTab"><h2>Privacy</h2><p>Control who can see your profile and posts.</p></section></div></div>
-<script src="../js/hshs-settings.js?v=260903i"></script>
-<script src="../js/mobile-shell.js?v=260903i"></script><script src="../js/hshs-tab-order.js?v=260903i"></script>
-</body></html>
+<body class="light-mode">
+    <div class="animated-bg">
+        <div class="gradient-bg"></div>
+        <div class="particles-container" id="particlesContainer"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>HSHS World</span>
+            </div>
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search..." class="search-input" id="searchInput">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+                <a href="gallery.html" class="nav-link"><i class="fas fa-images"></i><span>Gallery</span></a>
+                <a href="settings.html" class="nav-link active"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </div>
+            <div class="nav-actions">
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notifications-list" id="notificationsList">
+                            <p class="empty-state">No notifications</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <div class="profile-icon">
+                    <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img" id="profileImg">
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="profile.html" class="dropdown-item"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="settings.html" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
+                    </div>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hshs-settings" id="hshsSettingsRoot">
+        <section class="hshs-set-hero">
+            <div class="hshs-set-photo">
+                <img id="setHeroPic" alt="">
+                <button type="button" id="setPhotoBtn" class="hshs-set-cam" aria-label="Change photo"><i class="fas fa-camera"></i></button>
+                <input id="setPhotoFile" type="file" accept="image/*" hidden>
+            </div>
+            <div class="hshs-set-who">
+                <strong id="setHeroName">Create your account</strong>
+                <span id="setHeroUser">@yourname</span>
+                <em id="setHeroMeta">Student</em>
+            </div>
+        </section>
+
+        <nav class="hshs-set-tabs" aria-label="Settings sections">
+            <button type="button" class="hshs-set-tab on" data-set-tab="account"><i class="fas fa-user"></i> Account</button>
+            <button type="button" class="hshs-set-tab" data-set-tab="privacy"><i class="fas fa-lock"></i> Privacy</button>
+            <button type="button" class="hshs-set-tab" data-set-tab="notifications"><i class="fas fa-bell"></i> Alerts</button>
+            <button type="button" class="hshs-set-tab" data-set-tab="theme"><i class="fas fa-palette"></i> Look</button>
+        </nav>
+
+        <section class="hshs-set-pane on tab-content active" id="accountTab">
+            <div id="setSignedState">
+                <h2>Your profile</h2>
+                <label>Full name
+                    <input id="setFullName" type="text" autocomplete="name" placeholder="Amina Namukasa">
+                </label>
+                <label>Username
+                    <span class="hshs-set-prefix">@</span>
+                    <input id="setUsername" class="has-prefix" type="text" autocomplete="username" placeholder="amina_s4">
+                </label>
+                <label>Email
+                    <input id="setEmail" type="email" autocomplete="email" placeholder="amina@hshs.ac.ug">
+                </label>
+                <div class="hshs-set-two">
+                    <label>Class
+                        <select id="setClass">
+                            <option>S1</option><option>S2</option><option>S3</option>
+                            <option>S4</option><option>S5</option><option>S6</option>
+                            <option>Staff</option>
+                        </select>
+                    </label>
+                    <label>Role
+                        <select id="setRole">
+                            <option>Student</option>
+                            <option>Prefect</option>
+                            <option>Club</option>
+                            <option>Staff</option>
+                        </select>
+                    </label>
+                </div>
+                <label>Bio
+                    <textarea id="setBio" rows="3" placeholder="Sports, science club, house spirit."></textarea>
+                </label>
+                <button type="button" class="hshs-set-btn" id="setSaveAccount"><i class="fas fa-check"></i> Save account</button>
+                <p class="hshs-set-note">Saved on this phone now. School-wide login comes with Firebase.</p>
+                <button type="button" class="hshs-set-btn ghost" id="setSignOut">Sign out on this device</button>
+            </div>
+
+            <div id="setGuestState" hidden>
+                <h2>Create an HSHS World account</h2>
+                <p class="hshs-set-note">This stays on the device until school login is connected.</p>
+                <label>Full name <input id="newFullName" type="text" placeholder="Your school name"></label>
+                <label>Username <span class="hshs-set-prefix">@</span><input id="newUsername" class="has-prefix" type="text" placeholder="yourname"></label>
+                <label>Class
+                    <select id="newClass">
+                        <option>S1</option><option>S2</option><option>S3</option>
+                        <option>S4</option><option>S5</option><option>S6</option>
+                    </select>
+                </label>
+                <label>4-digit PIN <input id="newPin" type="password" inputmode="numeric" maxlength="4" placeholder="1234"></label>
+                <button type="button" class="hshs-set-btn" id="setCreateAccount">Create account</button>
+                <h3>Already have one?</h3>
+                <label>Name or username <input id="loginName" type="text" placeholder="@amina_s4"></label>
+                <label>PIN <input id="loginPin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN"></label>
+                <button type="button" class="hshs-set-btn ghost" id="setLoginAccount">Switch account</button>
+            </div>
+
+            <div class="hshs-set-wait">
+                <h3>School login</h3>
+                <p>Email verify, password reset and cloud backup wait for Firebase.</p>
+                <button type="button" class="hshs-set-btn wait" data-wait="firebase">Connect school email</button>
+            </div>
+        </section>
+
+        <section class="hshs-set-pane tab-content" id="privacyTab">
+            <h2>Privacy</h2>
+            <label class="hshs-set-switch"><span><b>Public profile</b><small>Students can find you by username</small></span><input type="checkbox" data-pref="publicProfile"></label>
+            <label class="hshs-set-switch"><span><b>Activity status</b><small>Show when you were last on HSHS World</small></span><input type="checkbox" data-pref="showActivity"></label>
+            <label class="hshs-set-switch"><span><b>Direct messages</b><small>Allow chats from other students</small></span><input type="checkbox" data-pref="allowMessages"></label>
+            <label class="hshs-set-switch"><span><b>Show class</b><small>Display S1–S6 on your profile</small></span><input type="checkbox" data-pref="showClass"></label>
+            <label class="hshs-set-switch"><span><b>Show likes</b><small>Let others see posts you liked</small></span><input type="checkbox" data-pref="showLikes"></label>
+            <p class="hshs-set-note">These save the moment you tap them.</p>
+        </section>
+
+        <section class="hshs-set-pane tab-content" id="notificationsTab">
+            <h2>Alerts</h2>
+            <label class="hshs-set-switch"><span><b>Likes</b><small>When someone likes your post</small></span><input type="checkbox" data-pref="notifyLikes"></label>
+            <label class="hshs-set-switch"><span><b>Comments</b><small>Replies on your photos and Buzz</small></span><input type="checkbox" data-pref="notifyComments"></label>
+            <label class="hshs-set-switch"><span><b>Mentions</b><small>When a student tags @you</small></span><input type="checkbox" data-pref="notifyMentions"></label>
+            <label class="hshs-set-switch"><span><b>Friend requests</b><small>New campus friend invites</small></span><input type="checkbox" data-pref="notifyFriends"></label>
+            <label class="hshs-set-switch"><span><b>School alerts</b><small>Assembly, sports day, house points</small></span><input type="checkbox" data-pref="notifySchool"></label>
+            <p class="hshs-set-note">Push to phones waits for school login. These prefs are stored now.</p>
+        </section>
+
+        <section class="hshs-set-pane tab-content" id="themeTab">
+            <h2>Look</h2>
+            <div class="hshs-set-card">
+                <div>
+                    <b>Theme</b>
+                    <small>Changes the whole site immediately</small>
+                </div>
+                <div class="hshs-theme-picks">
+                    <button type="button" class="hshs-theme-pick" data-theme-pick="dark">Dark</button>
+                    <button type="button" class="hshs-theme-pick" data-theme-pick="light">Light</button>
+                </div>
+            </div>
+            <p class="hshs-set-kicker">Accent</p>
+            <div class="hshs-accent-row">
+                <button type="button" class="hshs-accent" data-accent="navy"><i></i> Navy + gold</button>
+                <button type="button" class="hshs-accent" data-accent="ocean"><i></i> Ocean</button>
+                <button type="button" class="hshs-accent" data-accent="forest"><i></i> Forest</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="../js/utils.js?v=260904r"></script>
+    <script src="../js/theme.js?v=260904r"></script>
+    <script src="../js/navigation.js?v=260904r"></script>
+    <script src="../js/hshs-settings.js?v=260904r"></script>
+    <script type="module" src="../js/config.js?v=260904r"></script>
+    <script type="module" src="../js/db.js?v=260904r"></script>
+    <script src="../js/particles.js?v=260904r"></script>
+    <script src="../js/search.js?v=260904r"></script>
+    <script src="../js/mobile-navigation.js?v=260904r"></script>
+    <script src="../js/mobile-shell.js?v=260904r"></script>
+    <script src="../js/settings-controller.js?v=260904r"></script>
+</body>
+</html>

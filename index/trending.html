@@ -1,12 +1,44 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Trending - HSHS World</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="../css/style.css?v=260903i"><link rel="stylesheet" href="../css/trending.css?v=260903i">
-<link rel="stylesheet" href="../css/mobile-shell.css?v=260903i"><link rel="stylesheet" href="../css/hshs-theme.css?v=260903i"><link rel="stylesheet" href="../css/hshs-campus-wire.css?v=260903i">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+    <meta name="description" content="HSHS School Gallery - What's trending around school">
+    <meta name="theme-color" content="#08060d">
+    <title>Trending - HSHS School Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=260904r">
+    <link rel="stylesheet" href="../css/animations.css?v=260904r">
+    <link rel="stylesheet" href="../css/responsive.css?v=260904r">
+    <link rel="stylesheet" href="../css/trending.css?v=260904r">
+    <link rel="stylesheet" href="../css/hshs-no-flicker.css?v=260904r">
+    <link rel="stylesheet" href="../css/theme.css?v=260904r">
+    <link rel="stylesheet" href="../css/mobile-shell.css?v=260904r">
+    <link rel="stylesheet" href="../css/hshs-polish.css?v=260904r">
 </head>
-<body class="dark-mode has-mobile-shell">
-<nav class="navbar"><div class="navbar-container"><div class="logo"><span>HSHS World</span></div></div></nav>
-<div id="app-root" data-page="trending"><div class="container" style="padding:1.2rem"><h1>Trending</h1><div id="trendingRoot"></div></div></div>
-<script src="../js/trending.js?v=260903i"></script>
-<script src="../js/mobile-shell.js?v=260903i"></script><script src="../js/hshs-tab-order.js?v=260903i"></script>
-</body></html>
+<body class="dark-mode trending-body">
+    <div class="animated-bg" aria-hidden="true"><div class="gradient-bg"></div><div class="particles-container" id="particlesContainer"></div><div class="floating-shapes"><div class="shape shape-1"></div><div class="shape shape-2"></div><div class="shape shape-3"></div><div class="shape shape-4"></div></div></div>
+    <nav class="navbar"><div class="navbar-container">
+        <a class="logo" href="../index.html"><i class="fas fa-graduation-cap"></i><span>HSHS Gallery</span></a>
+        <div class="search-container"><i class="fas fa-search"></i><input type="text" placeholder="Search trending..." class="search-input" id="searchInput" autocomplete="off"><div class="search-results" id="searchResults"></div></div>
+        <div class="nav-links"></div>
+        <div class="nav-actions"><div class="notification-icon" id="notificationIcon"><i class="fas fa-bell"></i><span class="notification-badge" id="notificationBadge" hidden>0</span><div class="notification-dropdown" id="notificationDropdown"><div class="notifications-list" id="notificationsList"><p class="empty-state">No notifications</p></div></div></div><button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme"><i class="fas fa-moon"></i></button><div class="profile-icon"><img src="https://via.placeholder.com/40" alt="Profile" class="profile-img" id="profileImg"><div class="profile-dropdown" id="profileDropdown"><a href="profile.html" class="dropdown-item"><i class="fas fa-user"></i> My Profile</a><a href="settings.html" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a></div></div></div>
+    </div></nav>
+
+    <main class="trending-page"><div class="container">
+        <header class="trending-header"><div class="trending-title-row"><div><span class="trending-kicker"><i class="fas fa-arrow-trend-up"></i> HSHS NOW</span><h1>Trending</h1><p>What's hot in our school right now 🔥</p></div><label class="period-picker"><i class="fas fa-calendar-days"></i><span class="sr-only">Trending period</span><select id="periodSelect" aria-label="Trending period"><option value="today">Today</option><option value="week" selected>This Week</option><option value="month">This Month</option></select></label></div></header>
+        <div class="trending-filters" data-content-filter aria-label="Content type"><button class="content-filter active" data-filter="all" type="button">🔥 All</button><button class="content-filter" data-filter="video" type="button"><i class="fas fa-clapperboard"></i> Videos</button><button class="content-filter" data-filter="image" type="button"><i class="fas fa-image"></i> Photos</button><button class="content-filter" data-filter="events" type="button"><i class="fas fa-calendar-days"></i> Events</button><button class="content-filter" data-filter="buzz" type="button"><i class="fas fa-bullseye"></i> Buzz</button></div>
+        <section class="top-trending" aria-label="Top three trending posts"><div id="topTrendingHero"></div><div id="topTrendingSide"></div></section>
+        <section class="trending-section"><div class="section-heading"><div><span class="section-icon">⚡</span><h2>Trending Now</h2></div><button class="view-all-btn" id="viewAllTrending" type="button">View all <i class="fas fa-chevron-right"></i></button></div><div class="trending-grid" id="trendingGrid"></div></section>
+        <section class="hot-topics-section"><div class="section-heading"><div><span class="section-icon">🔥</span><h2>Hot Topics</h2></div></div><div class="hot-topics" id="hotTopics"></div></section>
+        <section class="desktop-insights" aria-label="Trending insights"><div class="insight-card"><h3><i class="fas fa-layer-group"></i> Top Categories</h3><div id="topCategoriesGrid"></div></div><div class="insight-card"><h3><i class="fas fa-heart"></i> Top Liked</h3><ol class="leaderboard-list" id="topLikedList"></ol></div><div class="insight-card"><h3><i class="fas fa-eye"></i> Most Viewed</h3><ol class="leaderboard-list" id="topViewedList"></ol></div><div class="insight-card"><h3><i class="fas fa-comments"></i> Most Discussed</h3><ol class="leaderboard-list" id="topCommentedList"></ol></div></section>
+    </div></main>
+    <script src="../js/navigation.js?v=260904r"></script><script src="../js/theme.js?v=260904r"></script><script src="../js/particles.js?v=260904r"></script><script type="module" src="../js/trending.js?v=260904r"></script><script src="../js/trending-ui.js?v=260904r"></script>
+    <script type="module" src="../js/config.js?v=260904r"></script>
+    <script type="module" src="../js/db.js?v=260904r"></script>
+    <script src="../js/utils.js?v=260904r"></script>
+    <script src="../js/search.js?v=260904r"></script>
+    <script src="../js/mobile-navigation.js?v=260904r"></script>
+    <script src="../js/mobile-shell.js?v=260904r"></script>
+</body>
+</html>
