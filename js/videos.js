@@ -169,11 +169,27 @@ class VideosPage {
     label(v){ return String(v || "").replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()); }
     escape(v){ return String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;" }[c])); }
     attr(v){ return this.escape(v); }
+    destroy() {
+        try {
+            const player = document.getElementById("videoPlayer");
+            const modal = document.getElementById("videoPlayerModal");
+            if (player) { player.pause(); player.removeAttribute("src"); }
+            if (modal) modal.classList.remove("active");
+        } catch (e) {}
+    }
 }
 
 function startVideos() {
-    if (document.getElementById("videosContainer")) new VideosPage();
+    if (!document.getElementById("videosContainer")) return;
+    try {
+        if (window.__hshsVideosPage && typeof window.__hshsVideosPage.destroy === "function") {
+            window.__hshsVideosPage.destroy();
+        }
+    } catch (e) {}
+    window.__hshsVideosPage = new VideosPage();
 }
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startVideos);
 else startVideos();
+document.addEventListener("hshs:page", startVideos);
+window.startVideos = startVideos;
 export { VideosPage };
