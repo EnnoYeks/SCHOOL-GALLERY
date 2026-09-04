@@ -120,9 +120,22 @@ class ProfileController {
     }
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.querySelector('.profile-img')) {
-        new ProfileController();
-    }
-});
+// Boot for full page load AND SPA page swaps (hshs:page).
+function startProfile() {
+    // Only on the profile page (navbar .profile-img exists everywhere)
+    if (!document.getElementById('hshsProfileRoot') && !document.querySelector('.hshs-profile-empty')) return;
+    try {
+        if (window.__hshsProfilePage && typeof window.__hshsProfilePage.destroy === 'function') {
+            window.__hshsProfilePage.destroy();
+        }
+    } catch (e) {}
+    window.__hshsProfilePage = new ProfileController();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startProfile);
+} else {
+    startProfile();
+}
+document.addEventListener('hshs:page', startProfile);
+window.startProfile = startProfile;
