@@ -490,6 +490,16 @@
         document.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) { if (l.href) loadedCss.add(l.href); });
         syncDesktopNav();
         buildBar();
+        // Snapshot the original page HTML BEFORE wrapping into #hshs-page.
+        // This lets SPA return-to-Home reconstruct from the existing static structure
+        // instead of an empty post-wrap tree or a forced network fetch.
+        try {
+            var snap = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            var f = currentFile() || 'index.html';
+            if (!pageCache[f]) pageCache[f] = snap;
+            if (!pageCache[fileKey(location.href)]) pageCache[fileKey(location.href)] = snap;
+            if ((f === 'index.html' || f === '') && !pageCache['index.html']) pageCache['index.html'] = snap;
+        } catch (e) {}
         wrapPage();
         fixBadLinks(document);
         wireHomeButtons();
