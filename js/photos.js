@@ -190,14 +190,30 @@ class PhotosPage {
 
         modal.classList.add('active');
     }
+
+    destroy() {
+        // SPA teardown hook (no persistent observers yet).
+    }
 }
 
-// Initialize photos page when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('masonryGrid')) {
-        new PhotosPage();
-    }
-});
+// Boot for full page load AND SPA page swaps (hshs:page).
+function startPhotos() {
+    if (!document.getElementById('masonryGrid')) return;
+    try {
+        if (window.__hshsPhotosPage && typeof window.__hshsPhotosPage.destroy === 'function') {
+            window.__hshsPhotosPage.destroy();
+        }
+    } catch (e) {}
+    window.__hshsPhotosPage = new PhotosPage();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startPhotos);
+} else {
+    startPhotos();
+}
+document.addEventListener('hshs:page', startPhotos);
+window.startPhotos = startPhotos;
 
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
