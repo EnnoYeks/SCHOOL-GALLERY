@@ -51,7 +51,7 @@ const els = {
 };
 
 const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({
-  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
+  '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '"',
 }[char]));
 const toNumber = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
 const debounce = (fn, wait = 250) => {
@@ -296,7 +296,30 @@ function setupNotifications() {
 }
 
 function boot() {
-  setupTabs(); setupSearch(); setupInfiniteScroll(); setupNotifications(); loadTrending('week');
+  // Re-bind element refs after SPA replaces #hshs-page content
+  els.trendingGrid = document.getElementById('trendingGrid');
+  els.topCategoriesGrid = document.getElementById('topCategoriesGrid');
+  els.topLikedList = document.getElementById('topLikedList');
+  els.topViewedList = document.getElementById('topViewedList');
+  els.topCommentedList = document.getElementById('topCommentedList');
+  els.searchInput = document.getElementById('searchInput');
+  els.searchResults = document.getElementById('searchResults');
+  els.notificationBadge = document.getElementById('notificationBadge');
+  els.notificationsList = document.getElementById('notificationsList');
+  if (!els.trendingGrid) return;
+  try {
+    if (state.notificationUnsubscribe) {
+      state.notificationUnsubscribe();
+      state.notificationUnsubscribe = null;
+    }
+  } catch (e) {}
+  state.page = 1;
+  state.posts = [];
+  state.visiblePosts = [];
+  state.hasMore = true;
+  setupTabs(); setupSearch(); setupInfiniteScroll(); setupNotifications(); loadTrending(state.period || 'week');
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 else boot();
+document.addEventListener('hshs:page', boot);
+window.startTrending = boot;
