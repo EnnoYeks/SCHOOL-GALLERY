@@ -1,40 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- CRITICAL: Add this meta tag FIRST in head -->
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
     <meta name="description" content="ENNOYEKS School Gallery - Share moments, connect community">
     <meta name="theme-color" content="#6366f1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <!-- Prevent zoom on input focus (iOS) -->
     <style>
         input[type="text"],
         input[type="email"],
         textarea,
-        select {
-            font-size: 16px !important;
-        }
+        select { font-size: 16px !important; }
     </style>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>For You Feed - ENNOYEKS School Gallery</title>
-    
-    <!-- ✅ FIXED PATHS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/style.css?v=260904r">
-    <link rel="stylesheet" href="../css/animations.css?v=260904r">
-    <link rel="stylesheet" href="../css/responsive.css?v=260904r">
-    <link rel="stylesheet" href="../css/gallery.css?v=260904r">
-    <link rel="stylesheet" href="../css/hshs-no-flicker.css?v=260904r">
-    <link rel="stylesheet" href="../css/theme.css?v=260904r">
-    <link rel="stylesheet" href="../css/mobile-shell.css?v=260904r">
-    <link rel="stylesheet" href="../css/hshs-polish.css?v=260904r">
-    <link rel="stylesheet" href="../css/gallery-transitions.css?v=260904r">
+    <link rel="stylesheet" href="../css/style.css?v=260904g">
+    <link rel="stylesheet" href="../css/animations.css?v=260904g">
+    <link rel="stylesheet" href="../css/responsive.css?v=260904g">
+    <link rel="stylesheet" href="../css/gallery.css?v=260904g">
+    <link rel="stylesheet" href="../css/hshs-no-flicker.css?v=260904g">
+    <link rel="stylesheet" href="../css/theme.css?v=260904g">
+    <link rel="stylesheet" href="../css/mobile-shell.css?v=260904g">
+    <link rel="stylesheet" href="../css/hshs-polish.css?v=260904g">
+    <link rel="stylesheet" href="../css/gallery-transitions.css?v=260904g">
 </head>
 <body class="light-mode">
-    <!-- Animated Background -->
     <div class="animated-bg">
         <div class="gradient-bg"></div>
         <div class="particles-container" id="particlesContainer"></div>
@@ -46,7 +37,6 @@
         </div>
     </div>
 
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
             <div class="logo">
@@ -86,7 +76,6 @@
                     <span>Spotlight</span>
                 </a>
             </div>
-
             <div class="nav-actions">
                 <div class="notification-icon">
                     <i class="fas fa-bell"></i>
@@ -97,30 +86,14 @@
                         </div>
                     </div>
                 </div>
-
-                <button class="theme-toggle" id="themeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
-
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
                 <div class="profile-icon">
                     <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img" id="profileImg">
                     <div class="profile-dropdown" id="profileDropdown">
-                        <a href="profile.html" class="dropdown-item">
-                            <i class="fas fa-user"></i> My Profile
-                        </a>
-                        <a href="settings.html" class="dropdown-item">
-                            <i class="fas fa-cog"></i> Settings
-                        </a>
-                        <a href="admin.html" class="dropdown-item">
-                            <i class="fas fa-shield-alt"></i> Admin Dashboard
-                        </a>
-                        <hr>
-                        <a href="#" class="dropdown-item logout">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
+                        <a href="profile.html" class="dropdown-item"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="settings.html" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
                     </div>
                 </div>
-
                 <button class="mobile-menu-toggle" id="mobileMenuToggle">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -128,9 +101,7 @@
         </div>
     </nav>
 
-    <!-- Gallery Container -->
-    <div class="gallery-container">
-        <!-- Category Filter -->
+    <div class="gallery-container" data-js-page="gallery" id="app-root">
         <div class="category-filter" id="categoryFilter">
             <button class="category-btn active" data-category="all">
                 <i class="fas fa-th"></i> All
@@ -161,21 +132,18 @@
             </button>
         </div>
 
-        <!-- Story Bar -->
         <div class="story-bar" id="storyBar">
             <div class="story-item">
                 <i class="fas fa-plus"></i>
             </div>
         </div>
 
-        <!-- Main Feed -->
         <div class="gallery-feed" id="galleryFeed">
             <div class="post-loading">
                 <div class="loading-spinner"></div>
             </div>
         </div>
 
-        <!-- Swipe Indicator -->
         <div class="swipe-indicator" id="swipeIndicator">
             <div class="swipe-arrow">
                 <i class="fas fa-arrow-down"></i>
@@ -184,12 +152,10 @@
         </div>
     </div>
 
-    <!-- Double Tap Like Overlay -->
     <div class="double-tap-overlay" id="doubleTapOverlay">
         <i class="fas fa-heart"></i>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -208,7 +174,7 @@
                     <h4>Resources</h4>
                     <a href="#">Privacy Policy</a>
                     <a href="#">Terms of Service</a>
-                    <a href="#">Contact</a>
+                    <a href="contat.html">Contact</a>
                     <a href="#">Support</a>
                 </div>
             </div>
@@ -218,17 +184,18 @@
         </div>
     </footer>
 
-    <!-- ✅ FIXED JS PATHS -->
-    <script type="module" src="../js/config.js?v=260904r"></script>
-    <script type="module" src="../js/db.js?v=260904r"></script>
-    <script src="../js/utils.js?v=260904r"></script>
-    <script src="../js/particles.js?v=260904r"></script>
-    <script src="../js/theme.js?v=260904r"></script>
-    <script src="../js/navigation.js?v=260904r"></script>
-    <script src="../js/search.js?v=260904r"></script>
-    <script src="../js/mobile-navigation.js?v=260904r"></script>
-    <script src="../js/mobile-shell.js?v=260904r"></script>
-    <script src="../js/gallery.js?v=260904r"></script>
-    <script src="../js/gallery-transitions.js?v=260904r"></script>
+    <script type="module" src="../js/config.js?v=260904g"></script>
+    <script type="module" src="../js/db.js?v=260904g"></script>
+    <script src="../js/utils.js?v=260904g"></script>
+    <script src="../js/hshs-store.js?v=260904g"></script>
+    <script src="../js/particles.js?v=260904g"></script>
+    <script src="../js/theme.js?v=260904g"></script>
+    <script src="../js/navigation.js?v=260904g"></script>
+    <script src="../js/search.js?v=260904g"></script>
+    <script src="../js/mobile-navigation.js?v=260904g"></script>
+    <script src="../js/mobile-shell.js?v=260904g"></script>
+    <script src="../js/gallery.js?v=260904g"></script>
+    <script src="../js/gallery-transitions.js?v=260904g"></script>
+    <script src="../js/hshs-js.js?v=260904g"></script>
 </body>
 </html>
