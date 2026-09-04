@@ -210,14 +210,34 @@ class GalleryPage {
     previousPost() {
         Utils.showToast('Already at the beginning', 'info');
     }
+
+    destroy() {
+        try {
+            if (this.observer) this.observer.disconnect();
+        } catch (e) {}
+        this.observer = null;
+    }
 }
 
-// Initialize gallery when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('galleryFeed')) {
-        new GalleryPage();
-    }
-});
+// Boot for full page load AND for SPA page swaps (hshs:page).
+// DOMContentLoaded alone is not enough: in-app navigation injects Gallery
+// HTML after that event has already fired, which left the feed empty.
+function startGallery() {
+    if (!document.getElementById('galleryFeed')) return;
+    try {
+        if (window.__hshsGalleryPage && typeof window.__hshsGalleryPage.destroy === 'function') {
+            window.__hshsGalleryPage.destroy();
+        }
+    } catch (e) {}
+    window.__hshsGalleryPage = new GalleryPage();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startGallery);
+} else {
+    startGallery();
+}
+document.addEventListener('hshs:page', startGallery);
 
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
