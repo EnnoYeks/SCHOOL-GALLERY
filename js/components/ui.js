@@ -61,5 +61,55 @@
       ])
     ]);
   }
-  global.HshsUI = { skeleton: skeleton, emptyState: emptyState, btn: btn, sectionTitle: sectionTitle, hero: hero, pageHeader: pageHeader, mediaCard: mediaCard };
+  function postCard(post) {
+    post = post || {};
+    var id = post.id || '';
+    var img = post.image || post.imageUrl || post.url || post.mediaUrl || post.thumbnail || 'https://via.placeholder.com/600x800';
+    var title = post.title || post.caption || 'Untitled';
+    var desc = post.description || post.caption || '';
+    var author = post.author || post.userName || 'Student';
+    var likes = post.likes || post.likeCount || 0;
+    var comments = post.comments || post.commentCount || 0;
+    var shares = post.shares || 0;
+    var saves = post.saves || 0;
+    var isVideo = (post.type === 'video') || (String(post.mediaType || '').indexOf('video') !== -1);
+    var media = isVideo
+      ? R().el('video', { src: img, className: 'post-media', controls: true, playsInline: true })
+      : R().el('img', { src: img, alt: title, className: 'post-media' });
+    return R().el('article', { className: 'post-card', dataset: { id: id, category: post.category || '' } }, [
+      R().el('div', { className: 'post-content' }, [
+        media,
+        R().el('div', { className: 'post-overlay' }),
+        R().el('div', { className: 'post-info' }, [
+          R().el('h2', { className: 'post-title', text: title }),
+          R().el('p', { className: 'post-description', text: desc.length > 150 ? desc.slice(0, 150) + '\u2026' : desc }),
+          R().el('div', { className: 'post-meta' }, [
+            R().el('div', { className: 'meta-item' }, [R().icon('fa-user'), ' ' + author])
+          ])
+        ]),
+        R().el('div', { className: 'side-actions' }, [
+          actionBtn('like-action', 'fa-heart', likes, id, 'like'),
+          actionBtn('comment-action', 'fa-comment', comments, id, 'comment'),
+          actionBtn('share-action', 'fa-share', shares, id, 'share'),
+          actionBtn('save-action', 'fa-bookmark', saves, id, 'save')
+        ])
+      ])
+    ]);
+  }
+  function actionBtn(cls, icon, count, postId, kind) {
+    return R().el('button', {
+      type: 'button',
+      className: 'action-btn ' + cls,
+      dataset: { postId: postId, action: kind },
+      onclick: function () {
+        if (kind === 'like' && global.HshsData && global.HshsData.toggleLike) global.HshsData.toggleLike(postId);
+        else if (kind === 'like' && global.reactionManager) global.reactionManager.toggleLike(postId);
+        else if (kind === 'share' && global.reactionManager) global.reactionManager.sharePost(postId);
+      }
+    }, [
+      R().el('i', { className: 'far ' + icon }),
+      R().el('div', { className: 'action-count', text: String(count) })
+    ]);
+  }
+  global.HshsUI = { skeleton: skeleton, emptyState: emptyState, btn: btn, sectionTitle: sectionTitle, hero: hero, pageHeader: pageHeader, mediaCard: mediaCard, postCard: postCard };
 })(typeof window !== 'undefined' ? window : this);
