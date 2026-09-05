@@ -6,6 +6,7 @@
   'use strict';
   if (window.__hshsFoundationBooted) return;
   window.__hshsFoundationBooted = true;
+  try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
 
   function assetBase() {
     var scripts = document.querySelectorAll('script[src]');
@@ -50,6 +51,7 @@
       try { await loadScript(ver(base + 'components/error.js'), 'hshs-comp-error'); } catch (e) {}
       try { await loadScript(ver(base + 'components/shared-ui.js'), 'hshs-comp-shared'); } catch (e) {}
       try { await loadScript(ver(base + 'core/data.js'), 'hshs-core-data'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/lifecycle.js'), 'hshs-core-lifecycle'); } catch (e) {}
       if (window.HshsApp) {
         window.HshsApp.setState({ foundation: true });
         window.HshsApp.markReady();
@@ -57,6 +59,8 @@
       document.dispatchEvent(new CustomEvent('hshs:foundation-ready', {
         detail: { version: (window.HshsApp && window.HshsApp.version) || '1.0.0-phase6' }
       }));
+      document.documentElement.classList.add('hshs-js-ready');
+      document.documentElement.classList.remove('hshs-js-booting');
       console.info('[HSHS] Phase 1+5+6 foundation ready');
     } catch (err) {
       console.warn('[HSHS] Foundation boot partial failure — falling back to existing system', err);
