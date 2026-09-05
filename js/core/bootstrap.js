@@ -1,5 +1,6 @@
 /**
  * HSHS Foundation Bootstrap – JS-first stack
+ * Critical modules must load; optional modules may fail.
  */
 (function () {
   'use strict';
@@ -16,6 +17,9 @@
       }
       if (src.indexOf('mobile-shell.js') !== -1) {
         return src.replace(/js\/mobile-shell\.js.*$/, 'js/');
+      }
+      if (src.indexOf('core/bootstrap.js') !== -1) {
+        return src.replace(/js\/core\/bootstrap\.js.*$/, 'js/');
       }
     }
     return location.pathname.indexOf('/index/') !== -1 ? '../js/' : 'js/';
@@ -35,7 +39,7 @@
   }
 
   function ver(url) {
-    var v = window.__hshsAssetVer || '260905j1';
+    var v = window.__hshsAssetVer || '260905j2';
     return url + (url.indexOf('?') === -1 ? '?v=' + v : '');
   }
 
@@ -49,25 +53,37 @@
       await loadScript(ver(base + 'components/shell.js'), 'hshs-comp-shell');
       await loadScript(ver(base + 'router/history.js'), 'hshs-router-history');
       await loadScript(ver(base + 'router/router.js'), 'hshs-router-main');
-      try { await loadScript(ver(base + 'components/loading.js'), 'hshs-comp-loading'); } catch (e) {}
-      try { await loadScript(ver(base + 'components/error.js'), 'hshs-comp-error'); } catch (e) {}
-      try { await loadScript(ver(base + 'components/shared-ui.js'), 'hshs-comp-shared'); } catch (e) {}
-      try { await loadScript(ver(base + 'core/data.js'), 'hshs-core-data'); } catch (e) {}
-      try { await loadScript(ver(base + 'core/lifecycle.js'), 'hshs-core-lifecycle'); } catch (e) {}
-      if (window.HshsApp) {
-        window.HshsApp.setState({ foundation: true });
-        window.HshsApp.markReady();
-      }
-      document.dispatchEvent(new CustomEvent('hshs:foundation-ready', {
-        detail: { version: (window.HshsApp && window.HshsApp.version) || '1.0.0-jsfirst' }
-      }));
-      document.documentElement.classList.add('hshs-js-ready');
-      document.documentElement.classList.remove('hshs-js-booting');
-      console.info('[HSHS] JS-first foundation ready');
     } catch (err) {
-      console.warn('[HSHS] Foundation boot partial failure', err);
-      if (window.HshsApp) window.HshsApp.reportError(err, 'foundation.boot');
+      console.error('[HSHS] Critical foundation failure', err);
+      if (window.HshsApp) window.HshsApp.reportError(err, 'foundation.critical');
+      document.documentElement.classList.add('hshs-js-failed');
+      document.documentElement.classList.remove('hshs-js-booting');
+      return;
     }
+
+    try { await loadScript(ver(base + 'components/loading.js'), 'hshs-comp-loading'); } catch (e) { console.warn('[HSHS] optional loading.js', e); }
+    try { await loadScript(ver(base + 'components/error.js'), 'hshs-comp-error'); } catch (e) { console.warn('[HSHS] optional error.js', e); }
+    try { await loadScript(ver(base + 'components/shared-ui.js'), 'hshs-comp-shared'); } catch (e) { console.warn('[HSHS] optional shared-ui.js', e); }
+    try { await loadScript(ver(base + 'core/data.js'), 'hshs-core-data'); } catch (e) { console.warn('[HSHS] optional data.js', e); }
+    try { await loadScript(ver(base + 'core/lifecycle.js'), 'hshs-core-lifecycle'); } catch (e) { console.warn('[HSHS] optional lifecycle.js', e); }
+
+    if (!window.HshsRender || !window.HshsUI || !window.HshsShell) {
+      console.error('[HSHS] Foundation incomplete after load');
+      document.documentElement.classList.add('hshs-js-failed');
+      document.documentElement.classList.remove('hshs-js-booting');
+      return;
+    }
+
+    if (window.HshsApp) {
+      window.HshsApp.setState({ foundation: true });
+      window.HshsApp.markReady();
+    }
+    document.dispatchEvent(new CustomEvent('hshs:foundation-ready', {
+      detail: { version: (window.HshsApp && window.HshsApp.version) || '1.0.0-jsfirst' }
+    }));
+    document.documentElement.classList.add('hshs-js-ready');
+    document.documentElement.classList.remove('hshs-js-booting');
+    console.info('[HSHS] JS-first foundation ready');
   }
 
   if (document.readyState === 'loading') {
