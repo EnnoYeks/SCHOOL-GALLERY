@@ -1,14 +1,14 @@
 (function (global) {
   'use strict';
-  if (global.__hshsGalleryPageModule) return;
-  global.__hshsGalleryPageModule = true;
-  var PAGE_NAME = 'gallery';
-  var PAGE_PATH = 'index/gallery.html';
+  if (global.__hshsAdminPageModule) return;
+  global.__hshsAdminPageModule = true;
+  var PAGE_NAME = 'admin';
+  var PAGE_PATH = 'index/admin.html';
   function currentFile() {
     try { return (location.pathname.split('/').pop() || 'index.html').toLowerCase(); }
     catch (e) { return 'index.html'; }
   }
-  function isPage() { return currentFile() === 'gallery.html'; }
+  function isPage() { return currentFile() === 'admin.html'; }
   function register() {
     if (!global.HshsRouter && !global.HshsApp) return;
     if (global.HshsApp) {
@@ -29,12 +29,7 @@
   function activate(fromNav) {
     if (!isPage()) return;
     document.documentElement.classList.add('hshs-page-' + PAGE_NAME);
-    document.documentElement.classList.add('hshs-page-active');
     document.documentElement.setAttribute('data-hshs-page', PAGE_NAME);
-    if (global.HshsSharedUI && global.HshsSharedUI.markActiveNav) {
-      try { global.HshsSharedUI.markActiveNav(); } catch (e) {}
-    }
-    document.dispatchEvent(new CustomEvent('hshs:page-active', { detail: { page: PAGE_NAME, path: PAGE_PATH, fromNav: !!fromNav } }));
     console.info('[HSHS]', PAGE_NAME, 'page module active');
   }
   function onReady() { register(); if (isPage()) activate(false); }

@@ -2,40 +2,49 @@
   'use strict';
   if (global.__hshsHomePageModule) return;
   global.__hshsHomePageModule = true;
+  var PAGE_NAME = 'home';
+  var PAGE_PATH = 'index.html';
+  function currentFile() {
+    try { return (location.pathname.split('/').pop() || 'index.html').toLowerCase(); }
+    catch (e) { return 'index.html'; }
+  }
   function isPage() {
-    var file = (location.pathname.split('/').pop() || '').toLowerCase();
+    var file = currentFile();
     return file === 'index.html' || file === '';
   }
-  function onFoundationReady() {
-    if (!global.HshsRouter) return;
+  function register() {
+    if (!global.HshsRouter && !global.HshsApp) return;
     if (global.HshsApp) {
-      global.HshsApp.setState({
-        pages: Object.assign({}, (global.HshsApp.getState().pages || {}), {
-          home: { registered: true, path: 'index.html' }
-        })
-      });
+      var pages = (global.HshsApp.getState().pages || {});
+      pages[PAGE_NAME] = { registered: true, path: PAGE_PATH, active: isPage() };
+      global.HshsApp.setState({ pages: pages, currentRoute: isPage() ? PAGE_PATH : global.HshsApp.getState().currentRoute });
     }
     global.HshsPages = global.HshsPages || {};
-    global.HshsPages.home = {
-      name: 'home', path: 'index.html',
-      isActive: function () { return isPage(); },
+    global.HshsPages[PAGE_NAME] = {
+      name: PAGE_NAME, path: PAGE_PATH, isActive: isPage,
       navigate: function () {
-        if (global.HshsRouter) return global.HshsRouter.navigate('home');
-        location.href = 'index.html';
-      }
+        if (global.HshsRouter) return global.HshsRouter.navigate(PAGE_NAME);
+        location.href = PAGE_PATH;
+      },
+      reinit: function () { if (isPage()) activate(true); }
     };
-    if (isPage()) {
-      document.documentElement.classList.add('hshs-page-home');
-      console.info('[HSHS] Home page module active');
+  }
+  function activate(fromNav) {
+    if (!isPage()) return;
+    document.documentElement.classList.add('hshs-page-' + PAGE_NAME);
+    document.documentElement.classList.add('hshs-page-active');
+    document.documentElement.setAttribute('data-hshs-page', PAGE_NAME);
+    if (global.HshsSharedUI && global.HshsSharedUI.markActiveNav) {
+      try { global.HshsSharedUI.markActiveNav(); } catch (e) {}
     }
+    document.dispatchEvent(new CustomEvent('hshs:page-active', { detail: { page: PAGE_NAME, path: PAGE_PATH, fromNav: !!fromNav } }));
+    console.info('[HSHS]', PAGE_NAME, 'page module active');
   }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      document.addEventListener('hshs:foundation-ready', onFoundationReady, { once: true });
-      setTimeout(onFoundationReady, 120);
-    }, { once: true });
-  } else {
-    document.addEventListener('hshs:foundation-ready', onFoundationReady, { once: true });
-    setTimeout(onFoundationReady, 120);
+  function onReady() { register(); if (isPage()) activate(false); }
+  function boot() {
+    document.addEventListener('hshs:foundation-ready', onReady, { once: true });
+    setTimeout(function () { if (global.HshsApp || global.HshsRouter) onReady(); }, 150);
   }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })(typeof window !== 'undefined' ? window : this);
