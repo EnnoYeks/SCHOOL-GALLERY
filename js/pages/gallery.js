@@ -1,46 +1,70 @@
+/**
+ * JS-first page module: gallery
+ */
 (function (global) {
   'use strict';
   if (global.__hshsGalleryPageModule) return;
   global.__hshsGalleryPageModule = true;
-  var PAGE_NAME = 'gallery';
-  var PAGE_PATH = 'index/gallery.html';
-  function currentFile() {
-    try { return (location.pathname.split('/').pop() || 'index.html').toLowerCase(); }
-    catch (e) { return 'index.html'; }
+  var PAGE = 'gallery';
+  var PATH = 'index/gallery.html';
+  function isPage() {
+    return (location.pathname.split('/').pop() || '').toLowerCase() === 'gallery.html';
   }
-  function isPage() { return currentFile() === 'gallery.html'; }
-  function register() {
-    if (!global.HshsRouter && !global.HshsApp) return;
-    if (global.HshsApp) {
-      var pages = (global.HshsApp.getState().pages || {});
-      pages[PAGE_NAME] = { registered: true, path: PAGE_PATH, active: isPage() };
-      global.HshsApp.setState({ pages: pages });
+  async function hydrateFeed(elId) {
+    var el = document.getElementById(elId);
+    if (!el) return;
+    try {
+      var posts = [];
+      if (global.HshsData && global.HshsData.getPosts) posts = await global.HshsData.getPosts(24, 0) || [];
+      global.HshsRender.clear(el);
+      if (!posts.length) {
+        el.appendChild(global.HshsUI.emptyState('No posts yet. Be the first to share.', 'fa-images'));
+        return;
+      }
+      posts.forEach(function (p) {
+        el.appendChild(global.HshsUI.mediaCard({
+          id: p.id, url: p.imageUrl || p.url || p.mediaUrl || p.thumbnail,
+          caption: p.caption || p.title || '', likes: p.likes || 0, type: p.type
+        }));
+      });
+    } catch (e) {
+      global.HshsRender.clear(el);
+      el.appendChild(global.HshsUI.emptyState('Could not load content.', 'fa-exclamation-triangle'));
     }
-    global.HshsPages = global.HshsPages || {};
-    global.HshsPages[PAGE_NAME] = {
-      name: PAGE_NAME, path: PAGE_PATH, isActive: isPage,
-      navigate: function () {
-        if (global.HshsRouter) return global.HshsRouter.navigate(PAGE_NAME);
-        location.href = PAGE_PATH;
-      },
-      reinit: function () { if (isPage()) activate(true); }
-    };
   }
-  function activate(fromNav) {
-    if (!isPage()) return;
-    document.documentElement.classList.add('hshs-page-' + PAGE_NAME);
-    document.documentElement.classList.add('hshs-page-active');
-    document.documentElement.setAttribute('data-hshs-page', PAGE_NAME);
-    if (global.HshsSharedUI && global.HshsSharedUI.markActiveNav) {
-      try { global.HshsSharedUI.markActiveNav(); } catch (e) {}
+  function render(root) {
+    var R = global.HshsRender, UI = global.HshsUI;
+    function chip(label, cat, active) {
+      return R.el('button', { type: 'button', className: 'filter-chip' + (active ? ' active' : ''), dataset: { category: cat }, text: label });
     }
-    document.dispatchEvent(new CustomEvent('hshs:page-active', { detail: { page: PAGE_NAME, path: PAGE_PATH, fromNav: !!fromNav } }));
-    console.info('[HSHS]', PAGE_NAME, 'page module active');
+    R.mount(root, [
+      R.el('div', { className: 'gallery-container' }, [
+        R.el('div', { className: 'category-filter', id: 'categoryFilter' }, [
+          chip('All', 'all', true), chip('Photos', 'photo'), chip('Videos', 'video'), chip('Events', 'event')
+        ]),
+        R.el('div', { className: 'gallery-feed', id: 'galleryFeed' }, [UI.skeleton(6)])
+      ])
+    ]);
+    hydrateFeed('galleryFeed');
   }
-  function onReady() { register(); if (isPage()) activate(false); }
+  function mount() {
+    if (!isPage() || !global.HshsRender || !global.HshsUI) return;
+    if (global.HshsShell) global.HshsShell.ensureShell();
+    var root = document.getElementById('hshs-page');
+    if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
+    document.documentElement.setAttribute('data-hshs-page', PAGE);
+    render(root);
+    console.info('[HSHS] JS-first page active:', PAGE);
+  }
   function boot() {
-    document.addEventListener('hshs:foundation-ready', onReady, { once: true });
-    setTimeout(function () { if (global.HshsApp || global.HshsRouter) onReady(); }, 150);
+    global.HshsPages = global.HshsPages || {};
+    global.HshsPages[PAGE] = { name: PAGE, path: PATH, isActive: isPage, mount: mount, reinit: function(){ if(isPage()) mount(); } };
+    function go() {
+      if (!isPage()) return;
+      if (!global.HshsRender || !global.HshsUI) { setTimeout(go, 40); return; }
+      mount();
+    }
+    document.addEventListener('hshs:foundation-ready', go, { once: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
