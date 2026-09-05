@@ -2,26 +2,33 @@
   'use strict';
   if (global.__hshsVideosPageModule) return;
   global.__hshsVideosPageModule = true;
-  var PAGE = 'videos';
   function isPage() { return (location.pathname.split('/').pop() || '').toLowerCase() === 'videos.html'; }
   async function hydrate(elId) {
     var el = document.getElementById(elId); if (!el) return;
     try {
       var posts = (global.HshsData && global.HshsData.getPosts) ? await global.HshsData.getPosts(24, 0) : [];
-      global.HshsRender.clear(el);
-      if (!posts || !posts.length) { el.appendChild(global.HshsUI.emptyState('No videos yet.', 'fa-video')); return; }
-      posts.forEach(function (p) {
-        el.appendChild(global.HshsUI.mediaCard({ id: p.id, url: p.imageUrl || p.url || p.mediaUrl, caption: p.caption || '', likes: p.likes || 0, type: 'video' }));
+      posts = (posts || []).filter(function (p) {
+        var t = (p.type || p.mediaType || '').toLowerCase();
+        return t.indexOf('video') !== -1;
       });
-    } catch (e) { global.HshsRender.clear(el); el.appendChild(global.HshsUI.emptyState('Could not load.', 'fa-exclamation-triangle')); }
+      global.HshsRender.clear(el);
+      if (!posts.length) { el.appendChild(global.HshsUI.emptyState('No videos yet.', 'fa-video')); return; }
+      posts.forEach(function (p) {
+        el.appendChild(global.HshsUI.postCard ? global.HshsUI.postCard(Object.assign({}, p, { type: 'video' })) : global.HshsUI.mediaCard(p));
+      });
+    } catch (e) {
+      global.HshsRender.clear(el);
+      el.appendChild(global.HshsUI.emptyState('Could not load.', 'fa-exclamation-triangle'));
+    }
   }
   function mount() {
     if (!isPage() || !global.HshsRender) return;
     if (global.HshsShell) global.HshsShell.ensureShell();
-    var root = document.getElementById('hshs-page') || document.body.appendChild(Object.assign(document.createElement('div'), { id: 'hshs-page' }));
+    var root = document.getElementById('hshs-page');
+    if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
     global.HshsRender.mount(root, [
       global.HshsUI.pageHeader('Vibe', 'Short videos from campus'),
-      global.HshsRender.el('div', { className: 'vibe-feed', id: 'vibeFeed' }, [global.HshsUI.skeleton(4)])
+      global.HshsRender.el('div', { className: 'vibe-feed', id: 'vibeFeed', style: { padding: '1rem' } }, [global.HshsUI.skeleton(4)])
     ]);
     hydrate('vibeFeed');
     console.info('[HSHS] JS-first page active: videos');
