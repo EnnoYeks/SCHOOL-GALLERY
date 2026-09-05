@@ -1,6 +1,5 @@
 /**
- * HSHS Foundation Bootstrap – loads modular core after existing shell.
- * Additive; existing mobile-shell continues to own page swapping.
+ * HSHS Foundation Bootstrap – JS-first stack
  */
 (function () {
   'use strict';
@@ -36,7 +35,7 @@
   }
 
   function ver(url) {
-    var v = window.__hshsAssetVer || '260905p6';
+    var v = window.__hshsAssetVer || '260905j1';
     return url + (url.indexOf('?') === -1 ? '?v=' + v : '');
   }
 
@@ -45,6 +44,9 @@
     try {
       await loadScript(ver(base + 'core/app.js'), 'hshs-core-app');
       await loadScript(ver(base + 'utils/dom.js'), 'hshs-utils-dom');
+      await loadScript(ver(base + 'core/render.js'), 'hshs-core-render');
+      await loadScript(ver(base + 'components/ui.js'), 'hshs-comp-ui');
+      await loadScript(ver(base + 'components/shell.js'), 'hshs-comp-shell');
       await loadScript(ver(base + 'router/history.js'), 'hshs-router-history');
       await loadScript(ver(base + 'router/router.js'), 'hshs-router-main');
       try { await loadScript(ver(base + 'components/loading.js'), 'hshs-comp-loading'); } catch (e) {}
@@ -57,13 +59,13 @@
         window.HshsApp.markReady();
       }
       document.dispatchEvent(new CustomEvent('hshs:foundation-ready', {
-        detail: { version: (window.HshsApp && window.HshsApp.version) || '1.0.0-phase6' }
+        detail: { version: (window.HshsApp && window.HshsApp.version) || '1.0.0-jsfirst' }
       }));
       document.documentElement.classList.add('hshs-js-ready');
       document.documentElement.classList.remove('hshs-js-booting');
-      console.info('[HSHS] Phase 1+5+6 foundation ready');
+      console.info('[HSHS] JS-first foundation ready');
     } catch (err) {
-      console.warn('[HSHS] Foundation boot partial failure — falling back to existing system', err);
+      console.warn('[HSHS] Foundation boot partial failure', err);
       if (window.HshsApp) window.HshsApp.reportError(err, 'foundation.boot');
     }
   }
