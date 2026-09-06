@@ -3,25 +3,22 @@
   if (global.__hshsMorePageModule) return;
   global.__hshsMorePageModule = true;
   function isPage() { return (location.pathname.split('/').pop() || '').toLowerCase() === 'more.html'; }
-  function mount() {
-    if (!isPage() || !global.HshsRender || !global.HshsUI) return;
+  function assetBase() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  async function mount() {
+    if (!isPage() || !global.HshsRender) return;
     if (global.HshsShell) global.HshsShell.ensureShell();
     var root = document.getElementById('hshs-page');
     if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
-    var R = global.HshsRender, UI = global.HshsUI;
-    var b = (global.HshsShell && global.HshsShell.basePath) ? global.HshsShell.basePath() : '../';
     document.documentElement.setAttribute('data-hshs-page', 'more');
-    R.mount(root, [
-      UI.pageHeader('More', 'Explore more of HSHS World'),
-      R.el('div', { className: 'page-content', style: { padding: '1rem', display: 'grid', gap: '0.75rem' } }, [
-        UI.btn('About', { href: b + 'index/about.html', variant: 'btn-secondary' }),
-        UI.btn('Profile', { href: b + 'index/profile.html', variant: 'btn-secondary' }),
-        UI.btn('Settings', { href: b + 'index/settings.html', variant: 'btn-secondary' }),
-        UI.btn('Saved', { href: b + 'index/saved.html', variant: 'btn-secondary' }),
-        UI.btn('Contact', { href: b + 'index/contat.html', variant: 'btn-secondary' })
-      ])
-    ]);
-    console.info('[HSHS] JS-first page active: more');
+    var base = assetBase();
+    if (!document.querySelector('link[data-hshs-page-css="css/hshs-more.css"]')) {
+      var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base + 'css/hshs-more.css?v=260906r';
+      l.setAttribute('data-hshs-page-css', 'css/hshs-more.css'); document.head.appendChild(l);
+    }
+    var tpl = global.HshsTemplates && global.HshsTemplates.more;
+    if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+    else if (tpl) root.innerHTML = tpl;
+    console.info('[HSHS] JS-first full page active: more');
   }
   function boot() {
     function go() { if (!isPage()) return; if (!global.HshsRender) { setTimeout(go, 40); return; } mount(); }
