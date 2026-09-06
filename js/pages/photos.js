@@ -1,38 +1,68 @@
+/**
+ * JS-first photos: full masonry + modal from main + PhotosPage
+ */
 (function (global) {
   'use strict';
   if (global.__hshsPhotosPageModule) return;
   global.__hshsPhotosPageModule = true;
-  function isPage() { return (location.pathname.split('/').pop() || '').toLowerCase() === 'photos.html'; }
-  function mount() {
-    if (!isPage() || !global.HshsRender || !global.HshsUI) return;
+  function isPage() {
+    return (location.pathname.split('/').pop() || '').toLowerCase() === 'photos.html';
+  }
+  function assetBase() {
+    return location.pathname.indexOf('/index/') !== -1 ? '../' : '';
+  }
+  function loadOnce(src, id) {
+    return new Promise(function (resolve) {
+      if (id && document.getElementById(id)) { resolve(); return; }
+      var s = document.createElement('script');
+      if (id) s.id = id;
+      s.src = src; s.async = false;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { resolve(); };
+      document.head.appendChild(s);
+    });
+  }
+  async function mount() {
+    if (!isPage() || !global.HshsRender) return;
+    if (global.__hshsPhotosMounted) return;
     if (global.HshsShell) global.HshsShell.ensureShell();
     var root = document.getElementById('hshs-page');
-    if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
-    var R = global.HshsRender, UI = global.HshsUI;
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'hshs-page';
+      document.body.appendChild(root);
+    }
     document.documentElement.setAttribute('data-hshs-page', 'photos');
-    R.mount(root, [
-      UI.pageHeader('Photos', 'School moments in pictures'),
-      R.el('div', { className: 'page-content', id: 'photosFeed', style: { padding: '1rem' } }, [UI.skeleton(6)])
-    ]);
-    (async function () {
-      var el = document.getElementById('photosFeed');
-      if (!el) return;
-      try {
-        var posts = (global.HshsData && global.HshsData.getPosts) ? await global.HshsData.getPosts(24, 0) : [];
-        posts = (posts || []).filter(function (p) {
-          var t = (p.type || p.mediaType || '').toLowerCase();
-          return t.indexOf('video') === -1;
-        });
-        R.clear(el);
-        if (!posts.length) { el.appendChild(UI.emptyState('No photos yet.', 'fa-images')); return; }
-        posts.forEach(function (p) { el.appendChild(UI.postCard ? UI.postCard(p) : UI.mediaCard(p)); });
-      } catch (e) { R.clear(el); el.appendChild(UI.emptyState('Could not load.', 'fa-exclamation-triangle')); }
-    })();
-    console.info('[HSHS] JS-first page active: photos');
+    var base = assetBase();
+    var tpl = global.HshsTemplates && global.HshsTemplates.photos;
+    if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+    else if (tpl) root.innerHTML = tpl;
+    if (!document.querySelector('link[data-hshs-page-css="css/photos.css"]')) {
+      var l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.href = base + 'css/photos.css?v=260906r';
+      l.setAttribute('data-hshs-page-css', 'css/photos.css');
+      document.head.appendChild(l);
+    }
+    await loadOnce(base + 'js/photos.js?v=260906r', 'hshs-legacy-photos');
+    try {
+      setTimeout(function () {
+        if (typeof PhotosPage === 'function' && document.getElementById('masonryGrid') && !global.__hshsPhotosPageInstance) {
+          global.__hshsPhotosPageInstance = new PhotosPage();
+        }
+      }, 50);
+    } catch (e) { console.warn('[HSHS] photos init', e); }
+    global.__hshsPhotosMounted = true;
+    console.info('[HSHS] JS-first full page active: photos');
   }
   function boot() {
-    function go() { if (!isPage()) return; if (!global.HshsRender) { setTimeout(go, 40); return; } mount(); }
+    function go() {
+      if (!isPage()) return;
+      if (!global.HshsRender || !global.HshsTemplates) { setTimeout(go, 40); return; }
+      mount();
+    }
     document.addEventListener('hshs:foundation-ready', go, { once: true });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })(typeof window !== 'undefined' ? window : this);

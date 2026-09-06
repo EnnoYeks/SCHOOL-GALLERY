@@ -36,8 +36,17 @@
     else if (content) root.appendChild(content);
     return root;
   }
+  function mountHTML(target, html) {
+    var root = typeof target === 'string' ? document.querySelector(target) : target;
+    if (!root) return null;
+    clear(root);
+    var wrap = document.createElement('div');
+    wrap.innerHTML = html || '';
+    while (wrap.firstChild) root.appendChild(wrap.firstChild);
+    return root;
+  }
   function icon(name, extra) {
     return el('i', { className: 'fas ' + name + (extra ? ' ' + extra : '') });
   }
-  global.HshsRender = { el: el, clear: clear, mount: mount, icon: icon };
+  global.HshsRender = { el: el, clear: clear, mount: mount, mountHTML: mountHTML, icon: icon };
 })(typeof window !== 'undefined' ? window : this);
