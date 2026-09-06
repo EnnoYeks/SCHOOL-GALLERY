@@ -1,11 +1,18 @@
 /**
  * HSHS Page lifecycle coordinator
- * Bridges mobile-shell SPA swaps with page modules without replacing either.
+ *
+ * Phase 1 contract:
+ * - foundation readiness is safe whether the listener attaches before or after boot
+ * - page activation is idempotent
+ * - legacy multi-page navigation and SPA-style swaps can share one lifecycle
  */
 (function (global) {
   'use strict';
   if (global.__hshsLifecycle) return;
   global.__hshsLifecycle = true;
+
+  var bound = false;
+  var activatedKey = '';
 
   function currentFile() {
     try {
@@ -19,25 +26,42 @@
     file = (file || currentFile()).toLowerCase();
     if (!file || file === 'index.html') return 'home';
     if (file === 'clips.html' || file === 'shorts.html') return 'buzz';
-    if (file === 'contact.html') return 'contact';
+    if (file === 'contact.html' || file === 'contat.html') return 'contact';
     return file.replace(/\.html$/, '');
   }
 
-  function activateCurrent(fromNav) {
+  function pageKey() {
+    return fileToPage() + '|' + (location.pathname || '/') + '|' + (location.search || '');
+  }
+
+  function activateCurrent(fromNav, force) {
     var name = fileToPage();
+    var key = pageKey();
+    if (!force && key === activatedKey) return false;
+
     var mod = global.HshsPages && global.HshsPages[name];
     if (mod && typeof mod.reinit === 'function') {
       try { mod.reinit(); } catch (e) {
         if (global.HshsApp) global.HshsApp.reportError(e, 'lifecycle.reinit');
       }
     }
+
+    activatedKey = key;
     document.documentElement.setAttribute('data-hshs-page', name);
     document.dispatchEvent(new CustomEvent('hshs:page', {
       detail: { page: name, fromNav: !!fromNav }
     }));
+    return true;
+  }
+
+  function foundationReady() {
+    activateCurrent(false, true);
   }
 
   function bind() {
+    if (bound) return;
+    bound = true;
+
     document.addEventListener('hshs:page', function () {
       if (global.HshsSharedUI && global.HshsSharedUI.markActiveNav) {
         try { global.HshsSharedUI.markActiveNav(); } catch (e) {}
@@ -45,7 +69,7 @@
     });
 
     window.addEventListener('popstate', function () {
-      setTimeout(function () { activateCurrent(true); }, 30);
+      setTimeout(function () { activateCurrent(true, true); }, 30);
     });
 
     var orig = global.__hshsOnPageReady;
@@ -53,12 +77,16 @@
       if (typeof orig === 'function') {
         try { orig(); } catch (e) {}
       }
-      activateCurrent(true);
+      activateCurrent(true, true);
     };
 
-    document.addEventListener('hshs:foundation-ready', function () {
-      setTimeout(function () { activateCurrent(false); }, 80);
-    });
+    if (global.HshsApp && typeof global.HshsApp.whenReady === 'function') {
+      global.HshsApp.whenReady(foundationReady);
+    } else if (global.HshsApp && global.HshsApp.isReady && global.HshsApp.isReady()) {
+      foundationReady();
+    } else {
+      document.addEventListener('hshs:foundation-ready', foundationReady, { once: true });
+    }
   }
 
   if (document.readyState === 'loading') {
@@ -69,6 +97,7 @@
 
   global.HshsLifecycle = {
     activateCurrent: activateCurrent,
-    fileToPage: fileToPage
+    fileToPage: fileToPage,
+    currentFile: currentFile
   };
 })(typeof window !== 'undefined' ? window : this);
