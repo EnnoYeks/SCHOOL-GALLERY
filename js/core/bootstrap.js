@@ -3,7 +3,7 @@
   if (window.__hshsFoundationBooted) return;
   window.__hshsFoundationBooted = true;
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
-  var ASSET_VER = window.__hshsAssetVer || '260906p3';
+  var ASSET_VER = window.__hshsAssetVer || '260906p5';
   function assetBase() {
     var scripts = document.querySelectorAll('script[src]');
     for (var i = 0; i < scripts.length; i++) {
@@ -63,11 +63,7 @@
     try {
       if (window.HshsRegistry && window.HshsApp) {
         var active = window.HshsRegistry.activeRoute();
-        window.HshsApp.setState({
-          currentRoute: active.route.appPath || active.route.path,
-          currentPage: active.name,
-          foundation: true
-        });
+        window.HshsApp.setState({ currentRoute: active.route.appPath || active.route.path, currentPage: active.name, foundation: true });
         if (active.route.title) document.title = active.route.title;
       }
     } catch (e) {}
@@ -75,12 +71,7 @@
       window.HshsApp.setState({ foundation: true });
       window.HshsApp.markReady();
     }
-    document.dispatchEvent(new CustomEvent('hshs:foundation-ready', {
-      detail: {
-        version: (window.HshsApp && window.HshsApp.version) || '1.0.0-phase1',
-        route: window.HshsRegistry ? window.HshsRegistry.activeRoute() : null
-      }
-    }));
+    document.dispatchEvent(new CustomEvent('hshs:foundation-ready', { detail: { version: (window.HshsApp && window.HshsApp.version) || '1.0.0-phase1', route: window.HshsRegistry ? window.HshsRegistry.activeRoute() : null } }));
     document.documentElement.classList.remove('hshs-js-booting');
     document.documentElement.classList.add('hshs-js-ready');
   }
