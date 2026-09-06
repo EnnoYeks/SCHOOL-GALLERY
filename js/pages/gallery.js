@@ -4,8 +4,7 @@
   if (global.__hshsgalleryPageModule) return;
   global.__hshsgalleryPageModule = true;
   function isPage() {
-    var f = (location.pathname.split('/').pop() || '').toLowerCase();
-    return f === 'gallery.html';
+    return (location.pathname.split('/').pop() || '').toLowerCase() === 'gallery.html';
   }
   function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
   function loadOnce(src, id) {
@@ -40,8 +39,9 @@
     }
     loadCss('css/gallery.css');
     loadCss('css/gallery-transitions.css');
-    await loadOnce(base() + 'js/gallery.js?v=260906r', 'hshs-leg-js-gallery.js');
-    await loadOnce(base() + 'js/gallery-transitions.js?v=260906r', 'hshs-leg-js-gallery-transitions.js');
+    await loadOnce(base() + 'js/gallery.js?v=260906r', 'hshs-leg-gallery');
+    await loadOnce(base() + 'js/gallery-patch.js?v=260906r', 'hshs-gallery-patch');
+    await loadOnce(base() + 'js/gallery-transitions.js?v=260906r', 'hshs-leg-gtr');
     try {
       global.__hshsGalleryOwnedByJsFirst = true;
       setTimeout(function () {
@@ -49,7 +49,7 @@
         if (GP && document.getElementById('galleryFeed') && !global.__hshsGalleryPageInstance) {
           global.__hshsGalleryPageInstance = new GP();
         }
-      }, 30);
+      }, 50);
     } catch (e) { console.warn(e); }
     global.__hshsgalleryMounted = true;
     console.info('[HSHS] JS-first full page active:', PAGE);
