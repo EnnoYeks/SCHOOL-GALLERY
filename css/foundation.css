@@ -13,6 +13,7 @@
  * 5. theme/settings overrides
  * 6. mobile shell/navigation
  * 7. final polish/performance safeguards
+ * 8. classic school design system
  */
 
 @import url("./hshs-no-flicker.css");
@@ -23,6 +24,7 @@
 @import url("./mobile-shell.css");
 @import url("./hshs-polish.css");
 @import url("./hshs-perf.css");
+@import url("./hshs-classic.css");
 
 /* Foundation-level application contract */
 :root {
@@ -49,12 +51,10 @@ body {
   width: 100%;
 }
 
-/* Prevent dynamically mounted pages from inheriting accidental margins. */
 #hshs-page > :first-child {
   margin-top: 0;
 }
 
-/* Accessibility: keep motion respectful without disabling page transitions. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

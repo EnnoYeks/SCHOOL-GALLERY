@@ -3,7 +3,7 @@
   if (window.__hshsFoundationBooted) return;
   window.__hshsFoundationBooted = true;
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
-  var ASSET_VER = window.__hshsAssetVer || '260906p7';
+  var ASSET_VER = window.__hshsAssetVer || '260906classic';
   function assetBase() {
     var scripts = document.querySelectorAll('script[src]');
     for (var i = 0; i < scripts.length; i++) {
@@ -26,8 +26,18 @@
   }
   function ver(url) { return url + (url.indexOf('?') === -1 ? '?v=' + ASSET_VER : ''); }
   var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
+  function ensureClassicCss() {
+    if (document.getElementById('hshs-classic-css')) return;
+    var cssBase = assetBase().replace(/js\/?$/, 'css/');
+    var link = document.createElement('link');
+    link.id = 'hshs-classic-css';
+    link.rel = 'stylesheet';
+    link.href = ver(cssBase + 'hshs-classic.css');
+    document.head.appendChild(link);
+  }
   async function boot() {
     var base = assetBase();
+    try { ensureClassicCss(); } catch (e) {}
     try {
       await loadScript(ver(base + 'core/app.js'), 'hshs-core-app');
       await loadScript(ver(base + 'core/registry.js'), 'hshs-core-registry');
