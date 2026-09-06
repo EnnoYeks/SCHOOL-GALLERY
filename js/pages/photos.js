@@ -1,64 +1,58 @@
-/**
- * JS-first photos: full masonry + modal from main + PhotosPage
- */
 (function (global) {
   'use strict';
-  if (global.__hshsPhotosPageModule) return;
-  global.__hshsPhotosPageModule = true;
+  var PAGE = 'photos';
+  if (global.__hshsphotosPageModule) return;
+  global.__hshsphotosPageModule = true;
   function isPage() {
     return (location.pathname.split('/').pop() || '').toLowerCase() === 'photos.html';
   }
-  function assetBase() {
-    return location.pathname.indexOf('/index/') !== -1 ? '../' : '';
-  }
+  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
   function loadOnce(src, id) {
-    return new Promise(function (resolve) {
-      if (id && document.getElementById(id)) { resolve(); return; }
+    return new Promise(function (res) {
+      if (id && document.getElementById(id)) return res();
       var s = document.createElement('script');
       if (id) s.id = id;
       s.src = src; s.async = false;
-      s.onload = function () { resolve(); };
-      s.onerror = function () { resolve(); };
+      s.onload = function () { res(); };
+      s.onerror = function () { res(); };
       document.head.appendChild(s);
     });
   }
+  function loadCss(href) {
+    if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
+    var l = document.createElement('link');
+    l.rel = 'stylesheet'; l.href = base() + href + '?v=260906r';
+    l.setAttribute('data-hshs-css', href);
+    document.head.appendChild(l);
+  }
   async function mount() {
     if (!isPage() || !global.HshsRender) return;
-    if (global.__hshsPhotosMounted) return;
-    if (global.HshsShell) global.HshsShell.ensureShell();
+    if (global.__hshsphotosMounted) return;
+    if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     var root = document.getElementById('hshs-page');
-    if (!root) {
-      root = document.createElement('div');
-      root.id = 'hshs-page';
-      document.body.appendChild(root);
+    if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
+    document.documentElement.setAttribute('data-hshs-page', PAGE);
+    var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
+    if (tpl) {
+      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+      else root.innerHTML = tpl;
     }
-    document.documentElement.setAttribute('data-hshs-page', 'photos');
-    var base = assetBase();
-    var tpl = global.HshsTemplates && global.HshsTemplates.photos;
-    if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
-    else if (tpl) root.innerHTML = tpl;
-    if (!document.querySelector('link[data-hshs-page-css="css/photos.css"]')) {
-      var l = document.createElement('link');
-      l.rel = 'stylesheet';
-      l.href = base + 'css/photos.css?v=260906r';
-      l.setAttribute('data-hshs-page-css', 'css/photos.css');
-      document.head.appendChild(l);
-    }
-    await loadOnce(base + 'js/photos.js?v=260906r', 'hshs-legacy-photos');
+    loadCss('css/photos.css');
+    await loadOnce(base() + 'js/photos.js?v=260906r', 'hshs-leg-photos');
     try {
       setTimeout(function () {
         if (typeof PhotosPage === 'function' && document.getElementById('masonryGrid') && !global.__hshsPhotosPageInstance) {
           global.__hshsPhotosPageInstance = new PhotosPage();
         }
-      }, 50);
-    } catch (e) { console.warn('[HSHS] photos init', e); }
-    global.__hshsPhotosMounted = true;
-    console.info('[HSHS] JS-first full page active: photos');
+      }, 30);
+    } catch (e) {}
+    global.__hshsphotosMounted = true;
+    console.info('[HSHS] JS-first full page active:', PAGE);
   }
   function boot() {
     function go() {
       if (!isPage()) return;
-      if (!global.HshsRender || !global.HshsTemplates) { setTimeout(go, 40); return; }
+      if (!global.HshsRender) { setTimeout(go, 40); return; }
       mount();
     }
     document.addEventListener('hshs:foundation-ready', go, { once: true });

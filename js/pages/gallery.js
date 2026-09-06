@@ -1,69 +1,63 @@
-/**
- * JS-first gallery: mount full main structure + GalleryPage controller
- */
 (function (global) {
   'use strict';
-  if (global.__hshsGalleryPageModule) return;
-  global.__hshsGalleryPageModule = true;
   var PAGE = 'gallery';
+  if (global.__hshsgalleryPageModule) return;
+  global.__hshsgalleryPageModule = true;
   function isPage() {
-    return (location.pathname.split('/').pop() || '').toLowerCase() === 'gallery.html';
+    var f = (location.pathname.split('/').pop() || '').toLowerCase();
+    return f === 'gallery.html';
   }
-  function assetBase() {
-    return location.pathname.indexOf('/index/') !== -1 ? '../' : '';
-  }
+  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
   function loadOnce(src, id) {
-    return new Promise(function (resolve) {
-      if (id && document.getElementById(id)) { resolve(); return; }
+    return new Promise(function (res) {
+      if (id && document.getElementById(id)) return res();
       var s = document.createElement('script');
       if (id) s.id = id;
-      s.src = src;
-      s.async = false;
-      s.onload = function () { resolve(); };
-      s.onerror = function () { resolve(); };
+      s.src = src; s.async = false;
+      s.onload = function () { res(); };
+      s.onerror = function () { res(); };
       document.head.appendChild(s);
     });
   }
+  function loadCss(href) {
+    if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
+    var l = document.createElement('link');
+    l.rel = 'stylesheet'; l.href = base() + href + '?v=260906r';
+    l.setAttribute('data-hshs-css', href);
+    document.head.appendChild(l);
+  }
   async function mount() {
     if (!isPage() || !global.HshsRender) return;
-    if (global.__hshsGalleryMounted) return;
-    global.__hshsGalleryOwnedByJsFirst = true;
-    if (global.HshsShell) global.HshsShell.ensureShell();
+    if (global.__hshsgalleryMounted) return;
+    if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     var root = document.getElementById('hshs-page');
-    if (!root) {
-      root = document.createElement('div');
-      root.id = 'hshs-page';
-      document.body.appendChild(root);
-    }
+    if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
     document.documentElement.setAttribute('data-hshs-page', PAGE);
-    var base = assetBase();
-    var tpl = global.HshsTemplates && global.HshsTemplates.gallery;
-    if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
-    else if (tpl) root.innerHTML = tpl;
-    ['css/gallery.css', 'css/gallery-transitions.css'].forEach(function (c) {
-      if (!document.querySelector('link[data-hshs-page-css="' + c + '"]')) {
-        var l = document.createElement('link');
-        l.rel = 'stylesheet';
-        l.href = base + c + '?v=260906r';
-        l.setAttribute('data-hshs-page-css', c);
-        document.head.appendChild(l);
-      }
-    });
-    await loadOnce(base + 'js/gallery.js?v=260906r', 'hshs-legacy-gallery');
-    await loadOnce(base + 'js/gallery-transitions.js?v=260906r', 'hshs-legacy-gallery-tr');
+    var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
+    if (tpl) {
+      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+      else root.innerHTML = tpl;
+    }
+    loadCss('css/gallery.css');
+    loadCss('css/gallery-transitions.css');
+    await loadOnce(base() + 'js/gallery.js?v=260906r', 'hshs-leg-js-gallery.js');
+    await loadOnce(base() + 'js/gallery-transitions.js?v=260906r', 'hshs-leg-js-gallery-transitions.js');
     try {
-      if (!global.__hshsGalleryPageInstance && document.getElementById('galleryFeed')) {
+      global.__hshsGalleryOwnedByJsFirst = true;
+      setTimeout(function () {
         var GP = global.GalleryPage || (typeof GalleryPage !== 'undefined' ? GalleryPage : null);
-        if (GP) global.__hshsGalleryPageInstance = new GP();
-      }
-    } catch (e) { console.warn('[HSHS] gallery init', e); }
-    global.__hshsGalleryMounted = true;
-    console.info('[HSHS] JS-first full page active: gallery');
+        if (GP && document.getElementById('galleryFeed') && !global.__hshsGalleryPageInstance) {
+          global.__hshsGalleryPageInstance = new GP();
+        }
+      }, 30);
+    } catch (e) { console.warn(e); }
+    global.__hshsgalleryMounted = true;
+    console.info('[HSHS] JS-first full page active:', PAGE);
   }
   function boot() {
     function go() {
       if (!isPage()) return;
-      if (!global.HshsRender || !global.HshsTemplates) { setTimeout(go, 40); return; }
+      if (!global.HshsRender) { setTimeout(go, 40); return; }
       mount();
     }
     document.addEventListener('hshs:foundation-ready', go, { once: true });
