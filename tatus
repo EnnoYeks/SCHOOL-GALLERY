@@ -1,0 +1,10 @@
+[33m61450bb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mjs-transition-controlled[m[33m, [m[1;31morigin/restore/best-timeline-d81e87b[m[33m, [m[1;31morigin/js-transition-controlled[m[33m, [m[1;32mrestore/best-timeline-d81e87b[m[33m)[m Restore the Sept 2 complete HSHS World and relink every page
+[33mb169839[m fix: isolate Home from old rainbow CSS and show cards without waiting on JS
+[33m5db4ca6[m Merge pull request #48 from EnnoYeks/fix/home-more-alive
+[33m69bf3ed[m[33m ([m[1;31morigin/fix/home-more-alive[m[33m)[m fix: Gallery page shell so it is not an empty screen
+[33m17f7e18[m feat: live Home welcome slides, featured cards, events and calendar
+[33m430abcb[m fix: stop More tabs opening Home; rebuild Home cards and tab order
+[33m64c8017[m fix: restore remaining More destination pages
+[33m4397bcb[m fix: restore page HTML so More tabs stop 404ing
+[33m1ac3553[m fix: More page keeps screenshot look and lists every campus tab
+[33m23643e3[m fix: restore More page tabs and use JS routes that do not 404
