@@ -34,12 +34,16 @@
       var templates = global.HshsTemplates;
       var render = global.HshsRender;
       if (!root || !templates || !templates[name]) return false;
-      // The mobile shell replaces #hshs-page with the fetched page body.
-      // JS-first shells are intentionally empty, so give them their template
-      // immediately even when the page module was already loaded earlier.
-      if (root.children.length || String(root.textContent || '').trim()) return false;
-      if (render && typeof render.mountHTML === 'function') render.mountHTML(root, templates[name]);
-      else root.innerHTML = templates[name];
+
+      // JS-first pages own their markup. The mobile shell may briefly place
+      // legacy/fetched HTML into #hshs-page while swapping pages. Replace it
+      // synchronously with the JS template before the browser gets a chance
+      // to paint that raw intermediate DOM.
+      if (render && typeof render.mountHTML === 'function') {
+        render.mountHTML(root, templates[name]);
+      } else {
+        root.innerHTML = templates[name];
+      }
       return true;
     } catch (e) {
       if (global.HshsApp) global.HshsApp.reportError(e, 'lifecycle.template-fallback');
@@ -89,17 +93,15 @@
     var name = fileToPage();
     renderTemplateFallback(name);
     refreshKnownPage(name);
-    // Page scripts are injected asynchronously by mobile-shell. Re-emit the
-    // readiness signal after they have had a chance to execute. Newly loaded
-    // JS-first modules attach their existing foundation-ready listener and can
-    // mount normally; already-rendered pages keep the fallback/template above.
-    setTimeout(function () {
-      try {
-        document.dispatchEvent(new CustomEvent('hshs:foundation-ready', {
-          detail: { navigation: true, page: name }
-        }));
-      } catch (e) {}
-    }, 80);
+
+    // Page modules use HshsApp.whenReady(), so they do not need an artificial
+    // 80ms readiness delay here. Keeping this event immediate also makes the
+    // navigation path feel responsive on slower phones.
+    try {
+      document.dispatchEvent(new CustomEvent('hshs:foundation-ready', {
+        detail: { navigation: true, page: name }
+      }));
+    } catch (e) {}
   }
 
   function bind() {
