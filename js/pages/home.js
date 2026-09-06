@@ -10,11 +10,9 @@
     var file = (location.pathname.split('/').pop() || '').toLowerCase();
     return file === 'index.html' || file === '';
   }
-
   function assetBase() {
     return location.pathname.indexOf('/index/') !== -1 ? '../' : '';
   }
-
   function loadOnce(src, id) {
     return new Promise(function (resolve) {
       if (id && document.getElementById(id)) { resolve(); return; }
@@ -27,18 +25,15 @@
       document.head.appendChild(link);
     });
   }
-
   function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
       return ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' })[c];
     });
   }
-
   function formatCount(value) {
     var n = Number(value || 0);
     return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace('.0', '') + 'k' : String(n);
   }
-
   function postCard(post) {
     var image = post.image || post.imageUrl || post.thumbnailUrl || '';
     var media = image
@@ -51,7 +46,16 @@
       + '<div class="home-feature-meta"><span>' + formatCount(post.likes) + ' likes</span><span>' + formatCount(post.views) + ' views</span></div>'
       + '</div></article>';
   }
-
+  function trendCard(post, rank) {
+    if (!post) return '<div class="home-empty"><i class="fas fa-fire"></i><strong>No trending yet</strong></div>';
+    var thumb = post.image || post.imageUrl || post.thumbnailUrl || '';
+    return '<a class="home-trend-item" href="index/trending.html"><span class="home-trend-thumb"' + (thumb ? ' style="background-image:url(\'' + esc(thumb) + '\')"' : '') + '></span><span class="home-trend-rank">#' + rank + '</span><span><strong>' + esc(post.title || 'HSHS moment') + '</strong><small>' + formatCount(post.likes) + ' likes · ' + formatCount(post.views) + ' views</small></span></a>';
+  }
+  function eventCard(ev) {
+    if (!ev) return '<div class="home-empty"><i class="fas fa-calendar-days"></i><strong>No events yet</strong></div>';
+    var d = new Date(ev.date || ev.startsAt || Date.now());
+    return '<article class="home-event-card"><div class="home-event-date"><small>' + esc(d.toLocaleString('en-US', { month: 'short' })) + '</small><strong>' + esc(String(d.getDate())) + '</strong></div><div><strong>' + esc(ev.title || 'School event') + '</strong><small>' + esc(ev.location || ev.place || ev.time || 'Campus') + '</small></div></article>';
+  }
   function renderData() {
     var store = global.HshsStore;
     if (!store) return;
@@ -59,47 +63,30 @@
     ['totalPhotos', 'totalVideos', 'totalStudents', 'totalLikes'].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
-      var raw = Number(stats[id] || 0);
-      el.setAttribute('data-count', String(raw));
+      el.setAttribute('data-count', String(Number(stats[id] || 0)));
       el.textContent = '0';
     });
     animateCounts();
-
     var featured = typeof store.featured === 'function' ? store.featured(4) : [];
     var grid = document.getElementById('featuredGrid');
     if (grid) {
       grid.innerHTML = featured.length
         ? featured.map(postCard).join('')
-        : '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong><span>Check back soon for campus moments.</span></div>';
+        : '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong></div>';
     }
-
-    var trending = typeof store.trending === 'function' ? store.trending(1) : [];
-    var trendRoot = document.getElementById('homeTrending');
-    if (trendRoot) {
-      if (!trending.length) {
-        trendRoot.innerHTML = '<div class="home-empty"><i class="fas fa-fire"></i><strong>No trending yet</strong><span>Loading...</span></div>';
-      } else {
-        var post = trending[0];
-        var thumb = post.image || post.imageUrl || post.thumbnailUrl || '';
-        trendRoot.innerHTML = '<a class="home-trend-item" href="index/trending.html"><span class="home-trend-thumb"' + (thumb ? ' style="background-image:url(\'' + esc(thumb) + '\')"' : '') + '></span><span class="home-trend-rank">#1</span><span><strong>' + esc(post.title || 'HSHS moment') + '</strong><small>' + formatCount(post.likes) + ' likes · ' + formatCount(post.views) + ' views</small></span></a>';
-      }
-    }
-
-    var eventsRoot = document.getElementById('homeEvents');
-    if (eventsRoot) {
-      var events = [];
-      if (store.events && typeof store.events === 'function') events = store.events(1) || [];
-      else if (Array.isArray(store.events)) events = store.events.slice(0, 1);
-      if (!events.length) {
-        eventsRoot.innerHTML = '<div class="home-empty"><i class="fas fa-calendar-days"></i><strong>No events yet</strong><span>Loading...</span></div>';
-      } else {
-        var ev = events[0];
-        var d = new Date(ev.date || ev.startsAt || Date.now());
-        eventsRoot.innerHTML = '<article class="home-event-card"><div class="home-event-date"><small>' + esc(d.toLocaleString('en-US', { month: 'short' })) + '</small><strong>' + esc(String(d.getDate())) + '</strong></div><div><strong>' + esc(ev.title || 'School event') + '</strong><small>' + esc(ev.location || ev.place || ev.time || 'Campus') + '</small></div></article>';
-      }
-    }
+    var trending = typeof store.trending === 'function' ? store.trending(2) : [];
+    var trendA = document.getElementById('homeTrendA');
+    var trendB = document.getElementById('homeTrendB');
+    if (trendA) trendA.innerHTML = trendCard(trending[0], 1);
+    if (trendB) trendB.innerHTML = trendCard(trending[1], 2);
+    var events = [];
+    if (store.events && typeof store.events === 'function') events = store.events(2) || [];
+    else if (Array.isArray(store.events)) events = store.events.slice(0, 2);
+    var eventA = document.getElementById('homeEventA');
+    var eventB = document.getElementById('homeEventB');
+    if (eventA) eventA.innerHTML = eventCard(events[0]);
+    if (eventB) eventB.innerHTML = eventCard(events[1]);
   }
-
   function animateCounts() {
     var nodes = document.querySelectorAll('.home-stat strong[data-count]');
     if (!nodes.length) return;
@@ -125,7 +112,6 @@
     var section = document.querySelector('.home-stats');
     if (section) io.observe(section); else run();
   }
-
   async function mount() {
     if (!isPage() || !global.HshsRender || global.__hshsHomeMounted) return;
     if (global.HshsShell) global.HshsShell.ensureShell();
@@ -138,7 +124,7 @@
     document.documentElement.setAttribute('data-hshs-page', 'home');
     await loadOnce(assetBase() + 'css/home.css?v=260906p3', 'hshs-home-css');
     await loadOnce(assetBase() + 'css/hshs-home-polish.css?v=260906hero', 'hshs-home-polish-css');
-    await loadOnce(assetBase() + 'css/hshs-vibe-home.css?v=260906split', 'hshs-vibe-home-css');
+    await loadOnce(assetBase() + 'css/hshs-vibe-home.css?v=260906split2', 'hshs-vibe-home-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
     else if (tpl) root.innerHTML = tpl;
@@ -146,7 +132,6 @@
     global.__hshsHomeMounted = true;
     document.dispatchEvent(new CustomEvent('hshs:page'));
   }
-
   function boot() {
     function go() {
       if (!isPage()) return;
@@ -157,7 +142,6 @@
     else if (global.HshsApp && global.HshsApp.isReady && global.HshsApp.isReady()) go();
     else document.addEventListener('hshs:foundation-ready', go, { once: true });
   }
-
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
 })(typeof window !== 'undefined' ? window : this);
