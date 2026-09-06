@@ -1,6 +1,5 @@
 /**
  * HSHS WORLD · Home page controller
- * Phase 3: rebuilt page content + live local store integration.
  */
 (function (global) {
   'use strict';
@@ -60,15 +59,19 @@
     var stats = typeof store.analytics === 'function' ? store.analytics() : {};
     ['totalPhotos', 'totalVideos', 'totalStudents', 'totalLikes'].forEach(function (id) {
       var el = document.getElementById(id);
-      if (el) el.textContent = formatCount(stats[id] || 0);
+      if (!el) return;
+      var raw = Number(stats[id] || 0);
+      el.setAttribute('data-count', String(raw));
+      el.textContent = '0';
     });
+    animateCounts();
 
     var featured = typeof store.featured === 'function' ? store.featured(4) : [];
     var grid = document.getElementById('featuredGrid');
     if (grid) {
       grid.innerHTML = featured.length
         ? featured.map(postCard).join('')
-        : '<div class="home-empty home-feature-empty">No featured moments yet.</div>';
+        : '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong><span>Check back soon for campus moments.</span></div>';
     }
 
     var trending = typeof store.trending === 'function' ? store.trending(3) : [];
@@ -76,11 +79,53 @@
     if (trendRoot) {
       trendRoot.innerHTML = trending.length
         ? trending.map(function (post, index) {
-            return '<a class="home-trend-item" href="index/trending.html"><span class="home-trend-rank">0' + (index + 1) + '</span><span><strong>' + esc(post.title || 'HSHS moment') + '</strong><small>' + formatCount(post.likes) + ' likes · ' + formatCount(post.views) + ' views</small></span><i class="fas fa-arrow-right"></i></a>';
+            var thumb = post.image || post.imageUrl || post.thumbnailUrl || '';
+            return '<a class="home-trend-item" href="index/trending.html"><span class="home-trend-thumb"' + (thumb ? ' style="background-image:url(\'' + esc(thumb) + '\')"' : '') + '></span><span class="home-trend-rank">#' + (index + 1) + '</span><span><strong>' + esc(post.title || 'HSHS moment') + '</strong><small>' + formatCount(post.likes) + ' likes · ' + formatCount(post.views) + ' views</small></span></a>';
           }).join('')
-        : '<div class="home-empty">No trending moments yet.</div>';
-      trendRoot.insertAdjacentHTML('beforeend', '<a class="home-link" href="index/trending.html">Open Trending <i class="fas fa-arrow-right"></i></a>');
+        : '<div class="home-empty"><i class="fas fa-fire"></i><strong>No trending moments yet</strong><span>Activity will appear here as the campus shares.</span></div>';
+      trendRoot.insertAdjacentHTML('beforeend', '<a class="home-link home-pill" href="index/trending.html">Open Trending <i class="fas fa-arrow-right"></i></a>');
     }
+
+    var eventsRoot = document.getElementById('homeEvents');
+    if (eventsRoot) {
+      var events = [];
+      if (store.events && typeof store.events === 'function') events = store.events(3) || [];
+      else if (Array.isArray(store.events)) events = store.events.slice(0, 3);
+      eventsRoot.innerHTML = events.length
+        ? events.map(function (ev) {
+            var d = new Date(ev.date || ev.startsAt || Date.now());
+            var mon = d.toLocaleString('en-US', { month: 'short' });
+            var day = String(d.getDate());
+            return '<article class="home-event-card"><div class="home-event-date"><small>' + esc(mon) + '</small><strong>' + esc(day) + '</strong></div><div><strong>' + esc(ev.title || 'School event') + '</strong><small>' + esc(ev.location || ev.place || ev.time || 'Campus') + '</small></div></article>';
+          }).join('')
+        : '<div class="home-empty"><i class="fas fa-calendar-days"></i><strong>No events posted yet</strong><span>Upcoming campus dates will land here.</span></div>';
+    }
+  }
+
+  function animateCounts() {
+    var nodes = document.querySelectorAll('.home-stat strong[data-count]');
+    if (!nodes.length) return;
+    var started = false;
+    function run() {
+      if (started) return;
+      started = true;
+      nodes.forEach(function (el) {
+        var target = Number(el.getAttribute('data-count') || 0);
+        var start = performance.now();
+        function tick(now) {
+          var t = Math.min(1, (now - start) / 700);
+          el.textContent = formatCount(Math.round(target * t));
+          if (t < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+    if (!('IntersectionObserver' in window)) { run(); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) run(); });
+    }, { threshold: 0.35 });
+    var section = document.querySelector('.home-stats');
+    if (section) io.observe(section); else run();
   }
 
   async function mount() {
@@ -94,12 +139,12 @@
     }
     document.documentElement.setAttribute('data-hshs-page', 'home');
     await loadOnce(assetBase() + 'css/home.css?v=260906p3', 'hshs-home-css');
+    await loadOnce(assetBase() + 'css/hshs-home-polish.css?v=260906hero', 'hshs-home-polish-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
     else if (tpl) root.innerHTML = tpl;
     renderData();
     global.__hshsHomeMounted = true;
-    console.info('[HSHS] Phase 3 home mounted');
   }
 
   function boot() {
