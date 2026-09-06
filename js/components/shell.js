@@ -14,7 +14,7 @@
     var b = basePath();
     return R().el('nav', { className: 'navbar' }, [
       R().el('div', { className: 'navbar-container' }, [
-        R().el('div', { className: 'logo' }, [R().icon('fa-graduation-cap'), R().el('span', { text: 'HSHS World' })]),
+        R().el('div', { className: 'logo' }, [R().icon('fa-graduation-cap'), R().el('div', { className: 'brand-lockup' }, [R().el('span', { className: 'brand-school', text: 'Hawthorne Scribner High School' }), R().el('span', { className: 'brand-mark', text: 'HSHS World' })])]),
         R().el('div', { className: 'search-container' }, [
           R().icon('fa-search'),
           R().el('input', { type: 'text', className: 'search-input', id: 'searchInput', placeholder: 'Search posts, students, events...' }),
@@ -102,5 +102,21 @@
     }
     return page;
   }
+  function bindNavScroll() {
+    if (global.__hshsNavScrollBound) return;
+    global.__hshsNavScrollBound = true;
+    function onScroll() {
+      document.documentElement.classList.toggle('hshs-nav-scrolled', window.scrollY > 12);
+      document.documentElement.style.setProperty('--hero-shift', String(Math.round(window.scrollY * 0.12)) + 'px');
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+  var _ensure = ensureShell;
+  ensureShell = function () {
+    var page = _ensure();
+    bindNavScroll();
+    return page;
+  };
   global.HshsShell = { ensureShell: ensureShell, renderNavbar: renderNavbar, renderFooter: renderFooter, basePath: basePath };
 })(typeof window !== 'undefined' ? window : this);
