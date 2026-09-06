@@ -1,28 +1,52 @@
 (function (global) {
   'use strict';
-  if (global.__hshsMorePageModule) return;
-  global.__hshsMorePageModule = true;
-  function isPage() { return (location.pathname.split('/').pop() || '').toLowerCase() === 'more.html'; }
-  function assetBase() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  var PAGE = 'more';
+  if (global['__hshs' + PAGE + 'PageModule']) return;
+  global['__hshs' + PAGE + 'PageModule'] = true;
+  function isPage() {
+    return (location.pathname.split('/').pop() || '').toLowerCase() === 'more.html';
+  }
+  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function loadOnce(src, id) {
+    return new Promise(function (res) {
+      if (id && document.getElementById(id)) return res();
+      var s = document.createElement('script');
+      if (id) s.id = id; s.src = src; s.async = false;
+      s.onload = function () { res(); }; s.onerror = function () { res(); };
+      document.head.appendChild(s);
+    });
+  }
+  function loadCss(href) {
+    if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=260906r';
+    l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
+  }
   async function mount() {
     if (!isPage() || !global.HshsRender) return;
-    if (global.HshsShell) global.HshsShell.ensureShell();
+    if (global['__hshs' + PAGE + 'Mounted']) return;
+    if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     var root = document.getElementById('hshs-page');
     if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
-    document.documentElement.setAttribute('data-hshs-page', 'more');
-    var base = assetBase();
-    if (!document.querySelector('link[data-hshs-page-css="css/hshs-more.css"]')) {
-      var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base + 'css/hshs-more.css?v=260906r';
-      l.setAttribute('data-hshs-page-css', 'css/hshs-more.css'); document.head.appendChild(l);
+    document.documentElement.setAttribute('data-hshs-page', PAGE);
+    var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
+    if (tpl) {
+      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+      else root.innerHTML = tpl;
     }
-    var tpl = global.HshsTemplates && global.HshsTemplates.more;
-    if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
-    else if (tpl) root.innerHTML = tpl;
-    console.info('[HSHS] JS-first full page active: more');
+    loadCss('css/hshs-more.css');
+    loadCss('css/hshs-account.css');
+    await loadOnce(base() + 'js/hshs-account.js?v=260906r', 'hshs-leg-account');
+    global['__hshs' + PAGE + 'Mounted'] = true;
+    console.info('[HSHS] JS-first full page active:', PAGE);
   }
   function boot() {
-    function go() { if (!isPage()) return; if (!global.HshsRender) { setTimeout(go, 40); return; } mount(); }
+    function go() {
+      if (!isPage()) return;
+      if (!global.HshsRender) { setTimeout(go, 40); return; }
+      mount();
+    }
     document.addEventListener('hshs:foundation-ready', go, { once: true });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })(typeof window !== 'undefined' ? window : this);

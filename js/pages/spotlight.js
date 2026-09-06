@@ -1,49 +1,37 @@
-/**
- * JS-first page module: spotlight
- */
 (function (global) {
   'use strict';
-  if (global.__hshsSpotlightPageModule) return;
-  global.__hshsSpotlightPageModule = true;
   var PAGE = 'spotlight';
+  if (global['__hshs' + PAGE + 'PageModule']) return;
+  global['__hshs' + PAGE + 'PageModule'] = true;
   function isPage() {
     return (location.pathname.split('/').pop() || '').toLowerCase() === 'spotlight.html';
   }
-  function R() { return global.HshsRender; }
-  function UI() { return global.HshsUI; }
-  async function hydrateFeed(elId) {
-    var el = document.getElementById(elId);
-    if (!el || !R() || !UI()) return;
-    try {
-      var posts = [];
-      if (global.HshsData && global.HshsData.getPosts) posts = await global.HshsData.getPosts(24, 0) || [];
-      R().clear(el);
-      if (!posts.length) { el.appendChild(UI().emptyState('Nothing here yet.', 'fa-star')); return; }
-      posts.forEach(function (p) {
-        el.appendChild(UI().postCard ? UI().postCard(p) : UI().mediaCard(p));
-      });
-    } catch (e) {
-      R().clear(el);
-      el.appendChild(UI().emptyState('Could not load content.', 'fa-exclamation-triangle'));
-    }
+  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function loadCss(href) {
+    if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=260906r';
+    l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
   }
-  function mount() {
-    if (!isPage() || !global.HshsRender || !global.HshsUI) return;
-    if (global.HshsShell) global.HshsShell.ensureShell();
+  async function mount() {
+    if (!isPage() || !global.HshsRender) return;
+    if (global['__hshs' + PAGE + 'Mounted']) return;
+    if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     var root = document.getElementById('hshs-page');
     if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
     document.documentElement.setAttribute('data-hshs-page', PAGE);
-    R().mount(root, [
-      UI().pageHeader('Spotlight', 'Featured students and moments'),
-      R().el('div', { className: 'page-content', id: 'spotlightFeed', style: { padding: '1rem' } }, [UI().skeleton(4)])
-    ]);
-    hydrateFeed('spotlightFeed');
-    console.info('[HSHS] JS-first page active:', PAGE);
+    var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
+    if (tpl) {
+      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+      else root.innerHTML = tpl;
+    }
+    loadCss('css/spotlight.css');
+    global['__hshs' + PAGE + 'Mounted'] = true;
+    console.info('[HSHS] JS-first full page active:', PAGE);
   }
   function boot() {
     function go() {
       if (!isPage()) return;
-      if (!global.HshsRender || !global.HshsUI) { setTimeout(go, 40); return; }
+      if (!global.HshsRender) { setTimeout(go, 40); return; }
       mount();
     }
     document.addEventListener('hshs:foundation-ready', go, { once: true });

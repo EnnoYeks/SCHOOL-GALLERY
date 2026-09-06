@@ -1,27 +1,53 @@
 (function (global) {
   'use strict';
-  if (global.__hshsChatPageModule) return;
-  global.__hshsChatPageModule = true;
-  function isPage() { return (location.pathname.split('/').pop() || '').toLowerCase() === 'chat.html'; }
-  function mount() {
-    if (!isPage() || !global.HshsRender || !global.HshsUI) return;
-    if (global.HshsShell) global.HshsShell.ensureShell();
+  var PAGE = 'chat';
+  if (global['__hshs' + PAGE + 'PageModule']) return;
+  global['__hshs' + PAGE + 'PageModule'] = true;
+  function isPage() {
+    return (location.pathname.split('/').pop() || '').toLowerCase() === 'chat.html';
+  }
+  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function loadOnce(src, id) {
+    return new Promise(function (res) {
+      if (id && document.getElementById(id)) return res();
+      var s = document.createElement('script');
+      if (id) s.id = id; s.src = src; s.async = false;
+      s.onload = function () { res(); }; s.onerror = function () { res(); };
+      document.head.appendChild(s);
+    });
+  }
+  function loadCss(href) {
+    if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=260906r';
+    l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
+  }
+  async function mount() {
+    if (!isPage() || !global.HshsRender) return;
+    if (global['__hshs' + PAGE + 'Mounted']) return;
+    if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     var root = document.getElementById('hshs-page');
     if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
-    var R = global.HshsRender, UI = global.HshsUI;
-    document.documentElement.setAttribute('data-hshs-page', 'chat');
-    R.mount(root, [
-      UI.pageHeader('Chat', 'Messages'),
-      R.el('div', { className: 'page-content', id: 'hshsChatPage', style: { padding: '1rem' } }, [
-        UI.emptyState('Open chat to message campus friends.', 'fa-comments')
-      ])
-    ]);
-    try { if (typeof global.initHshsChat === 'function') global.initHshsChat(); } catch (e) {}
-    console.info('[HSHS] JS-first page active: chat');
+    document.documentElement.setAttribute('data-hshs-page', PAGE);
+    var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
+    if (tpl) {
+      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+      else root.innerHTML = tpl;
+    }
+    loadCss('css/hshs-chat.css');
+    loadCss('css/hshs-chat-spring.css');
+    await loadOnce(base() + 'js/hshs-chat.js?v=260906r', 'hshs-leg-chat');
+    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260906r', 'hshs-leg-chat-spring');
+    global['__hshs' + PAGE + 'Mounted'] = true;
+    console.info('[HSHS] JS-first full page active:', PAGE);
   }
   function boot() {
-    function go() { if (!isPage()) return; if (!global.HshsRender) { setTimeout(go, 40); return; } mount(); }
+    function go() {
+      if (!isPage()) return;
+      if (!global.HshsRender) { setTimeout(go, 40); return; }
+      mount();
+    }
     document.addEventListener('hshs:foundation-ready', go, { once: true });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })(typeof window !== 'undefined' ? window : this);
