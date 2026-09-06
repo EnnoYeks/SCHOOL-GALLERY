@@ -1,52 +1,37 @@
-(function(g){'use strict';g.HshsTemplates=g.HshsTemplates||{};g.HshsTemplates['more']=`<main class="more-page" aria-label="More HSHS World">
-  <section class="more-hero">
-    <div class="more-hero-glow"></div>
-    <div class="more-hero-copy">
-      <span class="more-kicker">HSHS WORLD</span>
-      <h1>More</h1>
-      <p>Your HSHS world, all in one place.</p>
-    </div>
-  </section>
+(function(g){'use strict';g.HshsTemplates=g.HshsTemplates||{};g.HshsTemplates['more']=`<main class="hshs-account-page" aria-label="More HSHS World">
+  <a class="hshs-me-card" href="profile.html" id="morePageMe">
+    <span class="hshs-me-pic" id="morePagePic"><i class="fas fa-user"></i></span>
+    <span class="hshs-me-copy">
+      <strong id="morePageName">Guest student</strong>
+      <small id="morePageEmail">student@hshs.ac.ug</small>
+      <em id="morePageRole">HSHS Student</em>
+    </span>
+    <span class="hshs-me-go"><i class="fas fa-user"></i> View Profile</span>
+  </a>
 
-  <section class="more-profile-card" aria-label="Your profile">
-    <a href="profile.html" class="more-profile-link">
-      <div class="more-avatar" id="morePagePic"><i class="fas fa-user"></i></div>
-      <div class="more-profile-copy">
-        <strong id="morePageName">Your HSHS Profile</strong>
-        <span id="morePageEmail">Sign in to personalize your experience</span>
-      </div>
-      <span class="more-profile-arrow"><i class="fas fa-arrow-right"></i></span>
-    </a>
-  </section>
+  <div class="hshs-menu-list" id="hshsMoreMenu">
+    <p class="hshs-menu-kicker">You</p>
+    <a class="hshs-menu-item" href="profile.html"><i class="fas fa-user"></i><span><b>Profile</b><small>View and edit your profile</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="chat.html"><i class="fas fa-envelope"></i><span><b>Messages</b><small>Chats with friends and clubs</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="notifications.html"><i class="fas fa-bell"></i><span><b>Notifications</b><small>Alerts, mentions and school updates</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="saved.html"><i class="fas fa-star"></i><span><b>Saved</b><small>Saved and interacted posts</small></span><i class="fas fa-chevron-right"></i></a>
 
-  <section class="more-section" aria-labelledby="more-connect-title">
-    <div class="more-section-head"><div><span class="more-section-kicker">YOUR SPACE</span><h2 id="more-connect-title">Stay connected</h2></div></div>
-    <div class="more-grid">
-      <a href="profile.html" class="more-tile" data-tone="blue"><span class="more-tile-icon"><i class="fas fa-user"></i></span><strong>Profile</strong><small>Your account</small></a>
-      <a href="notifications.html" class="more-tile" data-tone="gold"><span class="more-tile-icon"><i class="fas fa-bell"></i></span><strong>Notifications</strong><small>Stay updated</small></a>
-      <a href="saved.html" class="more-tile" data-tone="purple"><span class="more-tile-icon"><i class="fas fa-bookmark"></i></span><strong>Saved</strong><small>Your collection</small></a>
-      <a href="chat.html" class="more-tile" data-tone="cyan"><span class="more-tile-icon"><i class="fas fa-comments"></i></span><strong>Chat</strong><small>Talk to HSHS</small></a>
-    </div>
-  </section>
+    <p class="hshs-menu-kicker">Campus</p>
+    <a class="hshs-menu-item" href="gallery.html"><i class="fas fa-image"></i><span><b>Gallery</b><small>All photos and videos</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="photos.html"><i class="fas fa-camera"></i><span><b>Photos</b><small>School photo albums</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="videos.html"><i class="fas fa-play"></i><span><b>Vibe</b><small>Campus videos</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="buzz.html"><i class="fas fa-bolt"></i><span><b>Buzz</b><small>Short clips from around school</small></span><i class="fas fa-chevron-right"></i></a>
 
-  <section class="more-section" aria-labelledby="more-discover-title">
-    <div class="more-section-head"><div><span class="more-section-kicker">DISCOVER</span><h2 id="more-discover-title">Explore HSHS</h2></div></div>
-    <div class="more-list">
-      <a href="spotlight.html" class="more-list-item"><span class="more-list-icon tone-pink"><i class="fas fa-star"></i></span><span><strong>Spotlight</strong><small>Featured people, moments and stories</small></span><i class="fas fa-chevron-right"></i></a>
-      <a href="polls.html" class="more-list-item"><span class="more-list-icon tone-green"><i class="fas fa-square-poll-vertical"></i></span><span><strong>Polls</strong><small>Have your say on school life</small></span><i class="fas fa-chevron-right"></i></a>
-      <a href="memories.html" class="more-list-item"><span class="more-list-icon tone-orange"><i class="fas fa-clock-rotate-left"></i></span><span><strong>Memories</strong><small>Look back at HSHS moments</small></span><i class="fas fa-chevron-right"></i></a>
-      <a href="buzz.html" class="more-list-item"><span class="more-list-icon tone-blue"><i class="fas fa-play"></i></span><span><strong>Buzz</strong><small>Short videos from around school</small></span><i class="fas fa-chevron-right"></i></a>
-    </div>
-  </section>
+    <p class="hshs-menu-kicker">Discover</p>
+    <a class="hshs-menu-item" href="trending.html"><i class="fas fa-fire"></i><span><b>Trending</b><small>What the school is talking about</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="spotlight.html"><i class="fas fa-trophy"></i><span><b>Spotlight</b><small>Featured students and moments</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="polls.html"><i class="fas fa-square-poll-vertical"></i><span><b>Polls</b><small>Vote on school questions</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="memories.html"><i class="fas fa-clock-rotate-left"></i><span><b>Memories</b><small>Past events and school history</small></span><i class="fas fa-chevron-right"></i></a>
 
-  <section class="more-section" aria-labelledby="more-help-title">
-    <div class="more-section-head"><div><span class="more-section-kicker">HSHS WORLD</span><h2 id="more-help-title">More from HSHS</h2></div></div>
-    <div class="more-list">
-      <a href="settings.html" class="more-list-item"><span class="more-list-icon tone-slate"><i class="fas fa-gear"></i></span><span><strong>Settings</strong><small>Manage your experience</small></span><i class="fas fa-chevron-right"></i></a>
-      <a href="about.html" class="more-list-item"><span class="more-list-icon tone-teal"><i class="fas fa-circle-info"></i></span><span><strong>About HSHS World</strong><small>Learn about the gallery</small></span><i class="fas fa-chevron-right"></i></a>
-      <a href="contact.html" class="more-list-item"><span class="more-list-icon tone-indigo"><i class="fas fa-headset"></i></span><span><strong>Contact</strong><small>Questions or feedback?</small></span><i class="fas fa-chevron-right"></i></a>
-    </div>
-  </section>
-
-  <div class="more-footer"><span>HSHS WORLD</span><small>Built for the HSHS community</small></div>
+    <p class="hshs-menu-kicker">Account</p>
+    <a class="hshs-menu-item" href="settings.html"><i class="fas fa-gear"></i><span><b>Settings</b><small>Theme, account and preferences</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="settings.html#privacy"><i class="fas fa-shield-halved"></i><span><b>Privacy</b><small>Privacy settings and controls</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="about.html"><i class="fas fa-graduation-cap"></i><span><b>About</b><small>About HSHS World</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item" href="contat.html"><i class="fas fa-circle-question"></i><span><b>Help & Support</b><small>Get help and contact support</small></span><i class="fas fa-chevron-right"></i></a>
+  </div>
 </main>`;})(typeof window!=='undefined'?window:this);
