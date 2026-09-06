@@ -1,15 +1,48 @@
+/**
+ * JS-first page module: polls
+ */
 (function (global) {
   'use strict';
   if (global.__hshsPollsPageModule) return;
   global.__hshsPollsPageModule = true;
-  function isPage() { var file = (location.pathname.split('/').pop() || '').toLowerCase(); return file === 'polls.html'; }
-  function onFoundationReady() {
-    if (!global.HshsRouter) return;
-    if (global.HshsApp) global.HshsApp.setState({ pages: Object.assign({}, (global.HshsApp.getState().pages || {}), { polls: { registered: true, path: 'index/polls.html' } }) });
-    global.HshsPages = global.HshsPages || {};
-    global.HshsPages.polls = { name: 'polls', path: 'index/polls.html', isActive: function () { return isPage(); }, navigate: function () { if (global.HshsRouter) return global.HshsRouter.navigate('polls'); location.href = 'index/polls.html'; } };
-    if (isPage()) { document.documentElement.classList.add('hshs-page-polls'); console.info('[HSHS] Polls page module active'); }
+  var PAGE = 'polls';
+  function isPage() {
+    return (location.pathname.split('/').pop() || '').toLowerCase() === 'polls.html';
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { document.addEventListener('hshs:foundation-ready', onFoundationReady, { once: true }); setTimeout(onFoundationReady, 120); }, { once: true });
-  else { document.addEventListener('hshs:foundation-ready', onFoundationReady, { once: true }); setTimeout(onFoundationReady, 120); }
+  function mount() {
+    if (!isPage() || !global.HshsRender || !global.HshsUI) return;
+    if (global.HshsShell) global.HshsShell.ensureShell();
+    var root = document.getElementById('hshs-page');
+    if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
+    var R = global.HshsRender, UI = global.HshsUI;
+    document.documentElement.setAttribute('data-hshs-page', PAGE);
+    R.mount(root, [
+      UI.pageHeader('Polls', 'Vote and see results'),
+      R.el('div', { className: 'page-content', id: 'pollsFeed', style: { padding: '1rem' } }, [UI.skeleton(3)])
+    ]);
+    (async function () {
+      var el = document.getElementById('pollsFeed');
+      if (!el) return;
+      try {
+        var posts = (global.HshsData && global.HshsData.getPosts) ? await global.HshsData.getPosts(24, 0) : [];
+        R.clear(el);
+        if (!posts || !posts.length) { el.appendChild(UI.emptyState('No polls yet.', 'fa-poll')); return; }
+        posts.forEach(function (p) { el.appendChild(UI.postCard ? UI.postCard(p) : UI.mediaCard(p)); });
+      } catch (e) {
+        R.clear(el);
+        el.appendChild(UI.emptyState('Could not load.', 'fa-exclamation-triangle'));
+      }
+    })();
+    console.info('[HSHS] JS-first page active:', PAGE);
+  }
+  function boot() {
+    function go() {
+      if (!isPage()) return;
+      if (!global.HshsRender) { setTimeout(go, 40); return; }
+      mount();
+    }
+    document.addEventListener('hshs:foundation-ready', go, { once: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })(typeof window !== 'undefined' ? window : this);
