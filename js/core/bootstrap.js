@@ -3,7 +3,7 @@
   if (window.__hshsFoundationBooted) return;
   window.__hshsFoundationBooted = true;
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
-  var ASSET_VER = window.__hshsAssetVer || '260906p5';
+  var ASSET_VER = window.__hshsAssetVer || '260906p6';
   function assetBase() {
     var scripts = document.querySelectorAll('script[src]');
     for (var i = 0; i < scripts.length; i++) {
