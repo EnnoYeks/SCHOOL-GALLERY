@@ -30,7 +30,7 @@
 
   function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+      return ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' })[c];
     });
   }
 
@@ -48,7 +48,6 @@
       + '<div class="home-feature-overlay"></div><div class="home-feature-body">'
       + '<span class="home-feature-type"><i class="fas ' + (post.type === 'video' ? 'fa-video' : 'fa-image') + '"></i> ' + esc(post.type === 'video' ? 'Vibe' : 'Photo') + '</span>'
       + '<h3>' + esc(post.title || 'HSHS moment') + '</h3>'
-      + '<p>' + esc(post.description || 'A moment from HSHS World.') + '</p>'
       + '<div class="home-feature-meta"><span>' + formatCount(post.likes) + ' likes</span><span>' + formatCount(post.views) + ' views</span></div>'
       + '</div></article>';
   }
@@ -83,7 +82,7 @@
             return '<a class="home-trend-item" href="index/trending.html"><span class="home-trend-thumb"' + (thumb ? ' style="background-image:url(\'' + esc(thumb) + '\')"' : '') + '></span><span class="home-trend-rank">#' + (index + 1) + '</span><span><strong>' + esc(post.title || 'HSHS moment') + '</strong><small>' + formatCount(post.likes) + ' likes · ' + formatCount(post.views) + ' views</small></span></a>';
           }).join('')
         : '<div class="home-empty"><i class="fas fa-fire"></i><strong>No trending moments yet</strong><span>Activity will appear here as the campus shares.</span></div>';
-      trendRoot.insertAdjacentHTML('beforeend', '<a class="home-link home-pill" href="index/trending.html">Open Trending <i class="fas fa-arrow-right"></i></a>');
+      trendRoot.insertAdjacentHTML('beforeend', '<a class="home-link" href="index/trending.html">Open Trending <i class="fas fa-chevron-right"></i></a>');
     }
 
     var eventsRoot = document.getElementById('homeEvents');
@@ -140,11 +139,13 @@
     document.documentElement.setAttribute('data-hshs-page', 'home');
     await loadOnce(assetBase() + 'css/home.css?v=260906p3', 'hshs-home-css');
     await loadOnce(assetBase() + 'css/hshs-home-polish.css?v=260906hero', 'hshs-home-polish-css');
+    await loadOnce(assetBase() + 'css/hshs-vibe-home.css?v=260906vibe', 'hshs-vibe-home-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
     else if (tpl) root.innerHTML = tpl;
     renderData();
     global.__hshsHomeMounted = true;
+    document.dispatchEvent(new CustomEvent('hshs:page'));
   }
 
   function boot() {
