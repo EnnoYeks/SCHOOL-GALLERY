@@ -3,7 +3,7 @@
   if (window.__hshsFoundationBooted) return;
   window.__hshsFoundationBooted = true;
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
-  var ASSET_VER = window.__hshsAssetVer || '260906p1';
+  var ASSET_VER = window.__hshsAssetVer || '260906p3';
   function assetBase() {
     var scripts = document.querySelectorAll('script[src]');
     for (var i = 0; i < scripts.length; i++) {
@@ -48,6 +48,7 @@
       document.documentElement.classList.remove('hshs-js-booting');
       return;
     }
+    try { await loadScript(ver(base + 'hshs-store.js'), 'hshs-store'); } catch (e) { console.warn('[HSHS] Data store unavailable', e); }
     try { await loadScript(ver(base + 'components/loading.js'), 'hshs-comp-loading'); } catch (e) {}
     try { await loadScript(ver(base + 'components/error.js'), 'hshs-comp-error'); } catch (e) {}
     try { await loadScript(ver(base + 'components/shared-ui.js'), 'hshs-comp-shared'); } catch (e) {}
@@ -80,9 +81,8 @@
         route: window.HshsRegistry ? window.HshsRegistry.activeRoute() : null
       }
     }));
-    document.documentElement.classList.add('hshs-js-ready');
     document.documentElement.classList.remove('hshs-js-booting');
-    console.info('[HSHS] JS-first foundation ready');
+    document.documentElement.classList.add('hshs-js-ready');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
