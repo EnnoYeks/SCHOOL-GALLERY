@@ -1,73 +1,24 @@
-(function (global) {
-  'use strict';
-  var PAGE = 'gallery';
-  if (global.__hshsgalleryPageModule) return;
-  global.__hshsgalleryPageModule = true;
-
-  function isPage() {
-    return (location.pathname.split('/').pop() || '').toLowerCase() === 'gallery.html';
-  }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
-  function loadOnce(src, id) {
-    return new Promise(function (res) {
-      if (id && document.getElementById(id)) return res();
-      var s = document.createElement('script');
-      if (id) s.id = id;
-      s.src = src; s.async = false;
-      s.onload = function () { res(); };
-      s.onerror = function () { res(); };
-      document.head.appendChild(s);
-    });
-  }
-  function loadCss(href) {
-    if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
-    var l = document.createElement('link');
-    l.rel = 'stylesheet'; l.href = base() + href + '?v=260906r';
-    l.setAttribute('data-hshs-css', href);
-    document.head.appendChild(l);
-  }
-  async function mount() {
-    if (!isPage() || !global.HshsRender || global.__hshsgalleryMounted) return;
-    if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
-    var root = document.getElementById('hshs-page');
-    if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
-    document.documentElement.setAttribute('data-hshs-page', PAGE);
-    var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
-    if (tpl) {
-      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
-      else root.innerHTML = tpl;
-    }
-    loadCss('css/gallery.css');
-    loadCss('css/gallery-transitions.css');
-    await loadOnce(base() + 'js/gallery.js?v=260906r', 'hshs-leg-gallery');
-    await loadOnce(base() + 'js/gallery-patch.js?v=260906r', 'hshs-gallery-patch');
-    await loadOnce(base() + 'js/gallery-transitions.js?v=260906r', 'hshs-leg-gtr');
-    try {
-      global.__hshsGalleryOwnedByJsFirst = true;
-      setTimeout(function () {
-        var GP = global.GalleryPage || (typeof GalleryPage !== 'undefined' ? GalleryPage : null);
-        if (GP && document.getElementById('galleryFeed') && !global.__hshsGalleryPageInstance) {
-          global.__hshsGalleryPageInstance = new GP();
-        }
-      }, 50);
-    } catch (e) { console.warn(e); }
-    global.__hshsgalleryMounted = true;
-    console.info('[HSHS] JS-first full page active:', PAGE);
-  }
-  function boot() {
-    function go() {
-      if (!isPage()) return;
-      if (!global.HshsRender) { setTimeout(go, 40); return; }
-      mount();
-    }
-    if (global.HshsApp && typeof global.HshsApp.whenReady === 'function') {
-      global.HshsApp.whenReady(go);
-    } else if (global.HshsApp && global.HshsApp.isReady && global.HshsApp.isReady()) {
-      go();
-    } else {
-      document.addEventListener('hshs:foundation-ready', go, { once: true });
-    }
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-  else boot();
-})(typeof window !== 'undefined' ? window : this);
+(function(global){'use strict';
+  if(global.__hshsGalleryModernModule)return; global.__hshsGalleryModernModule=true;
+  var PAGE='gallery', PAGE_SIZE=6, state={category:'all',items:[],offset:0,loading:false,done:false,observer:null};
+  function isPage(){var p=(location.pathname.split('/').pop()||'').toLowerCase();return p==='gallery.html'||p==='gallery'||p==='';}
+  function base(){return location.pathname.indexOf('/index/')!==-1?'../':'';}
+  function loadCss(href){if(document.querySelector('link[data-hshs-gallery-css="'+href+'"]'))return;var l=document.createElement('link');l.rel='stylesheet';l.href=base()+href+'?v=260906g1';l.dataset.hshsGalleryCss=href;document.head.appendChild(l);}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function count(v){v=Number(v)||0;return v>999?(v/1000).toFixed(v>9999?0:1).replace('.0','')+'k':String(v);}
+  function date(v){if(global.Utils&&Utils.formatDate)return Utils.formatDate(v);var d=new Date(v);return isNaN(d)?'Recently':d.toLocaleDateString(undefined,{month:'short',day:'numeric'});}
+  function mediaUrl(p){return p.imageUrl||p.thumbnailUrl||p.image||p.media_url||p.mediaUrl||'';}
+  function videoUrl(p){return p.videoUrl||p.video_url||p.url||'';}
+  function iconFor(p){return String(p.type||p.media_type||'photo').toLowerCase().indexOf('video')!==-1?'fa-play':'fa-image';}
+  function renderCard(p,i){var media=mediaUrl(p),video=videoUrl(p),isVideo=iconFor(p)==='fa-play';var title=esc(p.title||'Untitled moment'),desc=esc(p.description||''),author=esc(p.author||p.authorName||'HSHS World'),category=esc(p.category||'campus');var mediaHtml=isVideo&&video?'<video class="gallery-media" src="'+esc(video)+'" poster="'+esc(media)+'" muted playsinline preload="metadata"></video>':'<img class="gallery-media" src="'+esc(media)+'" alt="'+title+'" loading="'+(i<2?'eager':'lazy')+'">';return '<article class="gallery-card '+(isVideo?'is-video':'')+'" data-post-id="'+esc(p.id)+'"><div class="gallery-media-wrap">'+mediaHtml+'<div class="gallery-vignette"></div><span class="gallery-type"><i class="fas '+iconFor(p)+'"></i>'+(isVideo?' Video':' Photo')+'</span><span class="gallery-category">'+category+'</span><button class="gallery-like-float" type="button" data-action="like" aria-label="Like"><i class="far fa-heart"></i></button><div class="gallery-card-copy"><div class="gallery-author"><span class="author-dot"></span><span>'+author+'</span><time>'+esc(date(p.createdAt))+'</time></div><h2>'+title+'</h2>'+(desc?'<p>'+desc+'</p>':'')+'</div></div><div class="gallery-actions"><button type="button" data-action="like"><i class="far fa-heart"></i><span>'+count(p.likes)+'</span></button><button type="button" data-action="comment"><i class="far fa-comment"></i><span>'+count(p.comments)+'</span></button><button type="button" data-action="save"><i class="far fa-bookmark"></i><span>'+count(p.saves)+'</span></button><button type="button" data-action="share"><i class="fas fa-arrow-up-from-bracket"></i><span>'+count(p.shares)+'</span></button></div></article>';}
+  function render(){var feed=document.getElementById('galleryFeed'),empty=document.getElementById('galleryEmpty'),label=document.getElementById('galleryResultCount');if(!feed)return;feed.innerHTML=state.items.map(renderCard).join('');if(label)label.textContent=state.items.length?(state.category==='all'?'Latest moments':state.category+' moments'):'No moments found';if(empty)empty.hidden=state.items.length!==0;bindCards();}
+  function bindCards(){var feed=document.getElementById('galleryFeed');if(!feed)return;feed.querySelectorAll('[data-action]').forEach(function(btn){btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();var card=btn.closest('.gallery-card'),id=card&&card.dataset.postId,action=btn.dataset.action;if(!id)return;try{if(action==='like'&&global.reactionManager)global.reactionManager.toggleLike(id);else if(action==='share'&&global.reactionManager)global.reactionManager.sharePost(id);else if(action==='comment'&&global.reactionManager&&typeof global.reactionManager.openComments==='function')global.reactionManager.openComments(id);else if(action==='save'&&global.HshsStore&&typeof HshsStore.toggleSave==='function'){HshsStore.toggleSave(id);btn.classList.toggle('is-active');}}catch(err){console.warn('[HSHS] Gallery action failed',err);}});});}
+  async function fetchPage(reset){if(state.loading||state.done)return;state.loading=true;setLoading(true);try{var all=await db.getPosts(state.offset+PAGE_SIZE,0);var filtered=state.category==='all'?all:all.filter(function(p){return String(p.category||'').toLowerCase()===state.category;});var next=filtered.slice(state.offset,state.offset+PAGE_SIZE);if(reset)state.items=[];state.items=state.items.concat(next);state.offset+=next.length;if(next.length<PAGE_SIZE)state.done=true;render();}catch(e){console.error('[HSHS] Gallery load failed',e);}finally{state.loading=false;setLoading(false);}}
+  function setLoading(show){var el=document.getElementById('galleryLoader');if(el)el.hidden=!show;}
+  function setup(){var filter=document.getElementById('categoryFilter');if(filter&&!filter.dataset.bound){filter.dataset.bound='1';filter.addEventListener('click',function(e){var b=e.target.closest('.category-btn');if(!b)return;filter.querySelectorAll('.category-btn').forEach(function(x){x.classList.remove('active');});b.classList.add('active');state.category=b.dataset.category;state.offset=0;state.items=[];state.done=false;fetchPage(true);});}var sentinel=document.getElementById('gallerySentinel');if(sentinel&&!state.observer&&'IntersectionObserver'in global){state.observer=new IntersectionObserver(function(es){if(es[0].isIntersecting)fetchPage(false);},{rootMargin:'700px 0px'});state.observer.observe(sentinel);}var upload=document.querySelector('.gallery-upload-hint');if(upload&&!upload.dataset.bound){upload.dataset.bound='1';upload.addEventListener('click',function(){if(global.HshsRouter&&HshsRouter.navigate)HshsRouter.navigate('/upload');else location.href=base()+'upload.html';});}}
+  function destroy(){if(state.observer){state.observer.disconnect();state.observer=null;}state={category:'all',items:[],offset:0,loading:false,done:false,observer:null};global.__hshsGalleryModernMounted=false;}
+  function mount(){if(!isPage()||global.__hshsGalleryModernMounted||!global.HshsRender)return;global.__hshsGalleryModernMounted=true;document.documentElement.dataset.hshsPage=PAGE;var root=document.getElementById('hshs-page');if(!root){root=document.createElement('div');root.id='hshs-page';document.body.appendChild(root);}var tpl=global.HshsTemplates&&HshsTemplates[PAGE];if(tpl)(global.HshsRender.mountHTML?global.HshsRender.mountHTML(root,tpl):root.innerHTML=tpl);loadCss('css/gallery.css');setup();fetchPage(true);}
+  function boot(){var go=function(){if(isPage())mount();};if(global.HshsApp&&typeof HshsApp.whenReady==='function')HshsApp.whenReady(go);else if(global.HshsApp&&HshsApp.isReady&&HshsApp.isReady())go();else document.addEventListener('hshs:foundation-ready',go,{once:true});}
+  global.HshsGallery={mount:mount,destroy:destroy,refresh:function(){destroy();mount();}};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})(typeof window!=='undefined'?window:this);
