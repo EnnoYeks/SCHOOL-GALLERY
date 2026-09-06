@@ -1,39 +1,25 @@
-/**
- * JS-first page module: memories
- */
 (function (global) {
   'use strict';
-  if (global.__hshsMemoriesPageModule) return;
-  global.__hshsMemoriesPageModule = true;
   var PAGE = 'memories';
+  if (global['__hshs' + PAGE + 'PageModule']) return;
+  global['__hshs' + PAGE + 'PageModule'] = true;
   function isPage() {
     return (location.pathname.split('/').pop() || '').toLowerCase() === 'memories.html';
   }
-  function mount() {
-    if (!isPage() || !global.HshsRender || !global.HshsUI) return;
-    if (global.HshsShell) global.HshsShell.ensureShell();
+  async function mount() {
+    if (!isPage() || !global.HshsRender) return;
+    if (global['__hshs' + PAGE + 'Mounted']) return;
+    if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     var root = document.getElementById('hshs-page');
     if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
-    var R = global.HshsRender, UI = global.HshsUI;
     document.documentElement.setAttribute('data-hshs-page', PAGE);
-    R.mount(root, [
-      UI.pageHeader('Memories', 'Looking back at school life'),
-      R.el('div', { className: 'page-content', id: 'memoriesFeed', style: { padding: '1rem' } }, [UI.skeleton(4)])
-    ]);
-    (async function () {
-      var el = document.getElementById('memoriesFeed');
-      if (!el) return;
-      try {
-        var posts = (global.HshsData && global.HshsData.getPosts) ? await global.HshsData.getPosts(24, 0) : [];
-        R.clear(el);
-        if (!posts || !posts.length) { el.appendChild(UI.emptyState('No memories yet.', 'fa-history')); return; }
-        posts.forEach(function (p) { el.appendChild(UI.postCard ? UI.postCard(p) : UI.mediaCard(p)); });
-      } catch (e) {
-        R.clear(el);
-        el.appendChild(UI.emptyState('Could not load.', 'fa-exclamation-triangle'));
-      }
-    })();
-    console.info('[HSHS] JS-first page active:', PAGE);
+    var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
+    if (tpl) {
+      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+      else root.innerHTML = tpl;
+    }
+    global['__hshs' + PAGE + 'Mounted'] = true;
+    console.info('[HSHS] JS-first full page active:', PAGE);
   }
   function boot() {
     function go() {
