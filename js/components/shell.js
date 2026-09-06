@@ -47,8 +47,8 @@
       R().el('div', { className: 'container' }, [
         R().el('div', { className: 'footer-content' }, [
           R().el('div', { className: 'footer-section' }, [
-            R().el('h4', { text: 'HSHS World' }),
-            R().el('p', { text: 'The HSHS home for school memories and community.' })
+            R().el('h4', { text: 'Hawthorne Scribner High School' }),
+            R().el('p', { text: 'HSHS World \u00b7 Educate. Engage. Empower.' })
           ]),
           R().el('div', { className: 'footer-section' }, [
             R().el('h4', { text: 'Quick Links' }),
