@@ -39,7 +39,7 @@
   }
 
   function ver(url) {
-    var v = window.__hshsAssetVer || '260905j2';
+    var v = window.__hshsAssetVer || '260906f2';
     return url + (url.indexOf('?') === -1 ? '?v=' + v : '');
   }
 
@@ -49,6 +49,18 @@
       await loadScript(ver(base + 'core/app.js'), 'hshs-core-app');
       await loadScript(ver(base + 'utils/dom.js'), 'hshs-utils-dom');
       await loadScript(ver(base + 'core/render.js'), 'hshs-core-render');
+      try { await loadScript(ver(base + 'core/templates/home.js'), 'hshs-tpl-home'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/gallery.js'), 'hshs-tpl-gallery'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/photos.js'), 'hshs-tpl-photos'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/videos.js'), 'hshs-tpl-videos'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/about.js'), 'hshs-tpl-about'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/spotlight.js'), 'hshs-tpl-spotlight'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/polls.js'), 'hshs-tpl-polls'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/memories.js'), 'hshs-tpl-memories'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/more.js'), 'hshs-tpl-more'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/chat.js'), 'hshs-tpl-chat'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/admin.js'), 'hshs-tpl-admin'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/templates/settings.js'), 'hshs-tpl-settings'); } catch (e) {}
       await loadScript(ver(base + 'components/ui.js'), 'hshs-comp-ui');
       await loadScript(ver(base + 'components/shell.js'), 'hshs-comp-shell');
       await loadScript(ver(base + 'router/history.js'), 'hshs-router-history');
