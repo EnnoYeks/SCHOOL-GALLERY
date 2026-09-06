@@ -1,6 +1,6 @@
 /**
- * JS-first home page.
- * The page owns only its content; shared shell/foundation stay global.
+ * HSHS WORLD · Home page controller
+ * Phase 3: rebuilt page content, shared shell remains external.
  */
 (function (global) {
   'use strict';
@@ -8,8 +8,8 @@
   global.__hshsHomePageModule = true;
 
   function isPage() {
-    var f = (location.pathname.split('/').pop() || '').toLowerCase();
-    return f === 'index.html' || f === '';
+    var file = (location.pathname.split('/').pop() || '').toLowerCase();
+    return file === 'index.html' || file === '';
   }
 
   function assetBase() {
@@ -19,19 +19,18 @@
   function loadOnce(src, id) {
     return new Promise(function (resolve) {
       if (id && document.getElementById(id)) { resolve(); return; }
-      var s = document.createElement('script');
-      if (id) s.id = id;
-      s.src = src;
-      s.async = false;
-      s.onload = function () { resolve(); };
-      s.onerror = function () { resolve(); };
-      document.head.appendChild(s);
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = src;
+      if (id) link.id = id;
+      link.onload = resolve;
+      link.onerror = resolve;
+      document.head.appendChild(link);
     });
   }
 
   async function mount() {
     if (!isPage() || !global.HshsRender || global.__hshsHomeMounted) return;
-
     if (global.HshsShell) global.HshsShell.ensureShell();
     var root = document.getElementById('hshs-page');
     if (!root) {
@@ -39,15 +38,13 @@
       root.id = 'hshs-page';
       document.body.appendChild(root);
     }
-
     document.documentElement.setAttribute('data-hshs-page', 'home');
+    await loadOnce(assetBase() + 'css/home.css?v=260906p3', 'hshs-home-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
     else if (tpl) root.innerHTML = tpl;
-
-    await loadOnce(assetBase() + 'js/particles.js?v=260906r', 'hshs-particles');
     global.__hshsHomeMounted = true;
-    console.info('[HSHS] JS-first home mounted');
+    console.info('[HSHS] Phase 3 home mounted');
   }
 
   function boot() {
@@ -56,14 +53,9 @@
       if (!global.HshsRender) { setTimeout(go, 40); return; }
       mount();
     }
-
-    if (global.HshsApp && typeof global.HshsApp.whenReady === 'function') {
-      global.HshsApp.whenReady(go);
-    } else if (global.HshsApp && global.HshsApp.isReady && global.HshsApp.isReady()) {
-      go();
-    } else {
-      document.addEventListener('hshs:foundation-ready', go, { once: true });
-    }
+    if (global.HshsApp && typeof global.HshsApp.whenReady === 'function') global.HshsApp.whenReady(go);
+    else if (global.HshsApp && global.HshsApp.isReady && global.HshsApp.isReady()) go();
+    else document.addEventListener('hshs:foundation-ready', go, { once: true });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
