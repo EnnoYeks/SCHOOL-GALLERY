@@ -1,0 +1,71 @@
+/*
+ * HSHS WORLD · CSS FOUNDATION
+ *
+ * Single shared stylesheet entry point for the JS-first application shell.
+ * The imports intentionally preserve the existing visual system while the
+ * page-specific styles are migrated and rebuilt in later phases.
+ *
+ * Order matters:
+ * 1. no-flicker boot rules
+ * 2. core tokens + base + shared shell
+ * 3. motion
+ * 4. responsive rules
+ * 5. theme/settings overrides
+ * 6. mobile shell/navigation
+ * 7. final polish/performance safeguards
+ */
+
+@import url("./hshs-no-flicker.css");
+@import url("./style.css");
+@import url("./animations.css");
+@import url("./responsive.css");
+@import url("./theme.css");
+@import url("./mobile-shell.css");
+@import url("./hshs-polish.css");
+@import url("./hshs-perf.css");
+
+/* Foundation-level application contract */
+:root {
+  --hshs-shell-max: 1400px;
+  --hshs-page-gutter: clamp(1rem, 3vw, 2rem);
+  --hshs-mobile-breakpoint: 768px;
+  --hshs-tablet-breakpoint: 1024px;
+  --hshs-glass-blur: 16px;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#hshs-page {
+  min-height: 40vh;
+  width: 100%;
+}
+
+/* Prevent dynamically mounted pages from inheriting accidental margins. */
+#hshs-page > :first-child {
+  margin-top: 0;
+}
+
+/* Accessibility: keep motion respectful without disabling page transitions. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
