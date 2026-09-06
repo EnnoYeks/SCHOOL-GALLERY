@@ -2,14 +2,37 @@
   'use strict';
   if (global.__hshsBuzzPageModule) return;
   global.__hshsBuzzPageModule = true;
-  function isPage() { var file = (location.pathname.split('/').pop() || '').toLowerCase(); return file === 'buzz.html'; }
-  function onFoundationReady() {
-    if (!global.HshsRouter) return;
-    if (global.HshsApp) global.HshsApp.setState({ pages: Object.assign({}, (global.HshsApp.getState().pages || {}), { buzz: { registered: true, path: 'index/buzz.html' } }) });
-    global.HshsPages = global.HshsPages || {};
-    global.HshsPages.buzz = { name: 'buzz', path: 'index/buzz.html', isActive: function () { return isPage(); }, navigate: function () { if (global.HshsRouter) return global.HshsRouter.navigate('buzz'); location.href = 'index/buzz.html'; } };
-    if (isPage()) { document.documentElement.classList.add('hshs-page-buzz'); console.info('[HSHS] Buzz page module active'); }
+  function isPage() {
+    var f = (location.pathname.split('/').pop() || '').toLowerCase();
+    return f === 'buzz.html' || f === 'clips.html' || f === 'shorts.html';
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { document.addEventListener('hshs:foundation-ready', onFoundationReady, { once: true }); setTimeout(onFoundationReady, 120); }, { once: true });
-  else { document.addEventListener('hshs:foundation-ready', onFoundationReady, { once: true }); setTimeout(onFoundationReady, 120); }
+  function mount() {
+    if (!isPage() || !global.HshsRender || !global.HshsUI) return;
+    if (global.HshsShell) global.HshsShell.ensureShell();
+    var root = document.getElementById('hshs-page');
+    if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
+    var R = global.HshsRender, UI = global.HshsUI;
+    document.documentElement.setAttribute('data-hshs-page', 'buzz');
+    R.mount(root, [
+      UI.pageHeader('Buzz', 'Clips and buzz'),
+      R.el('div', { className: 'page-content', id: 'buzzFeed', style: { padding: '1rem' } }, [UI.skeleton(4)])
+    ]);
+    (async function () {
+      var el = document.getElementById('buzzFeed');
+      if (!el) return;
+      try {
+        var posts = (global.HshsData && global.HshsData.getPosts) ? await global.HshsData.getPosts(24, 0) : [];
+        R.clear(el);
+        if (!posts || !posts.length) { el.appendChild(UI.emptyState('No buzz yet.', 'fa-bolt')); return; }
+        posts.forEach(function (p) { el.appendChild(UI.postCard ? UI.postCard(p) : UI.mediaCard(p)); });
+      } catch (e) { R.clear(el); el.appendChild(UI.emptyState('Could not load.', 'fa-exclamation-triangle')); }
+    })();
+    try { if (typeof global.initHshsClips === 'function') global.initHshsClips(); } catch (e) {}
+    console.info('[HSHS] JS-first page active: buzz');
+  }
+  function boot() {
+    function go() { if (!isPage()) return; if (!global.HshsRender) { setTimeout(go, 40); return; } mount(); }
+    document.addEventListener('hshs:foundation-ready', go, { once: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
 })(typeof window !== 'undefined' ? window : this);

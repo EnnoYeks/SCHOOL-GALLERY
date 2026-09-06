@@ -2,14 +2,26 @@
   'use strict';
   if (global.__hshsSettingsPageModule) return;
   global.__hshsSettingsPageModule = true;
-  function isPage() { var file = (location.pathname.split('/').pop() || '').toLowerCase(); return file === 'settings.html'; }
-  function onFoundationReady() {
-    if (!global.HshsRouter) return;
-    if (global.HshsApp) global.HshsApp.setState({ pages: Object.assign({}, (global.HshsApp.getState().pages || {}), { settings: { registered: true, path: 'index/settings.html' } }) });
-    global.HshsPages = global.HshsPages || {};
-    global.HshsPages.settings = { name: 'settings', path: 'index/settings.html', isActive: function () { return isPage(); }, navigate: function () { if (global.HshsRouter) return global.HshsRouter.navigate('settings'); location.href = 'index/settings.html'; } };
-    if (isPage()) { document.documentElement.classList.add('hshs-page-settings'); console.info('[HSHS] Settings page module active'); }
+  function isPage() { return (location.pathname.split('/').pop() || '').toLowerCase() === 'settings.html'; }
+  function mount() {
+    if (!isPage() || !global.HshsRender || !global.HshsUI) return;
+    if (global.HshsShell) global.HshsShell.ensureShell();
+    var root = document.getElementById('hshs-page');
+    if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
+    var R = global.HshsRender, UI = global.HshsUI;
+    document.documentElement.setAttribute('data-hshs-page', 'settings');
+    R.mount(root, [
+      UI.pageHeader('Settings', 'Preferences and account'),
+      R.el('div', { className: 'page-content', style: { padding: '1.5rem' } }, [
+        R.el('p', { text: 'Use the theme toggle in the header to switch light and dark modes.' }),
+        R.el('p', { text: 'Account and notification preferences stay connected to your signed-in profile.' })
+      ])
+    ]);
+    console.info('[HSHS] JS-first page active: settings');
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { document.addEventListener('hshs:foundation-ready', onFoundationReady, { once: true }); setTimeout(onFoundationReady, 120); }, { once: true });
-  else { document.addEventListener('hshs:foundation-ready', onFoundationReady, { once: true }); setTimeout(onFoundationReady, 120); }
+  function boot() {
+    function go() { if (!isPage()) return; if (!global.HshsRender) { setTimeout(go, 40); return; } mount(); }
+    document.addEventListener('hshs:foundation-ready', go, { once: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
 })(typeof window !== 'undefined' ? window : this);

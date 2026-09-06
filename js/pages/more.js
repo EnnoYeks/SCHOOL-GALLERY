@@ -2,14 +2,30 @@
   'use strict';
   if (global.__hshsMorePageModule) return;
   global.__hshsMorePageModule = true;
-  function isPage() { var file = (location.pathname.split('/').pop() || '').toLowerCase(); return file === 'more.html'; }
-  function onFoundationReady() {
-    if (!global.HshsRouter) return;
-    if (global.HshsApp) global.HshsApp.setState({ pages: Object.assign({}, (global.HshsApp.getState().pages || {}), { more: { registered: true, path: 'index/more.html' } }) });
-    global.HshsPages = global.HshsPages || {};
-    global.HshsPages.more = { name: 'more', path: 'index/more.html', isActive: function () { return isPage(); }, navigate: function () { if (global.HshsRouter) return global.HshsRouter.navigate('more'); location.href = 'index/more.html'; } };
-    if (isPage()) { document.documentElement.classList.add('hshs-page-more'); console.info('[HSHS] More page module active'); }
+  function isPage() { return (location.pathname.split('/').pop() || '').toLowerCase() === 'more.html'; }
+  function mount() {
+    if (!isPage() || !global.HshsRender || !global.HshsUI) return;
+    if (global.HshsShell) global.HshsShell.ensureShell();
+    var root = document.getElementById('hshs-page');
+    if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
+    var R = global.HshsRender, UI = global.HshsUI;
+    var b = (global.HshsShell && global.HshsShell.basePath) ? global.HshsShell.basePath() : '../';
+    document.documentElement.setAttribute('data-hshs-page', 'more');
+    R.mount(root, [
+      UI.pageHeader('More', 'Explore more of HSHS World'),
+      R.el('div', { className: 'page-content', style: { padding: '1rem', display: 'grid', gap: '0.75rem' } }, [
+        UI.btn('About', { href: b + 'index/about.html', variant: 'btn-secondary' }),
+        UI.btn('Profile', { href: b + 'index/profile.html', variant: 'btn-secondary' }),
+        UI.btn('Settings', { href: b + 'index/settings.html', variant: 'btn-secondary' }),
+        UI.btn('Saved', { href: b + 'index/saved.html', variant: 'btn-secondary' }),
+        UI.btn('Contact', { href: b + 'index/contat.html', variant: 'btn-secondary' })
+      ])
+    ]);
+    console.info('[HSHS] JS-first page active: more');
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { document.addEventListener('hshs:foundation-ready', onFoundationReady, { once: true }); setTimeout(onFoundationReady, 120); }, { once: true });
-  else { document.addEventListener('hshs:foundation-ready', onFoundationReady, { once: true }); setTimeout(onFoundationReady, 120); }
+  function boot() {
+    function go() { if (!isPage()) return; if (!global.HshsRender) { setTimeout(go, 40); return; } mount(); }
+    document.addEventListener('hshs:foundation-ready', go, { once: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
 })(typeof window !== 'undefined' ? window : this);
