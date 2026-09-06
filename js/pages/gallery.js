@@ -3,6 +3,7 @@
   var PAGE = 'gallery';
   if (global.__hshsgalleryPageModule) return;
   global.__hshsgalleryPageModule = true;
+
   function isPage() {
     return (location.pathname.split('/').pop() || '').toLowerCase() === 'gallery.html';
   }
@@ -26,8 +27,7 @@
     document.head.appendChild(l);
   }
   async function mount() {
-    if (!isPage() || !global.HshsRender) return;
-    if (global.__hshsgalleryMounted) return;
+    if (!isPage() || !global.HshsRender || global.__hshsgalleryMounted) return;
     if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     var root = document.getElementById('hshs-page');
     if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
@@ -60,7 +60,13 @@
       if (!global.HshsRender) { setTimeout(go, 40); return; }
       mount();
     }
-    document.addEventListener('hshs:foundation-ready', go, { once: true });
+    if (global.HshsApp && typeof global.HshsApp.whenReady === 'function') {
+      global.HshsApp.whenReady(go);
+    } else if (global.HshsApp && global.HshsApp.isReady && global.HshsApp.isReady()) {
+      go();
+    } else {
+      document.addEventListener('hshs:foundation-ready', go, { once: true });
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
