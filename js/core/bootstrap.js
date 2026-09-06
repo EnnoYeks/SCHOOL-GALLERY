@@ -3,7 +3,7 @@
   if (window.__hshsFoundationBooted) return;
   window.__hshsFoundationBooted = true;
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
-  var ASSET_VER = window.__hshsAssetVer || '260906m1';
+  var ASSET_VER = window.__hshsAssetVer || '260906p1';
   function assetBase() {
     var scripts = document.querySelectorAll('script[src]');
     for (var i = 0; i < scripts.length; i++) {
@@ -25,7 +25,7 @@
     });
   }
   function ver(url) { return url + (url.indexOf('?') === -1 ? '?v=' + ASSET_VER : ''); }
-  var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','spotlight','polls','memories','settings','chat','admin','profile','notifications','saved','buzz','contact'];
+  var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
   async function boot() {
     var base = assetBase();
     try {
@@ -62,13 +62,23 @@
     try {
       if (window.HshsRegistry && window.HshsApp) {
         var active = window.HshsRegistry.activeRoute();
-        window.HshsApp.setState({ currentRoute: active.route.path, currentPage: active.name, foundation: true });
+        window.HshsApp.setState({
+          currentRoute: active.route.appPath || active.route.path,
+          currentPage: active.name,
+          foundation: true
+        });
         if (active.route.title) document.title = active.route.title;
       }
     } catch (e) {}
-    if (window.HshsApp) { window.HshsApp.setState({ foundation: true }); window.HshsApp.markReady(); }
+    if (window.HshsApp) {
+      window.HshsApp.setState({ foundation: true });
+      window.HshsApp.markReady();
+    }
     document.dispatchEvent(new CustomEvent('hshs:foundation-ready', {
-      detail: { version: (window.HshsApp && window.HshsApp.version) || '1.0.0-jsfirst', route: window.HshsRegistry ? window.HshsRegistry.activeRoute() : null }
+      detail: {
+        version: (window.HshsApp && window.HshsApp.version) || '1.0.0-phase1',
+        route: window.HshsRegistry ? window.HshsRegistry.activeRoute() : null
+      }
     }));
     document.documentElement.classList.add('hshs-js-ready');
     document.documentElement.classList.remove('hshs-js-booting');
