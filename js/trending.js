@@ -1,325 +1,43 @@
-/*
- * ENNOYEKS School Gallery - Trending Page
- * Requires an existing Firebase setup from ./config.js that exports Firestore and Storage.
- */
-import db from './db.js';
+/* HSHS Trending: real Firestore content only. */
 import { firestore, storage } from './config.js';
-import {
-  collection,
-  doc,
-  getDocs,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
-} from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
+import { collection, getDocs, limit, orderBy, query, where } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 import { ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js';
 
-// Trending signals:
-// - Total engagement = likes + comments + shares
-// - Likes receive an additional boost because they are the clearest positive signal
-// - Views add reach/context without overpowering interaction
-const TRENDING_WEIGHTS = Object.freeze({ engagement: 4, likes: 2, views: 1 });
 const PAGE_SIZE = 9;
 const CACHE_TTL = 5 * 60 * 1000;
-const SEARCH_MIN_LENGTH = 2;
-const state = {
-  period: 'week',
-  posts: [],
-  visiblePosts: [],
-  page: 1,
-  isLoading: false,
-  hasMore: true,
-  cache: new Map(),
-  notificationUnsubscribe: null,
-};
+const WEIGHTS = { engagement: 4, likes: 2, views: 1 };
+const state = { period: 'week', filter: 'all', posts: [], page: 1, hasMore: true, cache: new Map() };
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const num = v => Number.isFinite(Number(v)) ? Number(v) : 0;
+const debounce = (fn, ms=220) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
 
-const $ = (id) => document.getElementById(id);
-const els = {
-  trendingGrid: $('trendingGrid'),
-  topCategoriesGrid: $('topCategoriesGrid'),
-  topLikedList: $('topLikedList'),
-  topViewedList: $('topViewedList'),
-  topCommentedList: $('topCommentedList'),
-  searchInput: $('searchInput'),
-  searchResults: $('searchResults'),
-  notificationBadge: $('notificationBadge'),
-  notificationsList: $('notificationsList'),
-};
+function periodStart(period) { const d=new Date(); if(period==='today') d.setHours(0,0,0,0); else d.setDate(d.getDate()-(period==='month'?30:7)); return d; }
+function dateValue(v) { return v?.toDate ? v.toDate() : new Date(v || 0); }
+function ago(d) { const s=Math.max(1,Math.floor((Date.now()-d.getTime())/1000)); const u=[['day',86400],['hour',3600],['minute',60]]; const m=u.find(x=>s>=x[1]); return m ? `${Math.floor(s/m[1])} ${m[0]}${Math.floor(s/m[1])>1?'s':''} ago` : 'just now'; }
+async function mediaURL(v='') { if(!v || !storage || !v.startsWith('gs://')) return v; try{return await getDownloadURL(ref(storage,v));}catch{return '';} }
+async function normalize(docSnap) { const d=docSnap.data(); const likes=num(d.likesCount ?? d.likes), comments=num(d.commentsCount ?? d.comments), views=num(d.viewsCount ?? d.views), shares=num(d.sharesCount ?? d.shares); const p={id:docSnap.id,title:d.title||'Untitled post',description:d.description||'',mediaURL:await mediaURL(d.mediaURL||d.thumbnailURL||d.imageUrl||''),mediaType:d.mediaType||'image',category:d.category||'General',author:d.author||d.authorName||'HSHS Student',authorPhoto:d.authorPhoto||'',timestamp:dateValue(d.timestamp||d.createdAt),likesCount:likes,commentsCount:comments,viewsCount:views,sharesCount:shares,featured:Boolean(d.featured)}; p.engagementCount=likes+comments+shares; p.trendingScore=p.engagementCount*WEIGHTS.engagement+likes*WEIGHTS.likes+views; return p; }
+function cacheGet(k){const x=state.cache.get(k);return x&&Date.now()-x.time<CACHE_TTL?x.data:null;}
+function cacheSet(k,data){state.cache.set(k,{data,time:Date.now()});}
+async function getPosts(period=state.period){const k=`trending:${period}`;const hit=cacheGet(k);if(hit)return hit;const q=query(collection(firestore,'posts'),where('timestamp','>=',periodStart(period)),orderBy('timestamp','desc'),limit(60));const s=await getDocs(q);const data=(await Promise.all(s.docs.map(normalize))).filter(p=>p.mediaURL||p.title);data.sort((a,b)=>b.trendingScore-a.trendingScore||b.timestamp-a.timestamp);cacheSet(k,data);return data;}
+export async function getTrendingPosts(period=state.period){return getPosts(period);}
+export async function searchTrendingPosts(text){const q=String(text||'').trim().toLowerCase();if(q.length<2)return [];return getPosts(state.period).then(ps=>ps.filter(p=>[p.title,p.description,p.category,p.author].some(x=>x.toLowerCase().includes(q))).slice(0,8));}
+export async function getTopCategories(){const ps=await getPosts(state.period),m=new Map();ps.forEach(p=>{const x=m.get(p.category)||{name:p.category,postsCount:0,engagement:0};x.postsCount++;x.engagement+=p.engagementCount;m.set(p.category,x);});return [...m.values()].sort((a,b)=>b.engagement-a.engagement);}
+export async function getTopLikedPosts(){return (await getPosts()).slice().sort((a,b)=>b.likesCount-a.likesCount).slice(0,5);}
+export async function getTopViewedPosts(){return (await getPosts()).slice().sort((a,b)=>b.viewsCount-a.viewsCount).slice(0,5);}
+export async function getTopCommentedPosts(){return (await getPosts()).slice().sort((a,b)=>b.commentsCount-a.commentsCount).slice(0,5);}
 
-const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({
-  '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '"',
-}[char]));
-const toNumber = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
-const debounce = (fn, wait = 250) => {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn(...args), wait);
-  };
-};
-
-async function resolveMediaURL(url = '') {
-  if (!url || !storage || !url.startsWith('gs://')) return url;
-  try {
-    return await getDownloadURL(ref(storage, url));
-  } catch (error) {
-    console.warn('Unable to resolve Storage URL:', error);
-    return '';
-  }
-}
-
-async function normalizePost(snapshotOrData) {
-  const data = typeof snapshotOrData.data === 'function' ? snapshotOrData.data() : snapshotOrData;
-  const id = snapshotOrData.id || data.id;
-  return {
-    id,
-    title: data.title || 'Untitled post',
-    description: data.description || '',
-    mediaURL: await resolveMediaURL(data.mediaURL || data.thumbnailURL || ''),
-    mediaType: data.mediaType || 'image',
-    category: data.category || 'General',
-    author: data.author || data.authorName || 'ENNOYEKS Student',
-    authorPhoto: data.authorPhoto || '',
-    timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(data.timestamp || Date.now()),
-    likesCount: toNumber(data.likesCount),
-    commentsCount: toNumber(data.commentsCount),
-    viewsCount: toNumber(data.viewsCount),
-    sharesCount: toNumber(data.sharesCount),
-    featured: Boolean(data.featured),
-  };
-}
-
-function getPeriodStart(period = 'week') {
-  const now = new Date();
-  const start = new Date(now);
-  if (period === 'today') start.setHours(0, 0, 0, 0);
-  else if (period === 'month') start.setDate(now.getDate() - 30);
-  else start.setDate(now.getDate() - 7);
-  return start;
-}
-
-function calculateEngagement(post) {
-  return post.likesCount + post.commentsCount + post.sharesCount;
-}
-
-function calculateTrendingScore(post) {
-  const engagement = calculateEngagement(post);
-  return (engagement * TRENDING_WEIGHTS.engagement)
-    + (post.likesCount * TRENDING_WEIGHTS.likes)
-    + (post.viewsCount * TRENDING_WEIGHTS.views);
-}
-
-function withScores(posts) {
-  return posts.map((post) => ({
-    ...post,
-    engagementCount: calculateEngagement(post),
-    trendingScore: calculateTrendingScore(post),
-  }))
-    .sort((a, b) => b.trendingScore - a.trendingScore || b.timestamp - a.timestamp);
-}
-
-function timeAgo(date) {
-  const seconds = Math.max(1, Math.floor((Date.now() - date.getTime()) / 1000));
-  const units = [['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]];
-  const match = units.find(([, value]) => seconds >= value);
-  if (!match) return 'just now';
-  const amount = Math.floor(seconds / match[1]);
-  return `${amount} ${match[0]}${amount > 1 ? 's' : ''} ago`;
-}
-
-function cacheGet(key) {
-  const item = state.cache.get(key);
-  return item && Date.now() - item.time < CACHE_TTL ? item.data : null;
-}
-function cacheSet(key, data) { state.cache.set(key, { data, time: Date.now() }); }
-
-function renderSkeleton(target, count = 6, type = 'card') {
-  if (!target) return;
-  target.innerHTML = Array.from({ length: count }, () => `<article class="skeleton ${type}-skeleton"><span></span><div></div><p></p><p></p></article>`).join('');
-}
-function renderMessage(target, message, icon = '✨') {
-  if (target) target.innerHTML = `<div class="empty-state"><span>${icon}</span><h3>${escapeHTML(message)}</h3><p>Check back soon for more ENNOYEKS School Gallery moments.</p></div>`;
-}
-function renderError(target, message = 'Something went wrong while loading trending content.') { renderMessage(target, message, '⚠️'); }
-
-function postMedia(post, large = true) {
-  if (post.mediaType === 'video') {
-    return `<video class="post-media" ${large ? 'controls' : ''} preload="metadata" poster="${escapeHTML(post.mediaURL)}"><source src="${escapeHTML(post.mediaURL)}"></video>`;
-  }
-  return `<img class="post-media" src="${escapeHTML(post.mediaURL)}" alt="${escapeHTML(post.title)}" loading="lazy">`;
-}
-
-function renderTrendingPosts(append = false) {
-  if (!els.trendingGrid) return;
-  const nextPosts = state.posts.slice(0, state.page * PAGE_SIZE);
-  state.visiblePosts = nextPosts;
-  state.hasMore = nextPosts.length < state.posts.length;
-  if (!nextPosts.length) return renderMessage(els.trendingGrid, 'No trending posts yet');
-  els.trendingGrid.innerHTML = nextPosts.map((post, index) => `
-    <article class="trending-card fade-in" style="--delay:${Math.min(index, 8) * 70}ms" data-post-id="${escapeHTML(post.id)}">
-      <div class="media-wrap">
-        ${postMedia(post)}
-        <span class="category-badge">${escapeHTML(post.category)}</span>
-        ${post.featured ? '<span class="featured-badge">Featured</span>' : ''}
-      </div>
-      <div class="card-content">
-        <h3>${escapeHTML(post.title)}</h3>
-        <p>${escapeHTML(post.description.slice(0, 150))}${post.description.length > 150 ? '…' : ''}</p>
-        <div class="author-row">
-          <img src="${escapeHTML(post.authorPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(post.author))}" alt="${escapeHTML(post.author)}" loading="lazy">
-          <div><strong>${escapeHTML(post.author)}</strong><span>${timeAgo(post.timestamp)}</span></div>
-        </div>
-        <div class="stats-row">
-          <span>❤️ ${post.likesCount}</span><span>💬 ${post.commentsCount}</span><span>👁️ ${post.viewsCount}</span><span>🔁 ${post.sharesCount}</span><span class="engagement">⚡ ${post.engagementCount}</span><span class="hot">🔥 ${post.trendingScore}</span>
-        </div>
-      </div>
-    </article>`).join('');
-  if (!append) els.trendingGrid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-export async function getTrendingPosts(period = state.period) {
-  const key = `trending:${period}`;
-  const cached = cacheGet(key);
-  if (cached) return cached;
-  const q = query(collection(firestore, 'posts'), where('timestamp', '>=', getPeriodStart(period)), orderBy('timestamp', 'desc'), limit(60));
-  const snap = await getDocs(q);
-  const posts = withScores(await Promise.all(snap.docs.map(normalizePost)));
-  cacheSet(key, posts);
-  return posts;
-}
-
-export async function getTopCategories() {
-  const posts = cacheGet(`trending:${state.period}`) || await getTrendingPosts(state.period);
-  const categories = [...posts.reduce((map, post) => {
-    const current = map.get(post.category) || { name: post.category, postsCount: 0, engagement: 0 };
-    current.postsCount += 1;
-    current.engagement += post.engagementCount;
-    map.set(post.category, current);
-    return map;
-  }, new Map()).values()].sort((a, b) => b.engagement - a.engagement);
-  return categories;
-}
-export async function getTopLikedPosts() { return (await getTrendingPosts(state.period)).slice().sort((a, b) => b.likesCount - a.likesCount).slice(0, 5); }
-export async function getTopViewedPosts() { return (await getTrendingPosts(state.period)).slice().sort((a, b) => b.viewsCount - a.viewsCount).slice(0, 5); }
-export async function getTopCommentedPosts() { return (await getTrendingPosts(state.period)).slice().sort((a, b) => b.commentsCount - a.commentsCount).slice(0, 5); }
-export async function searchTrendingPosts(queryText) {
-  const queryLower = queryText.trim().toLowerCase();
-  if (queryLower.length < SEARCH_MIN_LENGTH) return [];
-  const posts = cacheGet(`trending:${state.period}`) || await getTrendingPosts(state.period);
-  return posts.filter((post) => [post.title, post.description, post.category].some((field) => field.toLowerCase().includes(queryLower))).slice(0, 8);
-}
-
-function renderCategories(categories) {
-  if (!els.topCategoriesGrid) return;
-  if (!categories.length) return renderMessage(els.topCategoriesGrid, 'No category activity yet');
-  const icons = ['🎓', '🏆', '🎨', '🔬', '📚', '🎭', '⚽', '🎵'];
-  els.topCategoriesGrid.innerHTML = categories.map((cat, i) => `<article class="category-card slide-up"><span>${icons[i % icons.length]}</span><h4>${escapeHTML(cat.name)}</h4><p>${cat.postsCount} posts</p><strong>${cat.engagement.toLocaleString()} engagement</strong></article>`).join('');
-}
-function renderLeaderboard(target, posts, metric, icon) {
-  if (!target) return;
-  if (!posts.length) return renderMessage(target, 'No posts to rank yet', '🏅');
-  target.innerHTML = posts.map((post, i) => `<li class="leaderboard-item"><b>#${i + 1}</b><img src="${escapeHTML(post.mediaURL)}" alt="${escapeHTML(post.title)}" loading="lazy"><span>${escapeHTML(post.title)}</span><strong>${icon} ${post[metric].toLocaleString()}</strong></li>`).join('');
-}
-async function renderSidebars() {
-  const [categories, liked, viewed, commented] = await Promise.all([getTopCategories(), getTopLikedPosts(), getTopViewedPosts(), getTopCommentedPosts()]);
-  renderCategories(categories);
-  renderLeaderboard(els.topLikedList, liked, 'likesCount', '❤️');
-  renderLeaderboard(els.topViewedList, viewed, 'viewsCount', '👁');
-  renderLeaderboard(els.topCommentedList, commented, 'commentsCount', '💬');
-}
-
-async function loadTrending(period = state.period) {
-  try {
-    state.isLoading = true; state.period = period; state.page = 1;
-    renderSkeleton(els.trendingGrid, 6); renderSkeleton(els.topCategoriesGrid, 4, 'category');
-    state.posts = await getTrendingPosts(period);
-    renderTrendingPosts();
-    await renderSidebars();
-  } catch (error) {
-    console.error(error);
-    renderError(els.trendingGrid);
-  } finally { state.isLoading = false; }
-}
-
-function setupTabs() {
-  const container = document.querySelector('[data-trending-tabs]') || document.querySelector('.trending-tabs');
-  if (!container) return;
-  container.addEventListener('click', (event) => {
-    const tab = event.target.closest('[data-period]');
-    if (!tab) return;
-    container.querySelectorAll('[data-period]').forEach((item) => item.classList.toggle('active', item === tab));
-    loadTrending(tab.dataset.period);
-  });
-}
-function setupSearch() {
-  if (!els.searchInput || !els.searchResults) return;
-  els.searchInput.addEventListener('input', debounce(async (event) => {
-    const results = await searchTrendingPosts(event.target.value);
-    els.searchResults.classList.toggle('show', results.length > 0);
-    els.searchResults.innerHTML = results.map((post) => `<button class="search-result" data-post-id="${escapeHTML(post.id)}"><img src="${escapeHTML(post.mediaURL)}" alt=""><span><strong>${escapeHTML(post.title)}</strong><small>${escapeHTML(post.category)} • 🔥 ${post.trendingScore}</small></span></button>`).join('');
-  }));
-  document.addEventListener('click', (event) => {
-    if (!els.searchInput.contains(event.target) && !els.searchResults.contains(event.target)) els.searchResults.classList.remove('show');
-  });
-}
-function setupInfiniteScroll() {
-  window.addEventListener('scroll', debounce(() => {
-    if (state.isLoading || !state.hasMore) return;
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 600) {
-      state.page += 1;
-      renderTrendingPosts(true);
-    }
-  }, 120));
-}
-function setupNotifications() {
-  if (!els.notificationBadge && !els.notificationsList) return;
-  const q = query(collection(firestore, 'notifications'), orderBy('timestamp', 'desc'), limit(10));
-  state.notificationUnsubscribe = onSnapshot(q, (snap) => {
-    const notifications = snap.docs.map((item) => ({ id: item.id, ...item.data() }));
-    const unread = notifications.filter((item) => !item.read).length;
-    if (els.notificationBadge) {
-      els.notificationBadge.textContent = unread;
-      els.notificationBadge.hidden = unread === 0;
-    }
-    if (els.notificationsList) {
-      els.notificationsList.innerHTML = notifications.length ? notifications.map((item) => `<button class="notification-item ${item.read ? '' : 'unread'}" data-notification-id="${item.id}"><strong>${escapeHTML(item.title || 'Notification')}</strong><span>${escapeHTML(item.message || item.body || '')}</span></button>`).join('') : '<div class="empty-notifications">No notifications yet.</div>';
-    }
-  });
-  els.notificationsList?.addEventListener('click', async (event) => {
-    const item = event.target.closest('[data-notification-id]');
-    if (item) await updateDoc(doc(firestore, 'notifications', item.dataset.notificationId), { read: true, readAt: serverTimestamp() });
-  });
-}
-
-function boot() {
-  // Re-bind element refs after SPA replaces #hshs-page content
-  els.trendingGrid = document.getElementById('trendingGrid');
-  els.topCategoriesGrid = document.getElementById('topCategoriesGrid');
-  els.topLikedList = document.getElementById('topLikedList');
-  els.topViewedList = document.getElementById('topViewedList');
-  els.topCommentedList = document.getElementById('topCommentedList');
-  els.searchInput = document.getElementById('searchInput');
-  els.searchResults = document.getElementById('searchResults');
-  els.notificationBadge = document.getElementById('notificationBadge');
-  els.notificationsList = document.getElementById('notificationsList');
-  if (!els.trendingGrid) return;
-  try {
-    if (state.notificationUnsubscribe) {
-      state.notificationUnsubscribe();
-      state.notificationUnsubscribe = null;
-    }
-  } catch (e) {}
-  state.page = 1;
-  state.posts = [];
-  state.visiblePosts = [];
-  state.hasMore = true;
-  setupTabs(); setupSearch(); setupInfiniteScroll(); setupNotifications(); loadTrending(state.period || 'week');
-}
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-else boot();
-document.addEventListener('hshs:page', boot);
-window.startTrending = boot;
+function media(p,small=false){ if(!p.mediaURL)return `<div class="feed-media"><div class="empty-state"><span>✨</span></div></div>`; return p.mediaType==='video' ? `<div class="feed-media"><video class="feed-image" preload="metadata" muted playsinline poster="${esc(p.mediaURL)}"><source src="${esc(p.mediaURL)}"></video><span class="play-icon"><i class="fas fa-play"></i></span></div>` : `<div class="feed-media"><img class="feed-image" src="${esc(p.mediaURL)}" alt="${esc(p.title)}" loading="lazy"></div>`; }
+function avatar(p){return p.authorPhoto?esc(p.authorPhoto):'';}
+function card(p,i){return `<article class="trend-feed-card" data-post-id="${esc(p.id)}"><div class="feed-media">${p.mediaURL?(p.mediaType==='video'?`<video class="feed-image" preload="metadata" muted playsinline poster="${esc(p.mediaURL)}"><source src="${esc(p.mediaURL)}"></video><span class="play-icon"><i class="fas fa-play"></i></span>`:`<img class="feed-image" src="${esc(p.mediaURL)}" alt="${esc(p.title)}" loading="lazy">`):'<div class="empty-state"><span>✨</span></div>'}<span class="feed-rank">#${i+1}</span></div><div class="feed-body"><span class="feed-category">${esc(p.category)}</span><h3>${esc(p.title)}</h3><div class="author-row">${avatar(p)?`<img src="${avatar(p)}" alt="">`:''}<div><span>${esc(p.author)}</span><small>${ago(p.timestamp)}</small></div></div><div class="feed-bottom"><span>❤️ ${p.likesCount} · 💬 ${p.commentsCount} · 👁 ${p.viewsCount}</span><strong>🔥 ${p.trendingScore}</strong></div></div></article>`;}
+function topCard(p,rank,hero=false){if(!p)return '';return `<article class="${hero?'hero':'mini'}-trending-card" data-post-id="${esc(p.id)}"><div class="${hero?'hero':'mini'}-media">${p.mediaURL?(p.mediaType==='video'?`<video class="${hero?'hero':'mini'}-image" muted playsinline preload="metadata" poster="${esc(p.mediaURL)}"><source src="${esc(p.mediaURL)}"></video>`:`<img class="${hero?'hero':'mini'}-image" src="${esc(p.mediaURL)}" alt="${esc(p.title)}" loading="lazy">`):'<div class="empty-state"><span>✨</span></div>'}</div><div class="${hero?'hero':'mini'}-overlay"></div><span class="rank-badge ${rank===1?'rank-one':rank===2?'rank-two':'rank-three'}">#${rank}</span><div class="${hero?'hero':'mini'}-content"><span class="${hero?'top-label':'mini-category'}">${esc(p.category)}</span><h${hero?'2':'3'}>${esc(p.title)}</h${hero?'2':'3'}>${hero?`<p>${esc(p.description.slice(0,180))}</p>`:''}<div class="author-row"><span>${esc(p.author)}</span><small>${ago(p.timestamp)}</small></div><div class="trend-stats"><span class="likes">❤️ ${p.likesCount}</span><span>💬 ${p.commentsCount}</span><span>👁 ${p.viewsCount}</span><span>🔥 ${p.trendingScore}</span></div></div></article>`;}
+function message(el,text,icon='✨'){if(el)el.innerHTML=`<div class="empty-state"><span>${icon}</span><h3>${esc(text)}</h3><p>Check back soon for more HSHS School Gallery moments.</p></div>`;}
+function renderTop(){const hero=$('topTrendingHero'),side=$('topTrendingSide');if(!hero||!side)return;const ps=state.posts.slice(0,3);if(!ps.length){message(hero,'No trending posts yet');side.innerHTML='';return;}hero.innerHTML=topCard(ps[0],1,true);side.innerHTML=topCard(ps[1],2)+topCard(ps[2],3);}
+function renderGrid(){const grid=$('trendingGrid');if(!grid)return;let ps=state.posts;if(state.filter!=='all')ps=ps.filter(p=>state.filter==='video'?p.mediaType==='video':state.filter==='image'?p.mediaType!=='video':state.filter==='buzz'?/buzz|short|clip/i.test(`${p.category} ${p.title} ${p.description}`):/event|sports|assembly|function/i.test(`${p.category} ${p.title} ${p.description}`));const shown=ps.slice(0,state.page*PAGE_SIZE);state.hasMore=shown.length<ps.length;if(!shown.length){message(grid,'No trending content for this filter');return;}grid.innerHTML=shown.map(card).join('');}
+function renderInsights(){Promise.all([getTopCategories(),getTopLikedPosts(),getTopViewedPosts(),getTopCommentedPosts()]).then(([cats,liked,viewed,commented])=>{const c=$('topCategoriesGrid'),hot=$('hotTopics');if(c)c.innerHTML=cats.length?cats.slice(0,6).map(x=>`<div class="category-row"><span>🔥 ${esc(x.name)}</span><strong>${x.postsCount} posts</strong></div>`).join(''):'';if(hot)hot.innerHTML=cats.slice(0,8).map(x=>`<article class="hot-topic"><strong>#${esc(x.name)}</strong><span>${x.postsCount} posts</span><small>${x.engagement} engagement</small></article>`).join('');const list=(id,ps,key,icon)=>{const el=$(id);if(el)el.innerHTML=ps.length?ps.map((p,i)=>`<li class="leaderboard-item"><b>#${i+1}</b>${p.mediaURL?`<img src="${esc(p.mediaURL)}" alt="" loading="lazy">`:''}<span>${esc(p.title)}</span><strong>${icon} ${p[key]}</strong></li>`).join(''):'';};list('topLikedList',liked,'likesCount','❤️');list('topViewedList',viewed,'viewsCount','👁');list('topCommentedList',commented,'commentsCount','💬');}).catch(e=>console.warn('[HSHS] Trending insights failed',e));}
+async function load(period=state.period){state.period=period;state.page=1;state.posts=[];state.hasMore=true;const grid=$('trendingGrid');if(grid)grid.innerHTML=Array.from({length:6},()=>'<div class="trend-skeleton"></div>').join('');try{state.posts=await getPosts(period);renderTop();renderGrid();renderInsights();}catch(e){console.error('[HSHS] Trending load failed',e);message(grid,'Trending content could not be loaded','⚠️');}}
+function wire(){const period=$('periodSelect');if(period&&!period.dataset.wired){period.dataset.wired='1';period.addEventListener('change',()=>load(period.value));}const filters=document.querySelector('.trending-filters');if(filters&&!filters.dataset.wired){filters.dataset.wired='1';filters.addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;state.filter=b.dataset.filter;filters.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));renderGrid();});}const view=$('viewAllTrending');if(view&&!view.dataset.wired){view.dataset.wired='1';view.addEventListener('click',e=>{e.preventDefault();state.filter='all';document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x.dataset.filter==='all'));state.page=Math.max(1,state.page+1);renderGrid();});}const search=$('searchInput'),results=$('searchResults');if(search&&results&&!search.dataset.wired){search.dataset.wired='1';search.addEventListener('input',debounce(async()=>{const ps=await searchTrendingPosts(search.value);results.innerHTML=ps.map(p=>`<button class="search-result" data-post-id="${esc(p.id)}"><strong>${esc(p.title)}</strong><small>${esc(p.category)} · 🔥 ${p.trendingScore}</small></button>`).join('');results.classList.toggle('show',ps.length>0);},200));}if(!window.__hshsTrendingScroll){window.__hshsTrendingScroll=true;window.addEventListener('scroll',debounce(()=>{if(state.hasMore&&window.innerHeight+window.scrollY>=document.body.offsetHeight-650){state.page++;renderGrid();}},120));}}
+function boot(){if(!$('trendingGrid'))return;wire();load(state.period||'week');}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+document.addEventListener('hshs:page',()=>setTimeout(boot,0));
+window.startTrending=boot;
