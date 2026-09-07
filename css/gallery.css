@@ -1,3 +1,4 @@
+@import url("./hshs-type.css");
 /* HSHS WORLD · Gallery */
 html[data-hshs-page="gallery"] body,
 body:has(.gallery-page){
@@ -9,7 +10,7 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
 .gallery-page{width:min(1080px,100%);margin:0 auto;padding:calc(72px + env(safe-area-inset-top)) 16px 110px}
 .gallery-hero-card{position:relative;overflow:hidden;border-radius:24px;padding:22px 18px 20px;background:linear-gradient(135deg,#0b1f4d 0%,#12306b 48%,#1d4ed8 78%,#eab308 100%);color:#fff;margin-bottom:16px;box-shadow:0 16px 36px rgba(7,20,51,.28)}
 .gallery-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-.gallery-hero-card h1{margin:10px 0 6px;font-size:clamp(2rem,8vw,3.2rem);line-height:.95;font-weight:900}
+.gallery-hero-card h1{margin:10px 0 6px;font-size:clamp(2rem,8vw,3.2rem);line-height:.95;font-weight:900;font-family:"Nunito","Segoe UI",sans-serif;letter-spacing:-.03em}
 .gallery-hero-card p{margin:0 0 16px;opacity:.9}
 .gallery-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
 .gallery-btn-primary,.gallery-btn-ghost{border:0;border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
