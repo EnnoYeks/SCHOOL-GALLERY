@@ -1,11 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap");
 html, body, button, input, textarea, select, .navbar, .mobile-tabbar {
-  font-family: "Nunito", "Segoe UI", sans-serif !important;
+  font-family: var(--font-ui, "Nunito", "Segoe UI", sans-serif) !important;
 }
 h1,h2,h3,h4,h5,h6,.logo,.brand-mark,.brand-copy strong,.home-title,.home-section-title,.about-hero h1,.footer-section h4,
 .vibe-hero-card h1,.gallery-hero-card h1,.msg-hero h1,.hshs-page-head h1,.polls-hero h1,.spotlight-hero h1,.hero-title,
 .trending-header h1,.memories-hero h1,.vibe-page h1,.home-cta h2,.section-heading h2,.section-title,.pf-names h1 {
-  font-family: "Nunito", "Segoe UI", sans-serif !important;
+  font-family: var(--font-display, "Nunito", "Segoe UI", sans-serif) !important;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
@@ -16,6 +15,6 @@ h1,h2,h3,h4,h5,h6,.logo,.brand-mark,.brand-copy strong,.home-title,.home-section
   font-size: clamp(2rem, 8vw, 2.8rem) !important;
 }
 .vibe-btn-primary,.vibe-btn-ghost,.gallery-btn-primary,.gallery-btn-ghost,.pf-btn,.poll-create,.hshs-open-chats,.hshs-tab,.gallery-chip,.category-btn {
-  font-family: "Nunito", "Segoe UI", sans-serif !important;
+  font-family: var(--font-ui, "Nunito", "Segoe UI", sans-serif) !important;
   font-weight: 800 !important;
 }
