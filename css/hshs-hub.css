@@ -2,7 +2,10 @@ html[data-hshs-page="more"] .navbar,
 html[data-hshs-page="notifications"] .navbar,
 html[data-hshs-page="polls"] .navbar,
 html[data-hshs-page="saved"] .navbar,
-html[data-hshs-page="memories"] .navbar{display:block!important;background:#071433!important}
+html[data-hshs-page="memories"] .navbar,
+html[data-hshs-page="videos"] .navbar,
+html[data-hshs-page="trending"] .navbar,
+html[data-hshs-page="spotlight"] .navbar{display:block!important;background:#071433!important}
 .hshs-account-page,.hshs-polls-page,.hshs-notifications-page{width:100%;max-width:none!important;margin:12px auto 110px!important;padding:0 16px 24px!important}
 .hshs-page-head{display:flex;align-items:center;gap:10px;margin:4px 0 12px}
 .hshs-page-head h1{flex:1;margin:0;font-size:1.35rem}
@@ -14,15 +17,19 @@ html[data-hshs-page="memories"] .navbar{display:block!important;background:#0714
 .hshs-notif-card{display:flex;gap:12px;padding:12px;border-radius:16px;background:#fff;margin-bottom:8px;border:1px solid #e5e7eb}
 .hshs-notif-card.unread{border-color:#bfdbfe;background:#eff6ff}
 .hshs-notif-ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#071433;color:#fbbf24;flex:0 0 40px}
-.hshs-notif-card strong,.hshs-notif-card p{display:block;margin:0}
-.hshs-notif-card p{color:#64748b;font-size:.82rem;margin-top:3px}
-.hshs-notif-card time{color:#94a3b8;font-size:.7rem}
 .hshs-empty{text-align:center;padding:48px 16px;color:#64748b}
 .hshs-polls-page .polls-hero{padding:18px 16px 16px;background:#071433;color:#fff;border-radius:18px;margin:8px 0 0}
-.hshs-polls-page .polls-hero h1{margin:.35rem 0;font-size:1.6rem}
-.hshs-polls-page .polls-content{padding:16px 0}
 .hshs-polls-page .poll-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:14px;margin-bottom:12px}
 .hshs-polls-page .poll-option{position:relative;display:flex;justify-content:space-between;width:100%;margin:6px 0;padding:10px 12px;border:0;border-radius:12px;background:#eef2ff;overflow:hidden}
-.hshs-polls-page .poll-option i{position:absolute;inset:0 auto 0 0;background:rgba(29,78,216,.16)}
-.hshs-polls-page .poll-option span,.hshs-polls-page .poll-option b{position:relative;z-index:1}
 .hshs-polls-page .poll-create{border:0;border-radius:999px;min-height:40px;padding:0 14px;background:#fbbf24;color:#071433;font-weight:800}
+.hub-card{display:flex;flex-direction:column;gap:8px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;margin:0 0 10px;color:#0f172a;text-align:left}
+.hub-card img{width:100%;height:150px;object-fit:cover;display:block;background:#0b1f4d}
+.hub-card div{padding:0 12px 12px}
+.hub-card b{display:block}
+.hub-card small{color:#64748b}
+#featuredVideo,#videosContainer,#trendingGrid,#spotlightGrid,#hshsSavedList,#onThisDayGrid,#yearArchiveContent{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#featuredVideo .hub-card img,#topTrendingHero .hub-card img{height:180px}
+#hotTopics{display:flex;flex-wrap:wrap;gap:8px}
+#hotTopics button{border:0;border-radius:999px;background:#071433;color:#fde68a;min-height:32px;padding:0 12px;font-weight:700}
+.hub-line{padding:10px 0;border-bottom:1px solid #e5e7eb}
+.hub-line small{display:block;color:#64748b}
