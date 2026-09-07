@@ -1,0 +1,8 @@
+/* HSHS Google Fonts tokens — faces load from fonts.googleapis.com */
+:root {
+  --font-ui: "Nunito", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Nunito", "Segoe UI", sans-serif;
+}
+html, body, button, input, textarea, select, .navbar, .mobile-tabbar {
+  font-family: var(--font-ui);
+}

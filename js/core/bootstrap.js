@@ -3,7 +3,7 @@
   if (window.__hshsFoundationBooted) return;
   window.__hshsFoundationBooted = true;
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
-  var ASSET_VER = window.__hshsAssetVer || '260907names';
+  var ASSET_VER = window.__hshsAssetVer || '260907gf1';
   function assetBase() {
     var scripts = document.querySelectorAll('script[src]');
     for (var i = 0; i < scripts.length; i++) {
@@ -26,6 +26,23 @@
   }
   function ver(url) { return url + (url.indexOf('?') === -1 ? '?v=' + ASSET_VER : ''); }
   var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
+  function ensureFonts() {
+    if (document.getElementById('hshs-google-fonts')) return;
+    function add(rel, href, id, extra) {
+      if (id && document.getElementById(id)) return;
+      var l = document.createElement('link');
+      if (id) l.id = id;
+      l.rel = rel;
+      l.href = href;
+      if (extra) { for (var k in extra) l.setAttribute(k, extra[k]); }
+      document.head.appendChild(l);
+    }
+    add('preconnect', 'https://fonts.googleapis.com', 'hshs-gf-pre');
+    add('preconnect', 'https://fonts.gstatic.com', 'hshs-gf-pre2', {crossorigin: ''});
+    add('stylesheet', 'https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap', 'hshs-google-fonts');
+    var cssBase = assetBase().replace(/js\/?$/, 'css/');
+    add('stylesheet', ver(cssBase + 'hshs-fonts.css'), 'hshs-fonts-css');
+  }
   function ensureClassicCss() {
     if (document.getElementById('hshs-classic-css')) return;
     var cssBase = assetBase().replace(/js\/?$/, 'css/');
@@ -37,7 +54,7 @@
   }
   async function boot() {
     var base = assetBase();
-    try { ensureClassicCss(); } catch (e) {}
+    try { ensureFonts(); ensureClassicCss(); } catch (e) {}
     try {
       await loadScript(ver(base + 'core/app.js'), 'hshs-core-app');
       await loadScript(ver(base + 'core/registry.js'), 'hshs-core-registry');
