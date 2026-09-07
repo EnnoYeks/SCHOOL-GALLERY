@@ -1,5 +1,5 @@
 /* HSHS WORLD classic school design system */
-@import url("https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap");
 :root {
   --hshs-navy: #0b1f4d;
   --hshs-navy-deep: #071433;
@@ -30,8 +30,8 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --space-3: 16px;
-  --font-serif: "Libre Baskerville", "Palatino Linotype", Palatino, "Times New Roman", serif;
-  --font-sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-serif: "Nunito", "Segoe UI", sans-serif;
+  --font-sans: "Nunito", "Segoe UI", system-ui, sans-serif;
   --fs-h1: clamp(2rem, 4.2vw, 3.25rem);
   --fs-h2: clamp(1.45rem, 2.6vw, 2rem);
   --fs-body: 1rem;
@@ -55,7 +55,7 @@ body.dark-mode {
 html { font-size: 16px; }
 body { font-family: var(--font-sans); font-size: var(--fs-body); line-height: 1.65; background: var(--bg-primary); color: var(--text-primary); }
 h1, h2, h3, h4, h5, h6, .home-title, .home-section-title, .logo, .about-hero h1, .about-story h2, .about-features h2, .about-stats h2, .about-cta h2, .hshs-contact-hero h1, .footer-section h4 {
-  font-family: var(--font-serif); font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; color: var(--text-primary);
+  font-family: "Nunito", "Segoe UI", sans-serif !important; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: var(--text-primary);
 }
 h1 { font-size: var(--fs-h1); }
 h2 { font-size: var(--fs-h2); }
@@ -67,7 +67,7 @@ h2 { font-size: var(--fs-h2); }
 body.light-mode { background: linear-gradient(180deg, rgba(11,31,77,.04), transparent 220px), var(--bg-primary); }
 .navbar, .navbar.hshs-flat-top { background: rgba(247,242,232,.94) !important; border-bottom: 1px solid var(--border-color) !important; box-shadow: none !important; }
 body.dark-mode .navbar, body.dark-mode .navbar.hshs-flat-top { background: rgba(7,20,51,.92) !important; }
-.logo { background: none !important; -webkit-text-fill-color: var(--hshs-navy) !important; color: var(--hshs-navy) !important; font-family: var(--font-serif) !important; font-size: 1.15rem !important; transform: none !important; }
+.logo { background: none !important; -webkit-text-fill-color: var(--hshs-navy) !important; color: var(--hshs-navy) !important; font-family: "Nunito", "Segoe UI", sans-serif !important; font-size: 1.15rem !important; transform: none !important; }
 body.dark-mode .logo { -webkit-text-fill-color: #f4efe3 !important; color: #f4efe3 !important; }
 .logo i { color: var(--hshs-gold) !important; -webkit-text-fill-color: var(--hshs-gold) !important; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--hshs-gold); display: inline-grid; place-items: center; font-size: .95rem !important; }
 .nav-link { color: var(--text-primary) !important; font-weight: 600; border-radius: var(--radius-sm); padding: 8px 10px; }
