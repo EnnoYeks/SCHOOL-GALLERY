@@ -12,8 +12,8 @@
     home: { path: 'index.html', appPath: '/', title: 'HSHS World' },
     gallery: { path: 'index/gallery.html', appPath: '/gallery', title: 'Gallery' },
     photos: { path: 'index/photos.html', appPath: '/photos', title: 'Photos' },
-    videos: { path: 'index/videos.html', appPath: '/videos', title: 'Vibe' },
-    vibe: { path: 'index/videos.html', appPath: '/vibe', title: 'Vibe', alias: true },
+    videos: { path: 'index/videos.html', appPath: '/videos', title: 'HSHS Studio' },
+    vibe: { path: 'index/videos.html', appPath: '/vibe', title: 'HSHS Studio', alias: true },
     trending: { path: 'index/trending.html', appPath: '/trending', title: 'Trending' },
     spotlight: { path: 'index/spotlight.html', appPath: '/spotlight', title: 'Spotlight' },
     polls: { path: 'index/polls.html', appPath: '/polls', title: 'Polls' },
@@ -26,9 +26,9 @@
     settings: { path: 'index/settings.html', appPath: '/settings', title: 'Settings' },
     notifications: { path: 'index/notifications.html', appPath: '/notifications', title: 'Notifications' },
     saved: { path: 'index/saved.html', appPath: '/saved', title: 'Saved' },
-    buzz: { path: 'index/buzz.html', appPath: '/buzz', title: 'Buzz' },
-    clips: { path: 'index/buzz.html', appPath: '/buzz', title: 'Buzz', alias: true },
-    shorts: { path: 'index/buzz.html', appPath: '/buzz', title: 'Buzz', alias: true },
+    buzz: { path: 'index/buzz.html', appPath: '/buzz', title: 'Vibe' },
+    clips: { path: 'index/buzz.html', appPath: '/buzz', title: 'Vibe', alias: true },
+    shorts: { path: 'index/buzz.html', appPath: '/buzz', title: 'Vibe', alias: true },
     chat: { path: 'index/chat.html', appPath: '/chat', title: 'Chat' },
     admin: { path: 'index/admin.html', appPath: '/admin', title: 'Admin' }
   };

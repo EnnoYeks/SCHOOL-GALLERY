@@ -3,7 +3,7 @@
   if (window.__hshsFoundationBooted) return;
   window.__hshsFoundationBooted = true;
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
-  var ASSET_VER = window.__hshsAssetVer || '260906split2';
+  var ASSET_VER = window.__hshsAssetVer || '260907names';
   function assetBase() {
     var scripts = document.querySelectorAll('script[src]');
     for (var i = 0; i < scripts.length; i++) {
@@ -51,6 +51,7 @@
       await loadScript(ver(base + 'components/shell.js'), 'hshs-comp-shell');
       await loadScript(ver(base + 'router/history.js'), 'hshs-router-history');
       await loadScript(ver(base + 'router/router.js'), 'hshs-router-main');
+      try { await loadScript(ver(base + 'hshs-labels.js'), 'hshs-labels'); } catch (e) {}
     } catch (err) {
       console.error('[HSHS] Critical foundation failure', err);
       if (window.HshsApp) window.HshsApp.reportError(err, 'foundation.critical');
