@@ -27,11 +27,11 @@
     document.documentElement.setAttribute('data-hshs-page', PAGE);
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
-    loadCss('css/hshs-chat.css?v=260907pk3');
-    loadCss('css/hshs-messages.css?v=260907pk3');
-    loadCss('css/hshs-chat-packs.css?v=260907pk3');
-    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260907pk3', 'hshs-msg-ui');
-    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260907pk3', 'hshs-chat-packs');
+    loadCss('css/hshs-chat.css?v=260908pk4');
+    loadCss('css/hshs-messages.css?v=260908pk4');
+    loadCss('css/hshs-chat-packs.css?v=260908pk4');
+    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260908pk4', 'hshs-msg-ui');
+    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260908pk4', 'hshs-chat-packs');
     if (global.HshsMessagesUi) global.HshsMessagesUi.boot();
     if (global.HshsChatPacks) global.HshsChatPacks.boot();
   }
