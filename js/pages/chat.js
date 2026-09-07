@@ -1,0 +1,94 @@
+(function (global) {
+  'use strict';
+  var PAGE = 'chat';
+  if (global['__hshs' + PAGE + 'PageModule']) return;
+  global['__hshs' + PAGE + 'PageModule'] = true;
+  function isPage() {
+    var f = (location.pathname.split('/').pop() || '').toLowerCase();
+    return f === 'chat.html';
+  }
+  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function loadOnce(src, id) {
+    return new Promise(function (resolve) {
+      if (id && document.getElementById(id)) return resolve();
+      var s = document.createElement('script');
+      if (id) s.id = id;
+      s.src = src;
+      s.async = false;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { resolve(); };
+      document.head.appendChild(s);
+    });
+  }
+  function loadCss(href) {
+    var key = href.split('?')[0];
+    if (document.querySelector('link[data-hshs-css="' + key + '"]')) return;
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = base() + href;
+    l.setAttribute('data-hshs-css', key);
+    document.head.appendChild(l);
+  }
+  function enforceChatListView() {
+    var id = 'hshs-chat-list-view-fix';
+    if (!document.getElementById(id)) {
+      var style = document.createElement('style');
+      style.id = id;
+      style.textContent = '#hshsChatPage:not(.is-open) #hshsThread{display:none!important;visibility:hidden!important;}';
+      document.head.appendChild(style);
+    }
+    var page = document.getElementById('hshsChatPage');
+    var list = document.getElementById('hshsChatListView');
+    var thread = document.getElementById('hshsThread');
+    if (page && !page.classList.contains('is-open')) {
+      if (list) list.hidden = false;
+      if (thread) thread.hidden = true;
+    }
+  }
+  async function mount() {
+    if (!isPage() || !global.HshsRender) return;
+    if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
+    var root = document.getElementById('hshs-page');
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'hshs-page';
+      document.body.appendChild(root);
+    }
+    document.documentElement.setAttribute('data-hshs-page', PAGE);
+    var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
+    if (tpl) {
+      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+      else root.innerHTML = tpl;
+    }
+    loadCss('css/hshs-chat.css?v=260908pk7');
+    loadCss('css/hshs-messages.css?v=260908pk7');
+    loadCss('css/hshs-chat-packs.css?v=260908pk7');
+    await loadOnce(base() + 'js/core/templates/chat.js?v=260908pk7', 'hshs-tpl-chat');
+    tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
+    if (tpl && root && !root.querySelector('#hshsChatPage')) {
+      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+      else root.innerHTML = tpl;
+    }
+    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260908pk7', 'hshs-msg-ui');
+    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260908pk7', 'hshs-chat-packs');
+    if (global.HshsMessagesUi) global.HshsMessagesUi.boot();
+    if (global.HshsChatPacks) global.HshsChatPacks.boot();
+    enforceChatListView();
+  }
+  function boot() {
+    function go() {
+      if (!isPage()) return;
+      if (!global.HshsRender) { setTimeout(go, 40); return; }
+      mount();
+    }
+    document.addEventListener('hshs:foundation-ready', go, { once: true });
+    if (global.HshsApp && global.HshsApp.whenReady) global.HshsApp.whenReady(go);
+    if (document.readyState !== 'loading') setTimeout(go, 80);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
+  document.addEventListener('hshs:page', function (e) {
+    var name = e && e.detail && e.detail.page;
+    if (name === PAGE || isPage()) mount();
+  });
+})(typeof window !== 'undefined' ? window : this);
