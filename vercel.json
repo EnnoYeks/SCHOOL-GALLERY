@@ -3,52 +3,14 @@
     {
       "source": "/",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, max-age=0"
-        },
-        {
-          "key": "X-HSHS-Build",
-          "value": "split2-live"
-        }
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "X-HSHS-Build", "value": "vibe-feed" }
       ]
     },
-    {
-      "source": "/(.*).html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, max-age=0"
-        }
-      ]
-    },
-    {
-      "source": "/index/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, max-age=0"
-        }
-      ]
-    },
-    {
-      "source": "/js/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/css/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    }
+    { "source": "/(.*).html", "headers": [{ "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }] },
+    { "source": "/index/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }] },
+    { "source": "/js/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }] },
+    { "source": "/css/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }] }
   ],
   "rewrites": [
     { "source": "/gallery.html", "destination": "/index/gallery.html" },
@@ -57,8 +19,10 @@
     { "source": "/photos", "destination": "/index/photos.html" },
     { "source": "/videos.html", "destination": "/index/videos.html" },
     { "source": "/videos", "destination": "/index/videos.html" },
-    { "source": "/vibe", "destination": "/index/videos.html" },
-    { "source": "/vibe.html", "destination": "/index/videos.html" },
+    { "source": "/studio", "destination": "/index/videos.html" },
+    { "source": "/studio.html", "destination": "/index/videos.html" },
+    { "source": "/vibe", "destination": "/index/buzz.html" },
+    { "source": "/vibe.html", "destination": "/index/buzz.html" },
     { "source": "/buzz.html", "destination": "/index/buzz.html" },
     { "source": "/buzz", "destination": "/index/buzz.html" },
     { "source": "/clips.html", "destination": "/index/buzz.html" },

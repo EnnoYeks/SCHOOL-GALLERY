@@ -1,0 +1,21 @@
+/* Reusable HSHS 3-dot wave loader */
+.hshs-wave{
+  width:72px;height:28px;margin:0 auto 8px;
+  display:flex;align-items:flex-end;justify-content:center;gap:8px;
+}
+.hshs-wave i{
+  width:10px;height:10px;border-radius:50%;
+  display:block;
+  animation:hshsWave 900ms ease-in-out infinite;
+  transform-origin:center bottom;
+}
+.hshs-wave i:nth-child(1){background:#3b82f6;animation-delay:0ms}
+.hshs-wave i:nth-child(2){background:linear-gradient(180deg,#60a5fa,#eab308);animation-delay:150ms}
+.hshs-wave i:nth-child(3){background:#eab308;animation-delay:300ms}
+@keyframes hshsWave{
+  0%,100%{transform:translateY(0) scale(1);opacity:.7}
+  40%{transform:translateY(-9px) scale(1.4);opacity:1}
+}
+@media (prefers-reduced-motion:reduce){
+  .hshs-wave i{animation:none;opacity:1}
+}

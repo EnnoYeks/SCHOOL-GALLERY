@@ -13,6 +13,7 @@
 @import url("./hshs-classic.css");
 @import url("./hshs-home-polish.css");
 @import url("./hshs-vibe-home.css");
+@import url("./hshs-wave.css");
 
 :root {
   --hshs-shell-max: 1400px;
