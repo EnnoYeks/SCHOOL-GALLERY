@@ -29,22 +29,6 @@
     l.setAttribute('data-hshs-css', key);
     document.head.appendChild(l);
   }
-  function enforceChatListView() {
-    var id = 'hshs-chat-list-view-fix';
-    if (!document.getElementById(id)) {
-      var style = document.createElement('style');
-      style.id = id;
-      style.textContent = '#hshsChatPage:not(.is-open) #hshsThread{display:none!important;visibility:hidden!important;}';
-      document.head.appendChild(style);
-    }
-    var page = document.getElementById('hshsChatPage');
-    var list = document.getElementById('hshsChatListView');
-    var thread = document.getElementById('hshsThread');
-    if (page && !page.classList.contains('is-open')) {
-      if (list) list.hidden = false;
-      if (thread) thread.hidden = true;
-    }
-  }
   async function mount() {
     if (!isPage() || !global.HshsRender) return;
     if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
@@ -73,7 +57,6 @@
     await loadOnce(base() + 'js/hshs-chat-packs.js?v=260908pk7', 'hshs-chat-packs');
     if (global.HshsMessagesUi) global.HshsMessagesUi.boot();
     if (global.HshsChatPacks) global.HshsChatPacks.boot();
-    enforceChatListView();
   }
   function boot() {
     function go() {
