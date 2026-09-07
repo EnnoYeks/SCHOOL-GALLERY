@@ -19,4 +19,41 @@
   --hshs-shell-max: 1400px;
   --hshs-page-gutter: clamp(1rem, 3vw, 2rem);
   --hshs-mobile-breakpoint: 768px;
+  --hshs-tablet-breakpoint: 1024px;
+  --hshs-glass-blur: 16px;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#hshs-page {
+  min-height: 40vh;
+  width: 100%;
+}
+
+#hshs-page > :first-child {
+  margin-top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
