@@ -14,9 +14,10 @@
     });
   }
   function loadCss(href) {
-    if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=260907pk2';
-    l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
+    var key = href.split('?')[0];
+    if (document.querySelector('link[data-hshs-css="' + key + '"]')) return;
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href;
+    l.setAttribute('data-hshs-css', key); document.head.appendChild(l);
   }
   async function mount() {
     if (!isPage() || !global.HshsRender) return;
@@ -26,12 +27,11 @@
     document.documentElement.setAttribute('data-hshs-page', PAGE);
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
-    loadCss('css/hshs-chat.css'); loadCss('css/hshs-chat-spring.css'); loadCss('css/hshs-messages.css');
-    await loadOnce(base() + 'js/hshs-chat.js?v=260907pk2', 'hshs-leg-chat', 'module');
-    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260907pk2', 'hshs-leg-chat-spring', 'module');
-    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260907pk2', 'hshs-msg-ui');
-    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260907pk2', 'hshs-chat-packs');
-    if (typeof global.initHshsChat === 'function') global.initHshsChat();
+    loadCss('css/hshs-chat.css?v=260907pk3');
+    loadCss('css/hshs-messages.css?v=260907pk3');
+    loadCss('css/hshs-chat-packs.css?v=260907pk3');
+    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260907pk3', 'hshs-msg-ui');
+    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260907pk3', 'hshs-chat-packs');
     if (global.HshsMessagesUi) global.HshsMessagesUi.boot();
     if (global.HshsChatPacks) global.HshsChatPacks.boot();
   }
@@ -41,5 +41,8 @@
     if (global.HshsApp && global.HshsApp.whenReady) global.HshsApp.whenReady(go);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
-  document.addEventListener('hshs:page', function (e) { var name = e && e.detail && e.detail.page; if (name === PAGE || isPage()) mount(); });
+  document.addEventListener('hshs:page', function (e) {
+    var name = e && e.detail && e.detail.page;
+    if (name === PAGE || isPage()) mount();
+  });
 })(typeof window !== 'undefined' ? window : this);
