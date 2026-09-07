@@ -111,3 +111,9 @@ html:not(.hshs-booting) body > *:not(#hshs-boot) {
   .hshs-boot-badge,
   .hshs-boot-card::before { animation: none !important; }
 }
+
+/* HSHS World wordmark lockup */
+.brand-lockup{display:flex;flex-direction:column;line-height:1.05;gap:1px}
+.brand-school{display:block;font-size:.62rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;font-family:"Nunito",system-ui,sans-serif}
+.brand-mark{display:block;font-size:1rem;font-weight:800;letter-spacing:-.01em;font-family:"Nunito",system-ui,sans-serif}
+.logo{display:flex;align-items:center;gap:10px}

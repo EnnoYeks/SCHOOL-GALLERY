@@ -45,7 +45,7 @@ html[data-hshs-page="chat"] #hshsChatMe{display:none!important}
 .hshs-chat-page.msg .hshs-thread-who{flex:1;display:flex;flex-direction:column;line-height:1.15}
 .hshs-chat-page.msg .hshs-thread-who em{font-style:normal;color:#93c5fd;font-size:.72rem}
 .hshs-chat-page.msg .hshs-thread-who small{color:#4ade80;font-size:.72rem}
-.hshs-thread-stage{position:relative;flex:1;min-height:320px;overflow:hidden;margin:8px 0 0;background:linear-gradient(180deg,rgba(7,20,51,.35),rgba(7,20,51,.82)),url("https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=60") center/cover no-repeat #071433}
+.hshs-thread-stage{position:relative;flex:1;min-height:320px;overflow:hidden;margin:8px 0 0;background:radial-gradient(ellipse at 20% 10%,rgba(29,78,216,.35),transparent 45%),radial-gradient(ellipse at 80% 90%,rgba(245,197,24,.12),transparent 40%),linear-gradient(180deg,#0a1a3a 0%,#071433 55%,#050f24 100%)}
 .hshs-thread-welcome{position:relative;z-index:1;height:100%;min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 20px 18px}
 .tw-mark{position:absolute;left:18px;top:28px;font-size:4.2rem;font-weight:900;letter-spacing:-.06em;color:rgba(255,255,255,.07);pointer-events:none}
 .tw-script{position:absolute;right:16px;top:36px;margin:0;color:#93c5fd;font-style:italic;font-weight:700;opacity:.8}
@@ -65,3 +65,11 @@ html[data-hshs-page="chat"] #hshsChatMe{display:none!important}
 .hshs-chat-page.msg .hshs-compose-pill{flex:1;display:flex;align-items:center;min-height:42px;padding:0 8px 0 12px;border-radius:12px;background:transparent}
 .hshs-chat-page.msg .hshs-compose-pill input{flex:1;border:0;background:none;color:#fff;outline:none}
 .hshs-thread-msgs{position:relative;z-index:2;height:100%;overflow:auto;padding:12px;background:linear-gradient(180deg,rgba(7,20,51,.28),rgba(7,20,51,.72))}
+
+/* Campus lock: never let WhatsApp tails/teal leak under .msg */
+.hshs-chat-page.msg .hshs-bubble::after,
+.hshs-chat-page.msg .hshs-bubble.mine::after,
+.hshs-chat-page.msg .hshs-bubble.theirs::after{display:none!important;content:none!important;border:0!important}
+.hshs-chat-page.msg{--chat-mine:#1d4ed8;--chat-accent:#f5c518;--chat-wallpaper:#071433;font-family:"Nunito",system-ui,sans-serif!important}
+.hshs-chat-page.msg .hshs-bubble.mine{background:linear-gradient(135deg,#1e40af,#1d4ed8)!important;color:#fff!important}
+.hshs-chat-page.msg .hshs-bubble.theirs{background:rgba(15,30,64,.92)!important;color:#e2e8f0!important;border:1px solid rgba(148,163,184,.18)}
