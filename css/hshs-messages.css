@@ -1,0 +1,60 @@
+html[data-hshs-page="chat"] body,body:has(.hshs-chat-page.msg){background:#070b16!important;color:#fff}
+html[data-hshs-page="chat"] .navbar{display:none!important}
+html[data-hshs-page="chat"] .mobile-tabbar{background:#0b0f1c!important;border-top:1px solid rgba(255,255,255,.06)!important}
+.hshs-chat-page.msg{max-width:470px;margin:0 auto;padding:0 0 96px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff}
+.hshs-chat-page.msg .hshs-chat-layout{display:flex;flex-direction:column;min-height:100svh;border:0;border-radius:0;box-shadow:none;background:#070b16}
+.hshs-chat-page.msg .hshs-chat-side,.hshs-chat-page.msg .hshs-chat-main{background:#070b16;min-height:100svh;border:0}
+.msg-appbar{display:flex;align-items:center;gap:8px;padding:8px 12px}
+.msg-brand{display:flex;flex-direction:column;line-height:1}
+.msg-brand span{color:#eab308}
+.msg-brand small{font-size:.48rem;letter-spacing:.1em;color:#c4b5fd}
+.msg-tag{flex:1;margin:0;font-family:Georgia,serif;font-style:italic;color:#bfdbfe;font-size:.82rem}
+.msg-ico{width:40px;height:40px;border:0;background:none;color:#fff;font-size:1.05rem}
+.msg-hero{padding:4px 16px 10px}
+.msg-hero h1{margin:0;font-size:1.7rem}
+.msg-hero p{margin:4px 0 0;color:#94a3b8;font-size:.82rem}
+.msg-search{margin:0 16px 12px;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border-radius:999px;background:#12182b;color:#94a3b8}
+.msg-search input{flex:1;border:0;background:none;color:#fff;outline:none}
+.msg-notes{display:flex;gap:12px;overflow-x:auto;padding:4px 16px 12px;scrollbar-width:none}
+.msg-note{flex:0 0 auto;width:68px;border:0;background:none;color:#cbd5e1;text-align:center}
+.msg-note b{display:block;width:58px;height:58px;margin:0 auto 6px;border-radius:50%;border:2px solid #4f46e5;background:#111 center/cover no-repeat;position:relative}
+.msg-note.add b{display:flex;align-items:center;justify-content:center;border-color:#334155;font-size:1.2rem;color:#fff}
+.msg-note span{display:block;font-size:.62rem}
+.msg-note em{position:absolute;right:1px;bottom:1px;width:10px;height:10px;border-radius:50%;background:#22c55e;border:2px solid #070b16}
+.msg-chips{display:flex;gap:8px;overflow-x:auto;padding:0 16px 10px}
+.msg-chips button{border:0;border-radius:999px;background:#12182b;color:#cbd5e1;min-height:30px;padding:0 12px;font-size:.75rem;font-weight:700;white-space:nowrap}
+.msg-chips button.on{background:#4f46e5;color:#fff}
+.msg-chips em{display:inline-flex;margin-left:4px;min-width:16px;height:16px;border-radius:99px;background:#ef4444;color:#fff;font-size:.6rem;font-style:normal;align-items:center;justify-content:center}
+.hshs-chat-page.msg .hshs-chat-list{flex:1;overflow:auto;padding:0 6px 20px}
+.hshs-chat-page.msg .hshs-contact{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:#fff;text-align:left;padding:10px;border-radius:14px}
+.hshs-chat-page.msg .hshs-contact.active{background:#12182b}
+.hshs-chat-page.msg .hshs-contact-avatar{position:relative;flex:0 0 48px;width:48px;height:48px;border-radius:50%;background:#1e293b;display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:800}
+.hshs-chat-page.msg .hshs-contact-avatar img{width:100%;height:100%;object-fit:cover}
+.hshs-chat-page.msg .hshs-online-dot{position:absolute;right:2px;bottom:2px;width:10px;height:10px;border-radius:50%;background:#22c55e;border:2px solid #070b16}
+.hshs-chat-page.msg .hshs-online-dot.off{display:none}
+.hshs-chat-page.msg .hshs-contact-body{flex:1;min-width:0}
+.hshs-chat-page.msg .hshs-contact-body strong,.hshs-chat-page.msg .hshs-contact-body small{display:block}
+.hshs-chat-page.msg .hshs-contact-body small{color:#94a3b8;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hshs-chat-page.msg .hshs-contact-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;color:#64748b;font-size:.68rem}
+.hshs-chat-page.msg .hshs-badge{min-width:18px;height:18px;border-radius:99px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem}
+.hshs-chat-page.msg .hshs-thread-head{display:flex;align-items:center;gap:8px;padding:8px;background:rgba(7,11,22,.92);position:sticky;top:0;z-index:5}
+.hshs-chat-page.msg .hshs-thread-back,.hshs-chat-page.msg .hshs-head-icon{width:40px;height:40px;border:0;background:none;color:#fff}
+.hshs-chat-page.msg .hshs-thread-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;background:#1e293b;display:flex;align-items:center;justify-content:center}
+.hshs-chat-page.msg .hshs-thread-who{flex:1}
+.hshs-chat-page.msg .hshs-thread-who small{color:#22c55e;font-size:.72rem}
+.msg-thread-cover{min-height:110px;background:#102044 center/cover no-repeat;position:relative}
+.msg-thread-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(#0000,#070b16)}
+.hshs-chat-page.msg .hshs-thread-msgs{flex:1;overflow:auto;padding:12px;background:#070b16}
+.hshs-chat-page.msg .hshs-date-chip{text-align:center;color:#94a3b8;font-size:.72rem;margin:8px 0}
+.hshs-chat-page.msg .hshs-bubble{max-width:78%;padding:8px 10px;border-radius:16px;margin:6px 0;font-size:.88rem}
+.hshs-chat-page.msg .hshs-bubble.theirs{background:#1e293b;border-bottom-left-radius:6px}
+.hshs-chat-page.msg .hshs-bubble.mine{margin-left:auto;background:#6d28d9;border-bottom-right-radius:6px}
+.hshs-chat-page.msg .hshs-bubble time{display:block;text-align:right;color:#cbd5e1;font-size:.62rem;margin-top:4px}
+.hshs-chat-page.msg .hshs-bubble-img{width:100%;border-radius:12px;display:block;margin-bottom:6px}
+.hshs-chat-page.msg .hshs-compose-wrap{padding:8px 10px calc(10px + env(safe-area-inset-bottom));background:#070b16}
+.hshs-chat-page.msg .hshs-thread-compose{display:flex;align-items:center;gap:8px}
+.msg-plus{width:36px;height:36px;border-radius:50%;border:0;background:#12182b;color:#fff;font-size:1.2rem}
+.hshs-chat-page.msg .hshs-compose-pill{flex:1;display:flex;align-items:center;min-height:42px;padding:0 8px 0 12px;border-radius:999px;background:#12182b}
+.hshs-chat-page.msg .hshs-compose-pill input{flex:1;border:0;background:none;color:#fff;outline:none}
+.hshs-chat-page.msg .hshs-compose-icon,.hshs-chat-page.msg .hshs-fab{width:36px;height:36px;border:0;background:none;color:#cbd5e1}
+@media(max-width:860px){.hshs-chat-page.msg .hshs-chat-main{display:none}.hshs-chat-page.msg.is-open .hshs-chat-side{display:none}.hshs-chat-page.msg.is-open .hshs-chat-main{display:flex}}
