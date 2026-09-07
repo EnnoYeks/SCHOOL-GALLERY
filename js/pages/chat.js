@@ -15,7 +15,7 @@
   }
   function loadCss(href) {
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=260907msg1';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=260907w1';
     l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
   }
   async function mount() {
@@ -27,9 +27,9 @@
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
     loadCss('css/hshs-chat.css'); loadCss('css/hshs-chat-spring.css'); loadCss('css/hshs-messages.css');
-    await loadOnce(base() + 'js/hshs-chat.js?v=260907msg1', 'hshs-leg-chat', 'module');
-    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260907msg1', 'hshs-leg-chat-spring', 'module');
-    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260907msg1', 'hshs-msg-ui');
+    await loadOnce(base() + 'js/hshs-chat.js?v=260907w1', 'hshs-leg-chat', 'module');
+    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260907w1', 'hshs-leg-chat-spring', 'module');
+    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260907w1', 'hshs-msg-ui');
     if (typeof global.initHshsChat === 'function') global.initHshsChat();
     if (global.HshsMessagesUi) global.HshsMessagesUi.boot();
   }
