@@ -8,23 +8,26 @@
 
   <!-- LIST -->
   <section class="msg-list-view" id="hshsChatListView">
-    <header class="msg-list-head">
-      <div class="msg-list-brand">
-        <span class="msg-crest" aria-hidden="true"><i class="fas fa-shield-halved"></i></span>
-        <div>
-          <h1>Messages</h1>
-          <p>Stay connected, always. 🚀</p>
+    <header class="msg-hero">
+      <div class="msg-hero-top">
+        <div class="msg-list-brand">
+          <span class="msg-crest" aria-hidden="true"><i class="fas fa-shield-halved"></i></span>
+          <div class="msg-hero-titles">
+            <h1>Messages</h1>
+            <p>Stay connected, always. 🚀</p>
+          </div>
+        </div>
+        <div class="msg-list-actions">
+          <button type="button" class="msg-icon-btn msg-compose-top" id="hshsComposeTop" aria-label="New message"><i class="fas fa-pen-to-square"></i></button>
+          <button type="button" class="msg-icon-btn msg-more-btn" id="hshsListMore" aria-label="More"><i class="fas fa-ellipsis-vertical"></i></button>
         </div>
       </div>
-      <div class="msg-list-actions">
-        <button type="button" class="msg-icon-btn msg-compose-top" id="hshsComposeTop" aria-label="New message"><i class="fas fa-pen-to-square"></i></button>
-        <button type="button" class="msg-icon-btn" id="hshsListMore" aria-label="More"><i class="fas fa-ellipsis-vertical"></i></button>
+      <div class="msg-search" role="search">
+        <span class="msg-search-icon" aria-hidden="true"><i class="fas fa-magnifying-glass"></i></span>
+        <input type="search" id="hshsChatSearch" placeholder="Search conversations..." autocomplete="off" enterkeyhint="search">
+        <button type="button" class="msg-search-clear" id="hshsSearchClear" hidden aria-label="Clear search"><i class="fas fa-xmark"></i></button>
       </div>
     </header>
-    <div class="msg-search" role="search">
-      <i class="fas fa-search"></i>
-      <input type="search" id="hshsChatSearch" placeholder="Search conversations..." autocomplete="off">
-    </div>
     <div class="msg-list-scroll" id="hshsChatList"><div class="hshs-chat-empty">Loading chats…</div></div>
     <button type="button" class="msg-fab-compose" id="hshsComposeFab" aria-label="New chat"><i class="fas fa-pen-to-square"></i></button>
   </section>
@@ -98,7 +101,7 @@
         <strong>Emoji</strong>
         <p>Add some emotion 😊</p>
       </div>
-      <button type="button" id="hshsEmojiClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
+      <button type="button" id="hshsEmojiClose" class="msg-emoji-close" aria-label="Close"><i class="fas fa-xmark"></i></button>
     </header>
     <div class="msg-emoji-search"><i class="fas fa-search"></i><input type="search" id="hshsEmojiSearch" placeholder="Search emoji..." autocomplete="off"></div>
     <div class="msg-emoji-tabs" id="hshsEmojiTabs"></div>
