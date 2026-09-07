@@ -8,7 +8,7 @@
     + '<div class="vibe-hero-sparkles" aria-hidden="true"><i class="vibe-spark"></i><i class="vibe-spark"></i><i class="vibe-spark"></i></div>'
     + '<div class="vibe-hero-copy"><span class="vibe-pill">Welcome to</span>'
     + '<h1>HSHS WORLD</h1>'
-    + '<p class="vibe-sub">Your school. One world.<br>Photos, Vibe, Buzz and memories.</p>'
+    + '<p class="vibe-sub">Your school. One world.<br>Photos, Vibe, Studio and memories.</p>'
     + '<p class="vibe-desc">The HSHS home for school moments, achievements and community.</p>'
     + '<div class="vibe-cta"><a class="vibe-btn-primary" href="index/gallery.html"><i class="fas fa-play"></i> Explore Feed</a>'
     + '<a class="vibe-btn-ghost" href="index/about.html"><i class="fas fa-circle-info"></i> Learn More</a></div></div>'
@@ -18,7 +18,7 @@
     + '<section class="home-section"><div class="home-section-head"><h2 class="home-section-title">HSHS at a glance</h2></div>'
     + '<div class="home-stats">'
     + '<div class="home-stat"><i class="fas fa-image"></i><div><strong id="totalPhotos" data-count="0">0</strong><span>Photos</span></div><i class="fas fa-chevron-right"></i></div>'
-    + '<div class="home-stat"><i class="fas fa-video"></i><div><strong id="totalVideos" data-count="0">0</strong><span>Vibe</span></div><i class="fas fa-chevron-right"></i></div>'
+    + '<div class="home-stat"><i class="fas fa-video"></i><div><strong id="totalVideos" data-count="0">0</strong><span>Studio</span></div><i class="fas fa-chevron-right"></i></div>'
     + '<div class="home-stat"><i class="fas fa-users"></i><div><strong id="totalStudents" data-count="0">0</strong><span>Students</span></div><i class="fas fa-chevron-right"></i></div>'
     + '<div class="home-stat"><i class="fas fa-heart"></i><div><strong id="totalLikes" data-count="0">0</strong><span>Likes</span></div><i class="fas fa-chevron-right"></i></div>'
     + '</div></section>'
@@ -33,6 +33,6 @@
     + '<article class="home-split-card" id="homeEventB"><div class="home-empty">Loading...</div></article>'
     + '</div></section>'
     + '<section class="home-cta home-wrap"><h2>Ready to share your story?</h2><p>Turn a school moment into part of the HSHS memory.</p><a class="vibe-btn-primary" href="index/photos.html"><i class="fas fa-cloud-arrow-up"></i> Start Uploading</a></section>'
-    + '<footer class="home-footer"><div class="home-wrap home-footer-grid"><div><h3>HSHS WORLD</h3><p>The digital home for school moments, creativity, achievements and community.</p></div><div><h3>Explore</h3><div class="home-footer-links"><a href="index/gallery.html">Gallery</a><a href="index/buzz.html">Buzz</a><a href="index/trending.html">Trending</a><a href="index/memories.html">Memories</a></div></div><div><h3>Community</h3><div class="home-footer-links"><a href="index/about.html">About HSHS World</a><a href="index/contact.html">Contact</a><a href="index/profile.html">Profile</a></div></div></div><div class="home-wrap home-footer-bottom">HSHS World · School community media platform</div></footer>'
+    + '<footer class="home-footer"><div class="home-wrap home-footer-grid"><div><h3>HSHS WORLD</h3><p>The digital home for school moments, creativity, achievements and community.</p></div><div><h3>Explore</h3><div class="home-footer-links"><a href="index/gallery.html">Gallery</a><a href="index/buzz.html">Vibe</a><a href="index/trending.html">Trending</a><a href="index/memories.html">Memories</a></div></div><div><h3>Community</h3><div class="home-footer-links"><a href="index/about.html">About HSHS World</a><a href="index/contact.html">Contact</a><a href="index/profile.html">Profile</a></div></div></div><div class="home-wrap home-footer-bottom">HSHS World · School community media platform</div></footer>'
     + '</main>';
 })(typeof window !== 'undefined' ? window : this);
