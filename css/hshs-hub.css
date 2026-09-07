@@ -1,3 +1,4 @@
+@import url("./hshs-type.css");
 html[data-hshs-page="more"] .navbar,html[data-hshs-page="notifications"] .navbar,html[data-hshs-page="polls"] .navbar,html[data-hshs-page="saved"] .navbar,html[data-hshs-page="memories"] .navbar,html[data-hshs-page="videos"] .navbar,html[data-hshs-page="trending"] .navbar,html[data-hshs-page="spotlight"] .navbar{display:block!important;background:#071433!important}
 .hshs-account-page,.hshs-polls-page,.hshs-notifications-page{width:100%;max-width:none!important;margin:12px auto 110px!important;padding:0 16px 24px!important}
 .hshs-page-head{display:flex;align-items:center;gap:10px;margin:4px 0 12px}
