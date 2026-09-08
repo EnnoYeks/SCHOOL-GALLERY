@@ -33,7 +33,10 @@
 
   function pulseLevels() {
     if (!hold.on) return;
-    hold.levels.push(0.2 + Math.random() * 0.8);
+    var live = (typeof window.__hshsRecLevel === 'number' && window.__hshsRecLevel > 0)
+      ? window.__hshsRecLevel
+      : (0.2 + Math.random() * 0.8);
+    hold.levels.push(live);
     if (hold.levels.length > 64) hold.levels.shift();
     drawWave();
     hold.raf = requestAnimationFrame(pulseLevels);
