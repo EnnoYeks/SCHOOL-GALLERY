@@ -1,0 +1,23 @@
+html[data-hshs-page="chat"] #hshsChatBanner{display:none!important;height:0!important;overflow:hidden!important}
+.msg-group-tag{font-style:normal;font-size:.62rem;font-weight:800;color:#fbbf24;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.28);border-radius:999px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.msg-row-av.is-group img,.hshs-thread-avatar.is-group{border-radius:16px}
+.hshs-sender{display:block;color:#fbbf24;font-size:.68rem;margin-bottom:2px}
+.hshs-bubble-photo{display:block;max-width:220px;width:100%;border-radius:12px;margin:2px 0}
+.hshs-voice-chip{display:flex;align-items:center;gap:8px;font-weight:700}
+.hshs-call-btn{width:36px;height:36px;border:0;border-radius:50%;background:rgba(255,255,255,.05);color:#64748b;cursor:pointer;opacity:.55}
+.hshs-call-btn.is-disabled{cursor:not-allowed}
+.hshs-call-btn.is-soon{color:#fbbf24;opacity:1}
+.hshs-typing{display:flex;gap:4px;align-items:center;min-width:46px;padding:10px 12px}
+.hshs-typing span{width:6px;height:6px;border-radius:50%;background:#93c5fd;animation:hshsDots 1s infinite ease-in-out}
+.hshs-typing span:nth-child(2){animation-delay:.15s}
+.hshs-typing span:nth-child(3){animation-delay:.3s}
+@keyframes hshsDots{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-3px);opacity:1}}
+.hshs-reacts{display:inline-flex;gap:2px;margin-top:4px;background:rgba(7,20,51,.7);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:1px 6px;font-size:.78rem}
+.hshs-react-pop{position:absolute;top:-38px;left:50%;transform:translateX(-50%);display:flex;gap:4px;background:#122044;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:4px;z-index:8;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.hshs-react-pop button{border:0;background:transparent;font-size:1.1rem;width:32px;height:32px;cursor:pointer}
+.hshs-row{position:relative}
+.msg-record-bar[hidden]{display:none!important}
+.msg-rec-hint.is-cancel{color:#fca5a5}
+.hshs-bubble-av.spacer{visibility:hidden}
+#hshsMicBtn.is-rec{color:#ef4444}
+.msg-rec-cancel{width:36px;height:36px;border:0;border-radius:50%;background:rgba(239,68,68,.15);color:#fca5a5;cursor:pointer}
