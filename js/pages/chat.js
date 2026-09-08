@@ -58,8 +58,10 @@
     await loadOnce(base() + 'js/hshs-messages-ui.js?v=260908pk12', 'hshs-msg-ui');
     await loadOnce(base() + 'js/hshs-chat-packs.js?v=260908pk12', 'hshs-chat-packs');
     await loadOnce(base() + 'js/hshs-chat-spring.js?v=260908pk12', 'hshs-chat-spring');
+    await loadOnce(base() + 'js/hshs-chat-attach.js?v=260908pk12', 'hshs-chat-attach');
     if (global.HshsMessagesUi) global.HshsMessagesUi.boot();
     if (global.HshsChatPacks) global.HshsChatPacks.boot();
+    if (global.HshsChatAttach) global.HshsChatAttach.boot();
   }
   function boot() {
     function go() {
