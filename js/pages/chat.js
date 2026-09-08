@@ -8,12 +8,13 @@
     return f === 'chat.html';
   }
   function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
-  function loadOnce(src, id) {
+  function loadOnce(src, id, asModule) {
     return new Promise(function (resolve) {
       if (id && document.getElementById(id)) return resolve();
       var s = document.createElement('script');
       if (id) s.id = id;
       s.src = src;
+      if (asModule) s.type = 'module';
       s.async = false;
       s.onload = function () { resolve(); };
       s.onerror = function () { resolve(); };
@@ -44,24 +45,26 @@
       if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
       else root.innerHTML = tpl;
     }
-    loadCss('css/hshs-chat.css?v=260908pk13');
-    loadCss('css/hshs-messages.css?v=260908pk13');
-    loadCss('css/hshs-chat-packs.css?v=260908pk13');
-    loadCss('css/hshs-chat-finish.css?v=260908pk13');
-    loadCss('css/hshs-chat-fixes.css?v=260908pk13');
-    await loadOnce(base() + 'js/core/templates/chat.js?v=260908pk13', 'hshs-tpl-chat');
+    loadCss('css/hshs-chat.css?v=260908pk15');
+    loadCss('css/hshs-messages.css?v=260908pk15');
+    loadCss('css/hshs-chat-packs.css?v=260908pk15');
+    loadCss('css/hshs-chat-finish.css?v=260908pk15');
+    loadCss('css/hshs-chat-fixes.css?v=260908pk15');
+    await loadOnce(base() + 'js/core/templates/chat.js?v=260908pk15', 'hshs-tpl-chat');
     tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl && root && !root.querySelector('#hshsChatPage')) {
       if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
       else root.innerHTML = tpl;
     }
-    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260908pk13', 'hshs-msg-ui');
-    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260908pk13', 'hshs-chat-packs');
-    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260908pk13', 'hshs-chat-spring');
-    await loadOnce(base() + 'js/hshs-chat-attach.js?v=260908pk13', 'hshs-chat-attach');
+    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260908pk15', 'hshs-msg-ui');
+    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260908pk15', 'hshs-chat-packs');
+    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260908pk15', 'hshs-chat-spring');
+    await loadOnce(base() + 'js/hshs-chat-attach.js?v=260908pk15', 'hshs-chat-attach');
+    await loadOnce(base() + 'js/hshs-chat-live.js?v=260908pk15', 'hshs-chat-live', true);
     if (global.HshsMessagesUi) global.HshsMessagesUi.boot();
     if (global.HshsChatPacks) global.HshsChatPacks.boot();
     if (global.HshsChatAttach) global.HshsChatAttach.boot();
+    if (global.HshsChatLive) global.HshsChatLive.boot();
   }
   function boot() {
     function go() {
