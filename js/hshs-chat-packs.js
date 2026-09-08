@@ -10,20 +10,35 @@
     { id: 'love', label: 'Love', icon: '❤️' },
     { id: 'animals', label: 'Animals', icon: '🐻' },
     { id: 'food', label: 'Food', icon: '🍔' },
-    { id: 'activities', label: 'Activities', icon: '⚽' },
-    { id: 'objects', label: 'Objects', icon: '💡' },
-    { id: 'flags', label: 'Flags', icon: '🇺🇬' }
+    { id: 'activities', label: 'Play', icon: '⚽' },
+    { id: 'objects', label: 'Things', icon: '💡' },
+    { id: 'flags', label: 'Flags', icon: '🇺🇬' },
+    { id: 'stickers', label: 'Stickers', icon: '✨' }
   ];
 
   var DATA = {
-    smileys: '😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊 😋 😎 😍 😘 🥰 😗 😙 😚 ☺️ 🙂 🤗 🤩 🤔 🤨 😐 😑 😶 🙄 😏 😣 😥 😮 🤐 😯 😪 😫 🥱 😴 😌 😛 😜 😝 🤤 😒 😓 😔 😕 🙃 🤑 😲 ☹️ 🙁 😖 😞 😟 😤 😢 😭 😦 😧 😨 😩 🤯 😬 😰 😱 🥵 🥶 😳 🤪 😵 😡 😠 🤬 😷 🤒 🤕 🤢 🤮 🥴 😇 🥳 🥺 🤠 🤡 🤥 🤫 🤭 🧐 🤓 👿 👺 👹 💀 ☠️ 👻 👽 🤖 💩'.split(' '),
-    people: '👋 🤚 🖐️ ✋ 🖖 👌 🤏 ✌️ 🤞 🤟 🤘 🤙 👈 👉 👆 🖕 👇 ☝️ 👍 👎 ✊ 👊 🤛 🤜 👏 🙌 👐 🤲 🤝 🙏 ✍️ 💅 🤳 💪 🦽 🦵 🦶 👂 👃 🧠 🦷 🦴 👀 👁️ 👅 👄 👶 👧 🧒 👦 👩 🧑 👨 👵 👴 👲 👳 👮 👷 💂 🕵️ 👩‍⚕️ 👨‍🎓 👨‍🏫 👨‍🎨 👨‍🍳 👨‍👩‍👧 👪 💏 💑'.split(' '),
-    love: '❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 ❣️ 💕 💞 💓 💗 💖 💘 💝 💟 ☮️ ✝️ ☪️ 🕉️ ☸️ ✡️ 🔯 🕎 ☯️ ☦️ 🛐 ⛎ ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓ 🔴 🟠 🟡 🟢 🔵 🟣 ⚫ ⚪ 🟤'.split(' '),
-    animals: '🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸 🐵 🙈 🙉 🙊 🐒 🐔 🐧 🐦 🐤 🦆 🦅 🦉 🦇 🐺 🐗 🐴 🦄 🐝 🐛 🦋 🐌 🐞 🐜 🦟 🦗 🕷️ 🦂 🐢 🐍 🦎 🦖 🦕 🐙 🦑 🦐 🦞 🦀 🐡 🐠 🐟 🐬 🐋 🐊'.split(' '),
-    food: '🍏 🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🫐 🍈 🍒 🍑 🥭 🍍 🥥 🥝 🍅 🍆 🥑 🥦 🥬 🥒 🌶️ 🌽 🍕 🫒 🧄 🧅 🥔 🍠 🥐 🥯 🍞 🥖 🥨 🧀 🥚 🍳 🧈 🥞 🥧 🥓 🥩 🍗 🍖 🌭 🍔 🍟 🍕 🥪 🥪 wait'.split(' '),
-    activities: '⚽'.split(' '),
-    objects: '⌚'.split(' '),
-    flags: '🇺🇬'.split(' ')
+    smileys: '😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊 😋 😎 😍 😘 🥰 😗 😙 😚 🙂 🤗 🤩 🤔 🤨 😐 😑 😶 🙄 😏 😣 😥 😮 🤐 😯 😪 😫 🥱 😴 😌 😛 😜 😝 🤤 😒 😓 😔 😕 🙃 🤑 😲 🙁 😖 😞 😟 😤 😢 😭 😦 😧 😨 😩 🤯 😬 😰 😱 🥵 🥶 😳 🤪 😵 😡 😠 🤬 😷 🤒 🤕 🤢 🤮 🥴 😇 🥳 🥺 🤠 🤡 🤥 🤫 🤭 🧐 🤓 👻 👽 🤖 💩 😺 😸 😹 😻 😼 😽 🙀 😿 😾'.split(' '),
+    people: '👋 🤚 🖐️ ✋ 🖖 👌 🤏 ✌️ 🤞 🤟 🤘 🤙 👈 👉 👆 👇 ☝️ 👍 👎 ✊ 👊 🤛 🤜 👏 🙌 👐 🤲 🤝 🙏 ✍️ 💅 🤳 💪 🦵 🦶 👂 👃 🧠 🦷 🦴 👀 👁️ 👅 👄 👶 👧 🧒 👦 👩 🧑 👨 👵 👴 👩‍🎓 👨‍🎓 👩‍🏫 👨‍🏫 👩‍💻 👨‍💻 👩‍🔬 👨‍🔬 👩‍🍳 👨‍🍳 👩‍⚕️ 👨‍⚕️ 👩‍🎓 👮 👷 💂 🕵️'.split(' '),
+    love: '❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 ❣️ 💕 💞 💓 💗 💖 💘 💝 💟 ☮️ ✨ 🌟 ⭐ 🌈 ☀️ 🌙 ⚡ 🔥 💧 ❄️ 🌸 🌻 🌼'.split(' '),
+    animals: '🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸 🐵 🙈 🙉 🙊 🐒 🐔 🐧 🐦 🐤 🦆 🦅 🦉 🦇 🐺 🐗 🐴 🦄 🐝 🐛 🦋 🐌 🐞 🐜 🦟 🦗 🐢 🐍 🦎 🐙 🦑 🦐 🦞 🦀 🐡 🐠 🐟 🐬 🐳 🐘 🦒 🦓 🦔'.split(' '),
+    food: '🍏 🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🫐 🍈 🍒 🍑 🥭 🍍 🥥 🥝 🍅 🍆 🥑 🥦 🥬 🥒 🌶️ 🌽 🫒 🧄 🧅 🥔 🍠 🥐 🥯 🍞 🥖 🥨 🧀 🐣 🍳 🧈 🥞 🥧 🥓 🍗 🍖 🌭 🍔 🍟 🍕 🥪 🌮 🌯 🥗 🍝 🍜 🍲 🍛 🍣 🍱 🥟 🍦 🍩 🍪 🎂 🍰 🧁 🍫 🍬 🍭 🍼 ☕ 🍵 🧃'.split(' '),
+    activities: '⚽ 🏀 🏈 ⚾ 🎾 🏐 🏉 🥏 🎱 🏓 🏸 🥅 ⛳ 🏹 🎣 🥊 🥋 🎽 ⛸️ 🎿 🏆 🥇 🥈 🥉 🏅 🎖️ 🎯 🎮 🕹️ 🎲 🧩 ♟️ 🎨 🎭 🎬 🎤 🎧 🎼 🎹 🥁 🎷 🎺 🎸 🪕 📚 📝 ✏️ 📌'.split(' '),
+    objects: '⌚ 📱 💻 ⌨️ 🖥️ 🖨️ 🖱️ 🕹️ 📷 📸 📹 🎥 📞 ☎️ 📺 📻 🧭 ⏰ ⌛ 🔋 🔌 💡 🔦 🕯️ 🛢️ 💸 💰 💳 💎 ⚖️ 🛠️ 🔧 🔨 ⚙️ 🧰 🧲 🔗 📎 ✂️ 📐 📏 📌 📍 🔒 🔑 📦 📪 📅 📆 🗂️ 📁'.split(' '),
+    flags: '🇺🇬 🇰🇪 🇹🇿 🇷🇼 🇧🇮 🇸🇸 🇪🇹 🇬🇭 🇳🇬 🇿🇦 🇪🇬 🇺🇸 🇬🇧 🇨🇦 🇫🇷 🇩🇪 🇮🇹 🇪🇸 🇵🇹 🇧🇷 🇮🇳 🇯🇵 🇨🇳 🇰🇷 🇦🇺 🇳🇿 🌍 🌎 🌏'.split(' '),
+    stickers: [
+      { e: '📚', t: 'Study mode' },
+      { e: '🏆', t: 'Well done' },
+      { e: '🙌', t: 'Lets go' },
+      { e: '🧠', t: 'Think hard' },
+      { e: '✏️', t: 'Homework' },
+      { e: '🎓', t: 'Scholar' },
+      { e: '⚽', t: 'Game day' },
+      { e: '🔬', t: 'Lab time' },
+      { e: '🎵', t: 'Choir' },
+      { e: '📸', t: 'Campus shot' },
+      { e: '🚌', t: 'On the way' },
+      { e: '⏰', t: 'Dont be late' }
+    ]
   };
 
   var recent = [];
@@ -64,16 +79,24 @@
   }
 
   function listFor(cat, q) {
-    q = String(q || '').trim();
+    q = String(q || '').trim().toLowerCase();
+    if (cat === 'stickers') {
+      var stickers = DATA.stickers.slice();
+      if (q) stickers = stickers.filter(function (s) { return (s.e + ' ' + s.t).toLowerCase().indexOf(q) !== -1; });
+      return stickers;
+    }
     var list;
-    if (cat === 'recent') list = recent.length ? recent.slice() : DATA.smileys.slice(0, 16);
+    if (cat === 'recent') list = recent.length ? recent.slice() : DATA.smileys.slice(0, 24);
     else list = (DATA[cat] || DATA.smileys).slice();
     if (q) {
-      list = list.filter(function (e) { return e.indexOf(q) !== -1; });
+      list = list.filter(function (e) { return String(e).indexOf(q) !== -1; });
       if (!list.length) {
         var all = [];
-        Object.keys(DATA).forEach(function (k) { all = all.concat(DATA[k]); });
-        list = all.filter(function (e) { return e.indexOf(q) !== -1; }).slice(0, 64);
+        Object.keys(DATA).forEach(function (k) {
+          if (k === 'stickers') return;
+          all = all.concat(DATA[k]);
+        });
+        list = all.filter(function (e) { return String(e).indexOf(q) !== -1; }).slice(0, 64);
       }
     }
     return list;
@@ -85,6 +108,13 @@
     var q = ($('hshsEmojiSearch') && $('hshsEmojiSearch').value) || '';
     var list = listFor(activeCat, q);
     var title = activeCat === 'recent' ? 'Recently Used' : ((CATS.find(function (c) { return c.id === activeCat; }) || {}).label || 'Emoji');
+    if (activeCat === 'stickers') {
+      body.innerHTML = '<h4>' + title + '</h4><div class="msg-sticker-grid">' +
+        list.map(function (s) {
+          return '<button type="button" class="msg-sticker-item" data-emo="' + s.e + '"><b>' + s.e + '</b><span>' + s.t + '</span></button>';
+        }).join('') + '</div>';
+      return;
+    }
     body.innerHTML = '<h4>' + title + '</h4><div class="msg-emoji-grid">' +
       list.map(function (e) {
         return '<button type="button" class="msg-emoji-item" data-emo="' + e + '">' + e + '</button>';
@@ -95,6 +125,13 @@
     activeCat = id || 'smileys';
     renderTabs();
     renderBody();
+    var body = $('hshsEmojiBody');
+    if (body) body.scrollTop = 0;
+  }
+
+  function markPage(on) {
+    var page = $('hshsChatPage');
+    if (page) page.classList.toggle('is-emoji', !!on);
   }
 
   function open() {
@@ -104,9 +141,12 @@
       sheet.classList.add('is-open');
       sheet.setAttribute('aria-hidden', 'false');
     }
+    markPage(true);
     renderTabs();
     renderDock();
     renderBody();
+    var box = $('hshsThreadMsgs');
+    if (box) box.scrollTop = box.scrollHeight;
   }
   function close() {
     var sheet = $('hshsEmojiSheet');
@@ -115,6 +155,7 @@
       sheet.classList.remove('is-open');
       sheet.setAttribute('aria-hidden', 'true');
     }
+    markPage(false);
   }
 
   function wire() {
@@ -145,11 +186,11 @@
         var id = b.getAttribute('data-dock');
         if (id === 'abc') { close(); var inp = $('hshsThreadInput'); if (inp) inp.focus(); return; }
         if (id === 'back') {
-          var inp = $('hshsThreadInput');
-          if (!inp) return;
-          var v = inp.value;
-          inp.value = v.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]$|.$/, '');
-          inp.dispatchEvent(new Event('input'));
+          var inp2 = $('hshsThreadInput');
+          if (!inp2) return;
+          var v = inp2.value;
+          inp2.value = v.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]$|.$/, '');
+          inp2.dispatchEvent(new Event('input'));
           return;
         }
         setCat(id);
