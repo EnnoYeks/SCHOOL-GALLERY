@@ -15,9 +15,12 @@ import {
     getDoc,
     doc,
     addDoc,
+    setDoc,
     updateDoc,
     deleteDoc,
-    increment
+    increment,
+    onSnapshot,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 class Database {
@@ -122,6 +125,94 @@ class Database {
             return { totalPosts:posts.size, totalPhotos:photos.size, totalVideos:videos.size };
         }catch(error){
             return { totalPosts:0, totalPhotos:0, totalVideos:0 };
+        }
+    }
+
+    async listChats(){
+        try{
+            const q = query(collection(firestore, "chats"), orderBy("updatedAt", "desc"), limit(40));
+            const snap = await getDocs(q);
+            return snap.docs.map(d => ({ id:d.id, ...d.data() }));
+        }catch(error){
+            console.error("listChats", error);
+            return [];
+        }
+    }
+
+    async upsertChat(chatId, data){
+        try{
+            await setDoc(doc(firestore, "chats", chatId), { ...data, updatedAt: serverTimestamp() }, { merge: true });
+            return true;
+        }catch(error){
+            console.error("upsertChat", error);
+            return false;
+        }
+    }
+
+    async listMessages(chatId, limitValue=80){
+        try{
+            const q = query(
+                collection(firestore, "chats", chatId, "messages"),
+                orderBy("createdAt", "asc"),
+                limit(limitValue)
+            );
+            const snap = await getDocs(q);
+            return snap.docs.map(d => ({ id:d.id, ...d.data() }));
+        }catch(error){
+            console.error("listMessages", error);
+            return [];
+        }
+    }
+
+    async sendMessage(chatId, data){
+        try{
+            const payload = {
+                text: String(data.text || "").slice(0, 2000),
+                senderId: data.senderId || await this.getCurrentUserId(),
+                senderName: data.senderName || "Campus student",
+                kind: data.kind || "text",
+                fileName: data.fileName || "",
+                fileMeta: data.fileMeta || "",
+                clientId: data.clientId || "",
+                createdAt: serverTimestamp()
+            };
+            const ref = await addDoc(collection(firestore, "chats", chatId, "messages"), payload);
+            await updateDoc(doc(firestore, "chats", chatId), {
+                preview: payload.kind === "text" ? payload.text.slice(0, 80) : (payload.kind + " attachment"),
+                updatedAt: serverTimestamp()
+            });
+            return { id: ref.id, ...payload };
+        }catch(error){
+            console.error("sendMessage", error);
+            return null;
+        }
+    }
+
+    watchMessages(chatId, onChange){
+        try{
+            const q = query(
+                collection(firestore, "chats", chatId, "messages"),
+                orderBy("createdAt", "asc"),
+                limit(120)
+            );
+            return onSnapshot(q, function(snap){
+                const rows = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+                onChange(rows);
+            }, function(err){
+                console.error("watchMessages", err);
+            });
+        }catch(error){
+            console.error("watchMessages", error);
+            return function(){};
+        }
+    }
+
+    async setPresence(uid, info){
+        try{
+            await setDoc(doc(firestore, "presence", uid), { ...info, lastSeen: serverTimestamp() }, { merge: true });
+            return true;
+        }catch(error){
+            return false;
         }
     }
 
