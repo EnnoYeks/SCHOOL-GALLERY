@@ -47,7 +47,6 @@
     }
     loadCss('css/hshs-chat.css?v=260908pk14');
     loadCss('css/hshs-messages.css?v=260908pk14');
-    loadCss('css/hshs-messages.css?v=260908pk14');
     loadCss('css/hshs-chat-packs.css?v=260908pk14');
     loadCss('css/hshs-chat-finish.css?v=260908pk14');
     loadCss('css/hshs-chat-fixes.css?v=260908pk14');
