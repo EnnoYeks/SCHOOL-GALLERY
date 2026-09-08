@@ -45,22 +45,22 @@
       if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
       else root.innerHTML = tpl;
     }
-    loadCss('css/hshs-chat.css?v=260908pk14');
-    loadCss('css/hshs-messages.css?v=260908pk14');
-    loadCss('css/hshs-chat-packs.css?v=260908pk14');
-    loadCss('css/hshs-chat-finish.css?v=260908pk14');
-    loadCss('css/hshs-chat-fixes.css?v=260908pk14');
-    await loadOnce(base() + 'js/core/templates/chat.js?v=260908pk14', 'hshs-tpl-chat');
+    loadCss('css/hshs-chat.css?v=260908pk15');
+    loadCss('css/hshs-messages.css?v=260908pk15');
+    loadCss('css/hshs-chat-packs.css?v=260908pk15');
+    loadCss('css/hshs-chat-finish.css?v=260908pk15');
+    loadCss('css/hshs-chat-fixes.css?v=260908pk15');
+    await loadOnce(base() + 'js/core/templates/chat.js?v=260908pk15', 'hshs-tpl-chat');
     tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl && root && !root.querySelector('#hshsChatPage')) {
       if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
       else root.innerHTML = tpl;
     }
-    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260908pk14', 'hshs-msg-ui');
-    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260908pk14', 'hshs-chat-packs');
-    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260908pk14', 'hshs-chat-spring');
-    await loadOnce(base() + 'js/hshs-chat-attach.js?v=260908pk14', 'hshs-chat-attach');
-    await loadOnce(base() + 'js/hshs-chat-live.js?v=260908pk14', 'hshs-chat-live', true);
+    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260908pk15', 'hshs-msg-ui');
+    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260908pk15', 'hshs-chat-packs');
+    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260908pk15', 'hshs-chat-spring');
+    await loadOnce(base() + 'js/hshs-chat-attach.js?v=260908pk15', 'hshs-chat-attach');
+    await loadOnce(base() + 'js/hshs-chat-live.js?v=260908pk15', 'hshs-chat-live', true);
     if (global.HshsMessagesUi) global.HshsMessagesUi.boot();
     if (global.HshsChatPacks) global.HshsChatPacks.boot();
     if (global.HshsChatAttach) global.HshsChatAttach.boot();
