@@ -4,9 +4,8 @@
   global.__hshsTplChat = true;
   var html = `
 <main class="hshs-chat-page msg" id="hshsChatPage" data-theme="campus" aria-label="Messages">
-  <div id="hshsChatBanner" class="hshs-chat-banner" hidden></div>
+  <div id="hshsChatBanner" class="hshs-chat-banner" hidden aria-hidden="true"></div>
 
-  <!-- LIST -->
   <section class="msg-list-view" id="hshsChatListView">
     <header class="msg-hero">
       <div class="msg-hero-top">
@@ -28,11 +27,10 @@
         <button type="button" class="msg-search-clear" id="hshsSearchClear" hidden aria-label="Clear search"><i class="fas fa-xmark"></i></button>
       </div>
     </header>
-    <div class="msg-list-scroll" id="hshsChatList"><div class="hshs-chat-empty">Loading chats…</div></div>
+    <div class="msg-list-scroll" id="hshsChatList"></div>
     <button type="button" class="msg-fab-compose" id="hshsComposeFab" aria-label="New chat"><i class="fas fa-pen-to-square"></i></button>
   </section>
 
-  <!-- THREAD -->
   <section class="msg-thread-view" id="hshsThread" hidden>
     <div class="hshs-thread-head">
       <button type="button" class="hshs-thread-back" id="hshsThreadBack" aria-label="Back"><i class="fas fa-chevron-left"></i></button>
@@ -44,6 +42,10 @@
         <strong id="hshsThreadName">Chat</strong>
         <em id="hshsThreadHandle">@user</em>
         <small id="hshsThreadMeta">Campus</small>
+      </div>
+      <div class="hshs-thread-calls">
+        <button type="button" class="hshs-thread-call is-off" id="hshsCallBtn" disabled title="Coming Soon" aria-label="Voice call, coming soon"><i class="fas fa-phone"></i></button>
+        <button type="button" class="hshs-thread-call is-off" id="hshsVideoBtn" disabled title="Coming Soon" aria-label="Video call, coming soon"><i class="fas fa-video"></i></button>
       </div>
       <button type="button" class="hshs-thread-more" id="hshsThreadMore" aria-label="More"><i class="fas fa-ellipsis-vertical"></i></button>
     </div>
@@ -68,7 +70,6 @@
       <div class="hshs-thread-msgs" id="hshsThreadMsgs" hidden></div>
     </div>
 
-    <!-- default compose -->
     <div class="hshs-compose-wrap" id="hshsComposeWrap">
       <form class="hshs-thread-compose" id="hshsThreadForm" autocomplete="off">
         <button type="button" class="hshs-plus" id="hshsPlusBtn" aria-label="Attach">+</button>
@@ -83,7 +84,6 @@
       <input type="file" id="hshsAttachInput" accept="image/*" hidden>
     </div>
 
-    <!-- voice recording bar (replaces compose while recording) -->
     <div class="msg-record-bar" id="hshsRecordBar" hidden>
       <button type="button" class="msg-rec-cancel" id="hshsRecCancel" aria-label="Cancel recording"><i class="fas fa-trash"></i></button>
       <span class="msg-rec-dot" aria-hidden="true"></span>
@@ -94,7 +94,6 @@
     </div>
   </section>
 
-  <!-- Emoji panel -->
   <div class="msg-emoji-sheet" id="hshsEmojiSheet" hidden>
     <div class="msg-emoji-handle"></div>
     <header class="msg-emoji-head">
