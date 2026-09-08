@@ -71,8 +71,34 @@
     </div>
 
     <div class="hshs-compose-wrap" id="hshsComposeWrap">
+      <div class="msg-attach-sheet" id="hshsAttachSheet" hidden>
+        <button type="button" class="msg-attach-item" data-attach="gallery">
+          <span class="msg-attach-ico ico-gallery"><i class="fas fa-images"></i></span>
+          <em>Gallery</em>
+        </button>
+        <button type="button" class="msg-attach-item" data-attach="video">
+          <span class="msg-attach-ico ico-video"><i class="fas fa-film"></i></span>
+          <em>Video</em>
+        </button>
+        <button type="button" class="msg-attach-item" data-attach="camera">
+          <span class="msg-attach-ico ico-camera"><i class="fas fa-camera"></i></span>
+          <em>Take photo</em>
+        </button>
+        <button type="button" class="msg-attach-item" data-attach="record">
+          <span class="msg-attach-ico ico-record"><i class="fas fa-video"></i></span>
+          <em>Record video</em>
+        </button>
+        <button type="button" class="msg-attach-item" data-attach="document">
+          <span class="msg-attach-ico ico-doc"><i class="fas fa-file-lines"></i></span>
+          <em>Document</em>
+        </button>
+        <button type="button" class="msg-attach-item" data-attach="pdf">
+          <span class="msg-attach-ico ico-pdf"><i class="fas fa-file-pdf"></i></span>
+          <em>PDF</em>
+        </button>
+      </div>
       <form class="hshs-thread-compose" id="hshsThreadForm" autocomplete="off">
-        <button type="button" class="hshs-plus" id="hshsPlusBtn" aria-label="Attach">+</button>
+        <button type="button" class="hshs-plus" id="hshsPlusBtn" aria-label="Attach" aria-haspopup="true">+</button>
         <div class="hshs-compose-pill">
           <input type="text" id="hshsThreadInput" placeholder="Message..." maxlength="2000" enterkeyhint="send">
         </div>
@@ -82,6 +108,12 @@
         <button type="submit" class="hshs-fab send" id="hshsSendBtn" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
       </form>
       <input type="file" id="hshsAttachInput" accept="image/*" hidden>
+      <input type="file" id="hshsAttachGallery" accept="image/*" hidden>
+      <input type="file" id="hshsAttachVideo" accept="video/*" hidden>
+      <input type="file" id="hshsAttachCamera" accept="image/*" capture="environment" hidden>
+      <input type="file" id="hshsAttachRecVideo" accept="video/*" capture="environment" hidden>
+      <input type="file" id="hshsAttachDoc" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.rtf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+      <input type="file" id="hshsAttachPdf" accept="application/pdf,.pdf" hidden>
     </div>
 
     <div class="msg-record-bar" id="hshsRecordBar" hidden>
@@ -92,22 +124,22 @@
       <span class="msg-rec-hint" id="hshsRecHint"><i class="fas fa-chevron-left"></i> Slide left cancel · up send</span>
       <button type="button" class="hshs-fab send msg-rec-send" id="hshsRecSend" aria-label="Send voice"><i class="fas fa-paper-plane"></i></button>
     </div>
-  </section>
 
-  <div class="msg-emoji-sheet" id="hshsEmojiSheet" hidden>
-    <div class="msg-emoji-handle"></div>
-    <header class="msg-emoji-head">
-      <div>
-        <strong>Emoji</strong>
-        <p>Add some emotion 😊</p>
-      </div>
-      <button type="button" id="hshsEmojiClose" class="msg-emoji-close" aria-label="Close"><i class="fas fa-xmark"></i></button>
-    </header>
-    <div class="msg-emoji-search"><i class="fas fa-search"></i><input type="search" id="hshsEmojiSearch" placeholder="Search emoji..." autocomplete="off"></div>
-    <div class="msg-emoji-tabs" id="hshsEmojiTabs"></div>
-    <div class="msg-emoji-body" id="hshsEmojiBody"></div>
-    <div class="msg-emoji-dock" id="hshsEmojiDock"></div>
-  </div>
+    <div class="msg-emoji-sheet" id="hshsEmojiSheet" hidden>
+      <div class="msg-emoji-handle" id="hshsEmojiHandle"></div>
+      <header class="msg-emoji-head">
+        <div>
+          <strong>Emoji & stickers</strong>
+          <p>Pick one without covering the chat</p>
+        </div>
+        <button type="button" id="hshsEmojiClose" class="msg-emoji-close" aria-label="Close"><i class="fas fa-xmark"></i></button>
+      </header>
+      <div class="msg-emoji-search"><i class="fas fa-search"></i><input type="search" id="hshsEmojiSearch" placeholder="Search emoji..." autocomplete="off"></div>
+      <div class="msg-emoji-tabs" id="hshsEmojiTabs"></div>
+      <div class="msg-emoji-body" id="hshsEmojiBody"></div>
+      <div class="msg-emoji-dock" id="hshsEmojiDock"></div>
+    </div>
+  </section>
 </main>`;
   global.HshsTemplates = global.HshsTemplates || {};
   global.HshsTemplates.chat = html;
