@@ -2,10 +2,9 @@
 // HSHS WORLD - CONFIGURATION
 // ============================================
 
-// Firebase: Auth + Firestore + Analytics
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
 
 const firebaseConfig = {
@@ -26,7 +25,7 @@ export const analytics = getAnalytics(app);
 export const CONFIG = {
   app: {
     name: "HSHS World",
-    version: "1.0.0",
+    version: "1.1.0",
     school: "HAWTHORNE SCRIBNER HIGH SCHOOL",
     schoolMotto: "Educate Engage Empower.",
     schoolEmail: "info@hshs.ac.ug",
@@ -34,7 +33,6 @@ export const CONFIG = {
     schoolAddress: "Bududa Kikholo",
     schoolAnniversaryDate: "2026-08-15"
   },
-
   theme: {
     defaultMode: "light",
     defaultTheme: "default",
@@ -42,28 +40,34 @@ export const CONFIG = {
     enableParticles: true,
     particleCount: 80
   },
-
-  // Media is intentionally kept outside Firebase.
-  // Cloudflare R2 + CDN will handle photos/videos in production.
   storage: {
     provider: "cloudflare-r2",
     maxFileSize: 104857600,
     maxPhotoSize: 52428800,
     maxVideoSize: 104857600
   },
-
   pagination: {
     postsPerPage: 10,
     photosPerPage: 20,
     videosPerPage: 12
   },
-
   features: {
     enableComments: true,
     enableLikes: true,
-    enableSharing: true
+    enableSharing: true,
+    enableLiveChat: true
   }
 };
+
+onAuthStateChanged(auth, function (user) {
+  window.hshsAuthUser = user || null;
+  window.hshsUid = user ? user.uid : (localStorage.getItem("guestId") || null);
+  document.dispatchEvent(new CustomEvent("hshs:auth", { detail: { user: user || null } }));
+});
+
+signInAnonymously(auth).catch(function (err) {
+  console.warn("Anonymous sign-in skipped:", err && err.message);
+});
 
 window.firebaseApp = app;
 window.firestore = firestore;
