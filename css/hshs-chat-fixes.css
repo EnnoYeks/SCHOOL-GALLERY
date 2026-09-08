@@ -1,4 +1,9 @@
 #hshsChatBanner{display:none!important}
+.msg-list-view[hidden]{display:none!important}
+.msg-thread-view,
+#hshsThread{display:none!important}
+.hshs-chat-page.msg.is-open .msg-thread-view,
+.hshs-chat-page.msg.is-open #hshsThread{display:flex!important}
 .msg-row.is-group .msg-row-av,
 .hshs-thread-avatar.is-group{border-radius:16px}
 .msg-group-tag{font-style:normal;font-size:.62rem;margin-left:6px;padding:1px 6px;border-radius:999px;background:rgba(245,197,24,.18);color:#f5c518;font-weight:800}
@@ -17,10 +22,10 @@
 .hshs-dots i:nth-child(2){animation-delay:.15s}
 .hshs-dots i:nth-child(3){animation-delay:.3s}
 @keyframes hshsDot{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
-.msg-record-bar.is-on{display:flex}
-.msg-record-bar[hidden]{display:none!important}
-.msg-record-bar.is-cancel{border-color:rgba(239,68,68,.7)}
-#hshsMicBtn.is-rec{color:#ef4444}
+#hshsRecordBar,
+.msg-record-bar,
+.msg-record-bar.is-on{display:none!important}
+#hshsMicBtn{opacity:.45}
 .hshs-compose-wrap[hidden]{display:none!important}
 .hshs-chat-toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,12px);background:#0b1f4d;color:#fff;padding:8px 14px;border-radius:999px;font-size:.82rem;opacity:0;pointer-events:none;z-index:80;border:1px solid rgba(255,255,255,.12)}
 .hshs-chat-toast.is-on{opacity:1;transform:translate(-50%,0);transition:opacity .2s,transform .2s}
