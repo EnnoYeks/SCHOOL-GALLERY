@@ -1,9 +1,24 @@
-.buzz-page{position:relative;min-height:100dvh;background:#03050d;color:#fff;overflow:hidden}
-.buzz-progress{position:fixed;z-index:50;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#1d4ed8,#0ea5e9);transform-origin:left center;transform:scaleX(0);opacity:0;transition:opacity .2s}
-.buzz-topbar{position:fixed;z-index:40;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;padding:calc(10px + env(safe-area-inset-top)) 16px 12px;background:linear-gradient(180deg,rgba(3,5,13,.72),transparent);pointer-events:none;transition:opacity .2s,transform .2s}
-.buzz-topbar>*{pointer-events:auto}
-.vibe-tabs{display:flex;gap:18px;align-items:center}
-.vibe-switch{border:0;background:transparent;color:rgba(255,255,255,.55);font-weight:800;font-size:.95rem;padding:6px 2px;position:relative}
-.vibe-switch.is-on{color:#fff}
-.vibe-switch.is-on::after{content:"";position:absolute;left:10%;right:10%;bottom:0;height:2px;border-radius:2px;background:#fff}
-.buzz-studio{position:absolute;right:16px;top:calc(10px + env(safe-area-inset-top));width:40px;height:40px;border-radius:14px;display:grid;place-items:center;color:#0b1220;background:linear-gradient(145deg,#fff,#e8eefc);border:0;box-shadow:0 8px 20px rgba(0,0,0,.35);font-size:1rem;cursor:pointer}.buzz-studio:active{transform:scale(.94)}
+/* Full Vibe styles + Post button override */
+@import url("https://cdn.jsdelivr.net/gh/EnnoYeks/SCHOOL-GALLERY@ed10ff7c964924b38c36780f574f7c09487aacf8/css/buzz.css");
+
+.buzz-studio{
+  position:absolute;
+  right:16px;
+  top:calc(10px + env(safe-area-inset-top));
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  color:#0b1220 !important;
+  background:linear-gradient(145deg,#fff,#e8eefc) !important;
+  border:0 !important;
+  box-shadow:0 8px 20px rgba(0,0,0,.35);
+  font-size:1rem;
+  cursor:pointer;
+}
+.buzz-studio:active{ transform:scale(.94); }
+.buzz-crest{
+  text-decoration:none;
+  cursor:pointer;
+}
