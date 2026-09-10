@@ -1,6 +1,8 @@
 /**
- * HSHS Studio · real-time canvas filters
- * Upgrades live camera: preview + photos + recorded video bake in the selected filter.
+ * HSHS Studio · stable real-time filters
+ * - Live CSS filter on video (instant, no black canvas)
+ * - Canvas only used when recording so the filter is baked in
+ * - Does NOT tear down the camera on mode switches
  */
 (function () {
   if (window.__hshsFilterEngine) return;
@@ -21,161 +23,182 @@
     vivid: 'saturate(1.6) contrast(1.18) brightness(1.02)'
   };
 
-  var FILTER_ORDER = ['original','film','cool','warm','mono','fade','punch','night','campus','gold','sky','vivid'];
-  var FILTER_LABELS = {
+  var ORDER = ['original','film','cool','warm','mono','fade','punch','night','campus','gold','sky','vivid'];
+  var LABELS = {
     original:'Original', film:'Film', cool:'Cool', warm:'Warm', mono:'Mono', fade:'Fade',
     punch:'Punch', night:'Night', campus:'Campus', gold:'Gold', sky:'Sky', vivid:'Vivid'
   };
 
   var state = {
     filter: 'original',
-    raf: 0,
     video: null,
     canvas: null,
     ctx: null,
-    stream: null,
-    tray: null
+    raf: 0,
+    recording: false,
+    trayBuilt: false
   };
 
   function css(id) { return FILTERS[id] || 'none'; }
 
-  function stopLoop() {
-    if (state.raf) { cancelAnimationFrame(state.raf); state.raf = 0; }
+  function findVideo() {
+    return document.getElementById('hshsCamVideo') ||
+      document.querySelector('.hshs-cam-stage video, .hshs-upload-cam video');
   }
 
-  function draw() {
-    if (!state.video || !state.ctx || !state.canvas) return;
-    var v = state.video;
-    if (v.videoWidth && (state.canvas.width !== v.videoWidth || state.canvas.height !== v.videoHeight)) {
-      state.canvas.width = v.videoWidth;
-      state.canvas.height = v.videoHeight;
+  function findStage() {
+    return document.querySelector('.hshs-cam-stage, .hshs-upload-cam');
+  }
+
+  function applyPreviewFilter() {
+    var v = findVideo();
+    if (!v) return;
+    state.video = v;
+    v.style.filter = css(state.filter);
+    v.style.opacity = '1';
+    v.style.position = '';
+    v.style.width = '';
+    v.style.height = '';
+    v.style.left = '';
+    v.style.pointerEvents = '';
+    v.classList.remove('hshs-cam-raw');
+  }
+
+  function ensureTray() {
+    var cam = document.querySelector('.hshs-cam') || findStage();
+    if (!cam) return;
+    var tray = cam.querySelector('.hshs-live-filters');
+    if (tray) {
+      tray.querySelectorAll('[data-live-filter]').forEach(function (b) {
+        b.classList.toggle('is-on', b.getAttribute('data-live-filter') === state.filter);
+      });
+      return;
     }
-    if (!state.canvas.width) return;
-    try {
-      state.ctx.filter = css(state.filter);
-      state.ctx.drawImage(v, 0, 0, state.canvas.width, state.canvas.height);
-    } catch (e) {}
-  }
-
-  function loop() {
-    draw();
-    state.raf = requestAnimationFrame(loop);
-  }
-
-  function ensureTray(parent) {
-    var existing = parent.querySelector('.hshs-live-filters');
-    if (existing) {
-      state.tray = existing;
-      return existing;
-    }
-    var tray = document.createElement('div');
+    tray = document.createElement('div');
     tray.className = 'hshs-live-filters';
-    FILTER_ORDER.forEach(function (id) {
+    tray.setAttribute('aria-label', 'Filters');
+    ORDER.forEach(function (id) {
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'hshs-live-filter' + (state.filter === id ? ' is-on' : '');
       btn.setAttribute('data-live-filter', id);
-      btn.innerHTML = '<span class="hshs-live-swatch" style="filter:' + css(id) + '"></span><em>' + (FILTER_LABELS[id] || id) + '</em>';
-      btn.onclick = function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        setFilter(id);
-      };
+      btn.innerHTML = '<span class="hshs-live-swatch" style="filter:' + css(id) + '"></span><em>' + (LABELS[id] || id) + '</em>';
       tray.appendChild(btn);
     });
-    parent.appendChild(tray);
-    state.tray = tray;
-    return tray;
+    var bottom = cam.querySelector('.hshs-cam-bottom');
+    if (bottom && bottom.parentNode) bottom.parentNode.insertBefore(tray, bottom);
+    else cam.appendChild(tray);
+    state.trayBuilt = true;
+  }
+
+  function flashName() {
+    var stage = findStage();
+    if (!stage) return;
+    var name = document.getElementById('hshsFilterName');
+    if (!name) {
+      name = document.createElement('div');
+      name.id = 'hshsFilterName';
+      name.className = 'hshs-filter-name';
+      stage.appendChild(name);
+    }
+    name.textContent = LABELS[state.filter] || state.filter;
+    name.classList.add('is-flash');
+    clearTimeout(flashName._t);
+    flashName._t = setTimeout(function () { name.classList.remove('is-flash'); }, 650);
   }
 
   function setFilter(id) {
-    state.filter = id || 'original';
-    if (state.tray) {
-      state.tray.querySelectorAll('[data-live-filter]').forEach(function (b) {
-        b.classList.toggle('is-on', b.getAttribute('data-live-filter') === state.filter);
-      });
-    }
-    var name = document.getElementById('hshsFilterName');
-    if (!name) {
-      var stage = document.querySelector('.hshs-cam-stage');
-      if (stage) {
-        name = document.createElement('div');
-        name.id = 'hshsFilterName';
-        name.className = 'hshs-filter-name';
-        stage.appendChild(name);
-      }
-    }
-    if (name) {
-      name.textContent = FILTER_LABELS[state.filter] || state.filter;
-      name.classList.add('is-flash');
-      clearTimeout(setFilter._t);
-      setFilter._t = setTimeout(function () { name.classList.remove('is-flash'); }, 700);
-    }
+    if (!FILTERS[id]) return;
+    state.filter = id;
+    applyPreviewFilter();
+    ensureTray();
+    flashName();
   }
 
-  function upgradeCamera() {
-    var stage = document.querySelector('.hshs-cam-stage, .hshs-upload-cam');
-    if (!stage) return false;
-
-    var video = stage.querySelector('video');
-    if (!video || !video.srcObject) return false;
-
-    var canvas = stage.querySelector('#hshsCamCanvas');
-    if (canvas && state.video === video && state.raf) {
-      ensureTray(stage.parentElement || stage);
-      return true;
+  function getBakeCanvas() {
+    if (!state.canvas) {
+      state.canvas = document.createElement('canvas');
+      state.canvas.width = 720;
+      state.canvas.height = 1280;
+      state.ctx = state.canvas.getContext('2d', { alpha: false });
     }
+    return state.canvas;
+  }
 
-    stopLoop();
-    state.stream = video.srcObject;
-    state.video = video;
+  function drawCover(ctx, video, cw, ch) {
+    var vw = video.videoWidth || cw;
+    var vh = video.videoHeight || ch;
+    if (!vw || !vh) return;
+    var scale = Math.max(cw / vw, ch / vh);
+    var dw = vw * scale;
+    var dh = vh * scale;
+    var dx = (cw - dw) / 2;
+    var dy = (ch - dh) / 2;
+    ctx.filter = css(state.filter);
+    ctx.drawImage(video, dx, dy, dw, dh);
+  }
 
-    if (!canvas) {
-      canvas = document.createElement('canvas');
-      canvas.id = 'hshsCamCanvas';
-      canvas.className = 'hshs-cam-canvas';
-      stage.appendChild(canvas);
+  function startBakeLoop() {
+    stopBakeLoop();
+    var video = findVideo();
+    if (!video) return;
+    var canvas = getBakeCanvas();
+    function tick() {
+      if (!state.recording) return;
+      var w = video.videoWidth || 720;
+      var h = video.videoHeight || 1280;
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+      try {
+        state.ctx.fillStyle = '#000';
+        state.ctx.fillRect(0, 0, canvas.width, canvas.height);
+        drawCover(state.ctx, video, canvas.width, canvas.height);
+      } catch (e) {}
+      state.raf = requestAnimationFrame(tick);
     }
-    state.canvas = canvas;
-    state.ctx = canvas.getContext('2d', { alpha: false });
+    state.recording = true;
+    state.raf = requestAnimationFrame(tick);
+  }
 
-    video.classList.add('hshs-cam-raw');
-    video.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px';
-
-    function ready() {
-      canvas.width = video.videoWidth || 720;
-      canvas.height = video.videoHeight || 1280;
-      stopLoop();
-      loop();
+  function stopBakeLoop() {
+    state.recording = false;
+    if (state.raf) {
+      cancelAnimationFrame(state.raf);
+      state.raf = 0;
     }
-    if (video.videoWidth) ready();
-    else video.onloadedmetadata = ready;
-
-    ensureTray(stage.parentElement || document.querySelector('.hshs-cam') || stage);
-
-    if (!document.getElementById('hshsFilterName')) {
-      var n = document.createElement('div');
-      n.id = 'hshsFilterName';
-      n.className = 'hshs-filter-name';
-      stage.appendChild(n);
-    }
-
-    return true;
   }
 
   var NativeMR = window.MediaRecorder;
   if (NativeMR && !NativeMR.__hshsPatched) {
     function PatchedMR(stream, opts) {
       var use = stream;
-      if (state.canvas && state.stream && stream === state.stream && typeof state.canvas.captureStream === 'function') {
+      var video = findVideo();
+      var camStream = video && video.srcObject;
+      if (camStream && stream === camStream && typeof HTMLCanvasElement !== 'undefined') {
         try {
-          draw();
-          var cs = state.canvas.captureStream(30);
-          state.stream.getAudioTracks().forEach(function (t) {
+          startBakeLoop();
+          var canvas = getBakeCanvas();
+          if (video.videoWidth) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            drawCover(state.ctx, video, canvas.width, canvas.height);
+          }
+          var cs = canvas.captureStream(30);
+          stream.getAudioTracks().forEach(function (t) {
             try { cs.addTrack(t); } catch (e) {}
           });
           use = cs;
-        } catch (e) {}
+          var rec = new NativeMR(use, opts);
+          var origStop = rec.stop.bind(rec);
+          rec.stop = function () {
+            try { origStop(); } finally { stopBakeLoop(); }
+          };
+          return rec;
+        } catch (e) {
+          stopBakeLoop();
+        }
       }
       return new NativeMR(use, opts);
     }
@@ -186,31 +209,44 @@
   }
 
   document.addEventListener('click', function (e) {
-    var filterBtn = e.target.closest('[data-filter], [data-live-filter], [data-act="filter"]');
-    if (filterBtn) {
-      var id = filterBtn.getAttribute('data-live-filter') || filterBtn.getAttribute('data-filter');
-      if (id) setFilter(id);
-      else if (filterBtn.getAttribute('data-act') === 'filter') {
-        var i = FILTER_ORDER.indexOf(state.filter);
-        setFilter(FILTER_ORDER[(i + 1) % FILTER_ORDER.length]);
-      }
+    var live = e.target.closest('[data-live-filter]');
+    if (live) {
+      e.preventDefault();
+      e.stopPropagation();
+      setFilter(live.getAttribute('data-live-filter'));
+      return;
+    }
+    var sheet = e.target.closest('[data-filter]');
+    if (sheet) {
+      setFilter(sheet.getAttribute('data-filter'));
+      return;
+    }
+    if (e.target.closest('[data-act="filter"]')) {
+      var i = ORDER.indexOf(state.filter);
+      setFilter(ORDER[(i + 1) % ORDER.length]);
     }
   }, true);
 
-  var obs = new MutationObserver(function () {
-    if (document.body.classList.contains('studio-open') || document.body.classList.contains('upload-open')) {
-      upgradeCamera();
-    } else {
-      stopLoop();
+  function softAttach() {
+    if (!document.body.classList.contains('studio-open') &&
+        !document.body.classList.contains('upload-open')) {
+      stopBakeLoop();
+      return;
     }
-  });
-  obs.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'hidden'] });
+    var v = findVideo();
+    if (!v || !v.srcObject) return;
+    applyPreviewFilter();
+    ensureTray();
+  }
 
-  setInterval(function () {
-    if (document.body.classList.contains('studio-open') || document.body.classList.contains('upload-open')) {
-      upgradeCamera();
-    }
-  }, 800);
+  var t = null;
+  var obs = new MutationObserver(function () {
+    clearTimeout(t);
+    t = setTimeout(softAttach, 120);
+  });
+  obs.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+
+  setInterval(softAttach, 2000);
 
   window.__hshsSetLiveFilter = setFilter;
   window.__hshsGetLiveFilter = function () { return state.filter; };
