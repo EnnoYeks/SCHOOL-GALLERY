@@ -3,13 +3,13 @@
     window.__hshsUpload = true;
 
     var DESTINATIONS = [
-        { id: 'gallery', label: 'Gallery', hint: 'For You feed', kinds: ['photo', 'video'] },
-        { id: 'photos', label: 'Photos', hint: 'Still library', kinds: ['photo'] },
-        { id: 'vibe', label: 'Vibe', hint: 'School videos', kinds: ['video'] },
-        { id: 'buzz', label: 'Buzz', hint: 'Short clips', kinds: ['video'] },
-        { id: 'spotlight', label: 'Spotlight', hint: 'Featured wall', kinds: ['photo', 'video'] },
-        { id: 'memories', label: 'Memories', hint: 'Keep this day', kinds: ['photo', 'video'] },
-        { id: 'trending', label: 'Trending', hint: 'Push to hot', kinds: ['photo', 'video'] }
+        { id: 'gallery', label: 'Gallery', hint: 'For You feed · everyone sees this first', icon: 'fa-images', page: 'gallery.html', kinds: ['photo', 'video'] },
+        { id: 'photos', label: 'Photos', hint: 'Still photo library', icon: 'fa-camera', page: 'photos.html', kinds: ['photo'] },
+        { id: 'vibe', label: 'Vibe', hint: 'Long school videos', icon: 'fa-play', page: 'videos.html', kinds: ['video'] },
+        { id: 'buzz', label: 'Buzz', hint: 'Short clips · vertical', icon: 'fa-bolt', page: 'buzz.html', kinds: ['video'] },
+        { id: 'spotlight', label: 'Spotlight', hint: 'Featured student wall', icon: 'fa-trophy', page: 'spotlight.html', kinds: ['photo', 'video'] },
+        { id: 'memories', label: 'Memories', hint: 'On this day archive', icon: 'fa-clock-rotate-left', page: 'memories.html', kinds: ['photo', 'video'] },
+        { id: 'trending', label: 'Trending', hint: 'Hot / rising right now', icon: 'fa-fire', page: 'trending.html', kinds: ['photo', 'video'] }
     ];
 
     var FILTERS = [
@@ -36,7 +36,7 @@
 
     var CLASS_TAGS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'Campus', 'Sports', 'Choir', 'STEM', 'Houses'];
 
-    function escapeHtml(s) { return (window.HshsUtils && window.HshsUtils.escapeHtml) ? window.HshsUtils.escapeHtml(s) : String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+    function escapeHtml(s) { return (window.HshsUtils && window.HshsUtils.escapeHtml) ? window.HshsUtils.escapeHtml(s) : String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); }
 
     var draft = {
         kind: 'photo',
@@ -191,7 +191,7 @@
         recorder.onstop = function () {
             var blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
             var src = URL.createObjectURL(blob);
-            draft.src = src; // video preview
+            draft.src = src;
             draft.kind = 'video';
             draft.destinations = suggested('video');
             stopCam();
@@ -203,58 +203,90 @@
         render();
     }
 
-    function publish() {
+    function pageMap() {
+        var m = {};
+        DESTINATIONS.forEach(function (d) { m[d.id] = d.page; });
+        return m;
+    }
+
+    async function publish() {
         if (!draft.src || !draft.destinations.length) return;
         var title = (draft.caption || '').trim() || 'Untitled moment';
+        var progress = showProgress();
+        var mediaUrl = draft.src;
+        var mediaKey = '';
+        var mediaProvider = 'local';
+
+        try {
+            if (window.HshsStorage && typeof window.HshsStorage.uploadFromUrl === 'function') {
+                var up = await window.HshsStorage.uploadFromUrl(draft.src, { kind: draft.kind });
+                if (up && up.url) {
+                    mediaUrl = up.url;
+                    mediaKey = up.key || '';
+                    mediaProvider = up.provider || 'local';
+                }
+            }
+        } catch (e) {
+            console.warn('[upload] storage fallback', e);
+        }
+
         var payload = {
             type: draft.kind === 'video' ? 'video' : 'photo',
             title: title,
             description: draft.caption || '',
             category: 'events',
             classTag: draft.classTag || defaultClassTag(),
-            image: draft.src,
+            image: mediaUrl,
+            imageUrl: mediaUrl,
+            thumbnailUrl: mediaUrl,
+            videoUrl: draft.kind === 'video' ? mediaUrl : '',
+            mediaKey: mediaKey,
+            mediaProvider: mediaProvider,
             destinations: draft.destinations.slice(),
             filter: draft.filter,
             soundId: draft.soundId === 'none' ? undefined : draft.soundId
         };
 
-        var progress = showProgress();
-
-        // Try to use store API first
-        if (window.HshsStore && typeof window.HshsStore.addPost === 'function') {
-            try {
-                var res = window.HshsStore.addPost(payload);
-                // handle promise-like responses
-                if (res && typeof res.then === 'function') {
-                    res.then(function (r) {
-                        hideProgress(progress);
-                        if (r && r.ok === false) fallbackLocalSave(payload);
-                    }).catch(function () { hideProgress(progress); fallbackLocalSave(payload); });
-                } else {
-                    hideProgress(progress);
-                    if (res && res.ok === false) fallbackLocalSave(payload);
+        try {
+            if (window.db) {
+                var dests = payload.destinations;
+                var feedDests = ['gallery', 'spotlight', 'memories', 'trending'];
+                var needsPost = dests.some(function (d) { return feedDests.indexOf(d) !== -1; }) || dests.indexOf('photos') === -1;
+                if (needsPost || dests.indexOf('gallery') !== -1) {
+                    await window.db.createPost(payload);
                 }
-            } catch (e) {
-                hideProgress(progress);
-                fallbackLocalSave(payload);
+                if (dests.indexOf('photos') !== -1 && payload.type === 'photo') {
+                    await window.db.createPhoto(payload);
+                }
+                if ((dests.indexOf('vibe') !== -1 || dests.indexOf('buzz') !== -1) && payload.type === 'video') {
+                    await window.db.createVideo(payload);
+                }
             }
-        } else {
-            // fallback to local save
-            setTimeout(function () { hideProgress(progress); fallbackLocalSave(payload); }, 700);
+        } catch (e) {
+            console.warn('[upload] Firestore write failed', e);
         }
 
+        try {
+            if (window.HshsStore && typeof window.HshsStore.addPost === 'function') {
+                var res = window.HshsStore.addPost(payload);
+                if (res && typeof res.then === 'function') {
+                    res.catch(function () { fallbackLocalSave(payload); });
+                } else if (res && res.ok === false) {
+                    fallbackLocalSave(payload);
+                }
+            } else {
+                fallbackLocalSave(payload);
+            }
+        } catch (e) {
+            fallbackLocalSave(payload);
+        }
+
+        hideProgress(progress);
         close();
+
         if (window.__hshsNavigate) {
             var first = draft.destinations[0];
-            var map = {
-                gallery: 'gallery.html',
-                photos: 'photos.html',
-                vibe: 'videos.html',
-                buzz: 'buzz.html',
-                spotlight: 'spotlight.html',
-                memories: 'memories.html',
-                trending: 'trending.html'
-            };
+            var map = pageMap();
             var file = map[first] || 'gallery.html';
             var inSub = location.pathname.indexOf('/index/') !== -1;
             window.__hshsNavigate(inSub ? file : ('index/' + file));
@@ -284,7 +316,7 @@
         var el = document.getElementById(id);
         if (!el) {
             el = document.createElement('div'); el.id = id; el.className = 'hshs-upload-progress';
-            el.innerHTML = '<div class="bar"><div class="fill" style="width:0%"></div></div><div class="label">Uploading…</div>';
+            el.innerHTML = '<div class=\"bar\"><div class=\"fill\" style=\"width:0%\"></div></div><div class=\"label\">Uploading…</div>';
             document.body.appendChild(el);
         }
         var fill = el.querySelector('.fill');
@@ -299,122 +331,141 @@
     function render(errorMsg) {
         var root = ensureRoot();
         var html = '';
-        html += '<div class="hshs-upload-head">';
-        html += '<button type="button" class="hshs-upload-icon" id="hshsUploadBack" aria-label="Back"><i class="fas fa-' + (step === 'source' ? 'times' : 'chevron-left') + '"></i></button>';
+        html += '<div class=\"hshs-upload-head\">';
+        html += '<button type=\"button\" class=\"hshs-upload-icon\" id=\"hshsUploadBack\" aria-label=\"Back\"><i class=\"fas fa-' + (step === 'source' ? 'times' : 'chevron-left') + '\"></i></button>';
         html += '<strong>' + (step === 'source' ? 'Create' : step === 'camera' ? 'Capture' : 'Place it') + '</strong>';
-        html += '<span class="hshs-upload-spacer"></span></div>';
+        html += '<span class=\"hshs-upload-spacer\"></span></div>';
 
         if (step === 'source') {
-            html += '<div class="hshs-upload-body">';
-            html += '<p class="hshs-upload-lead">Library, camera, or record — then tag class and pick pages.</p>';
-            if (errorMsg) html += '<p class="hshs-upload-error">' + escapeHtml(errorMsg) + '</p>';
-            html += '<div class="hshs-source-grid">';
-            html += '<button type="button" class="hshs-source-card" data-action="library"><span class="ico"><i class="fas fa-images"></i></span><span><b>Library</b><small>Photos and videos on this device</small></span></button>';
-            html += '<button type="button" class="hshs-source-card" data-action="photo"><span class="ico"><i class="fas fa-camera"></i></span><span><b>Camera</b><small>Take a still right now</small></span></button>';
-            html += '<button type="button" class="hshs-source-card" data-action="video"><span class="ico"><i class="fas fa-video"></i></span><span><b>Record</b><small>Clip for Vibe or Buzz</small></span></button>';
+            html += '<div class=\"hshs-upload-body\">';
+            html += '<p class=\"hshs-upload-lead\">Library, camera, or record — then tag class and pick pages.</p>';
+            if (errorMsg) html += '<p class=\"hshs-upload-error\">' + escapeHtml(errorMsg) + '</p>';
+            html += '<div class=\"hshs-source-grid\">';
+            html += '<button type=\"button\" class=\"hshs-source-card\" data-action=\"library\"><span class=\"ico\"><i class=\"fas fa-images\"></i></span><span><b>Library</b><small>Photos and videos on this device</small></span></button>';
+            html += '<button type=\"button\" class=\"hshs-source-card\" data-action=\"photo\"><span class=\"ico\"><i class=\"fas fa-camera\"></i></span><span><b>Camera</b><small>Take a still right now</small></span></button>';
+            html += '<button type=\"button\" class=\"hshs-source-card\" data-action=\"video\"><span class=\"ico\"><i class=\"fas fa-video\"></i></span><span><b>Record</b><small>Clip for Vibe or Buzz</small></span></button>';
             html += '</div>';
-            html += '<div class="hshs-drag-drop" id="hshsUploadDrop">Drop files here or use Library</div>';
-            html += '<input type="file" id="hshsUploadFile" accept="image/*,video/*" hidden>';
+            html += '<div class=\"hshs-drag-drop\" id=\"hshsUploadDrop\">Drop files here or use Library</div>';
+            html += '<input type=\"file\" id=\"hshsUploadFile\" accept=\"image/*,video/*\" hidden>';
             html += '</div>';
         } else if (step === 'camera') {
-            html += '<div class="hshs-upload-cam">';
-            html += '<video id="hshsCamVideo" playsinline muted autoplay></video>';
-            html += '<div class="hshs-cam-bar">';
-            html += '<button type="button" class="hshs-cam-side" data-action="flip" aria-label="Flip"><i class="fas fa-sync-alt"></i></button>';
+            html += '<div class=\"hshs-upload-cam\">';
+            html += '<video id=\"hshsCamVideo\" playsinline muted autoplay></video>';
+            html += '<div class=\"hshs-cam-bar\">';
+            html += '<button type=\"button\" class=\"hshs-cam-side\" data-action=\"flip\" aria-label=\"Flip\"><i class=\"fas fa-sync-alt\"></i></button>';
             if (draft.kind === 'video') {
-                html += '<button type="button" class="hshs-cam-shutter ' + (recording ? 'is-rec' : '') + '" data-action="record" aria-label="Record"></button>';
+                html += '<button type=\"button\" class=\"hshs-cam-shutter ' + (recording ? 'is-rec' : '') + '\" data-action=\"record\" aria-label=\"Record\"></button>';
             } else {
-                html += '<button type="button" class="hshs-cam-shutter is-photo" data-action="snap" aria-label="Capture"></button>';
+                html += '<button type=\"button\" class=\"hshs-cam-shutter is-photo\" data-action=\"snap\" aria-label=\"Capture\"></button>';
             }
-            html += '<span class="hshs-cam-side"></span></div></div>';
+            html += '<span class=\"hshs-cam-side\"></span></div></div>';
         } else {
-            html += '<div class="hshs-upload-body hshs-compose">';
-            html += '<div class="hshs-compose-left">';
-            html += '<div class="hshs-preview"><img id="hshsPreviewImg" src="' + escapeHtml(draft.src) + '" alt="preview" style="filter:' + filterCss(draft.filter) + '"></div>';
+            html += '<div class=\"hshs-upload-body hshs-compose\">';
+            html += '<div class=\"hshs-compose-left\">';
+            html += '<div class=\"hshs-preview\"><img id=\"hshsPreviewImg\" src=\"' + escapeHtml(draft.src) + '\" alt=\"preview\" style=\"filter:' + filterCss(draft.filter) + '\"></div>';
 
-            // filter thumbnails row
-            html += '<div class="hshs-section"><label>Filter</label><div class="hshs-filter-row" id="hshsFilterRow">';
+            html += '<div class=\"hshs-section\"><label>Filter</label><div class=\"hshs-filter-row\" id=\"hshsFilterRow\">';
             FILTERS.forEach(function (f) {
-                html += '<button type="button" class="hshs-filter-thumb' + (draft.filter === f.id ? ' on' : '') + '" data-filter="' + f.id + '" aria-label="' + escapeHtml(f.label) + '"><img src="' + escapeHtml(draft.src) + '" style="filter:' + f.css + '"><small>' + escapeHtml(f.label) + '</small></button>';
+                html += '<button type=\"button\" class=\"hshs-filter-thumb' + (draft.filter === f.id ? ' on' : '') + '\" data-filter=\"' + f.id + '\" aria-label=\"' + escapeHtml(f.label) + '\"><img src=\"' + escapeHtml(draft.src) + '\" style=\"filter:' + f.css + '\"><small>' + escapeHtml(f.label) + '</small></button>';
             });
             html += '</div></div>';
 
-            // sound picker with preview
-            html += '<div class="hshs-section"><label>Sound</label><div class="hshs-sound-row" id="hshsSoundRow">';
+            html += '<div class=\"hshs-section\"><label>Sound</label><div class=\"hshs-sound-row\" id=\"hshsSoundRow\">';
             SOUNDS.forEach(function (s) {
-                html += '<button type="button" class="hshs-sound' + (draft.soundId === s.id ? ' on' : '') + '" data-sound="' + s.id + '" data-url="' + (s.url || '') + '"><b>' + escapeHtml(s.label) + '</b><small>' + escapeHtml(s.artist) + '</small>' + (s.url ? ' <i class="fas fa-play"></i>' : '') + '</button>';
+                html += '<button type=\"button\" class=\"hshs-sound' + (draft.soundId === s.id ? ' on' : '') + '\" data-sound=\"' + s.id + '\" data-url=\"' + (s.url || '') + '\"><b>' + escapeHtml(s.label) + '</b><small>' + escapeHtml(s.artist) + '</small>' + (s.url ? ' <i class=\"fas fa-play\"></i>' : '') + '</button>';
             });
             html += '</div></div>';
 
-            html += '</div>'; // left
+            html += '</div>';
 
-            html += '<div class="hshs-compose-right">';
-            html += '<div class="hshs-section"><label>Class tag</label><p class="hshs-hint">Who this moment belongs to (S1–S6, club, or campus).</p><div class="hshs-chips">';
+            html += '<div class=\"hshs-compose-right\">';
+            html += '<div class=\"hshs-section\"><label>Class tag</label><p class=\"hshs-hint\">Who this moment belongs to (S1–S6, club, or campus).</p><div class=\"hshs-chips\">';
             CLASS_TAGS.forEach(function (c) {
-                html += '<button type="button" class="hshs-chip' + (draft.classTag === c ? ' on' : '') + '" data-class="' + c + '">' + c + '</button>';
+                html += '<button type=\"button\" class=\"hshs-chip' + (draft.classTag === c ? ' on' : '') + '\" data-class=\"' + c + '\">' + c + '</button>';
             });
             html += '</div></div>';
 
-            html += '<div class="hshs-section"><label>Show this on</label><p class="hshs-hint">Pick every page that should carry this file.</p><div class="hshs-dest-grid">';
+            html += '<div class=\"hshs-section hshs-dest-section\"><label>Where should this appear?</label>';
+            html += '<p class=\"hshs-hint\">Tap every page that should show this media. At least one is required.</p>';
+            html += '<div class=\"hshs-dest-toolbar\">';
+            html += '<button type=\"button\" class=\"hshs-dest-tool\" data-dest-action=\"all\">Select all</button>';
+            html += '<button type=\"button\" class=\"hshs-dest-tool\" data-dest-action=\"clear\">Clear</button>';
+            html += '<span class=\"hshs-dest-count\">' + draft.destinations.length + ' selected</span>';
+            html += '</div>';
+            html += '<div class=\"hshs-dest-grid\">';
             DESTINATIONS.filter(function (d) { return d.kinds.indexOf(draft.kind) !== -1; }).forEach(function (d) {
                 var on = draft.destinations.indexOf(d.id) !== -1;
-                html += '<button type="button" class="hshs-dest' + (on ? ' on' : '') + '" data-dest="' + d.id + '"><span><b>' + escapeHtml(d.label) + '</b><small>' + escapeHtml(d.hint) + '</small></span>' + (on ? '<i class="fas fa-check"></i>' : '') + '</button>';
+                html += '<button type=\"button\" class=\"hshs-dest' + (on ? ' on' : '') + '\" data-dest=\"' + d.id + '\" aria-pressed=\"' + (on ? 'true' : 'false') + '\">';
+                html += '<span class=\"hshs-dest-ico\"><i class=\"fas ' + (d.icon || 'fa-file') + '\"></i></span>';
+                html += '<span class=\"hshs-dest-copy\"><b>' + escapeHtml(d.label) + '</b><small>' + escapeHtml(d.hint) + '</small></span>';
+                html += (on ? '<i class=\"fas fa-check-circle hshs-dest-check\"></i>' : '<i class=\"far fa-circle hshs-dest-check\"></i>');
+                html += '</button>';
             });
-            html += '</div></div>';
+            html += '</div>';
+            if (!draft.destinations.length) {
+                html += '<p class=\"hshs-upload-error\">Pick at least one page so students can find this moment.</p>';
+            } else {
+                html += '<p class=\"hshs-dest-summary\">Will show on: <strong>' + draft.destinations.map(function (id) {
+                    var row = DESTINATIONS.find(function (x) { return x.id === id; });
+                    return row ? row.label : id;
+                }).join(', ') + '</strong></p>';
+            }
+            html += '</div>';
 
-            // caption input
-            html += '<div class="hshs-section"><label>Caption</label><textarea id="hshsCaption" rows="3" placeholder="What is this moment?">' + escapeHtml(draft.caption || '') + '</textarea></div>';
+            html += '<div class=\"hshs-section\"><label>Caption</label><textarea id=\"hshsCaption\" rows=\"3\" placeholder=\"What is this moment?\">' + escapeHtml(draft.caption || '') + '</textarea></div>';
 
-            // destinations count + post button
-            html += '<div class="hshs-compose-actions"><button type="button" class="hshs-post-btn" id="hshsPublish"' + (!draft.destinations.length ? ' disabled' : '') + '>Post to ' + draft.destinations.length + ' page' + (draft.destinations.length === 1 ? '' : 's') + '</button></div>';
+            html += '<div class=\"hshs-compose-actions\"><button type=\"button\" class=\"hshs-post-btn\" id=\"hshsPublish\"' + (!draft.destinations.length ? ' disabled' : '') + '>Post to ' + draft.destinations.length + ' page' + (draft.destinations.length === 1 ? '' : 's') + '</button></div>';
 
-            html += '</div>'; // right
-
+            html += '</div>';
             html += '</div>';
         }
 
         root.innerHTML = html;
 
-        // Wire up controls
         var back = document.getElementById('hshsUploadBack');
         if (back) back.onclick = function () {
             if (step === 'source') close();
             else { stopCam(); step = 'source'; render(); }
         };
 
-        root.querySelectorAll('[data-action="library"]').forEach(function (b) {
+        root.querySelectorAll('[data-action=\"library\"]').forEach(function (b) {
             b.onclick = function () { document.getElementById('hshsUploadFile').click(); };
         });
-        root.querySelectorAll('[data-action="photo"]').forEach(function (b) {
+        root.querySelectorAll('[data-action=\"photo\"]').forEach(function (b) {
             b.onclick = function () { startCamera('photo'); };
         });
-        root.querySelectorAll('[data-action="video"]').forEach(function (b) {
+        root.querySelectorAll('[data-action=\"video\"]').forEach(function (b) {
             b.onclick = function () { startCamera('video'); };
         });
+        root.querySelectorAll('[data-action=\"flip\"]').forEach(function (b) {
+            b.onclick = function () {
+                facing = facing === 'environment' ? 'user' : 'environment';
+                startCamera(draft.kind === 'video' ? 'video' : 'photo');
+            };
+        });
+        root.querySelectorAll('[data-action=\"snap\"]').forEach(function (b) { b.onclick = captureStill; });
+        root.querySelectorAll('[data-action=\"record\"]').forEach(function (b) { b.onclick = toggleRecord; });
 
+        var fileInput = document.getElementById('hshsUploadFile');
+        if (fileInput) fileInput.onchange = function () {
+            var f = fileInput.files && fileInput.files[0];
+            if (f) handleFile(f);
+        };
         var drop = document.getElementById('hshsUploadDrop');
-        var file = document.getElementById('hshsUploadFile');
         if (drop) {
-            drop.addEventListener('dragover', function (e) { e.preventDefault(); drop.classList.add('drag-over'); });
-            drop.addEventListener('dragleave', function () { drop.classList.remove('drag-over'); });
-            drop.addEventListener('drop', function (e) { e.preventDefault(); drop.classList.remove('drag-over'); var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) handleFile(f); });
-            drop.addEventListener('click', function () { if (file) file.click(); });
+            drop.ondragover = function (e) { e.preventDefault(); drop.classList.add('on'); };
+            drop.ondragleave = function () { drop.classList.remove('on'); };
+            drop.ondrop = function (e) {
+                e.preventDefault(); drop.classList.remove('on');
+                var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                if (f) handleFile(f);
+            };
         }
-        if (file) file.onchange = function (e) { var f = e.target.files && e.target.files[0]; if (!f) return; handleFile(f); };
 
-        root.querySelectorAll('[data-action="flip"]').forEach(function (b) { b.onclick = function () { facing = facing === 'user' ? 'environment' : 'user'; startCamera(draft.kind === 'video' ? 'video' : 'photo'); }; });
-        root.querySelectorAll('[data-action="snap"]').forEach(function (b) { b.onclick = captureStill; });
-        root.querySelectorAll('[data-action="record"]').forEach(function (b) { b.onclick = toggleRecord; });
-
-        root.querySelectorAll('[data-filter]').forEach(function (b) { b.onclick = function () { draft.filter = b.getAttribute('data-filter'); render(); }; });
-
-        // wire filter thumbs
-        var filterThumbs = root.querySelectorAll('.hshs-filter-thumb');
-        filterThumbs.forEach(function (btn) {
+        root.querySelectorAll('.hshs-filter-thumb').forEach(function (btn) {
             btn.addEventListener('click', function () { draft.filter = btn.getAttribute('data-filter'); render(); });
         });
 
-        // sound picker: play preview when available
         var audio = document.getElementById('hshsSoundPreview');
         if (!audio) {
             audio = document.createElement('audio'); audio.id = 'hshsSoundPreview'; audio.style.display = 'none'; document.body.appendChild(audio);
@@ -423,7 +474,7 @@
             b.onclick = function () {
                 var sid = b.getAttribute('data-sound');
                 var url = b.getAttribute('data-url');
-                if (draft.soundId === sid) { // toggle off
+                if (draft.soundId === sid) {
                     draft.soundId = 'none';
                     if (audio) { audio.pause(); audio.currentTime = 0; }
                 } else {
@@ -435,7 +486,24 @@
         });
 
         root.querySelectorAll('[data-class]').forEach(function (b) { b.onclick = function () { draft.classTag = b.getAttribute('data-class'); render(); }; });
-        root.querySelectorAll('[data-dest]').forEach(function (b) { b.onclick = function () { var id = b.getAttribute('data-dest'); var i = draft.destinations.indexOf(id); if (i >= 0) draft.destinations.splice(i, 1); else draft.destinations.push(id); render(); }; });
+        root.querySelectorAll('[data-dest]').forEach(function (b) {
+            b.onclick = function () {
+                var id = b.getAttribute('data-dest');
+                var i = draft.destinations.indexOf(id);
+                if (i >= 0) draft.destinations.splice(i, 1);
+                else draft.destinations.push(id);
+                render();
+            };
+        });
+        root.querySelectorAll('[data-dest-action]').forEach(function (b) {
+            b.onclick = function () {
+                var action = b.getAttribute('data-dest-action');
+                var allowed = DESTINATIONS.filter(function (d) { return d.kinds.indexOf(draft.kind) !== -1; }).map(function (d) { return d.id; });
+                if (action === 'all') draft.destinations = allowed.slice();
+                else if (action === 'clear') draft.destinations = [];
+                render();
+            };
+        });
 
         var cap = document.getElementById('hshsCaption');
         if (cap) cap.oninput = function () { draft.caption = cap.value; };
