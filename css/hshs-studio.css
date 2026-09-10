@@ -12,9 +12,10 @@ body.studio-open .navbar{opacity:0;pointer-events:none}
 /* ===== CAMERA ===== */
 .hshs-cam{position:absolute;inset:0;display:flex;flex-direction:column}
 .hshs-cam-stage{position:absolute;inset:0;background:#0a0a0a;overflow:hidden}
-.hshs-cam-stage video{
-  width:100%;height:100%;object-fit:cover;
-  transform:scaleX(1);
+.hshs-cam-stage video.hshs-cam-raw{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.hshs-cam-stage .hshs-cam-canvas{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:block;
 }
 .hshs-cam-recbar{
   position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.15);z-index:5;
@@ -116,6 +117,44 @@ body.studio-open .navbar{opacity:0;pointer-events:none}
 .hshs-cam-modes button.is-on{
   color:#fff;
   text-shadow:0 0 12px rgba(255,255,255,.4);
+}
+
+/* Real-time filter pipeline */
+.hshs-filter-name{
+  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
+  font-size:28px;font-weight:800;letter-spacing:.04em;
+  text-shadow:0 2px 16px rgba(0,0,0,.7);
+  pointer-events:none;opacity:0;transition:opacity .25s;
+  z-index:5;
+}
+.hshs-filter-name.is-flash{opacity:1}
+
+.hshs-live-filters{
+  position:absolute;z-index:12;left:0;right:0;
+  bottom:calc(118px + env(safe-area-inset-bottom));
+  display:flex;gap:12px;overflow-x:auto;padding:8px 16px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  background:linear-gradient(0deg,rgba(0,0,0,.55),transparent);
+}
+.hshs-live-filters::-webkit-scrollbar{display:none}
+.hshs-live-filter{
+  flex:0 0 auto;border:0;background:transparent;color:#fff;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;padding:0;
+}
+.hshs-live-swatch{
+  width:56px;height:56px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.35);
+  background:linear-gradient(135deg,#f472b6,#fbbf24 40%,#34d399 70%,#60a5fa);
+  box-shadow:0 4px 12px rgba(0,0,0,.35);
+}
+.hshs-live-filter.is-on .hshs-live-swatch{
+  border-color:#fff;border-width:3px;
+  box-shadow:0 0 0 2px rgba(255,255,255,.3),0 4px 16px rgba(0,0,0,.45);
+}
+.hshs-live-filter em{
+  font-style:normal;font-size:10px;font-weight:700;
+  max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 
 /* ===== CREATE PIN ===== */
