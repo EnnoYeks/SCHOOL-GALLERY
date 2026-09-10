@@ -29,7 +29,7 @@
   }
 
   function ver(url) {
-    var v = '260910filters';
+    var v = '260910stable';
     return url + (url.indexOf('?') === -1 ? '?' : '&') + 'v=' + v;
   }
 
@@ -80,6 +80,7 @@
     try { await loadScript(ver(base + 'storage.js'), 'hshs-storage'); } catch (e) { console.warn('[HSHS] Storage layer unavailable', e); }
     try { await loadScript(ver(base + 'hshs-upload.js'), 'hshs-upload'); } catch (e) {}
     try { await loadScript(ver(base + 'hshs-filter-engine.js'), 'hshs-filter-engine'); } catch (e) {}
+    try { await loadScript(ver(base + 'hshs-studio-stable.js'), 'hshs-studio-stable'); } catch (e) {}
     try { await loadScript(ver(base + 'core/store-sanitizer.js'), 'hshs-store-sanitizer'); } catch (e) { console.warn('[HSHS] Store sanitizer unavailable', e); }
     try { await loadScript(ver(base + 'components/loading.js'), 'hshs-comp-loading'); } catch (e) {}
     try { await loadScript(ver(base + 'components/error.js'), 'hshs-comp-error'); } catch (e) {}
