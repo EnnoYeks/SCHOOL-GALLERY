@@ -1,60 +1,60 @@
 (function () {
   'use strict';
-  if (window.__hshsFoundationBooted) return;
-  window.__hshsFoundationBooted = true;
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
-  var ASSET_VER = window.__hshsAssetVer || '260910backend';
-  function assetBase() {
-    var scripts = document.querySelectorAll('script[src]');
-    for (var i = 0; i < scripts.length; i++) {
-      var src = scripts[i].getAttribute('src') || '';
-      if (src.indexOf('core/bootstrap.js') !== -1) return src.replace(/js\/core\/bootstrap\.js.*$/, 'js/');
-      if (src.indexOf('navigation.js') !== -1 && src.indexOf('mobile-navigation') === -1) return src.replace(/js\/navigation\.js.*$/, 'js/');
-    }
+
+  function scriptBase() {
+    try {
+      var scripts = document.querySelectorAll('script[src]');
+      for (var i = 0; i < scripts.length; i++) {
+        var src = scripts[i].getAttribute('src') || '';
+        if (src.indexOf('core/bootstrap') !== -1) {
+          return src.replace(/core\/bootstrap\.js.*$/, '');
+        }
+      }
+    } catch (e) {}
     return location.pathname.indexOf('/index/') !== -1 ? '../js/' : 'js/';
   }
+
   function loadScript(src, id) {
     return new Promise(function (resolve, reject) {
-      if (id && document.getElementById(id)) { resolve(); return; }
+      if (id && document.getElementById(id)) return resolve();
       var s = document.createElement('script');
       if (id) s.id = id;
-      s.src = src; s.async = false;
+      s.src = src;
+      s.async = false;
       s.onload = function () { resolve(); };
-      s.onerror = function () { reject(new Error('Failed to load ' + src)); };
+      s.onerror = function () { reject(new Error('Failed ' + src)); };
       document.head.appendChild(s);
     });
   }
-  function ver(url) { return url + (url.indexOf('?') === -1 ? '?v=' + ASSET_VER : ''); }
-  var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
-  function ensureFonts() {
-    if (document.getElementById('hshs-google-fonts')) return;
-    function add(rel, href, id, extra) {
-      if (id && document.getElementById(id)) return;
-      var l = document.createElement('link');
-      if (id) l.id = id;
-      l.rel = rel;
-      l.href = href;
-      if (extra) { for (var k in extra) l.setAttribute(k, extra[k]); }
-      document.head.appendChild(l);
-    }
-    add('preconnect', 'https://fonts.googleapis.com', 'hshs-gf-pre');
-    add('preconnect', 'https://fonts.gstatic.com', 'hshs-gf-pre2', {crossorigin: ''});
-    add('stylesheet', 'https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap', 'hshs-google-fonts');
-    var cssBase = assetBase().replace(/js\/?$/, 'css/');
-    add('stylesheet', ver(cssBase + 'hshs-fonts.css'), 'hshs-fonts-css');
+
+  function ver(url) {
+    var v = '260910filters';
+    return url + (url.indexOf('?') === -1 ? '?' : '&') + 'v=' + v;
   }
-  function ensureClassicCss() {
-    if (document.getElementById('hshs-classic-css')) return;
-    var cssBase = assetBase().replace(/js\/?$/, 'css/');
-    var link = document.createElement('link');
-    link.id = 'hshs-classic-css';
-    link.rel = 'stylesheet';
-    link.href = ver(cssBase + 'hshs-classic.css');
-    document.head.appendChild(link);
+
+  function add(rel, href, id, extra) {
+    if (id && document.getElementById(id)) return;
+    var l = document.createElement('link');
+    if (id) l.id = id;
+    l.rel = rel;
+    l.href = href;
+    if (extra) Object.keys(extra).forEach(function (k) { l.setAttribute(k, extra[k]); });
+    document.head.appendChild(l);
   }
+
   async function boot() {
-    var base = assetBase();
-    try { ensureFonts(); ensureClassicCss(); } catch (e) {}
+    var base = scriptBase();
+    var cssBase = base.replace(/js\/?$/, 'css/');
+    try {
+      add('preconnect', 'https://fonts.googleapis.com', 'hshs-gf-pre');
+      add('preconnect', 'https://fonts.gstatic.com', 'hshs-gf-pre2', { crossorigin: '' });
+      add('stylesheet', 'https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap', 'hshs-google-fonts');
+      add('stylesheet', ver(cssBase + 'hshs-fonts.css'), 'hshs-fonts-css');
+    } catch (e) {}
+
+    var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
+
     try {
       await loadScript(ver(base + 'core/app.js'), 'hshs-core-app');
       await loadScript(ver(base + 'core/registry.js'), 'hshs-core-registry');
@@ -69,21 +69,24 @@
       await loadScript(ver(base + 'router/history.js'), 'hshs-router-history');
       await loadScript(ver(base + 'router/router.js'), 'hshs-router-main');
       try { await loadScript(ver(base + 'hshs-labels.js'), 'hshs-labels'); } catch (e) {}
-    } catch (err) {
-      console.error('[HSHS] Critical foundation failure', err);
-      if (window.HshsApp) window.HshsApp.reportError(err, 'foundation.critical');
+    } catch (e) {
+      console.error('[HSHS] Core boot failed', e);
       document.documentElement.classList.add('hshs-js-failed');
       document.documentElement.classList.remove('hshs-js-booting');
       return;
     }
+
     try { await loadScript(ver(base + 'hshs-store.js'), 'hshs-store'); } catch (e) { console.warn('[HSHS] Data store unavailable', e); }
     try { await loadScript(ver(base + 'storage.js'), 'hshs-storage'); } catch (e) { console.warn('[HSHS] Storage layer unavailable', e); }
+    try { await loadScript(ver(base + 'hshs-upload.js'), 'hshs-upload'); } catch (e) {}
+    try { await loadScript(ver(base + 'hshs-filter-engine.js'), 'hshs-filter-engine'); } catch (e) {}
     try { await loadScript(ver(base + 'core/store-sanitizer.js'), 'hshs-store-sanitizer'); } catch (e) { console.warn('[HSHS] Store sanitizer unavailable', e); }
     try { await loadScript(ver(base + 'components/loading.js'), 'hshs-comp-loading'); } catch (e) {}
     try { await loadScript(ver(base + 'components/error.js'), 'hshs-comp-error'); } catch (e) {}
     try { await loadScript(ver(base + 'components/shared-ui.js'), 'hshs-comp-shared'); } catch (e) {}
     try { await loadScript(ver(base + 'core/data.js'), 'hshs-core-data'); } catch (e) {}
     try { await loadScript(ver(base + 'core/lifecycle.js'), 'hshs-core-lifecycle'); } catch (e) {}
+
     if (!window.HshsRender || !window.HshsUI || !window.HshsShell) {
       console.error('[HSHS] Foundation incomplete after load');
       document.documentElement.classList.add('hshs-js-failed');
