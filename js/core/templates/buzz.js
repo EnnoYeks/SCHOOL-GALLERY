@@ -11,9 +11,9 @@
           <button class="vibe-switch" type="button" data-buzz-action="feed" data-feed="following" role="tab">Following</button>
           <button class="vibe-switch is-on" type="button" data-buzz-action="feed" data-feed="discover" role="tab" aria-selected="true">Discover</button>
         </div>
-        <a class="buzz-studio" href="videos.html" title="HSHS Studio" aria-label="Open HSHS Studio">
-          <i class="fas fa-clapperboard"></i>
-        </a>
+        <button type="button" class="buzz-studio" data-buzz-action="upload" title="Post to Vibe" aria-label="Post a Vibe clip">
+          <i class="fas fa-plus"></i>
+        </button>
       </header>
 
       <section class="buzz-feed" id="buzzFeed" aria-live="polite">
