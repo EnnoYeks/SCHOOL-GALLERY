@@ -1,0 +1,106 @@
+/* HSHS Studio compose layout */
+@media (max-width: 1024px) {
+  .hshs-compose {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding-bottom: 0 !important;
+  }
+  .hshs-compose-left, .hshs-compose-right { display: contents; }
+  .hshs-compose-card {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 12px;
+    align-items: stretch;
+    padding: 12px;
+    border-radius: 18px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+  }
+  .hshs-preview-compact {
+    width: 96px; height: 96px; max-width: 96px; aspect-ratio: 1;
+    border-radius: 14px; margin: 0; overflow: hidden;
+  }
+  .hshs-preview-compact img { width: 100%; height: 100%; object-fit: cover; }
+  .hshs-compose-card #hshsCaption {
+    margin: 0; min-height: 96px; height: 100%;
+    border: 0; background: transparent; padding: 4px 2px;
+    font-size: 0.95rem; resize: none; width: 100%;
+    color: inherit; font: inherit;
+  }
+  .hshs-section-tight { margin: 0; }
+  .hshs-section-tight label { margin-bottom: 6px; }
+  .hshs-dest-list { display: flex; flex-direction: column; gap: 6px; }
+  .hshs-dest-row {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; text-align: left;
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-secondary);
+    border-radius: 14px; padding: 10px 12px; color: inherit;
+  }
+  .hshs-dest-row .hshs-dest-ico {
+    flex: 0 0 34px; width: 34px; height: 34px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: rgba(29,78,216,.1); color: var(--primary-color); font-size: 0.9rem;
+  }
+  .hshs-dest-row .hshs-dest-copy { flex: 1; min-width: 0; }
+  .hshs-dest-row b { display: block; font-size: 0.9rem; }
+  .hshs-dest-row small { display: block; font-size: 0.7rem; color: var(--text-secondary); margin-top: 1px; }
+  .hshs-dest-row.on {
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 10%, var(--bg-secondary));
+  }
+  .hshs-dest-row.on .hshs-dest-ico {
+    background: linear-gradient(145deg, #1d4ed8, #0ea5e9); color: #fff;
+  }
+  .hshs-dest-row.on .hshs-dest-check { color: var(--primary-color); opacity: 1; }
+  .hshs-filter-row, .hshs-sound-row {
+    display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hshs-filter-thumb {
+    flex: 0 0 64px; border: 1.5px solid var(--border-color);
+    background: var(--bg-secondary); border-radius: 12px; padding: 4px; color: inherit;
+  }
+  .hshs-filter-thumb img {
+    width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; display: block;
+  }
+  .hshs-filter-thumb small { display: block; text-align: center; font-size: 0.65rem; margin-top: 2px; }
+  .hshs-filter-thumb.on { border-color: var(--primary-color); }
+  .hshs-sound {
+    flex: 0 0 auto; border: 1px solid var(--border-color);
+    background: var(--bg-secondary); border-radius: 999px;
+    padding: 8px 12px; color: inherit; font-size: 0.8rem;
+  }
+  .hshs-sound.on {
+    background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+    color: #fff; border-color: transparent;
+  }
+  .hshs-sound b { font-weight: 700; }
+  .hshs-compose-spacer { height: 88px; flex: 0 0 88px; }
+  .hshs-compose-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 1410;
+    padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--bg-primary) 92%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--border-color);
+  }
+  .hshs-compose-bar .hshs-post-btn { margin: 0; width: 100%; }
+  .hshs-upload-progress {
+    position: fixed; left: 16px; right: 16px; bottom: calc(90px + env(safe-area-inset-bottom));
+    z-index: 1500; padding: 12px 14px; border-radius: 14px;
+    background: var(--bg-primary); border: 1px solid var(--border-color);
+    box-shadow: 0 12px 32px rgba(0,0,0,.18);
+  }
+  .hshs-upload-progress .bar {
+    height: 6px; border-radius: 99px; background: var(--bg-secondary); overflow: hidden;
+  }
+  .hshs-upload-progress .fill {
+    height: 100%; background: linear-gradient(90deg, #1d4ed8, #0ea5e9); width: 0%;
+    transition: width .25s ease;
+  }
+  .hshs-upload-progress .label {
+    margin-top: 8px; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);
+  }
+}
