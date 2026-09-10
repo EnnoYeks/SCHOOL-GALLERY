@@ -277,6 +277,74 @@
         background: var(--primary-color); color: #fff; font-weight: 800; font-size: 0.95rem;
     }
     .hshs-post-btn:disabled { opacity: 0.45; }
+
+    /* HSHS Studio — campus look */
+    .hshs-upload-studio {
+        background:
+            radial-gradient(900px 500px at 10% -10%, rgba(29,78,216,.22), transparent 55%),
+            radial-gradient(700px 420px at 100% 0%, rgba(234,179,8,.16), transparent 50%),
+            var(--bg-primary);
+    }
+    .hshs-studio-brand {
+        display: flex; flex-direction: column; align-items: center; gap: 2px; line-height: 1.15;
+    }
+    .hshs-studio-brand strong {
+        font-size: 1.08rem; letter-spacing: .02em;
+        background: linear-gradient(90deg, #1d4ed8, #0ea5e9 55%, #eab308);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+    }
+    .hshs-studio-brand small {
+        font-size: 0.72rem; font-weight: 600; color: var(--text-secondary);
+        letter-spacing: .04em; text-transform: uppercase;
+    }
+    .hshs-studio-hero {
+        display: flex; flex-direction: column; gap: 8px;
+        padding: 14px 14px 12px; border-radius: 18px;
+        background:
+            linear-gradient(135deg, rgba(29,78,216,.14), rgba(14,165,233,.1) 50%, rgba(234,179,8,.12));
+        border: 1px solid color-mix(in srgb, var(--primary-color) 22%, var(--border-color));
+    }
+    .hshs-studio-badge {
+        align-self: flex-start; font-size: 0.68rem; font-weight: 800;
+        letter-spacing: .08em; text-transform: uppercase;
+        padding: 4px 10px; border-radius: 999px;
+        background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+        color: #fff;
+    }
+    .hshs-studio-hero .hshs-upload-lead { margin: 0; color: var(--text-primary); font-size: 0.92rem; line-height: 1.4; }
+    .hshs-source-grid { display: flex; flex-direction: column; gap: 10px; }
+    .hshs-source-card {
+        box-shadow: 0 6px 18px rgba(15,23,42,.06);
+        transition: transform .15s ease, border-color .15s ease;
+    }
+    .hshs-source-card:active { transform: scale(0.98); }
+    .hshs-source-card .ico {
+        background: linear-gradient(145deg, #1d4ed8, #0ea5e9);
+        color: #fff;
+    }
+    .hshs-drag-drop {
+        margin-top: 4px; padding: 16px; border-radius: 16px; text-align: center;
+        border: 1.5px dashed color-mix(in srgb, var(--primary-color) 35%, var(--border-color));
+        color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;
+        background: color-mix(in srgb, var(--primary-color) 5%, transparent);
+    }
+    .hshs-drag-drop.on {
+        border-color: var(--primary-color);
+        background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    }
+    .hshs-post-btn {
+        background: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 55%, #0284c7 100%);
+        box-shadow: 0 10px 24px rgba(29,78,216,.28);
+        letter-spacing: .01em;
+    }
+    .hshs-chip.on {
+        background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+        border-color: transparent;
+    }
+    .hshs-dest.on .hshs-dest-ico {
+        background: linear-gradient(145deg, #1d4ed8, #0ea5e9);
+    }
 }
 
 @media (min-width: 1025px) {
