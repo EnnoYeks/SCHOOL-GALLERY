@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260911ga1';
+var HSHS_ASSET_VER = '260911evt1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -172,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-account-js', 'hshs-account.js');
     add('hshs-auth-bridge-js', 'hshs-auth-bridge.js');
     add('hshs-analytics-js', 'hshs-analytics.js');
+    add('hshs-analytics-hooks-js', 'hshs-analytics-hooks.js');
     add('hshs-profile-edit-link-js', 'hshs-profile-edit-link.js');
     add('hshs-settings-js', 'hshs-settings.js');
     add('hshs-school-js', 'hshs-school.js');
