@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+  <meta name="theme-color" content="#050d1c">
+  <title>Edit profile · HSHS World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/hshs-edit-profile.css?v=260911ep1">
+</head>
+<body class="ep-page ep-body">
+  <header class="ep-top">
+    <a class="ep-icon-btn" href="profile.html" id="epBack" aria-label="Back"><i class="fas fa-arrow-left"></i></a>
+    <h1>Edit profile</h1>
+    <button type="button" class="ep-save-top" data-ep-save>Save</button>
+  </header>
+
+  <main class="ep-wrap">
+    <section class="ep-hero">
+      <div class="ep-cover" id="epCover">
+        <div class="ep-cover-actions">
+          <button type="button" class="ep-chip-btn" id="epChangeCover"><i class="fas fa-image"></i> Cover</button>
+        </div>
+      </div>
+      <div class="ep-avatar-wrap">
+        <img class="ep-avatar" id="epAvatarImg" alt="" hidden>
+        <div class="ep-avatar-fallback" id="epAvatarFall">?</div>
+        <div class="ep-avatar-actions">
+          <button type="button" class="ep-chip-btn" id="epChangeAvatar"><i class="fas fa-camera"></i> Photo</button>
+          <button type="button" class="ep-chip-btn" id="epRemoveAvatar">Remove</button>
+        </div>
+      </div>
+      <input type="file" id="epAvatarFile" class="ep-hidden" accept="image/*">
+      <input type="file" id="epCoverFile" class="ep-hidden" accept="image/*">
+    </section>
+
+    <section class="ep-section">
+      <h2><i class="fas fa-eye"></i> Preview</h2>
+      <p class="ep-lead">How others will see you on campus.</p>
+      <div class="ep-preview">
+        <img id="epPrevImg" alt="">
+        <div>
+          <strong id="epPrevName">Your name</strong>
+          <small id="epPrevMeta">@username · Class</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="ep-section">
+      <h2><i class="fas fa-id-badge"></i> Identity</h2>
+      <p class="ep-lead">Core details used across HSHS World.</p>
+      <label class="ep-field"><span>Full name</span><input id="epFullName" type="text" maxlength="80" placeholder="As on school records" autocomplete="name"></label>
+      <div class="ep-grid2">
+        <label class="ep-field"><span>Username</span><input id="epUsername" type="text" maxlength="24" placeholder="letters, numbers, . _" autocapitalize="none"></label>
+        <label class="ep-field"><span>Pronouns <em>optional</em></span><input id="epPronouns" type="text" maxlength="24" placeholder="e.g. she/her"></label>
+      </div>
+      <label class="ep-field"><span>Headline <em>optional</em></span><input id="epHeadline" type="text" maxlength="80" placeholder="e.g. S4 STEM · Prefects Board"></label>
+      <label class="ep-field"><span>Bio <em id="epBioCount">0/160</em></span><textarea id="epBio" maxlength="160" placeholder="A short intro for your school community"></textarea></label>
+    </section>
+
+    <section class="ep-section">
+      <h2><i class="fas fa-graduation-cap"></i> School</h2>
+      <p class="ep-lead">Helps classmates find and tag you correctly.</p>
+      <div class="ep-grid2">
+        <label class="ep-field"><span>Student ID</span><input id="epStudentId" type="text" placeholder="HSHS-…"></label>
+        <label class="ep-field"><span>Class / year</span><select id="epClassYear"></select></label>
+      </div>
+      <label class="ep-field"><span>House</span><select id="epHouse"><option value="">—</option></select></label>
+      <label class="ep-field"><span>Interests</span><div class="ep-chips" id="epInterests"></div></label>
+    </section>
+
+    <section class="ep-section">
+      <h2><i class="fas fa-address-card"></i> Contact & links</h2>
+      <p class="ep-lead">Control what appears on your public profile.</p>
+      <label class="ep-field"><span>Email <em>from account</em></span><input id="epEmail" type="email" disabled></label>
+      <div class="ep-grid2">
+        <label class="ep-field"><span>Phone</span><input id="epPhone" type="tel" placeholder="+256 …"></label>
+        <label class="ep-field"><span>WhatsApp</span><input id="epWhatsapp" type="tel" placeholder="+256 …"></label>
+      </div>
+      <label class="ep-field"><span>Location</span><input id="epLocation" type="text" placeholder="Campus / hometown"></label>
+      <label class="ep-field"><span>Website</span><input id="epWebsite" type="url" placeholder="https://"></label>
+      <div class="ep-grid2">
+        <label class="ep-field"><span>Instagram</span><input id="epInstagram" type="text" placeholder="@handle"></label>
+        <label class="ep-field"><span>TikTok</span><input id="epTiktok" type="text" placeholder="@handle"></label>
+      </div>
+    </section>
+
+    <section class="ep-section">
+      <h2><i class="fas fa-shield-halved"></i> Privacy & visibility</h2>
+      <p class="ep-lead">Choose what classmates can see about you.</p>
+      <div class="ep-toggle-row"><div><strong>Show email on profile</strong><small>Only for signed-in students</small></div><label class="ep-switch"><input type="checkbox" id="epShowEmail"><span></span></label></div>
+      <div class="ep-toggle-row"><div><strong>Show phone number</strong><small>Visible on your profile card</small></div><label class="ep-switch"><input type="checkbox" id="epShowPhone"><span></span></label></div>
+      <div class="ep-toggle-row"><div><strong>Show student ID</strong><small>Useful for class lists & tags</small></div><label class="ep-switch"><input type="checkbox" id="epShowStudentId" checked><span></span></label></div>
+      <div class="ep-toggle-row"><div><strong>Private account</strong><small>Approve followers before they see posts</small></div><label class="ep-switch"><input type="checkbox" id="epPrivateAccount"><span></span></label></div>
+      <div class="ep-toggle-row"><div><strong>Allow messages</strong><small>Classmates can start a chat with you</small></div><label class="ep-switch"><input type="checkbox" id="epAllowMessages" checked><span></span></label></div>
+      <div class="ep-toggle-row"><div><strong>Show activity</strong><small>Likes & comments appear in activity</small></div><label class="ep-switch"><input type="checkbox" id="epShowActivity" checked><span></span></label></div>
+    </section>
+
+    <section class="ep-section">
+      <h2><i class="fas fa-key"></i> Security</h2>
+      <p class="ep-lead">Password changes use your login email. Open Sign in → Forgot password, or contact school admin.</p>
+      <a class="ep-chip-btn" href="login.html" style="display:inline-flex;text-decoration:none">Go to sign in</a>
+    </section>
+
+    <p id="epMsg" class="ep-msg" role="status"></p>
+    <div class="ep-footer-actions">
+      <button type="button" class="ep-btn-ghost" onclick="location.href='profile.html'">Cancel</button>
+      <button type="button" class="ep-btn-primary" data-ep-save>Save profile</button>
+    </div>
+
+    <section class="ep-section ep-danger-zone" style="margin-top:18px">
+      <h2><i class="fas fa-triangle-exclamation"></i> Account</h2>
+      <p class="ep-lead">Signing out clears this device session only.</p>
+      <button type="button" class="ep-link-danger" id="epSignOut">Sign out of HSHS World</button>
+    </section>
+  </main>
+
+  <script type="module" src="../js/config.js?v=260911ep1"></script>
+  <script type="module" src="../js/hshs-auth-api.js?v=260911ep1"></script>
+  <script src="../js/hshs-edit-profile.js?v=260911ep1"></script>
+  <script>
+    document.getElementById('epSignOut')?.addEventListener('click', async function () {
+      try { if (window.HshsAuthApi && window.HshsAuthApi.signOutUser) await window.HshsAuthApi.signOutUser(); } catch (e) {}
+      try { localStorage.removeItem('userProfile'); localStorage.removeItem('hshsUid'); } catch (e) {}
+      location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>
