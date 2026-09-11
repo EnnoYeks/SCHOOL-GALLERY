@@ -1,6 +1,5 @@
 /**
- * HSHS upload context — wires bottom + to Studio and locks destination to current page section.
- * Loads after hshs-upload.js / mobile-shell.js.
+ * HSHS upload context — bottom + opens Studio; lock destination to current section.
  */
 (function () {
   if (window.__hshsUploadContext) return;
@@ -18,12 +17,27 @@
     'trending.html': 'trending'
   };
 
+  var lockedDest = null;
+  var names = {
+    gallery: 'Gallery', photos: 'Photos', buzz: 'Buzz', vibe: 'Vibe',
+    spotlight: 'Spotlight', memories: 'Memories', trending: 'Trending'
+  };
+
   function destinationFromPath(pathname) {
     var file = ((pathname || location.pathname).split('/').pop() || '').toLowerCase();
     return PAGE_DEST[file] || null;
   }
 
   window.__hshsUploadDestinationFromPath = destinationFromPath;
+
+  function applyBoardLock() {
+    if (!lockedDest) return;
+    var rows = document.querySelectorAll('.hshs-create-form .hshs-row[data-act="boards"]');
+    rows.forEach(function (row) {
+      var nice = names[lockedDest] || lockedDest;
+      row.outerHTML = '<div class="hshs-row hshs-row-locked"><span>Posting to</span><strong>' + nice + '</strong></div>';
+    });
+  }
 
   function openForPage(pathname) {
     var dest = destinationFromPath(pathname);
@@ -32,6 +46,7 @@
       console.warn('[upload-context] Studio not ready');
       return false;
     }
+    lockedDest = dest || null;
     if (dest) {
       var preferVideo = dest === 'vibe' || dest === 'buzz';
       open({
@@ -43,6 +58,8 @@
     } else {
       open();
     }
+    setTimeout(applyBoardLock, 80);
+    setTimeout(applyBoardLock, 400);
     return true;
   }
 
@@ -53,23 +70,14 @@
     if (typeof orig !== 'function' || orig.__hshsContextWrapped) return;
     function wrapped(opts) {
       opts = opts || {};
+      if (opts.lockDestinations || opts.fromPage) {
+        lockedDest = opts.fromPage || (opts.destinations && opts.destinations[0]) || lockedDest;
+      } else if (!opts.destinations) {
+        lockedDest = null;
+      }
       var result = orig.call(this, opts);
-      try {
-        if (opts.lockDestinations || opts.fromPage) {
-          setTimeout(function hideBoardPicker() {
-            var rows = document.querySelectorAll('.hshs-create-form .hshs-row[data-act="boards"]');
-            rows.forEach(function (row) {
-              var label = (opts.fromPage || (opts.destinations && opts.destinations[0]) || 'this section');
-              var names = {
-                gallery: 'Gallery', photos: 'Photos', buzz: 'Buzz', vibe: 'Vibe',
-                spotlight: 'Spotlight', memories: 'Memories', trending: 'Trending'
-              };
-              var nice = names[label] || label;
-              row.outerHTML = '<div class="hshs-row hshs-row-locked"><span>Posting to</span><strong>' + nice + '</strong></div>';
-            });
-          }, 50);
-        }
-      } catch (e) {}
+      setTimeout(applyBoardLock, 80);
+      setTimeout(applyBoardLock, 400);
       return result;
     }
     wrapped.__hshsContextWrapped = true;
@@ -95,6 +103,21 @@
     e.stopPropagation();
     openForPage(location.pathname);
   }, true);
+
+  // When compose UI re-renders (after capture), re-apply lock
+  if (typeof MutationObserver !== 'undefined') {
+    var mo = new MutationObserver(function () {
+      if (lockedDest) applyBoardLock();
+    });
+    function watchStudio() {
+      var root = document.getElementById('hshsStudio');
+      if (root && !root.__hshsContextObserved) {
+        root.__hshsContextObserved = true;
+        mo.observe(root, { childList: true, subtree: true });
+      }
+    }
+    setInterval(watchStudio, 500);
+  }
 
   function boot() {
     enhanceOpen();
