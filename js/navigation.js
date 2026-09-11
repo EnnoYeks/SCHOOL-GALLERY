@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260911upload';
+var HSHS_ASSET_VER = '260911auth2';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-page-swipe-js', 'page-swipe.js');
     add('hshs-chat-spring-js', 'hshs-chat-spring.js');
     add('hshs-account-js', 'hshs-account.js');
+    add('hshs-auth-bridge-js', 'hshs-auth-bridge.js');
     add('hshs-settings-js', 'hshs-settings.js');
     add('hshs-school-js', 'hshs-school.js');
 })();
