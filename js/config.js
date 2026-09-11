@@ -20,7 +20,17 @@ const app = initializeApp(firebaseConfig);
 
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
-export const analytics = getAnalytics(app);
+
+// Analytics: only in browser; fail soft if blocked / unsupported
+let analytics = null;
+try {
+  if (typeof window !== "undefined") {
+    analytics = getAnalytics(app);
+  }
+} catch (e) {
+  console.warn("Analytics init skipped:", e && e.message);
+}
+export { analytics };
 
 export const CONFIG = {
   app: {
@@ -63,6 +73,9 @@ onAuthStateChanged(auth, function (user) {
   window.hshsAuthUser = user || null;
   window.hshsUid = user ? user.uid : (localStorage.getItem("guestId") || null);
   document.dispatchEvent(new CustomEvent("hshs:auth", { detail: { user: user || null } }));
+  if (window.HshsAnalytics && window.HshsAnalytics.setUser) {
+    window.HshsAnalytics.setUser(user || null);
+  }
 });
 
 signInAnonymously(auth).catch(function (err) {
