@@ -116,3 +116,106 @@ async function saveProfile(user, data) {
   profile.updatedAt = Date.now();
   return profile;
 }
+
+async function loadOrCreateProfile(user) {
+  if (!user) return null;
+  try {
+    var ref = doc(db(), "users", user.uid);
+    var snap = await getDoc(ref);
+    if (snap.exists()) {
+      var data = Object.assign({ uid: user.uid }, snap.data());
+      return data;
+    }
+    return saveProfile(user, {
+      fullName: user.displayName || "HSHS Student",
+      email: user.email || "",
+      photoURL: user.photoURL || "",
+      classYear: "Campus"
+    });
+  } catch (e) {
+    console.warn("[auth] loadOrCreateProfile", e);
+    return null;
+  }
+}
+
+async function signInWithEmail(email, password) {
+  return signInWithEmailAndPassword(appAuth(), email, password);
+}
+
+async function signUpWithEmail(email, password) {
+  return createUserWithEmailAndPassword(appAuth(), email, password);
+}
+
+async function signOutUser() {
+  try { localStorage.removeItem("userProfile"); } catch (e) {}
+  return signOut(appAuth());
+}
+
+async function sendPasswordReset(email) {
+  return sendPasswordResetEmail(appAuth(), String(email || "").trim());
+}
+
+async function activityForUser(uid, max) {
+  max = max || 40;
+  var out = { posts: [], photos: [], videos: [] };
+  if (!uid) return out;
+  try {
+    var postsQ = query(collection(db(), "posts"), where("authorId", "==", uid), limit(max));
+    var postsSnap = await getDocs(postsQ);
+    out.posts = postsSnap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+  } catch (e) { console.warn("[auth] activity posts", e); }
+  try {
+    var photosQ = query(collection(db(), "photos"), where("authorId", "==", uid), limit(max));
+    var photosSnap = await getDocs(photosQ);
+    out.photos = photosSnap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+  } catch (e) {}
+  try {
+    var videosQ = query(collection(db(), "videos"), where("authorId", "==", uid), limit(max));
+    var videosSnap = await getDocs(videosQ);
+    out.videos = videosSnap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+  } catch (e) {}
+  return out;
+}
+
+async function lookupUserFieldSafe(field, value) {
+  var v = String(value || "").trim();
+  if (field === "username") v = v.toLowerCase();
+  try {
+    var idx = await getDoc(doc(db(), "userIndex", field + "_" + v));
+    if (idx.exists()) {
+      var data = idx.data();
+      return { uid: data.uid, email: data.email };
+    }
+  } catch (e) {}
+  return lookupUserField(field, value);
+}
+
+window.HshsAuthApi = {
+  lookupUserField: lookupUserFieldSafe,
+  saveProfile: saveProfile,
+  loadOrCreateProfile: loadOrCreateProfile,
+  signInWithEmail: signInWithEmail,
+  signUpWithEmail: signUpWithEmail,
+  signOutUser: signOutUser,
+  sendPasswordReset: sendPasswordReset,
+  activityForUser: activityForUser,
+  onAuthStateChanged: function (cb) {
+    return onAuthStateChanged(appAuth(), cb);
+  }
+};
+
+onAuthStateChanged(appAuth(), function (user) {
+  window.hshsAuthUser = user || null;
+  window.hshsUid = user ? user.uid : null;
+  if (user && !user.isAnonymous) {
+    loadOrCreateProfile(user).then(function (p) {
+      try { localStorage.setItem("userProfile", JSON.stringify(p)); } catch (e) {}
+      window.hshsProfile = p;
+      document.dispatchEvent(new CustomEvent("hshs:auth", { detail: { user: user, profile: p } }));
+    });
+  } else {
+    document.dispatchEvent(new CustomEvent("hshs:auth", { detail: { user: user || null } }));
+  }
+});
+
+console.info("[HSHS] Auth API ready");
