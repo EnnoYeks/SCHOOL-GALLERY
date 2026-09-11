@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../css/hshs-edit-profile.css?v=260911ep1">
+  <link rel="stylesheet" href="../css/hshs-edit-profile.css?v=260911ep2">
 </head>
 <body class="ep-page ep-body">
   <header class="ep-top">
@@ -101,13 +101,16 @@
 
     <section class="ep-section">
       <h2><i class="fas fa-key"></i> Security</h2>
-      <p class="ep-lead">Password changes use your login email. Open Sign in → Forgot password, or contact school admin.</p>
-      <a class="ep-chip-btn" href="login.html" style="display:inline-flex;text-decoration:none">Go to sign in</a>
+      <p class="ep-lead">Password changes use the email on your account.</p>
+      <div class="ep-grid2" style="align-items:stretch">
+        <button type="button" class="ep-chip-btn" id="epResetPassword"><i class="fas fa-envelope"></i> Email password reset</button>
+        <a class="ep-chip-btn" href="login.html" style="display:inline-flex;text-decoration:none;align-items:center;justify-content:center"><i class="fas fa-right-to-bracket"></i> Sign-in page</a>
+      </div>
     </section>
 
     <p id="epMsg" class="ep-msg" role="status"></p>
     <div class="ep-footer-actions">
-      <button type="button" class="ep-btn-ghost" onclick="location.href='profile.html'">Cancel</button>
+      <button type="button" class="ep-btn-ghost" id="epCancel">Cancel</button>
       <button type="button" class="ep-btn-primary" data-ep-save>Save profile</button>
     </div>
 
@@ -118,15 +121,8 @@
     </section>
   </main>
 
-  <script type="module" src="../js/config.js?v=260911ep1"></script>
-  <script type="module" src="../js/hshs-auth-api.js?v=260911ep1"></script>
-  <script src="../js/hshs-edit-profile.js?v=260911ep1"></script>
-  <script>
-    document.getElementById('epSignOut')?.addEventListener('click', async function () {
-      try { if (window.HshsAuthApi && window.HshsAuthApi.signOutUser) await window.HshsAuthApi.signOutUser(); } catch (e) {}
-      try { localStorage.removeItem('userProfile'); localStorage.removeItem('hshsUid'); } catch (e) {}
-      location.href = 'login.html';
-    });
-  </script>
+  <script type="module" src="../js/config.js?v=260911ep2"></script>
+  <script type="module" src="../js/hshs-auth-api.js?v=260911ep2"></script>
+  <script src="../js/hshs-edit-profile.js?v=260911ep2"></script>
 </body>
 </html>
