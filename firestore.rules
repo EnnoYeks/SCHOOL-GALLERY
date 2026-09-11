@@ -1,77 +1,255 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ── helpers ──────────────────────────────────────────────
     function signedIn() {
+      return request.auth != null
+        && request.auth.uid != null
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    function signedInAny() {
       return request.auth != null;
     }
+
     function isSelf(uid) {
       return signedIn() && request.auth.uid == uid;
     }
-    function shortText(field, max) {
-      return request.resource.data[field] is string
-        && request.resource.data[field].size() <= max;
+
+    function isAuthor() {
+      return signedIn()
+        && resource.data.authorId is string
+        && resource.data.authorId == request.auth.uid;
     }
 
+    function isAuthorOnCreate() {
+      return signedIn()
+        && request.resource.data.authorId is string
+        && request.resource.data.authorId == request.auth.uid;
+    }
+
+    function optionalString(field, max) {
+      return !(field in request.resource.data)
+        || request.resource.data[field] == null
+        || (request.resource.data[field] is string
+            && request.resource.data[field].size() <= max);
+    }
+
+    function optionalBool(field) {
+      return !(field in request.resource.data)
+        || request.resource.data[field] is bool;
+    }
+
+    function optionalList(field, maxItems) {
+      return !(field in request.resource.data)
+        || (request.resource.data[field] is list
+            && request.resource.data[field].size() <= maxItems);
+    }
+
+    // ── users (profiles) ─────────────────────────────────────
     match /users/{uid} {
       allow read: if true;
-      allow create, update: if isSelf(uid);
+
+      allow create: if isSelf(uid)
+        && request.resource.data.uid == uid
+        && optionalString('fullName', 80)
+        && optionalString('name', 80)
+        && optionalString('username', 24)
+        && optionalString('studentId', 40)
+        && optionalString('email', 120)
+        && optionalString('bio', 160)
+        && optionalString('headline', 80)
+        && optionalString('classYear', 40)
+        && optionalString('house', 40)
+        && optionalString('role', 40)
+        && optionalList('interests', 20)
+        && optionalBool('showEmail')
+        && optionalBool('showPhone')
+        && optionalBool('showStudentId')
+        && optionalBool('privateAccount')
+        && optionalBool('allowMessages')
+        && optionalBool('showActivity');
+
+      allow update: if isSelf(uid)
+        && (!('uid' in request.resource.data) || request.resource.data.uid == uid)
+        && optionalString('fullName', 80)
+        && optionalString('name', 80)
+        && optionalString('username', 24)
+        && optionalString('studentId', 40)
+        && optionalString('email', 120)
+        && optionalString('bio', 160)
+        && optionalString('headline', 80)
+        && optionalString('classYear', 40)
+        && optionalString('house', 40)
+        && optionalString('role', 40)
+        && optionalString('pronouns', 24)
+        && optionalString('phone', 40)
+        && optionalString('whatsapp', 40)
+        && optionalString('location', 80)
+        && optionalString('website', 200)
+        && optionalString('instagram', 40)
+        && optionalString('tiktok', 40)
+        && optionalString('photoURL', 900000)
+        && optionalString('avatar', 900000)
+        && optionalString('coverURL', 900000)
+        && optionalString('cover', 900000)
+        && optionalList('interests', 20)
+        && optionalBool('showEmail')
+        && optionalBool('showPhone')
+        && optionalBool('showStudentId')
+        && optionalBool('privateAccount')
+        && optionalBool('allowMessages')
+        && optionalBool('showActivity')
+        && optionalBool('isAnonymous');
+
       allow delete: if false;
     }
 
+    // ── login indexes (username / studentId → uid) ───────────
     match /userIndex/{id} {
       allow read: if true;
-      allow create, update: if signedIn();
-      allow delete: if false;
+
+      allow create, update: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.field is string
+        && request.resource.data.field in ['username', 'studentId', 'email']
+        && request.resource.data.value is string
+        && request.resource.data.value.size() > 0
+        && request.resource.data.value.size() <= 120
+        && optionalString('email', 120);
+
+      allow delete: if signedIn()
+        && resource.data.uid == request.auth.uid;
     }
 
+    // ── feed content ─────────────────────────────────────────
     match /posts/{id} {
       allow read: if true;
-      allow create, update: if signedIn();
-      allow delete: if signedIn();
-    }
-    match /photos/{id} {
-      allow read: if true;
-      allow create, update: if signedIn();
-      allow delete: if signedIn();
-    }
-    match /videos/{id} {
-      allow read: if true;
-      allow create, update: if signedIn();
-      allow delete: if signedIn();
-    }
-    match /comments/{id} {
-      allow read: if true;
-      allow create: if signedIn() && shortText('text', 2000);
-      allow update, delete: if signedIn();
-    }
-    match /likes/{id} {
-      allow read: if true;
-      allow create, delete: if signedIn();
+
+      allow create: if isAuthorOnCreate()
+        && optionalString('text', 5000)
+        && optionalString('title', 200)
+        && optionalString('type', 40)
+        && optionalList('destinations', 20);
+
+      allow update: if isAuthor()
+        || (signedIn()
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['likes', 'comments', 'shares', 'likeCount', 'commentCount']));
+
+      allow delete: if isAuthor();
     }
 
-    match /chats/{chatId} {
+    match /photos/{id} {
       allow read: if true;
-      allow create, update: if signedIn()
+      allow create: if isAuthorOnCreate()
+        && optionalString('caption', 2000)
+        && optionalString('url', 900000)
+        && optionalString('type', 40);
+      allow update: if isAuthor()
+        || (signedIn()
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['likes', 'comments', 'shares', 'likeCount', 'commentCount']));
+      allow delete: if isAuthor();
+    }
+
+    match /videos/{id} {
+      allow read: if true;
+      allow create: if isAuthorOnCreate()
+        && optionalString('caption', 2000)
+        && optionalString('url', 2000)
+        && optionalString('type', 40);
+      allow update: if isAuthor()
+        || (signedIn()
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['likes', 'comments', 'shares', 'likeCount', 'commentCount']));
+      allow delete: if isAuthor();
+    }
+
+    // ── social ───────────────────────────────────────────────
+    match /comments/{id} {
+      allow read: if true;
+
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 2000
+        && optionalString('postId', 120);
+
+      allow update: if signedIn()
+        && resource.data.authorId == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 2000;
+
+      allow delete: if signedIn()
+        && resource.data.authorId == request.auth.uid;
+    }
+
+    match /likes/{id} {
+      allow read: if true;
+
+      allow create: if signedIn()
+        && (
+          (request.resource.data.userId == request.auth.uid)
+          || (request.resource.data.user == request.auth.uid)
+          || (request.resource.data.authorId == request.auth.uid)
+        );
+
+      allow delete: if signedIn()
+        && (
+          (resource.data.userId == request.auth.uid)
+          || (resource.data.user == request.auth.uid)
+          || (resource.data.authorId == request.auth.uid)
+        );
+
+      allow update: if false;
+    }
+
+    // ── chat ─────────────────────────────────────────────────
+    match /chats/{chatId} {
+      allow read: if signedInAny();
+
+      allow create: if signedIn()
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() < 80;
+
+      allow update: if signedIn()
         && request.resource.data.name is string
         && request.resource.data.name.size() < 80;
+
       allow delete: if false;
 
       match /messages/{msgId} {
-        allow read: if true;
+        allow read: if signedInAny();
+
         allow create: if signedIn()
-          && request.resource.data.senderId is string
-          && request.resource.data.senderId.size() < 80
+          && request.resource.data.senderId == request.auth.uid
           && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 2000;
+
         allow update: if signedIn()
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reacts']);
-        allow delete: if false;
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['reacts']);
+
+        allow delete: if signedIn()
+          && resource.data.senderId == request.auth.uid;
       }
     }
 
+    // ── presence ─────────────────────────────────────────────
     match /presence/{uid} {
-      allow read: if true;
-      allow write: if isSelf(uid);
+      allow read: if signedInAny();
+      allow create, update: if isSelf(uid);
+      allow delete: if isSelf(uid);
+    }
+
+    // ── default deny ─────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
