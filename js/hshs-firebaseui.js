@@ -1,5 +1,5 @@
 /**
- * HSHS World \u00b7 FirebaseUI login (Google, Facebook, Email)
+ * HSHS World · FirebaseUI login (Google, Facebook, Email)
  * + school Student ID / Username fallback
  */
 (function () {
@@ -105,15 +105,24 @@
     return !profile.studentId || !profile.username;
   }
 
-  async function finishSignIn(user) {
+  async function finishSignIn(user, method) {
     try {
+      if (window.HshsAnalytics && window.HshsAnalytics.events) {
+        window.HshsAnalytics.events.login(
+          method ||
+            (user && user.providerData && user.providerData[0] && user.providerData[0].providerId) ||
+            "firebaseui"
+        );
+      }
       var profile = await ensureUserDoc(user);
-      storeProfile(profile || {
-        uid: user.uid,
-        email: user.email || "",
-        fullName: user.displayName || "HSHS Student",
-        photoURL: user.photoURL || ""
-      });
+      storeProfile(
+        profile || {
+          uid: user.uid,
+          email: user.email || "",
+          fullName: user.displayName || "HSHS Student",
+          photoURL: user.photoURL || ""
+        }
+      );
       if (needsSchoolFields(profile)) {
         location.href = "edit-profile.html?welcome=1";
         return;
@@ -205,7 +214,7 @@
       }
       var email = null;
       try {
-        msg("Looking up account\u2026");
+        msg("Looking up account…");
         if (method === "studentId") {
           var sid = ((document.getElementById("loginStudentId") || {}).value || "").trim();
           if (!sid) {
@@ -247,7 +256,7 @@
         }
         var cred = await auth.signInWithEmailAndPassword(email, password);
         window.__hshsFuiHandled = true;
-        await finishSignIn(cred.user);
+        await finishSignIn(cred.user, "school_" + method);
       } catch (err) {
         var code = err && err.code;
         if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
