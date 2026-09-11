@@ -14,9 +14,25 @@
   --auth-font: "Nunito", system-ui, -apple-system, sans-serif;
 }
 
+html.hshs-ready,
+html:has(.hshs-auth-page),
+body.hshs-auth-page,
+body.hshs-auth-body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100% !important;
+  min-height: 100dvh !important;
+  overflow-x: hidden;
+}
+
 .hshs-auth-page {
+  min-height: 100vh;
   min-height: 100dvh;
-  margin: 0;
+  margin: 0 auto !important;
+  width: 100%;
+  max-width: 100%;
   font-family: var(--auth-font);
   color: var(--auth-text);
   background:
@@ -24,15 +40,22 @@
     radial-gradient(800px 500px at 100% 20%, rgba(14, 165, 233, 0.28), transparent 50%),
     radial-gradient(700px 400px at 50% 100%, rgba(234, 179, 8, 0.18), transparent 55%),
     linear-gradient(165deg, #050d1c 0%, #0a1a3a 40%, #071433 100%);
-  display: grid;
-  place-items: center;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center !important;
+  justify-content: center !important;
   padding: 24px 16px 40px;
   box-sizing: border-box;
+  text-align: center;
 }
 
 .hshs-auth-shell {
   width: min(440px, 100%);
+  max-width: 440px;
+  margin-left: auto !important;
+  margin-right: auto !important;
   position: relative;
+  text-align: left;
 }
 
 .hshs-auth-brand {
@@ -318,5 +341,22 @@ body.hshs-auth-body .mobile-tabbar,
 body.hshs-auth-body .navbar,
 body.hshs-auth-body .more-sheet,
 body.hshs-auth-body .more-backdrop {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .hshs-auth-page {
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .hshs-auth-shell {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+body.hshs-auth-body #hshs-page,
+body.hshs-auth-body .app-shell,
+body.hshs-auth-body .mobile-shell {
   display: none !important;
 }
