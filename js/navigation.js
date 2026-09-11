@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260902k';
+var HSHS_ASSET_VER = '260911upload';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}html.hshs-booting .animated-bg,html.hshs-booting .gradient-bg,html.hshs-booting .navbar,html.hshs-b[...]';
+        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}';
         document.documentElement.classList.add('hshs-booting');
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
@@ -160,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-notify-js', 'hshs-notify.js');
     add('hshs-mobile-shell-js', 'mobile-shell.js');
     add('hshs-upload-js', 'hshs-upload.js');
+    add('hshs-upload-context-js', 'hshs-upload-context.js');
     add('hshs-search-btn-js', 'mobile-search-btn.js');
     add('hshs-brand-js', 'hshs-brand.js');
     add('hshs-spring-js', 'hshs-spring.js');
