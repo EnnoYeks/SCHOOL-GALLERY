@@ -47,6 +47,62 @@ async function lookupUserField(field, value) {
   }
 }
 
+function normalizeProfile(raw, user) {
+  raw = raw || {};
+  var uid = (user && user.uid) || raw.uid || "";
+  function ts(v) {
+    if (v == null) return Date.now();
+    if (typeof v === "number") return v;
+    if (v && typeof v.toMillis === "function") return v.toMillis();
+    if (v && typeof v.seconds === "number") return v.seconds * 1000;
+    return Date.now();
+  }
+  return {
+    uid: uid,
+    email: (raw.email || (user && user.email) || "").toLowerCase(),
+    fullName: raw.fullName || raw.name || (user && user.displayName) || "HSHS Student",
+    name: raw.fullName || raw.name || (user && user.displayName) || "HSHS Student",
+    username: String(raw.username || "").toLowerCase(),
+    studentId: String(raw.studentId || "").trim(),
+    classYear: raw.classYear || "Campus",
+    house: raw.house || "",
+    bio: String(raw.bio || "").slice(0, 160),
+    headline: String(raw.headline || "").slice(0, 80),
+    pronouns: raw.pronouns || "",
+    phone: raw.phone || "",
+    whatsapp: raw.whatsapp || "",
+    location: raw.location || "",
+    website: raw.website || "",
+    instagram: String(raw.instagram || "").replace(/^@/, ""),
+    tiktok: String(raw.tiktok || "").replace(/^@/, ""),
+    interests: Array.isArray(raw.interests) ? raw.interests : [],
+    photoURL: raw.photoURL || raw.avatar || (user && user.photoURL) || "",
+    avatar: raw.photoURL || raw.avatar || (user && user.photoURL) || "",
+    coverURL: raw.coverURL || raw.cover || "",
+    cover: raw.coverURL || raw.cover || "",
+    showEmail: !!raw.showEmail,
+    showPhone: !!raw.showPhone,
+    showStudentId: raw.showStudentId !== false,
+    privateAccount: !!raw.privateAccount,
+    allowMessages: raw.allowMessages !== false,
+    showActivity: raw.showActivity !== false,
+    role: raw.role || "student",
+    isAnonymous: false,
+    createdAt: ts(raw.createdAt),
+    updatedAt: ts(raw.updatedAt)
+  };
+}
+
+function persistProfileLocal(profile) {
+  if (!profile) return;
+  try { localStorage.setItem("userProfile", JSON.stringify(profile)); } catch (e) {}
+  if (profile.uid) {
+    try { localStorage.setItem("hshsUid", profile.uid); } catch (e) {}
+    window.hshsUid = profile.uid;
+  }
+  window.hshsProfile = profile;
+}
+
 async function saveProfile(user, data) {
   var uid = user.uid;
   data = data || {};
@@ -114,7 +170,9 @@ async function saveProfile(user, data) {
   } catch (e) {}
   profile.createdAt = Date.now();
   profile.updatedAt = Date.now();
-  return profile;
+  var out = normalizeProfile(profile, user);
+  persistProfileLocal(out);
+  return out;
 }
 
 async function loadOrCreateProfile(user) {
@@ -123,17 +181,25 @@ async function loadOrCreateProfile(user) {
     var ref = doc(db(), "users", user.uid);
     var snap = await getDoc(ref);
     if (snap.exists()) {
-      var data = Object.assign({ uid: user.uid }, snap.data());
+      var data = normalizeProfile(Object.assign({ uid: user.uid }, snap.data()), user);
+      persistProfileLocal(data);
       return data;
     }
-    return saveProfile(user, {
+    var created = await saveProfile(user, {
       fullName: user.displayName || "HSHS Student",
       email: user.email || "",
       photoURL: user.photoURL || "",
       classYear: "Campus"
     });
+    var normalized = normalizeProfile(created, user);
+    persistProfileLocal(normalized);
+    return normalized;
   } catch (e) {
     console.warn("[auth] loadOrCreateProfile", e);
+    try {
+      var local = JSON.parse(localStorage.getItem("userProfile") || "null");
+      if (local && local.uid === user.uid) return normalizeProfile(local, user);
+    } catch (e2) {}
     return null;
   }
 }
@@ -147,7 +213,13 @@ async function signUpWithEmail(email, password) {
 }
 
 async function signOutUser() {
-  try { localStorage.removeItem("userProfile"); } catch (e) {}
+  try {
+    localStorage.removeItem("userProfile");
+    localStorage.removeItem("hshsUid");
+  } catch (e) {}
+  window.hshsProfile = null;
+  window.hshsUid = null;
+  window.hshsAuthUser = null;
   return signOut(appAuth());
 }
 
@@ -194,6 +266,8 @@ window.HshsAuthApi = {
   lookupUserField: lookupUserFieldSafe,
   saveProfile: saveProfile,
   loadOrCreateProfile: loadOrCreateProfile,
+  normalizeProfile: normalizeProfile,
+  persistProfileLocal: persistProfileLocal,
   signInWithEmail: signInWithEmail,
   signUpWithEmail: signUpWithEmail,
   signOutUser: signOutUser,
@@ -209,12 +283,15 @@ onAuthStateChanged(appAuth(), function (user) {
   window.hshsUid = user ? user.uid : null;
   if (user && !user.isAnonymous) {
     loadOrCreateProfile(user).then(function (p) {
-      try { localStorage.setItem("userProfile", JSON.stringify(p)); } catch (e) {}
-      window.hshsProfile = p;
-      document.dispatchEvent(new CustomEvent("hshs:auth", { detail: { user: user, profile: p } }));
+      if (p) persistProfileLocal(p);
+      document.dispatchEvent(new CustomEvent("hshs:auth", { detail: { user: user, profile: p || null } }));
+      document.dispatchEvent(new CustomEvent("hshs:profile", { detail: { profile: p || null } }));
+    }).catch(function (err) {
+      console.warn("[auth] profile hydrate failed", err);
+      document.dispatchEvent(new CustomEvent("hshs:auth", { detail: { user: user, profile: null } }));
     });
   } else {
-    document.dispatchEvent(new CustomEvent("hshs:auth", { detail: { user: user || null } }));
+    document.dispatchEvent(new CustomEvent("hshs:auth", { detail: { user: user || null, profile: null } }));
   }
 });
 
