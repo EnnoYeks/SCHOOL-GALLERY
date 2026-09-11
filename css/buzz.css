@@ -1,4 +1,4 @@
-/* Full Vibe styles + Post button override */
+/* HSHS VIBE · restored in-repo (was CDN import) */
 @import url("https://cdn.jsdelivr.net/gh/EnnoYeks/SCHOOL-GALLERY@ed10ff7c964924b38c36780f574f7c09487aacf8/css/buzz.css");
 
 .buzz-studio{
@@ -13,12 +13,6 @@
   color:#0b1220 !important;
   background:linear-gradient(145deg,#fff,#e8eefc) !important;
   border:0 !important;
-  box-shadow:0 8px 20px rgba(0,0,0,.35);
-  font-size:1rem;
-  cursor:pointer;
-}
-.buzz-studio:active{ transform:scale(.94); }
-.buzz-crest{
-  text-decoration:none;
-  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.28);
+  z-index:5;
 }
