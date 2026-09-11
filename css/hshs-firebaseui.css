@@ -1,0 +1,132 @@
+/* FirebaseUI dark theme for HSHS World */
+#firebaseui-auth-container {
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.firebaseui-container {
+  max-width: 100% !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-family: "Nunito", system-ui, sans-serif !important;
+}
+
+.firebaseui-card-header,
+.firebaseui-title,
+.firebaseui-subtitle {
+  display: none !important;
+}
+
+.firebaseui-card-content {
+  padding: 0 !important;
+}
+
+.firebaseui-list-item {
+  margin: 0 0 10px !important;
+}
+
+.firebaseui-idp-button {
+  max-width: 100% !important;
+  border-radius: 14px !important;
+  height: 48px !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
+  font-weight: 800 !important;
+}
+
+.firebaseui-idp-text {
+  font-family: "Nunito", system-ui, sans-serif !important;
+  font-weight: 800 !important;
+}
+
+.firebaseui-idp-google .firebaseui-idp-text,
+.firebaseui-idp-password .firebaseui-idp-text {
+  color: #0f172a !important;
+}
+
+.firebaseui-idp-facebook {
+  background-color: #1877f2 !important;
+}
+
+.firebaseui-form-actions .firebaseui-button,
+.firebaseui-id-submit {
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #1d4ed8, #0ea5e9) !important;
+  font-weight: 900 !important;
+  font-family: inherit !important;
+  text-transform: none !important;
+  box-shadow: 0 10px 24px rgba(29, 78, 216, 0.35) !important;
+}
+
+.firebaseui-textfield.mdl-textfield .firebaseui-label,
+.firebaseui-textfield.mdl-textfield .firebaseui-input,
+.firebaseui-input,
+.firebaseui-input-floating-button {
+  color: #f1f5ff !important;
+  font-family: inherit !important;
+}
+
+.firebaseui-textfield.mdl-textfield.is-dirty .firebaseui-label,
+.firebaseui-textfield.mdl-textfield.is-focused .firebaseui-label {
+  color: #93c5fd !important;
+}
+
+.firebaseui-textfield .mdl-textfield__input {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #f1f5ff !important;
+}
+
+.firebaseui-textfield .mdl-textfield__label:after {
+  background-color: #0ea5e9 !important;
+}
+
+.firebaseui-link {
+  color: #93c5fd !important;
+}
+
+.firebaseui-error {
+  color: #fecaca !important;
+}
+
+.firebaseui-info-bar {
+  background: rgba(12, 24, 52, 0.95) !important;
+  color: #f1f5ff !important;
+  border-radius: 12px !important;
+}
+
+.mdl-card {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.firebaseui-callback-indicator-container {
+  background: transparent !important;
+}
+
+.hshs-school-login {
+  margin-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+  text-align: left;
+}
+.hshs-school-login summary {
+  cursor: pointer;
+  color: #8b9bb8;
+  font-weight: 800;
+  font-size: 0.85rem;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+.hshs-school-login summary::-webkit-details-marker { display: none; }
+.hshs-school-login summary::before {
+  content: "\25B8";
+  color: #60a5fa;
+  font-size: 0.75rem;
+}
+.hshs-school-login[open] summary::before { content: "\25BE"; }
+.hshs-school-login-body {
+  margin-top: 14px;
+}
