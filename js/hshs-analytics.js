@@ -1,6 +1,5 @@
 /**
- * HSHS World · Firebase Analytics helper
- * Safe init, page views, user id, and product events.
+ * HSHS World · Firebase Analytics — custom user events
  */
 (function (g) {
   if (g.__hshsAnalyticsBoot) return;
@@ -12,36 +11,45 @@
   var _setUserProps = null;
   var _ready = false;
   var _queue = [];
+  var MAX_PARAM = 100;
 
-  function isBrowser() {
-    return typeof window !== 'undefined' && typeof document !== 'undefined';
-  }
-
-  function flush() {
-    if (!_ready || !_logEvent) return;
-    while (_queue.length) {
-      var item = _queue.shift();
-      try {
-        _logEvent(_analytics, item.name, item.params || {});
-      } catch (e) {
-        console.warn('[analytics]', e);
-      }
-    }
+  function clean(params) {
+    var out = {
+      app_name: 'HSHS World',
+      school: 'Hawthorne Scribner'
+    };
+    if (!params) return out;
+    Object.keys(params).forEach(function (k) {
+      var v = params[k];
+      if (v == null) return;
+      if (typeof v === 'string') out[k] = v.slice(0, MAX_PARAM);
+      else if (typeof v === 'number' || typeof v === 'boolean') out[k] = v;
+      else out[k] = String(v).slice(0, MAX_PARAM);
+    });
+    return out;
   }
 
   function track(name, params) {
     if (!name) return;
-    var p = params || {};
-    p.app_name = 'HSHS World';
-    p.school = 'Hawthorne Scribner High School';
+    name = String(name).toLowerCase().replace(/[^a-z0-9_]/g, '_').slice(0, 40);
+    var p = clean(params);
     if (!_ready) {
       _queue.push({ name: name, params: p });
       return;
     }
     try {
       _logEvent(_analytics, name, p);
+      if (g.__HSHS_ANALYTICS_DEBUG) console.debug('[GA]', name, p);
     } catch (e) {
-      console.warn('[analytics] logEvent', name, e);
+      console.warn('[analytics]', name, e);
+    }
+  }
+
+  function flush() {
+    if (!_ready || !_logEvent) return;
+    while (_queue.length) {
+      var item = _queue.shift();
+      try { _logEvent(_analytics, item.name, item.params); } catch (e) {}
     }
   }
 
@@ -52,139 +60,111 @@
         _setUserId(_analytics, user.uid);
         if (_setUserProps) {
           _setUserProps(_analytics, {
-            sign_in_method: (user.providerData && user.providerData[0] && user.providerData[0].providerId) || 'unknown',
+            sign_in_method: (user.providerData && user.providerData[0] && user.providerData[0].providerId) || 'password',
             is_anonymous: 'false'
           });
         }
       } else {
         _setUserId(_analytics, null);
       }
-    } catch (e) {
-      console.warn('[analytics] setUserId', e);
-    }
+    } catch (e) {}
   }
 
-  function pageView(pageName, pagePath) {
-    var path = pagePath || (location.pathname + location.search);
-    var title = pageName || document.title || 'HSHS World';
+  function pageView(pageName) {
+    var path = location.pathname + location.search;
     track('page_view', {
-      page_title: title,
+      page_title: pageName || document.title || 'HSHS World',
       page_location: location.href,
       page_path: path
     });
   }
 
-  function screenView(screenName) {
+  function screenView(screen) {
     track('screen_view', {
-      firebase_screen: screenName || 'unknown',
+      firebase_screen: screen || 'unknown',
       firebase_screen_class: 'HSHSWorld'
     });
   }
 
   var Events = {
-    login: function (method) {
-      track('login', { method: method || 'unknown' });
-    },
-    signUp: function (method) {
-      track('sign_up', { method: method || 'email' });
-    },
-    logout: function () {
-      track('logout', {});
-    },
-    uploadStart: function (type) {
-      track('upload_start', { content_type: type || 'media' });
-    },
+    login: function (method) { track('login', { method: method || 'unknown' }); },
+    signUp: function (method) { track('sign_up', { method: method || 'email' }); },
+    logout: function () { track('logout', {}); },
+    uploadStart: function (type) { track('upload_start', { content_type: type || 'media' }); },
     uploadComplete: function (type, board) {
-      track('upload_complete', {
-        content_type: type || 'media',
-        board: board || 'general'
-      });
+      track('upload_complete', { content_type: type || 'media', board: board || 'general' });
     },
-    like: function (contentType) {
-      track('like', { content_type: contentType || 'post' });
+    uploadCancel: function () { track('upload_cancel', {}); },
+    viewPost: function (postId, type) {
+      track('view_item', { item_id: postId || '', content_type: type || 'post' });
     },
-    comment: function () {
-      track('comment', {});
+    like: function (postId, contentType) {
+      track('like', { item_id: postId || '', content_type: contentType || 'post' });
     },
-    share: function (method) {
-      track('share', { method: method || 'app' });
+    unlike: function (postId) { track('unlike', { item_id: postId || '' }); },
+    comment: function (postId) { track('comment', { item_id: postId || '' }); },
+    share: function (postId, method) {
+      track('share', { item_id: postId || '', method: method || 'app' });
     },
-    search: function (term) {
-      track('search', { search_term: String(term || '').slice(0, 80) });
+    save: function (postId) { track('save_post', { item_id: postId || '' }); },
+    search: function (term) { track('search', { search_term: String(term || '').slice(0, 80) }); },
+    selectContent: function (contentType, itemId) {
+      track('select_content', { content_type: contentType || 'unknown', item_id: itemId || '' });
     },
-    profileEdit: function () {
-      track('profile_edit', {});
-    },
-    openStudio: function (context) {
-      track('open_studio', { context: context || 'unknown' });
+    openStudio: function (context) { track('open_studio', { context: context || 'unknown' }); },
+    openGallery: function (section) { track('open_gallery', { section: section || 'all' }); },
+    tabSwitch: function (tab) { track('tab_switch', { tab: tab || '' }); },
+    follow: function (userId) { track('follow', { target_uid: userId || '' }); },
+    unfollow: function (userId) { track('unfollow', { target_uid: userId || '' }); },
+    profileView: function (userId) { track('profile_view', { target_uid: userId || '' }); },
+    profileEdit: function () { track('profile_edit', {}); },
+    messageStart: function () { track('message_start', {}); },
+    notificationOpen: function () { track('notification_open', {}); },
+    moreMenuOpen: function () { track('more_menu_open', {}); },
+    themeChange: function (mode) { track('theme_change', { mode: mode || '' }); },
+    error: function (code, message) {
+      track('app_error', { error_code: code || 'unknown', message: String(message || '').slice(0, 80) });
     }
   };
 
   async function boot() {
-    if (!isBrowser()) return;
-    if (g.analytics && g.firebaseApp) {
-      try {
-        var mod = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js');
-        _analytics = g.analytics;
-        _logEvent = mod.logEvent;
-        _setUserId = mod.setUserId;
-        _setUserProps = mod.setUserProperties;
-        _ready = true;
-        flush();
-        bindHooks();
-        pageView();
-        return;
-      } catch (e) {
-        console.warn('[analytics] attach failed', e);
-      }
+    if (typeof window === 'undefined') return;
+
+    async function attach(instance) {
+      var mod = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js');
+      _analytics = instance;
+      _logEvent = mod.logEvent;
+      _setUserId = mod.setUserId;
+      _setUserProps = mod.setUserProperties;
+      _ready = true;
+      flush();
+      pageView();
+      screenView((location.pathname.split('/').pop() || 'home').replace(/\.html$/, '') || 'home');
     }
 
     try {
-      if (!g.firebaseApp && g.firebaseConfig) {
-        var appMod = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js');
-        g.firebaseApp = appMod.initializeApp(g.firebaseConfig);
+      if (g.analytics) {
+        await attach(g.analytics);
+        return;
       }
       if (g.firebaseApp) {
         var aMod = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js');
-        _analytics = aMod.getAnalytics(g.firebaseApp);
-        _logEvent = aMod.logEvent;
-        _setUserId = aMod.setUserId;
-        _setUserProps = aMod.setUserProperties;
-        g.analytics = _analytics;
-        _ready = true;
-        flush();
-        bindHooks();
-        pageView();
+        var inst = aMod.getAnalytics(g.firebaseApp);
+        g.analytics = inst;
+        await attach(inst);
+        return;
+      }
+      if (g.firebaseConfig) {
+        var appMod = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js');
+        if (!g.firebaseApp) g.firebaseApp = appMod.initializeApp(g.firebaseConfig);
+        var aMod2 = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js');
+        var inst2 = aMod2.getAnalytics(g.firebaseApp);
+        g.analytics = inst2;
+        await attach(inst2);
       }
     } catch (err) {
       console.warn('[analytics] init skipped:', err && err.message);
     }
-  }
-
-  function bindHooks() {
-    document.addEventListener('hshs:auth', function (ev) {
-      var user = ev.detail && ev.detail.user;
-      setUser(user || null);
-    });
-
-    document.addEventListener('hshs:profile', function () {
-      Events.profileEdit();
-    });
-
-    var lastPath = location.pathname;
-    setInterval(function () {
-      if (location.pathname !== lastPath) {
-        lastPath = location.pathname;
-        pageView();
-        var name = (lastPath.split('/').pop() || 'home').replace(/\.html$/, '') || 'home';
-        screenView(name);
-      }
-    }, 800);
-
-    document.addEventListener('click', function (e) {
-      var t = e.target.closest('#openUploadStudio, .tab-upload, [data-open-studio]');
-      if (t) Events.openStudio(location.pathname);
-    }, true);
   }
 
   g.HshsAnalytics = {
@@ -193,23 +173,21 @@
     screenView: screenView,
     setUser: setUser,
     events: Events,
-    isReady: function () { return _ready; }
+    isReady: function () { return _ready; },
+    debug: function (on) { g.__HSHS_ANALYTICS_DEBUG = !!on; }
   };
 
+  g.hshsTrack = track;
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      setTimeout(boot, 50);
-    });
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 40); });
   } else {
-    setTimeout(boot, 50);
+    setTimeout(boot, 40);
   }
 
   var tries = 0;
   var iv = setInterval(function () {
-    if (_ready || ++tries > 40) {
-      clearInterval(iv);
-      return;
-    }
-    if (g.analytics || g.firebaseApp) boot();
-  }, 250);
+    if (_ready || ++tries > 50) { clearInterval(iv); return; }
+    if (g.analytics || g.firebaseApp || g.firebaseConfig) boot();
+  }, 200);
 })(typeof window !== 'undefined' ? window : globalThis);
