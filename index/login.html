@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+  <meta name="theme-color" content="#071433">
+  <meta name="description" content="Sign in to HSHS World — Hawthorne Scribner High School">
+  <title>Sign in · HSHS World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/hshs-auth.css?v=260911auth1">
+  <script>(function(){document.documentElement.classList.add('hshs-ready');})();</script>
+</head>
+<body class="hshs-auth-page hshs-auth-body">
+  <div class="hshs-auth-shell" id="hshsAuthRoot">
+    <div class="hshs-auth-brand">
+      <img src="https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png" alt="HSHS" width="64" height="64">
+      <h1>HSHS World</h1>
+      <p>Hawthorne Scribner · Educate. Engage. Empower.</p>
+    </div>
+
+    <div class="hshs-auth-card">
+      <div class="hshs-auth-tabs" role="tablist">
+        <button type="button" data-auth-mode="login" class="is-on" role="tab">Sign in</button>
+        <button type="button" data-auth-mode="signup" role="tab">Create account</button>
+      </div>
+
+      <p id="authAlreadyIn" class="hshs-auth-hint" hidden></p>
+
+      <div id="authLoginPanel">
+        <div class="hshs-auth-methods" role="tablist" aria-label="Login method">
+          <button type="button" data-login-method="email" class="is-on"><i class="fas fa-envelope"></i>Email</button>
+          <button type="button" data-login-method="studentId"><i class="fas fa-id-card"></i>Student ID</button>
+          <button type="button" data-login-method="username"><i class="fas fa-at"></i>Username</button>
+        </div>
+        <p class="hshs-auth-hint" id="loginMethodHint">Use the email you registered with.</p>
+
+        <form id="authLoginForm" autocomplete="on">
+          <div data-method-panel="email">
+            <label class="hshs-field">
+              <span>Email</span>
+              <div class="hshs-field-input">
+                <i class="fas fa-envelope lead"></i>
+                <input id="loginEmail" name="email" type="email" inputmode="email" autocomplete="username" placeholder="you@example.com">
+              </div>
+            </label>
+          </div>
+          <div data-method-panel="studentId" hidden>
+            <label class="hshs-field">
+              <span>Student ID</span>
+              <div class="hshs-field-input">
+                <i class="fas fa-id-card lead"></i>
+                <input id="loginStudentId" name="studentId" type="text" autocomplete="off" placeholder="e.g. HSHS-2026-0142">
+              </div>
+            </label>
+          </div>
+          <div data-method-panel="username" hidden>
+            <label class="hshs-field">
+              <span>Username</span>
+              <div class="hshs-field-input">
+                <i class="fas fa-at lead"></i>
+                <input id="loginUsername" name="username" type="text" autocomplete="username" placeholder="yourname" autocapitalize="none">
+              </div>
+            </label>
+          </div>
+
+          <label class="hshs-field">
+            <span>Password</span>
+            <div class="hshs-field-input">
+              <i class="fas fa-lock lead"></i>
+              <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Your password" required minlength="6">
+              <button type="button" class="toggle-pw" data-toggle-password="loginPassword" aria-label="Show password"><i class="fas fa-eye"></i></button>
+            </div>
+          </label>
+
+          <div class="hshs-auth-row">
+            <label><input type="checkbox" id="rememberMe" checked> Remember me</label>
+            <a href="#reset" id="forgotLink">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="hshs-auth-submit">Sign in</button>
+        </form>
+      </div>
+
+      <div id="authSignupPanel" hidden>
+        <div class="hshs-signup-steps" aria-hidden="true">
+          <span class="is-on"></span><span></span><span></span>
+        </div>
+
+        <form id="authSignupForm" autocomplete="on">
+          <div data-signup-step="1">
+            <p class="hshs-auth-hint">Step 1 of 3 · School identity</p>
+            <label class="hshs-field">
+              <span>Full name</span>
+              <div class="hshs-field-input">
+                <i class="fas fa-user lead"></i>
+                <input id="suFullName" type="text" autocomplete="name" placeholder="As on your school records" required>
+              </div>
+            </label>
+            <div class="hshs-auth-grid2">
+              <label class="hshs-field">
+                <span>Student ID</span>
+                <div class="hshs-field-input">
+                  <i class="fas fa-id-card lead"></i>
+                  <input id="suStudentId" type="text" placeholder="HSHS-…" required>
+                </div>
+              </label>
+              <label class="hshs-field">
+                <span>Class / year</span>
+                <select id="suClassYear" required>
+                  <option value="">Select…</option>
+                  <option>S1</option><option>S2</option><option>S3</option>
+                  <option>S4</option><option>S5</option><option>S6</option>
+                  <option>Staff</option><option>Alumni</option>
+                </select>
+              </label>
+            </div>
+            <button type="submit" class="hshs-auth-submit">Continue</button>
+          </div>
+
+          <div data-signup-step="2" hidden>
+            <p class="hshs-auth-hint">Step 2 of 3 · How you sign in</p>
+            <label class="hshs-field">
+              <span>Email</span>
+              <div class="hshs-field-input">
+                <i class="fas fa-envelope lead"></i>
+                <input id="suEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
+              </div>
+            </label>
+            <label class="hshs-field">
+              <span>Username</span>
+              <div class="hshs-field-input">
+                <i class="fas fa-at lead"></i>
+                <input id="suUsername" type="text" autocomplete="username" placeholder="letters, numbers, . _" autocapitalize="none" required>
+              </div>
+            </label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="hshs-auth-submit" id="signupBack" style="background:#1e293b;box-shadow:none;flex:0 0 42%">Back</button>
+              <button type="submit" class="hshs-auth-submit" style="flex:1">Continue</button>
+            </div>
+          </div>
+
+          <div data-signup-step="3" hidden>
+            <p class="hshs-auth-hint">Step 3 of 3 · Password (not a PIN — use a strong password)</p>
+            <label class="hshs-field">
+              <span>Password</span>
+              <div class="hshs-field-input">
+                <i class="fas fa-lock lead"></i>
+                <input id="suPassword" type="password" autocomplete="new-password" placeholder="At least 6 characters" required minlength="6">
+                <button type="button" class="toggle-pw" data-toggle-password="suPassword" aria-label="Show password"><i class="fas fa-eye"></i></button>
+              </div>
+            </label>
+            <label class="hshs-field">
+              <span>Confirm password</span>
+              <div class="hshs-field-input">
+                <i class="fas fa-lock lead"></i>
+                <input id="suPassword2" type="password" autocomplete="new-password" placeholder="Repeat password" required minlength="6">
+                <button type="button" class="toggle-pw" data-toggle-password="suPassword2" aria-label="Show password"><i class="fas fa-eye"></i></button>
+              </div>
+            </label>
+            <button type="submit" class="hshs-auth-submit">Create account</button>
+          </div>
+        </form>
+      </div>
+
+      <p id="authMsg" class="hshs-auth-msg" role="status"></p>
+    </div>
+
+    <a class="hshs-auth-skip" href="../index.html">Continue as guest</a>
+    <p class="hshs-auth-footer">By continuing you agree to community guidelines of Hawthorne Scribner High School.</p>
+  </div>
+
+  <script type="module" src="../js/config.js?v=260911auth1"></script>
+  <script type="module" src="../js/hshs-auth-api.js?v=260911auth1"></script>
+  <script src="../js/hshs-auth.js?v=260911auth1"></script>
+</body>
+</html>
