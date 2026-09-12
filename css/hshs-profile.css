@@ -1,25 +1,34 @@
 html[data-hshs-page="profile"] body,body:has(.pf){background:#071433!important;color:#fff}
 html[data-hshs-page="profile"] .mobile-tabbar{background:#071433!important;border-top:1px solid rgba(255,255,255,.08)!important}
 .pf{display:flex;flex-direction:column;width:100%;max-width:none;min-height:100svh;padding:0 0 96px;background:#071433;color:#fff}
-.pf-cover{min-height:120px;background:#0b1f4d center/cover no-repeat}
-.pf-band{display:flex;align-items:flex-end;gap:12px;padding:0 16px 10px;margin-top:-36px}
-.pf-ava{width:84px;height:84px;border-radius:50%;padding:3px;background:linear-gradient(135deg,#fbbf24,#1d4ed8);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pf-cover{min-height:140px;background:#0b1f4d center/cover no-repeat;position:relative}
+.pf-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(7,20,51,.75) 100%);pointer-events:none}
+.pf-band{display:flex;align-items:flex-end;gap:12px;padding:0 16px 10px;margin-top:-40px;position:relative;z-index:2}
+.pf-ava-wrap{flex-shrink:0}
+.pf-ava{width:88px;height:88px;border-radius:50%;padding:3px;background:linear-gradient(135deg,#fbbf24,#1d4ed8 55%,#38bdf8);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .pf-ava span,.pf-ava img{width:100%;height:100%;border-radius:50%;background:#071433;border:3px solid #071433}
-.pf-ava span{display:flex;align-items:center;justify-content:center;font-weight:800}
+.pf-ava span{display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.6rem;color:#fbbf24}
 .pf-ava img{object-fit:cover}
 .pf-ava img:not([src]),.pf-ava img[src=""]{display:none}
-.pf-names{flex:1;min-width:0}
-.pf-names h1{margin:0;font-size:1.05rem}
-.pf-display,.pf-role{margin:2px 0 0;color:#94a3b8;font-size:.78rem}
-.pf-tools{display:flex;gap:6px}
-.pf-btn{border:1px solid rgba(251,191,36,.35);background:#0b1f4d;color:#fff;border-radius:999px;min-height:32px;padding:0 12px;font-size:.75rem;font-weight:700}
-.pf-bio{margin:0;padding:6px 16px 0;font-size:.9rem}
-.pf-tags{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px 0}
-.pf-tags span{padding:4px 8px;border-radius:999px;background:#0b1f4d;color:#fde68a;font-size:.68rem}
-.pf-stats{display:flex;justify-content:space-around;margin:12px 0 0;padding:10px 8px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
+.pf-names{flex:1;min-width:0;padding-bottom:4px}
+.pf-names h1{margin:0;font-size:1.05rem;font-weight:800;letter-spacing:.01em}
+.pf-display{margin:2px 0 0;color:#e2e8f0;font-size:.9rem;font-weight:700}
+.pf-role{margin:2px 0 0;color:#94a3b8;font-size:.75rem}
+.pf-tools{display:flex;gap:6px;flex-shrink:0;padding-bottom:6px}
+.pf-btn{border:1px solid rgba(251,191,36,.35);background:#0b1f4d;color:#fff;border-radius:999px;min-height:34px;padding:0 14px;font-size:.75rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:transform .15s ease,background .15s ease}
+.pf-btn:active{transform:scale(.97)}
+.pf-btn-primary{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#071433;border:0;box-shadow:0 4px 14px rgba(251,191,36,.35)}
+.pf-btn-primary:hover{filter:brightness(1.05)}
+.pf-btn-lg{min-height:46px;padding:0 22px;font-size:.9rem;border-radius:12px}
+.pf-bio{margin:0;padding:8px 16px 0;font-size:.88rem;line-height:1.45;color:#cbd5e1}
+.pf-tags{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px 0}
+.pf-tags span{padding:4px 10px;border-radius:999px;background:#0b1f4d;color:#fde68a;font-size:.68rem;font-weight:600}
+.pf-tag-guest{background:rgba(148,163,184,.15)!important;color:#94a3b8!important}
+.pf-stats{display:flex;justify-content:space-around;margin:14px 0 0;padding:12px 8px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
 .pf-stats button{border:0;background:none;color:#fff;min-height:44px}
 .pf-stats b,.pf-stats span{display:block}
-.pf-stats span{color:#94a3b8;font-size:.7rem}
+.pf-stats b{font-size:1.05rem}
+.pf-stats span{color:#94a3b8;font-size:.7rem;margin-top:2px}
 .pf-highs{display:flex;gap:12px;overflow-x:auto;padding:12px 16px;scrollbar-width:none}
 .pf-hl{flex:0 0 auto;width:68px;border:0;background:none;color:#cbd5e1;text-align:center}
 .pf-hl b{display:flex;align-items:center;justify-content:center;width:56px;height:56px;margin:0 auto 6px;border-radius:50%;border:2px solid #fbbf24;background:#0b1f4d}
@@ -27,11 +36,20 @@ html[data-hshs-page="profile"] .mobile-tabbar{background:#071433!important;borde
 .pf-tabs{display:flex;position:sticky;top:0;z-index:12;background:#071433}
 .pf-tabs button{flex:1;min-height:44px;border:0;background:none;color:#64748b;font-weight:700;border-bottom:2px solid transparent}
 .pf-tabs button.on{color:#fbbf24;border-bottom-color:#fbbf24}
-.pf-grid{display:flex;flex-wrap:wrap;gap:2px}
+.pf-grid{display:flex;flex-wrap:wrap;gap:2px;min-height:180px}
 .pf-cell,.pf-skel{flex:0 0 calc(33.333% - 1.4px);width:calc(33.333% - 1.4px);aspect-ratio:1;border:0;padding:0;background:#0b1f4d;position:relative;overflow:hidden}
 .pf-cell img{width:100%;height:100%;object-fit:cover;display:block}
 .pf-cell .likes{position:absolute;left:6px;bottom:5px;color:#fff;font-size:.68rem;text-shadow:0 1px 4px #000}
+.pf-cell .mark{position:absolute;top:8px;right:8px;color:#fff;font-size:.75rem;text-shadow:0 1px 4px #000}
 .pf-empty{flex:1 0 100%;padding:48px 16px;text-align:center;color:#94a3b8}
+
+/* Guest empty state card */
+.pf-guest-card{flex:1 0 100%;margin:20px 16px 0;padding:28px 20px;border-radius:18px;background:linear-gradient(160deg,#0b1f4d 0%,#0a1838 100%);border:1px solid rgba(251,191,36,.18);text-align:center;box-shadow:0 12px 32px rgba(0,0,0,.25)}
+.pf-guest-ico{width:56px;height:56px;margin:0 auto 14px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:rgba(251,191,36,.12);color:#fbbf24;font-size:1.25rem}
+.pf-guest-card h3{margin:0 0 8px;font-size:1.15rem;font-weight:800;color:#fff}
+.pf-guest-card p{margin:0 0 18px;font-size:.88rem;line-height:1.5;color:#94a3b8}
+.pf.is-guest .pf-tabs{opacity:.55;pointer-events:none}
+
 .pf-pop{position:fixed;top:70px;right:12px;z-index:40;display:flex;flex-direction:column;min-width:170px;background:#0b1f4d;border-radius:12px}
 .pf-pop[hidden],.pf-modal[hidden],.pf-sheet[hidden]{display:none}
 .pf-pop button{border:0;background:none;color:#fff;text-align:left;padding:12px}
