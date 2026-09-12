@@ -1,6 +1,26 @@
+/* Keep global top bar identical to other pages — never restyle/hide it from profile */
+html[data-hshs-page="profile"] .navbar,
+html[data-hshs-page="profile"] .navbar.hshs-flat-top {
+  display: block !important;
+  visibility: visible !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+}
+html[data-hshs-page="profile"] .navbar .logo,
+html[data-hshs-page="profile"] .navbar .nav-actions,
+html[data-hshs-page="profile"] .navbar .profile-icon,
+html[data-hshs-page="profile"] .navbar .notification-icon {
+  display: flex !important;
+  visibility: visible !important;
+}
+html[data-hshs-page="profile"] .mobile-tabbar {
+  display: flex !important;
+  visibility: visible !important;
+}
 html[data-hshs-page="profile"] body,body:has(.pf){background:#071433!important;color:#fff}
 html[data-hshs-page="profile"] .mobile-tabbar{background:#071433!important;border-top:1px solid rgba(255,255,255,.08)!important}
-.pf{display:flex;flex-direction:column;width:100%;max-width:none;min-height:100svh;padding:0 0 96px;background:#071433;color:#fff}
+.pf{display:flex;flex-direction:column;width:100%;max-width:none;min-height:100svh;padding:0 0 96px;background:#071433;color:#fff;position:relative;z-index:1}
 .pf-cover{min-height:140px;background:#0b1f4d center/cover no-repeat;position:relative}
 .pf-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(7,20,51,.75) 100%);pointer-events:none}
 .pf-band{display:flex;align-items:flex-end;gap:12px;padding:0 16px 10px;margin-top:-40px;position:relative;z-index:2}
