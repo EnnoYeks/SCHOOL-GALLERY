@@ -2,29 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
   <meta name="theme-color" content="#071433">
+  <meta name="description" content="Profile · HSHS World">
   <title>Profile · HSHS World</title>
-  <link rel="stylesheet" href="../css/foundation.css?v=260912dope1">
+  <link rel="stylesheet" href="../css/foundation.css?v=260912shell1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../css/hshs-profile.css?v=260912dope1">
-  <link rel="stylesheet" href="../css/hshs-profile-photo.css?v=260912dope1">
-  <script>(function(){document.documentElement.classList.add('hshs-ready','hshs-js-first');})();</script>
+  <link rel="stylesheet" href="../css/style.css?v=260912shell1">
+  <link rel="stylesheet" href="../css/theme.css?v=260912shell1">
+  <link rel="stylesheet" href="../css/mobile-shell.css?v=260912shell1">
+  <link rel="stylesheet" href="../css/hshs-theme.css?v=260912shell1">
+  <link rel="stylesheet" href="../css/hshs-profile.css?v=260912shell1">
+  <link rel="stylesheet" href="../css/hshs-profile-photo.css?v=260912shell1">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add('hshs-ready', 'hshs-js-first');
+      r.classList.add(window.matchMedia('(max-width:1024px)').matches ? 'hshs-device-mobile' : 'hshs-device-desktop');
+    })();
+  </script>
 </head>
 <body>
   <div id="hshs-page"></div>
-  <script type="module" src="../js/config.js?v=260912dope1"></script>
-  <script type="module" src="../js/hshs-auth-api.js?v=260912dope1"></script>
-  <script type="module" src="../js/db.js?v=260912dope1"></script>
-  <script src="../js/utils.js?v=260912dope1"></script>
-  <script src="../js/theme.js?v=260912dope1"></script>
-  <script src="../js/navigation.js?v=260912dope1"></script>
-  <script src="../js/mobile-navigation.js?v=260912dope1"></script>
-  <script src="../js/search.js?v=260912dope1"></script>
-  <script src="../js/mobile-shell.js?v=260912dope1"></script>
-  <script src="../js/core/bootstrap.js?v=260912dope1"></script>
-  <script src="../js/pages/profile.js?v=260912dope1"></script>
-  <script src="../js/hshs-profile-edit-link.js?v=260912dope1"></script>
-  <script src="../js/hshs-profile-cloud.js?v=260912dope1"></script>
+  <script type="module" src="../js/config.js?v=260912shell1"></script>
+  <script type="module" src="../js/hshs-auth-api.js?v=260912shell1"></script>
+  <script type="module" src="../js/db.js?v=260912shell1"></script>
+  <script src="../js/utils.js?v=260912shell1"></script>
+  <script src="../js/theme.js?v=260912shell1"></script>
+  <script src="../js/navigation.js?v=260912shell1"></script>
+  <script src="../js/mobile-navigation.js?v=260912shell1"></script>
+  <script src="../js/search.js?v=260912shell1"></script>
+  <script src="../js/mobile-shell.js?v=260912shell1"></script>
+  <script src="../js/hshs-brand.js?v=260912shell1"></script>
+  <script src="../js/core/bootstrap.js?v=260912shell1"></script>
+  <script src="../js/pages/profile.js?v=260912shell1"></script>
+  <script src="../js/hshs-profile-edit-link.js?v=260912shell1"></script>
+  <script src="../js/hshs-profile-cloud.js?v=260912shell1"></script>
 </body>
 </html>
