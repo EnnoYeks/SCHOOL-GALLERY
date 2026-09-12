@@ -29,7 +29,7 @@
   }
 
   function ver(url) {
-    var v = '260910stable';
+    var v = '260912gsap';
     return url + (url.indexOf('?') === -1 ? '?' : '&') + 'v=' + v;
   }
 
@@ -87,6 +87,7 @@
     try { await loadScript(ver(base + 'components/shared-ui.js'), 'hshs-comp-shared'); } catch (e) {}
     try { await loadScript(ver(base + 'core/data.js'), 'hshs-core-data'); } catch (e) {}
     try { await loadScript(ver(base + 'core/lifecycle.js'), 'hshs-core-lifecycle'); } catch (e) {}
+    try { await loadScript(ver(base + 'hshs-gsap.js'), 'hshs-gsap'); } catch (e) { console.warn('[HSHS] GSAP motion unavailable', e); }
 
     if (!window.HshsRender || !window.HshsUI || !window.HshsShell) {
       console.error('[HSHS] Foundation incomplete after load');
