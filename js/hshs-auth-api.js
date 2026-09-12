@@ -1,11 +1,14 @@
 /**
  * Firebase Auth API for HSHS World
- * Email/password + profile index for studentId / username login
+ * Email/password + Google + Facebook + profile index
  */
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
   signOut,
   updateProfile,
   onAuthStateChanged,
@@ -29,6 +32,21 @@ function appAuth() {
 }
 function db() {
   return window.firestore || getFirestore(window.firebaseApp);
+}
+
+function makeGoogleProvider() {
+  var provider = new GoogleAuthProvider();
+  provider.addScope("email");
+  provider.addScope("profile");
+  return provider;
+}
+
+function makeFacebookProvider() {
+  var provider = new FacebookAuthProvider();
+  provider.addScope("email");
+  provider.addScope("public_profile");
+  provider.setCustomParameters({ display: "popup" });
+  return provider;
 }
 
 async function lookupUserField(field, value) {
@@ -57,6 +75,12 @@ function normalizeProfile(raw, user) {
     if (v && typeof v.seconds === "number") return v.seconds * 1000;
     return Date.now();
   }
+  var provider = raw.provider || "";
+  try {
+    if (!provider && user && user.providerData && user.providerData[0]) {
+      provider = user.providerData[0].providerId || "";
+    }
+  } catch (e) {}
   return {
     uid: uid,
     email: (raw.email || (user && user.email) || "").toLowerCase(),
@@ -87,6 +111,7 @@ function normalizeProfile(raw, user) {
     allowMessages: raw.allowMessages !== false,
     showActivity: raw.showActivity !== false,
     role: raw.role || "student",
+    provider: provider,
     isAnonymous: false,
     createdAt: ts(raw.createdAt),
     updatedAt: ts(raw.updatedAt)
@@ -110,6 +135,12 @@ async function saveProfile(user, data) {
   var cover = data.coverURL || data.cover || "";
   if (typeof photo === "string" && photo.length > 700000) photo = "";
   if (typeof cover === "string" && cover.length > 700000) cover = "";
+  var provider = data.provider || "";
+  try {
+    if (!provider && user.providerData && user.providerData[0]) {
+      provider = user.providerData[0].providerId || "";
+    }
+  } catch (e) {}
 
   var profile = {
     uid: uid,
@@ -141,6 +172,7 @@ async function saveProfile(user, data) {
     allowMessages: data.allowMessages !== false,
     showActivity: data.showActivity !== false,
     role: data.role || "student",
+    provider: provider,
     updatedAt: serverTimestamp(),
     isAnonymous: false
   };
@@ -212,6 +244,14 @@ async function signUpWithEmail(email, password) {
   return createUserWithEmailAndPassword(appAuth(), email, password);
 }
 
+async function signInWithGoogle() {
+  return signInWithPopup(appAuth(), makeGoogleProvider());
+}
+
+async function signInWithFacebook() {
+  return signInWithPopup(appAuth(), makeFacebookProvider());
+}
+
 async function signOutUser() {
   try {
     localStorage.removeItem("userProfile");
@@ -270,6 +310,8 @@ window.HshsAuthApi = {
   persistProfileLocal: persistProfileLocal,
   signInWithEmail: signInWithEmail,
   signUpWithEmail: signUpWithEmail,
+  signInWithGoogle: signInWithGoogle,
+  signInWithFacebook: signInWithFacebook,
   signOutUser: signOutUser,
   sendPasswordReset: sendPasswordReset,
   activityForUser: activityForUser,

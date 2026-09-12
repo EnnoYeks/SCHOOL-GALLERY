@@ -1,6 +1,9 @@
 /**
  * HSHS World · FirebaseUI login (Google, Facebook, Email)
  * + school Student ID / Username fallback
+ *
+ * Facebook uses signInWithPopup (not redirect) so Vercel preview
+ * domains do not get stuck on auth/unauthorized-domain redirects.
  */
 (function () {
   var firebaseConfig = {
@@ -40,6 +43,30 @@
     el.className = "hshs-auth-msg" + (text ? (ok ? " is-ok" : " is-error") : "");
   }
 
+  function friendlyAuthError(err) {
+    var code = (err && err.code) || "";
+    var map = {
+      "auth/unauthorized-domain":
+        "This site domain is not allowed yet. In Firebase Console → Authentication → Settings → Authorized domains, add hshsgallery.vercel.app.",
+      "auth/operation-not-allowed":
+        "Facebook sign-in is not enabled yet. In Firebase Console → Authentication → Sign-in method, enable Facebook and paste the App ID and App Secret.",
+      "auth/popup-blocked":
+        "Your browser blocked the Facebook window. Allow popups for this site and try again.",
+      "auth/popup-closed-by-user":
+        "Facebook window was closed before finishing sign-in.",
+      "auth/cancelled-popup-request":
+        "Sign-in was cancelled. Try again.",
+      "auth/account-exists-with-different-credential":
+        "That email already has an HSHS World account (probably Google or email). Sign in with that method first.",
+      "auth/user-disabled":
+        "This account has been disabled. Contact school admin.",
+      "auth/network-request-failed":
+        "Network error. Check your connection and try again."
+    };
+    if (map[code]) return map[code];
+    return (err && err.message) || "Facebook sign-in failed.";
+  }
+
   function storeProfile(profile) {
     try {
       localStorage.setItem("userProfile", JSON.stringify(profile));
@@ -54,10 +81,20 @@
     } catch (e) {}
   }
 
-  async function ensureUserDoc(user) {
+  function providerFromUser(user) {
+    try {
+      var p = user && user.providerData && user.providerData[0];
+      return (p && p.providerId) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  async function ensureUserDoc(user, method) {
     if (!user || user.isAnonymous) return null;
     var ref = db.collection("users").doc(user.uid);
     var snap = await ref.get();
+    var provider = method || providerFromUser(user);
     var base = {
       uid: user.uid,
       email: (user.email || "").toLowerCase(),
@@ -65,6 +102,7 @@
       name: user.displayName || "HSHS Student",
       photoURL: user.photoURL || "",
       avatar: user.photoURL || "",
+      provider: provider,
       isAnonymous: false,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
@@ -86,6 +124,7 @@
         fullName: base.fullName || snap.data().fullName,
         photoURL: base.photoURL || snap.data().photoURL || "",
         avatar: base.photoURL || snap.data().avatar || "",
+        provider: provider || snap.data().provider || "",
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         isAnonymous: false
       },
@@ -95,6 +134,7 @@
       email: base.email || snap.data().email,
       fullName: base.fullName || snap.data().fullName,
       photoURL: base.photoURL || snap.data().photoURL,
+      provider: provider || snap.data().provider || "",
       updatedAt: Date.now()
     });
     return data;
@@ -114,15 +154,17 @@
             "firebaseui"
         );
       }
-      var profile = await ensureUserDoc(user);
+      var profile = await ensureUserDoc(user, method);
       storeProfile(
         profile || {
           uid: user.uid,
           email: user.email || "",
           fullName: user.displayName || "HSHS Student",
-          photoURL: user.photoURL || ""
+          photoURL: user.photoURL || "",
+          provider: method || providerFromUser(user)
         }
       );
+      msg("Signed in — opening HSHS World…", true);
       if (needsSchoolFields(profile)) {
         location.href = "edit-profile.html?welcome=1";
         return;
@@ -137,6 +179,38 @@
     }
   }
 
+  function facebookProvider() {
+    var provider = new firebase.auth.FacebookAuthProvider();
+    provider.addScope("email");
+    provider.addScope("public_profile");
+    provider.setCustomParameters({ display: "popup" });
+    return provider;
+  }
+
+  function googleProvider() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope("email");
+    provider.addScope("profile");
+    return provider;
+  }
+
+  async function popupSignIn(kind) {
+    msg("Opening " + (kind === "facebook" ? "Facebook" : "Google") + "…");
+    var provider = kind === "facebook" ? facebookProvider() : googleProvider();
+    try {
+      var result = await auth.signInWithPopup(provider);
+      window.__hshsFuiHandled = true;
+      await finishSignIn(result.user, kind === "facebook" ? "facebook.com" : "google.com");
+    } catch (err) {
+      if (err && err.code === "auth/popup-closed-by-user") {
+        msg("");
+        return;
+      }
+      console.error("[auth] " + kind, err);
+      msg(friendlyAuthError(err));
+    }
+  }
+
   var uiConfig = {
     signInFlow: "popup",
     signInSuccessUrl: nextUrl(),
@@ -147,7 +221,8 @@
       },
       {
         provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        fullLabel: "Continue with Facebook"
+        fullLabel: "Continue with Facebook",
+        scopes: ["email", "public_profile"]
       },
       {
         provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -157,18 +232,19 @@
     ],
     callbacks: {
       signInSuccessWithAuthResult: function (authResult) {
+        if (window.__hshsFuiHandled) return false;
         finishSignIn(authResult.user);
         return false;
       },
       signInFailure: function (error) {
-        msg((error && error.message) || "Sign-in failed.");
+        msg(friendlyAuthError(error) || (error && error.message) || "Sign-in failed.");
         return Promise.resolve();
       },
       uiShown: function () {
         msg("");
       }
     },
-    credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
+    credentialHelper: firebaseui.auth.CredentialHelper.NONE
   };
 
   try {
@@ -176,8 +252,21 @@
     ui.start("#firebaseui-auth-container", uiConfig);
   } catch (e) {
     console.error("[firebaseui]", e);
-    msg("Could not load sign-in UI. Enable Google/Facebook/Email in Firebase Console.");
+    msg("Could not load sign-in UI. Enable Google / Facebook / Email in Firebase Console.");
   }
+
+  document.addEventListener(
+    "click",
+    function (e) {
+      var fb = e.target.closest && e.target.closest(".firebaseui-idp-facebook");
+      var gg = e.target.closest && e.target.closest(".firebaseui-idp-google");
+      if (!fb && !gg) return;
+      e.preventDefault();
+      e.stopPropagation();
+      popupSignIn(fb ? "facebook" : "google");
+    },
+    true
+  );
 
   var method = "studentId";
   document.querySelectorAll("[data-login-method]").forEach(function (btn) {
@@ -251,7 +340,7 @@
           }
         }
         if (!email) {
-          msg("Account found but has no email. Use Google / email sign-in.");
+          msg("Account found but has no email. Use Google / Facebook / email sign-in.");
           return;
         }
         var cred = await auth.signInWithEmailAndPassword(email, password);
