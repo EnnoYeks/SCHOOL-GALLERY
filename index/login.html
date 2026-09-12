@@ -11,8 +11,8 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css">
-  <link rel="stylesheet" href="../css/hshs-auth.css?v=260911fui">
-  <link rel="stylesheet" href="../css/hshs-firebaseui.css?v=260911fui">
+  <link rel="stylesheet" href="../css/hshs-auth.css?v=260912auth1">
+  <link rel="stylesheet" href="../css/hshs-firebaseui.css?v=260912auth1">
   <script>(function(){document.documentElement.classList.add('hshs-ready');})();</script>
 </head>
 <body class="hshs-auth-page hshs-auth-body">
@@ -24,48 +24,9 @@
     </div>
 
     <div class="hshs-auth-card">
-      <p class="hshs-auth-hint" style="margin-top:0;text-align:center">Sign in with Google, Facebook, or email</p>
+      <p class="hshs-auth-hint" style="margin-top:0;text-align:center">Sign in with Google or email &amp; password</p>
       <div id="firebaseui-auth-container"></div>
       <p id="authMsg" class="hshs-auth-msg" role="status"></p>
-
-      <details class="hshs-school-login">
-        <summary>School login · Student ID or Username</summary>
-        <div class="hshs-school-login-body">
-          <div class="hshs-auth-methods" role="tablist" aria-label="School login method">
-            <button type="button" data-login-method="studentId" class="is-on"><i class="fas fa-id-card"></i>Student ID</button>
-            <button type="button" data-login-method="username"><i class="fas fa-at"></i>Username</button>
-          </div>
-          <form id="authSchoolForm" autocomplete="on">
-            <div data-method-panel="studentId">
-              <label class="hshs-field">
-                <span>Student ID</span>
-                <div class="hshs-field-input">
-                  <i class="fas fa-id-card lead"></i>
-                  <input id="loginStudentId" type="text" placeholder="e.g. HSHS-2026-0142" autocomplete="off">
-                </div>
-              </label>
-            </div>
-            <div data-method-panel="username" hidden>
-              <label class="hshs-field">
-                <span>Username</span>
-                <div class="hshs-field-input">
-                  <i class="fas fa-at lead"></i>
-                  <input id="loginUsername" type="text" placeholder="yourname" autocapitalize="none" autocomplete="username">
-                </div>
-              </label>
-            </div>
-            <label class="hshs-field">
-              <span>Password</span>
-              <div class="hshs-field-input">
-                <i class="fas fa-lock lead"></i>
-                <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required minlength="6">
-                <button type="button" class="toggle-pw" data-toggle-password="loginPassword" aria-label="Show password"><i class="fas fa-eye"></i></button>
-              </div>
-            </label>
-            <button type="submit" class="hshs-auth-submit">Sign in with school ID</button>
-          </form>
-        </div>
-      </details>
     </div>
 
     <a class="hshs-auth-skip" href="../index.html">Continue as guest</a>
@@ -86,7 +47,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.js"></script>
-  <script src="../js/hshs-analytics.js?v=260911ga1"></script>
-  <script src="../js/hshs-firebaseui.js?v=260911fui"></script>
+  <script src="../js/hshs-analytics.js?v=260912auth1"></script>
+  <script src="../js/hshs-firebaseui.js?v=260912auth1"></script>
 </body>
 </html>
