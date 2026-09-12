@@ -41,7 +41,7 @@
   }
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
-      return { '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' }[c];
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
   function abbr(n) {
@@ -62,17 +62,15 @@
     if (document.querySelector('link[data-hshs-profile-css]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = base() + 'css/hshs-profile.css?v=260912dope1';
+    l.href = base() + 'css/hshs-profile.css?v=260912shell1';
     l.setAttribute('data-hshs-profile-css', '1');
     document.head.appendChild(l);
   }
 
-  /** Absolute path to login, with next= so we return here after auth */
   function loginUrl() {
     var next = location.pathname + location.search;
     var path = base() + 'index/login.html';
     try {
-      // Prefer absolute so SPA interceptors can't rewrite incorrectly
       var u = new URL(path, location.href);
       u.searchParams.set('next', next);
       return u.pathname + u.search;
@@ -410,7 +408,7 @@
         }
       },
       true
-    ); // capture phase so SPA link interceptors don't block us
+    );
 
     document.addEventListener('hshs:auth', function () {
       if (isPage()) paint();
@@ -420,21 +418,55 @@
     });
   }
 
+  function ensureSharedChrome() {
+    document.body.classList.add('has-mobile-shell', 'hshs-nav-slim');
+    try {
+      if (g.HshsShell && typeof g.HshsShell.ensureShell === 'function') g.HshsShell.ensureShell();
+    } catch (e) {}
+    if (!document.querySelector('.navbar')) {
+      var tries = 0;
+      var iv = setInterval(function () {
+        tries++;
+        try {
+          if (g.HshsShell && g.HshsShell.ensureShell) g.HshsShell.ensureShell();
+        } catch (e) {}
+        if (document.querySelector('.navbar') || tries > 25) clearInterval(iv);
+      }, 80);
+    }
+    try {
+      var logo = document.querySelector('.logo');
+      if (logo && !logo.querySelector('.brand-copy')) {
+        document.dispatchEvent(new Event('hshs:page'));
+      }
+    } catch (e) {}
+    var nav = document.querySelector('.navbar');
+    if (nav) {
+      nav.style.display = '';
+      nav.hidden = false;
+      nav.classList.add('hshs-flat-top');
+    }
+    var bar = document.querySelector('.mobile-tabbar');
+    if (bar) {
+      bar.style.display = '';
+      bar.hidden = false;
+    }
+  }
+
   function mount() {
     if (!isPage() || !g.HshsRender || !g.HshsTemplates || !g.HshsTemplates.profile) return;
-    if (g.HshsShell)
-      try {
-        g.HshsShell.ensureShell();
-      } catch (e) {}
+    ensureSharedChrome();
     var root = document.getElementById('hshs-page');
     if (!root) {
       root = document.createElement('div');
       root.id = 'hshs-page';
-      document.body.appendChild(root);
+      var nav = document.querySelector('.navbar');
+      if (nav && nav.parentNode) nav.parentNode.insertBefore(root, nav.nextSibling);
+      else document.body.appendChild(root);
     }
     loadCss();
     g.HshsRender.mountHTML(root, g.HshsTemplates.profile);
     document.documentElement.setAttribute('data-hshs-page', PAGE);
+    ensureSharedChrome();
     bind();
     paint();
   }
