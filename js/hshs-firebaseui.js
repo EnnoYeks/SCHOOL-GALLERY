@@ -1,6 +1,5 @@
 /**
- * HSHS World · FirebaseUI login (Google, Facebook, Email)
- * + school Student ID / Username fallback
+ * HSHS World · FirebaseUI login (Google + Email/password only)
  */
 (function () {
   var firebaseConfig = {
@@ -102,7 +101,7 @@
 
   function needsSchoolFields(profile) {
     if (!profile) return true;
-    return !profile.studentId || !profile.username;
+    return !profile.username;
   }
 
   async function finishSignIn(user, method) {
@@ -146,10 +145,6 @@
         fullLabel: "Continue with Google"
       },
       {
-        provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        fullLabel: "Continue with Facebook"
-      },
-      {
         provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
         requireDisplayName: true,
         fullLabel: "Continue with Email"
@@ -176,97 +171,6 @@
     ui.start("#firebaseui-auth-container", uiConfig);
   } catch (e) {
     console.error("[firebaseui]", e);
-    msg("Could not load sign-in UI. Enable Google/Facebook/Email in Firebase Console.");
-  }
-
-  var method = "studentId";
-  document.querySelectorAll("[data-login-method]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      method = btn.getAttribute("data-login-method");
-      document.querySelectorAll("[data-login-method]").forEach(function (b) {
-        b.classList.toggle("is-on", b === btn);
-      });
-      document.querySelectorAll("[data-method-panel]").forEach(function (p) {
-        p.hidden = p.getAttribute("data-method-panel") !== method;
-      });
-    });
-  });
-
-  document.querySelectorAll("[data-toggle-password]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var id = btn.getAttribute("data-toggle-password");
-      var input = document.getElementById(id);
-      if (!input) return;
-      input.type = input.type === "password" ? "text" : "password";
-      var icon = btn.querySelector("i");
-      if (icon) icon.className = input.type === "password" ? "fas fa-eye" : "fas fa-eye-slash";
-    });
-  });
-
-  var schoolForm = document.getElementById("authSchoolForm");
-  if (schoolForm) {
-    schoolForm.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      var password = (document.getElementById("loginPassword") || {}).value || "";
-      if (password.length < 6) {
-        msg("Enter your password.");
-        return;
-      }
-      var email = null;
-      try {
-        msg("Looking up account…");
-        if (method === "studentId") {
-          var sid = ((document.getElementById("loginStudentId") || {}).value || "").trim();
-          if (!sid) {
-            msg("Enter your student ID.");
-            return;
-          }
-          var idx = await db.collection("userIndex").doc("studentId_" + sid).get();
-          if (!idx.exists) {
-            var q = await db.collection("users").where("studentId", "==", sid).limit(1).get();
-            if (q.empty) {
-              msg("No account with that student ID.");
-              return;
-            }
-            email = (q.docs[0].data().email || "").toLowerCase();
-          } else {
-            email = (idx.data().email || "").toLowerCase();
-          }
-        } else {
-          var un = ((document.getElementById("loginUsername") || {}).value || "").trim().toLowerCase();
-          if (!un) {
-            msg("Enter your username.");
-            return;
-          }
-          var idx2 = await db.collection("userIndex").doc("username_" + un).get();
-          if (!idx2.exists) {
-            var q2 = await db.collection("users").where("username", "==", un).limit(1).get();
-            if (q2.empty) {
-              msg("No account with that username.");
-              return;
-            }
-            email = (q2.docs[0].data().email || "").toLowerCase();
-          } else {
-            email = (idx2.data().email || "").toLowerCase();
-          }
-        }
-        if (!email) {
-          msg("Account found but has no email. Use Google / email sign-in.");
-          return;
-        }
-        var cred = await auth.signInWithEmailAndPassword(email, password);
-        window.__hshsFuiHandled = true;
-        await finishSignIn(cred.user, "school_" + method);
-      } catch (err) {
-        var code = err && err.code;
-        if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
-          msg("Wrong password.");
-        } else if (code === "auth/user-not-found") {
-          msg("Account not found.");
-        } else {
-          msg((err && err.message) || "Sign-in failed.");
-        }
-      }
-    });
+    msg("Could not load sign-in UI. Enable Google and Email in Firebase Console.");
   }
 })();
