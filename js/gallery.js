@@ -7,7 +7,7 @@ class GalleryPage {
     constructor() {
         this.currentCategory = 'all';
         this.currentPage = 0;
-        this.postsPerPage = CONFIG.pagination.postsPerPage;
+        this.postsPerPage = (window.CONFIG && CONFIG.pagination && CONFIG.pagination.postsPerPage) || 10;
         this.observer = null;
         this.currentlyLoading = false;
         this.init();
@@ -17,8 +17,8 @@ class GalleryPage {
         this.setupCategoryFilter();
         await this.loadPosts();
         this.setupInfiniteScroll();
-        this.setupSwipeNavigation();
         this.setupDoubleClick();
+        this.setupSwipeNavigation();
     }
 
     setupCategoryFilter() {
@@ -37,15 +37,28 @@ class GalleryPage {
         });
     }
 
+    async readPosts() {
+        var list = [];
+        try {
+            if (window.db && typeof db.getPosts === 'function') {
+                list = await db.getPosts(80, 0);
+            }
+        } catch (e) { list = []; }
+        if ((!list || !list.length) && window.HshsStore && typeof HshsStore.listPosts === 'function') {
+            list = HshsStore.listPosts();
+        }
+        return Array.isArray(list) ? list : [];
+    }
+
     async loadPosts() {
         const feed = document.getElementById('galleryFeed');
         if (!feed || this.currentlyLoading) return;
 
         this.currentlyLoading = true;
-        const allPosts = await db.getPosts(this.postsPerPage * (this.currentPage + 1), 0);
+        const allPosts = await this.readPosts();
         const filteredPosts = this.currentCategory === 'all'
             ? allPosts
-            : allPosts.filter(p => p.category === this.currentCategory);
+            : allPosts.filter(p => (p.category || '') === this.currentCategory);
 
         const startIndex = this.currentPage * this.postsPerPage;
         const endIndex = startIndex + this.postsPerPage;
@@ -53,6 +66,12 @@ class GalleryPage {
 
         if (this.currentPage === 0) {
             feed.innerHTML = '';
+        }
+
+        if (!pagePosts.length && this.currentPage === 0) {
+            feed.innerHTML = '<div class="post-loading"><p>No posts in this category yet. Try All.</p></div>';
+            this.currentlyLoading = false;
+            return;
         }
 
         pagePosts.forEach((post, index) => {
@@ -69,46 +88,49 @@ class GalleryPage {
         const card = document.createElement('div');
         card.className = 'post-card';
         card.setAttribute('data-post-id', post.id);
+        const img = post.image || post.imageUrl || post.thumbnailUrl || '';
+        const title = post.title || 'Campus post';
+        const desc = post.description || '';
+        const author = post.author || 'HSHS';
+        const cut = (window.Utils && Utils.truncateText) ? Utils.truncateText(desc, 150) : desc;
+        const when = (window.Utils && Utils.formatDate) ? Utils.formatDate(post.createdAt || Date.now()) : '';
+        const num = (n) => (window.Utils && Utils.formatNumber) ? Utils.formatNumber(n || 0) : (n || 0);
         card.innerHTML = `
             <div class="post-content">
-                <img src="${post.image}" alt="${post.title}" class="post-media">
+                <img src="${img}" alt="${title}" class="post-media">
                 <div class="post-overlay"></div>
-                
                 <div class="post-info">
-                    <h2 class="post-title">${post.title}</h2>
-                    <p class="post-description">${Utils.truncateText(post.description, 150)}</p>
+                    <h2 class="post-title">${title}</h2>
+                    <p class="post-description">${cut}</p>
                     <div class="post-meta">
                         <div class="meta-item">
-                            <i class="fas fa-user"></i> ${post.author}
+                            <i class="fas fa-user"></i> ${author}
                         </div>
                         <div class="meta-item">
-                            <i class="fas fa-calendar"></i> ${Utils.formatDate(post.createdAt)}
+                            <i class="fas fa-calendar"></i> ${when}
                         </div>
                     </div>
                 </div>
-
-                <!-- Side Actions -->
                 <div class="side-actions">
-                    <button class="action-btn like-action" onclick="reactionManager.toggleLike('${post.id}')">
+                    <button class="action-btn like-action" type="button">
                         <i class="far fa-heart"></i>
-                        <div class="action-count">${Utils.formatNumber(post.likes)}</div>
+                        <div class="action-count">${num(post.likes)}</div>
                     </button>
-                    <button class="action-btn comment-action">
+                    <button class="action-btn comment-action" type="button">
                         <i class="far fa-comment"></i>
-                        <div class="action-count">${Utils.formatNumber(post.comments)}</div>
+                        <div class="action-count">${num(post.comments)}</div>
                     </button>
-                    <button class="action-btn share-action" onclick="reactionManager.sharePost('${post.id}')">
+                    <button class="action-btn share-action" type="button">
                         <i class="fas fa-share"></i>
-                        <div class="action-count">${Utils.formatNumber(post.shares)}</div>
+                        <div class="action-count">${num(post.shares)}</div>
                     </button>
-                    <button class="action-btn save-action">
+                    <button class="action-btn save-action" type="button">
                         <i class="far fa-bookmark"></i>
-                        <div class="action-count">${Utils.formatNumber(post.saves || 0)}</div>
+                        <div class="action-count">${num(post.saves)}</div>
                     </button>
                 </div>
             </div>
         `;
-
         return card;
     }
 
@@ -116,13 +138,6 @@ class GalleryPage {
         const feed = document.getElementById('galleryFeed');
         if (!feed) return;
 
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                this.loadPosts();
-            }
-        }, { threshold: 0.1 });
-
-        // Observe last element
         this.observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
                 this.loadPosts();
@@ -156,18 +171,10 @@ class GalleryPage {
             this.handleSwipe();
         }, false);
 
-        const handleSwipe = () => {
-            if (touchEndX < touchStartX - 50) {
-                // Swiped left - next post
-                this.nextPost();
-            }
-            if (touchEndX > touchStartX + 50) {
-                // Swiped right - previous post
-                this.previousPost();
-            }
+        this.handleSwipe = () => {
+            if (touchEndX < touchStartX - 50) this.nextPost();
+            if (touchEndX > touchStartX + 50) this.previousPost();
         };
-
-        this.handleSwipe = handleSwipe;
     }
 
     setupDoubleClick() {
@@ -177,9 +184,7 @@ class GalleryPage {
         feed.addEventListener('dblclick', (e) => {
             if (e.target.classList.contains('post-media')) {
                 const card = e.target.closest('.post-card');
-                const postId = card.getAttribute('data-post-id');
-                
-                reactionManager.toggleLike(postId);
+                if (!card) return;
                 this.showDoubleTapLike();
             }
         });
@@ -197,7 +202,7 @@ class GalleryPage {
 
     nextPost() {
         const feed = document.getElementById('galleryFeed');
-        const firstCard = feed.querySelector('.post-card');
+        const firstCard = feed && feed.querySelector('.post-card');
         if (firstCard) {
             firstCard.style.animation = 'slideLeft 0.5s ease';
             setTimeout(() => {
@@ -208,18 +213,21 @@ class GalleryPage {
     }
 
     previousPost() {
-        Utils.showToast('Already at the beginning', 'info');
+        if (window.Utils && Utils.showToast) Utils.showToast('Already at the beginning', 'info');
     }
 }
 
-// Initialize gallery when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('galleryFeed')) {
-        new GalleryPage();
-    }
-});
+window.GalleryPage = GalleryPage;
 
-// Export for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GalleryPage;
+function bootGallery() {
+    if (window.__hshsGalleryPage) return;
+    if (document.getElementById('galleryFeed')) {
+        window.__hshsGalleryPage = new GalleryPage();
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootGallery);
+} else {
+    bootGallery();
 }
