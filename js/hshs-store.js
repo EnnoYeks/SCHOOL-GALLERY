@@ -13,12 +13,6 @@
 
     function now() { return Date.now(); }
     function id(prefix) { return (prefix || 'id') + '-' + Math.random().toString(36).slice(2, 9); }
-    function pinHash(pin) {
-        var n = String(pin || '');
-        var h = 7;
-        for (var i = 0; i < n.length; i++) h = ((h * 31) + n.charCodeAt(i)) >>> 0;
-        return 'p' + h.toString(16);
-    }
     function slugify(name) {
         return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 18) || 'student';
     }
@@ -46,6 +40,7 @@
             u.chatTheme = u.chatTheme || 'ocean';
             u.bubbleStyle = u.bubbleStyle || 'rounded';
             u.lastSeen = u.lastSeen || now() - Math.floor(Math.random() * 600000);
+            if (u.pin) delete u.pin;
             return u;
         });
         return s;
@@ -57,14 +52,14 @@
     }
     function seed() {
         var users = [
-            { id: 'u-demo', name: 'Amina Namukasa', username: 'amina_s4', classYear: 'S4', role: 'Student', bio: 'Sports, track days, and school vibes.', avatar: '', pin: pinHash('1234'), chatTheme: 'ocean', bubbleStyle: 'rounded', lastSeen: now(), createdAt: now() - 86400000 * 20 },
-            { id: 'u-prefect', name: 'Joel Wambede', username: 'joel_pref', classYear: 'S6', role: 'Prefect', bio: 'Prefect desk. Keep it school-safe.', avatar: '', pin: pinHash('2468'), chatTheme: 'grape', bubbleStyle: 'rounded', lastSeen: now() - 20000, createdAt: now() - 86400000 * 40 },
-            { id: 'u-sports', name: 'Sports Club', username: 'hshs_sports', classYear: 'Campus', role: 'Club', bio: 'Match days, drills, and house spirit.', avatar: '', pin: pinHash('1111'), chatTheme: 'mint', bubbleStyle: 'soft', lastSeen: now() - 120000, createdAt: now() - 86400000 * 50 },
-            { id: 'u-choir', name: 'Choir Desk', username: 'hshs_choir', classYear: 'Music', role: 'Club', bio: 'Rehearsals and assembly anthems.', avatar: '', pin: pinHash('2222'), chatTheme: 'sunset', bubbleStyle: 'soft', lastSeen: now() - 300000, createdAt: now() - 86400000 * 55 },
-            { id: 'u-lab', name: 'Science Lab', username: 'stem_lab', classYear: 'STEM', role: 'Department', bio: 'Experiments, fairs, and lab notes.', avatar: '', pin: pinHash('3333'), chatTheme: 'slate', bubbleStyle: 'square', lastSeen: now() - 900000, createdAt: now() - 86400000 * 60 },
-            { id: 'u-house', name: 'House Captains', username: 'house_caps', classYear: 'Houses', role: 'Leadership', bio: 'House points and spirit days.', avatar: '', pin: pinHash('4444'), chatTheme: 'rose', bubbleStyle: 'rounded', lastSeen: now() - 45000, createdAt: now() - 86400000 * 62 },
-            { id: 'u-maya', name: 'Maya Okello', username: 'maya_lens', classYear: 'S5', role: 'Student', bio: 'Photography club. Capturing campus light.', avatar: '', pin: pinHash('5555'), chatTheme: 'ocean', bubbleStyle: 'soft', lastSeen: now() - 8000, createdAt: now() - 86400000 * 12 },
-            { id: 'u-brian', name: 'Brian Kato', username: 'brian_k', classYear: 'S3', role: 'Student', bio: 'Football and Friday vibes.', avatar: '', pin: pinHash('6666'), chatTheme: 'mint', bubbleStyle: 'rounded', lastSeen: now() - 180000, createdAt: now() - 86400000 * 8 }
+            { id: 'u-demo', name: 'Amina Namukasa', username: 'amina_s4', classYear: 'S4', role: 'Student', bio: 'Sports, track days, and school vibes.', avatar: '', chatTheme: 'ocean', bubbleStyle: 'rounded', lastSeen: now(), createdAt: now() - 86400000 * 20 },
+            { id: 'u-prefect', name: 'Joel Wambede', username: 'joel_pref', classYear: 'S6', role: 'Prefect', bio: 'Prefect desk. Keep it school-safe.', avatar: '', chatTheme: 'grape', bubbleStyle: 'rounded', lastSeen: now() - 20000, createdAt: now() - 86400000 * 40 },
+            { id: 'u-sports', name: 'Sports Club', username: 'hshs_sports', classYear: 'Campus', role: 'Club', bio: 'Match days, drills, and house spirit.', avatar: '', chatTheme: 'mint', bubbleStyle: 'soft', lastSeen: now() - 120000, createdAt: now() - 86400000 * 50 },
+            { id: 'u-choir', name: 'Choir Desk', username: 'hshs_choir', classYear: 'Music', role: 'Club', bio: 'Rehearsals and assembly anthems.', avatar: '', chatTheme: 'sunset', bubbleStyle: 'soft', lastSeen: now() - 300000, createdAt: now() - 86400000 * 55 },
+            { id: 'u-lab', name: 'Science Lab', username: 'stem_lab', classYear: 'STEM', role: 'Department', bio: 'Experiments, fairs, and lab notes.', avatar: '', chatTheme: 'slate', bubbleStyle: 'square', lastSeen: now() - 900000, createdAt: now() - 86400000 * 60 },
+            { id: 'u-house', name: 'House Captains', username: 'house_caps', classYear: 'Houses', role: 'Leadership', bio: 'House points and spirit days.', avatar: '', chatTheme: 'rose', bubbleStyle: 'rounded', lastSeen: now() - 45000, createdAt: now() - 86400000 * 62 },
+            { id: 'u-maya', name: 'Maya Okello', username: 'maya_lens', classYear: 'S5', role: 'Student', bio: 'Photography club. Capturing campus light.', avatar: '', chatTheme: 'ocean', bubbleStyle: 'soft', lastSeen: now() - 8000, createdAt: now() - 86400000 * 12 },
+            { id: 'u-brian', name: 'Brian Kato', username: 'brian_k', classYear: 'S3', role: 'Student', bio: 'Football and Friday vibes.', avatar: '', chatTheme: 'mint', bubbleStyle: 'rounded', lastSeen: now() - 180000, createdAt: now() - 86400000 * 8 }
         ];
         var posts = [
             { id: 'p1', type: 'photo', title: 'Sports Day 2026', description: 'Track finals on the main field.', category: 'sports', classTag: 'S4', image: PICS[0], imageUrl: PICS[0], thumbnailUrl: PICS[0], author: 'Amina Namukasa', authorId: 'u-demo', likes: 42, views: 310, comments: 6, shares: 4, createdAt: now() - 86400000 * 2 },
@@ -75,7 +70,7 @@
         ];
         return save({
             users: users,
-            sessionUserId: 'u-demo',
+            sessionUserId: null,
             posts: posts,
             follows: [
                 { followerId: 'u-demo', followingId: 'u-prefect', createdAt: now() - 86400000 },
@@ -118,7 +113,8 @@
         if (user && !user.username) user.username = slugify(user.name);
         return user;
     }
-    function pairKey(a, b) { return [a, b].sort().join('__'); }
+    function pairKey(a, b) { return [a, b].sort().join('__');
+    }
     function pushNotify(userId, type, title, message, data) {
         var s = state();
         s.notifications.unshift({
@@ -163,13 +159,12 @@
                 return String(u.classYear || '').toLowerCase() === k;
             });
         },
+        // Local demo helpers only — real auth is Firebase email/password or Google
         signup: function (data) {
             var s = state();
             var name = String(data.name || '').trim();
-            var pin = String(data.pin || '').trim();
             var username = slugify(data.username || name);
-            if (name.length < 2) return { ok: false, error: 'Enter your school name.' };
-            if (!/^\d{4}$/.test(pin)) return { ok: false, error: 'Use a 4-digit school PIN.' };
+            if (name.length < 2) return { ok: false, error: 'Enter your name.' };
             if (s.users.some(function (u) { return u.name.toLowerCase() === name.toLowerCase(); })) {
                 return { ok: false, error: 'That name already has an account. Switch instead.' };
             }
@@ -180,24 +175,15 @@
                 id: id('u'), name: name, username: username, classYear: data.classYear || 'S1',
                 role: data.role || 'Student', bio: data.bio || 'New HSHS World member.', avatar: data.avatar || '',
                 chatTheme: data.chatTheme || 'ocean', bubbleStyle: data.bubbleStyle || 'rounded',
-                pin: pinHash(pin), lastSeen: now(), createdAt: now()
+                lastSeen: now(), createdAt: now()
             };
             s.users.push(user);
             s.sessionUserId = user.id;
             save(s);
             return { ok: true, user: user };
         },
-        login: function (name, pin) {
-            var s = state();
-            var q = String(name || '').trim().toLowerCase().replace(/^@/, '');
-            var user = s.users.find(function (u) {
-                return u.name.toLowerCase() === q || String(u.username || '').toLowerCase() === q;
-            });
-            if (!user || user.pin !== pinHash(pin)) return { ok: false, error: 'Name, username, or PIN did not match.' };
-            s.sessionUserId = user.id;
-            user.lastSeen = now();
-            save(s);
-            return { ok: true, user: ensureUsername(user) };
+        login: function () {
+            return { ok: false, error: 'Use email/password or Google sign-in on the login page.' };
         },
         switchUser: function (uid) {
             var s = state();
@@ -326,36 +312,20 @@
             return { ok: true, status: 'outgoing', request: req };
         },
         acceptFriend: function (requestId) {
-            var s = state();
-            var me = s.sessionUserId;
-            var req = s.friendRequests.find(function (r) { return r.id === requestId; });
-            if (!req || req.toId !== me || req.status !== 'pending') return { ok: false, error: 'Request not found.' };
-            req.status = 'accepted';
-            var key = pairKey(req.fromId, req.toId);
-            if (!s.friends.some(function (f) { return pairKey(f.a, f.b) === key; })) {
-                s.friends.push({ a: req.fromId, b: req.toId, createdAt: now() });
-            }
-            save(s);
-            var meUser = userById(me);
-            pushNotify(req.fromId, 'friend_accept', 'Friend request accepted', (meUser ? meUser.name : 'Someone') + ' accepted your request', { userId: me });
-            return { ok: true, status: 'friends' };
+            return { ok: false, error: 'Use the notifications UI.' };
         },
-        declineFriend: function (requestId) {
-            var s = state();
-            var me = s.sessionUserId;
-            var req = s.friendRequests.find(function (r) { return r.id === requestId; });
-            if (!req || req.toId !== me) return { ok: false, error: 'Request not found.' };
-            req.status = 'declined';
-            save(s);
-            return { ok: true, status: 'declined' };
+        listPosts: function () { return state().posts.slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }); },
+        postsByUser: function (uid) {
+            return state().posts.filter(function (p) { return p.authorId === uid; });
         },
-        listNotifications: function (limitN) {
+        listNotifications: function (max) {
+            max = max || 40;
             var me = state().sessionUserId;
-            return state().notifications.filter(function (n) { return n.userId === me; }).slice(0, limitN || 30);
+            return state().notifications.filter(function (n) { return !me || n.userId === me; }).slice(0, max);
         },
         unreadNotifications: function () {
             var me = state().sessionUserId;
-            return state().notifications.filter(function (n) { return n.userId === me && !n.read; }).length;
+            return state().notifications.filter(function (n) { return (!me || n.userId === me) && !n.read; }).length;
         },
         markNotificationRead: function (nid) {
             var s = state();
@@ -365,144 +335,10 @@
         markAllNotificationsRead: function () {
             var s = state();
             var me = s.sessionUserId;
-            s.notifications.forEach(function (n) { if (n.userId === me) n.read = true; });
-            save(s);
-        },
-        followersOf: function (uid) {
-            return state().follows.filter(function (f) { return f.followingId === uid; }).map(function (f) { return userById(f.followerId); }).filter(Boolean);
-        },
-        followingOf: function (uid) {
-            return state().follows.filter(function (f) { return f.followerId === uid; }).map(function (f) { return userById(f.followingId); }).filter(Boolean);
-        },
-        listPosts: function () { return state().posts.slice().sort(function (a, b) { return b.createdAt - a.createdAt; }); },
-        listPhotos: function () {
-            return api.listPosts().filter(function (p) { return p.type !== 'video'; }).map(function (p) {
-                return Object.assign({}, p, { image: p.image || p.imageUrl });
+            s.notifications.forEach(function (n) {
+                if (!me || n.userId === me) n.read = true;
             });
-        },
-        listVideos: function () { return api.listPosts().filter(function (p) { return p.type === 'video'; }); },
-        myPosts: function () {
-            var uid = state().sessionUserId;
-            return api.listPosts().filter(function (p) { return p.authorId === uid; });
-        },
-        postsByUser: function (uid) { return api.listPosts().filter(function (p) { return p.authorId === uid; }); },
-        addPost: function (data) {
-            var s = state();
-            var user = userById(s.sessionUserId);
-            if (!user) return { ok: false, error: 'Create an account first.' };
-            var title = String(data.title || '').trim();
-            if (!title) return { ok: false, error: 'Give the post a title.' };
-            var post = {
-                id: id('p'), type: data.type === 'video' ? 'video' : 'photo', title: title,
-                description: data.description || '', category: data.category || 'events',
-                classTag: data.classTag || user.classYear || '',
-                image: data.image || PICS[Math.floor(Math.random() * PICS.length)],
-                author: user.name, authorId: user.id, likes: 0, views: 1, comments: 0, shares: 0,
-                destinations: data.destinations || [], filter: data.filter, soundId: data.soundId,
-                duration: data.duration || '00:30', createdAt: now()
-            };
-            post.imageUrl = post.image; post.thumbnailUrl = post.image;
-            s.posts.unshift(post); save(s);
-            return { ok: true, post: post };
-        },
-        deletePost: function (postId) {
-            var s = state();
-            var user = userById(s.sessionUserId);
-            var post = s.posts.find(function (p) { return p.id === postId; });
-            if (!user || !post || post.authorId !== user.id) return { ok: false, error: 'You can only remove your own posts.' };
-            s.posts = s.posts.filter(function (p) { return p.id !== postId; });
             save(s);
-            return { ok: true };
-        },
-        isLiked: function (itemId) {
-            var s = state();
-            var uid = s.sessionUserId || 'guest';
-            return s.likes.indexOf(uid + ':' + itemId) !== -1;
-        },
-        toggleLike: function (itemId) {
-            var s = state();
-            var uid = s.sessionUserId || 'guest';
-            var key = uid + ':' + itemId;
-            var i = s.likes.indexOf(key);
-            var post = s.posts.find(function (p) { return p.id === itemId; });
-            if (!post) return { ok: false, liked: false, likes: 0 };
-            if (i >= 0) { s.likes.splice(i, 1); post.likes = Math.max(0, (post.likes || 0) - 1); }
-            else {
-                s.likes.push(key);
-                post.likes = (post.likes || 0) + 1;
-                if (post.authorId && post.authorId !== uid) {
-                    var me = userById(uid);
-                    pushNotify(post.authorId, 'like', 'New like', (me ? me.name : 'Someone') + ' liked "' + post.title + '"', { postId: itemId });
-                }
-            }
-            save(s);
-            return { ok: true, liked: i < 0, likes: post.likes };
-        },
-        isSaved: function (itemId) {
-            var s = state();
-            var uid = s.sessionUserId || 'guest';
-            return (s.saves || []).indexOf(uid + ':' + itemId) !== -1;
-        },
-        toggleSave: function (itemId) {
-            var s = state();
-            if (!s.saves) s.saves = [];
-            var uid = s.sessionUserId || 'guest';
-            var key = uid + ':' + itemId;
-            var i = s.saves.indexOf(key);
-            var post = s.posts.find(function (p) { return p.id === itemId; });
-            if (!post) return { ok: false, saved: false };
-            if (i >= 0) s.saves.splice(i, 1);
-            else s.saves.push(key);
-            save(s);
-            return { ok: true, saved: i < 0 };
-        },
-        listSaved: function () {
-            var s = state();
-            var uid = s.sessionUserId || 'guest';
-            var ids = (s.saves || []).filter(function (k) { return k.indexOf(uid + ':') === 0; }).map(function (k) { return k.split(':')[1]; });
-            return api.listPosts().filter(function (p) { return ids.indexOf(p.id) !== -1; });
-        },
-        addComment: function (postId, text) {
-            var s = state();
-            var user = userById(s.sessionUserId);
-            var clean = String(text || '').trim();
-            if (!clean) return { ok: false, error: 'Write a short school-safe comment.' };
-            var row = { id: id('c'), postId: postId, author: user ? user.name : 'Guest', text: clean, createdAt: now() };
-            s.comments.unshift(row);
-            var post = s.posts.find(function (p) { return p.id === postId; });
-            if (post) {
-                post.comments = (post.comments || 0) + 1;
-                if (post.authorId && user && post.authorId !== user.id) {
-                    pushNotify(post.authorId, 'mention', 'New comment', user.name + ' commented on "' + post.title + '"', { postId: postId });
-                }
-            }
-            save(s);
-            return { ok: true, comment: row };
-        },
-        search: function (q) {
-            q = String(q || '').toLowerCase().trim();
-            if (!q) return api.listPosts();
-            return api.listPosts().filter(function (p) {
-                return (p.title + ' ' + (p.description || '') + ' ' + (p.author || '') + ' ' + (p.category || '') + ' ' + (p.classTag || '')).toLowerCase().indexOf(q) !== -1;
-            });
-        },
-        trending: function (n) {
-            return api.listPosts().slice().sort(function (a, b) { return score(b) - score(a); }).slice(0, n || 6);
-        },
-        featured: function (n) {
-            var list = api.listPosts().filter(function (p) { return p.featured || (p.likes || 0) > 20; });
-            if (!list.length) list = api.trending(n);
-            return list.slice(0, n || 4);
-        },
-        analytics: function () {
-            var posts = state().posts;
-            return {
-                totalPosts: posts.length,
-                totalPhotos: posts.filter(function (p) { return p.type !== 'video'; }).length,
-                totalVideos: posts.filter(function (p) { return p.type === 'video'; }).length,
-                totalStudents: state().users.length,
-                totalLikes: posts.reduce(function (sum, p) { return sum + (p.likes || 0); }, 0)
-            };
         }
     };
     window.HshsStore = api;
