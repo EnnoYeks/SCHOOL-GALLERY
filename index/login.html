@@ -10,9 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css">
-  <link rel="stylesheet" href="../css/hshs-auth.css?v=260912auth1">
-  <link rel="stylesheet" href="../css/hshs-firebaseui.css?v=260912auth1">
+  <link rel="stylesheet" href="../css/hshs-auth.css?v=260916auth1">
   <script>(function(){document.documentElement.classList.add('hshs-ready');})();</script>
 </head>
 <body class="hshs-auth-page hshs-auth-body">
@@ -24,30 +22,102 @@
     </div>
 
     <div class="hshs-auth-card">
-      <p class="hshs-auth-hint" style="margin-top:0;text-align:center">Sign in with Google or email &amp; password</p>
-      <div id="firebaseui-auth-container"></div>
+      <div class="hshs-auth-tabs">
+        <button type="button" data-auth-mode="login" class="is-on">Sign in</button>
+        <button type="button" data-auth-mode="signup">Create account</button>
+      </div>
+
+      <button type="button" class="hshs-auth-submit" id="googleSignIn" style="background:#fff;color:#102047;margin-bottom:14px;box-shadow:none;border:1px solid rgba(255,255,255,.16)">
+        <i class="fab fa-google"></i> Continue with Google
+      </button>
+      <p class="hshs-auth-hint" style="text-align:center">or use email and password</p>
+
+      <form id="authLoginForm" class="hshs-auth-panel" data-auth-panel="login">
+        <label class="hshs-field">
+          <span>Email or username</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-user lead"></i>
+            <input id="loginId" type="text" autocomplete="username" placeholder="name@email.com or username" required>
+          </span>
+        </label>
+        <label class="hshs-field">
+          <span>Password</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-lock lead"></i>
+            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required>
+            <button type="button" class="toggle-pw" data-toggle-password="loginPassword"><i class="fas fa-eye"></i></button>
+          </span>
+        </label>
+        <div class="hshs-auth-row">
+          <span></span>
+          <a href="#reset" id="openReset">Forgot password?</a>
+        </div>
+        <button type="submit" class="hshs-auth-submit">Sign in</button>
+      </form>
+
+      <form id="authSignupForm" class="hshs-auth-panel" data-auth-panel="signup" hidden>
+        <label class="hshs-field">
+          <span>Full name</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-id-card lead"></i>
+            <input id="suFullName" type="text" autocomplete="name" placeholder="Your name" required>
+          </span>
+        </label>
+        <label class="hshs-field">
+          <span>Username</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-at lead"></i>
+            <input id="suUsername" type="text" autocomplete="username" placeholder="campusname" required>
+          </span>
+        </label>
+        <label class="hshs-field">
+          <span>Email</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-envelope lead"></i>
+            <input id="suEmail" type="email" autocomplete="email" placeholder="you@email.com" required>
+          </span>
+        </label>
+        <label class="hshs-field">
+          <span>Password</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-lock lead"></i>
+            <input id="suPassword" type="password" autocomplete="new-password" placeholder="At least 6 characters" required>
+            <button type="button" class="toggle-pw" data-toggle-password="suPassword"><i class="fas fa-eye"></i></button>
+          </span>
+        </label>
+        <label class="hshs-field">
+          <span>Confirm password</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-lock lead"></i>
+            <input id="suPassword2" type="password" autocomplete="new-password" placeholder="Repeat password" required>
+          </span>
+        </label>
+        <button type="submit" class="hshs-auth-submit">Create account</button>
+      </form>
+
+      <form id="authResetForm" class="hshs-auth-panel" hidden>
+        <p class="hshs-auth-hint">We will send a reset link to your email.</p>
+        <label class="hshs-field">
+          <span>Email</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-envelope lead"></i>
+            <input id="resetEmail" type="email" autocomplete="email" placeholder="you@email.com" required>
+          </span>
+        </label>
+        <button type="submit" class="hshs-auth-submit">Send reset link</button>
+        <p class="hshs-auth-footer"><a href="#login" id="backToLogin">Back to sign in</a></p>
+      </form>
+
       <p id="authMsg" class="hshs-auth-msg" role="status"></p>
+      <p id="authAlreadyIn" hidden></p>
     </div>
 
     <a class="hshs-auth-skip" href="../index.html">Continue as guest</a>
-    <p class="hshs-auth-footer">By continuing you agree to community guidelines of Hawthorne Scribner High School.</p>
+    <p class="hshs-auth-footer">By continuing you agree to the Hawthorne Scribner High School community guidelines.</p>
   </div>
 
-  <script>
-  window.firebaseConfig = {
-    apiKey: "AIzaSyCoFBtKrk7ZRvV1mZe5hN9tRCPKsuQBlgo",
-    authDomain: "school-gallery-62032.firebaseapp.com",
-    projectId: "school-gallery-62032",
-    messagingSenderId: "931689210926",
-    appId: "1:931689210926:web:fd2daf8495d6e6f3e42bbf",
-    measurementId: "G-5W89YVBV6J"
-  };
-  </script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.js"></script>
-  <script src="../js/hshs-analytics.js?v=260912auth1"></script>
-  <script src="../js/hshs-firebaseui.js?v=260912auth1"></script>
+  <script type="module" src="../js/config.js?v=260916auth1"></script>
+  <script type="module" src="../js/hshs-auth-api.js?v=260916auth1"></script>
+  <script src="../js/hshs-auth.js?v=260916auth1"></script>
 </body>
 </html>
