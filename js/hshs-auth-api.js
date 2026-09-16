@@ -1,7 +1,6 @@
 /**
  * HSHS World · one Firebase Auth API
- * Email/password + Google. Username is the public identity.
- * Firebase UID is the account identity. No Student ID login.
+ * Email/password + Google. Username is unique. Firebase UID is identity.
  */
 import {
   getAuth,
@@ -24,8 +23,7 @@ import {
   where,
   limit,
   getDocs,
-  serverTimestamp,
-  deleteDoc
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 function appAuth() {
@@ -123,6 +121,14 @@ async function lookupUserField(field, value) {
   }
 }
 
+async function isUsernameTaken(username, exceptUid) {
+  username = cleanUsername(username);
+  if (!username || username.length < 3) return false;
+  var found = await lookupUserField("username", username);
+  if (!found || !found.uid) return false;
+  return found.uid !== exceptUid;
+}
+
 async function claimUsername(uid, username, email) {
   username = cleanUsername(username);
   if (!username) return;
@@ -131,12 +137,20 @@ async function claimUsername(uid, username, email) {
   if (snap.exists() && snap.data().uid && snap.data().uid !== uid) {
     throw new Error("That username is taken. Choose another.");
   }
-  await setDoc(ref, {
-    uid: uid,
-    email: (email || "").toLowerCase(),
-    field: "username",
-    value: username
-  }, { merge: true });
+  try {
+    await setDoc(ref, {
+      uid: uid,
+      email: (email || "").toLowerCase(),
+      field: "username",
+      value: username
+    }, { merge: true });
+  } catch (e) {
+    if (e && e.code === "permission-denied") {
+      console.warn("[auth] username index write blocked by rules", e);
+      return;
+    }
+    throw e;
+  }
 }
 
 async function saveProfile(user, data) {
@@ -148,7 +162,9 @@ async function saveProfile(user, data) {
   var existing = existingSnap.exists() ? existingSnap.data() : {};
   if (!username) username = cleanUsername(existing.username);
 
-  if (username) await claimUsername(uid, username, data.email || user.email || existing.email);
+  if (username && await isUsernameTaken(username, uid)) {
+    throw new Error("That username is taken. Choose another.");
+  }
 
   var photo = data.photoURL || data.avatar || existing.photoURL || user.photoURL || "";
   if (typeof photo === "string" && photo.length > 700000) photo = existing.photoURL || "";
@@ -156,22 +172,32 @@ async function saveProfile(user, data) {
   var profile = {
     uid: uid,
     email: (data.email || user.email || existing.email || "").toLowerCase(),
-    fullName: data.fullName || data.name || existing.fullName || user.displayName || "HSHS Student",
-    name: data.fullName || data.name || existing.name || user.displayName || "HSHS Student",
+    fullName: String(data.fullName || data.name || existing.fullName || user.displayName || "HSHS Student").slice(0, 80),
+    name: String(data.fullName || data.name || existing.name || user.displayName || "HSHS Student").slice(0, 80),
     username: username,
     classYear: data.classYear || existing.classYear || "Campus",
     house: data.house || existing.house || "",
     bio: String(data.bio != null ? data.bio : (existing.bio || "")).slice(0, 160),
     photoURL: photo,
     avatar: photo,
-    coverURL: data.coverURL || existing.coverURL || "",
     role: existing.role || data.role || "student",
     updatedAt: serverTimestamp(),
     isAnonymous: false
   };
   if (!existingSnap.exists()) profile.createdAt = serverTimestamp();
 
-  await setDoc(doc(db(), "users", uid), profile, { merge: true });
+  try {
+    await setDoc(doc(db(), "users", uid), profile, { merge: true });
+  } catch (e) {
+    persistProfileLocal(normalizeProfile(Object.assign({}, existing, profile, { createdAt: Date.now(), updatedAt: Date.now() }), user));
+    if (e && e.code === "permission-denied") {
+      throw new Error("Could not save your profile yet. Sign in again after the school updates Firestore rules.");
+    }
+    throw e;
+  }
+
+  if (username) await claimUsername(uid, username, profile.email);
+
   try {
     await updateProfile(user, {
       displayName: profile.fullName,
@@ -199,6 +225,7 @@ async function loadOrCreateProfile(user, extra) {
       persistProfileLocal(data);
       return data;
     }
+    if (window.__hshsSigningUp && !extra.username && !extra.fullName) return null;
     return saveProfile(user, {
       fullName: extra.fullName || user.displayName || "HSHS Student",
       email: extra.email || user.email || "",
@@ -240,27 +267,9 @@ async function sendPasswordReset(email) {
   return sendPasswordResetEmail(appAuth(), String(email || "").trim().toLowerCase());
 }
 
-async function activityForUser(uid, max) {
-  max = max || 40;
-  var out = { posts: [], photos: [], videos: [] };
-  if (!uid) return out;
-  try {
-    var postsSnap = await getDocs(query(collection(db(), "posts"), where("authorId", "==", uid), limit(max)));
-    out.posts = postsSnap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
-  } catch (e) {}
-  try {
-    var photosSnap = await getDocs(query(collection(db(), "photos"), where("authorId", "==", uid), limit(max)));
-    out.photos = photosSnap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
-  } catch (e) {}
-  try {
-    var videosSnap = await getDocs(query(collection(db(), "videos"), where("authorId", "==", uid), limit(max)));
-    out.videos = videosSnap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
-  } catch (e) {}
-  return out;
-}
-
 window.HshsAuthApi = {
   lookupUserField: lookupUserField,
+  isUsernameTaken: isUsernameTaken,
   saveProfile: saveProfile,
   loadOrCreateProfile: loadOrCreateProfile,
   normalizeProfile: normalizeProfile,
@@ -270,7 +279,6 @@ window.HshsAuthApi = {
   signInWithGoogle: signInWithGoogle,
   signOutUser: signOutUser,
   sendPasswordReset: sendPasswordReset,
-  activityForUser: activityForUser,
   cleanUsername: cleanUsername,
   state: function () { return window.hshsAuthState || "loading"; },
   isAuthenticated: function () { return window.hshsAuthState === "authenticated"; },
