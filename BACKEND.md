@@ -4,20 +4,72 @@ The app talks to Firebase project **`school-gallery-62032`**.
 
 | Layer | Status | Notes |
 |-------|--------|--------|
-| **Auth** | Live | Anonymous sign-in on boot (`js/config.js`) |
-| **Firestore** | Live | posts, photos, videos, comments, likes, chats, messages, presence |
+| **Auth** | Live | Email/password + Google. Firebase UID is the account identity. |
+| **Firestore** | Live | posts, photos, videos, comments, likes, chats, messages, presence, users |
 | **Chat** | Live | `js/hshs-chat-live.js` + `db.js` |
-| **Media files** | Prepared | `js/storage.js` → Cloudflare R2 when configured; data-URL fallback now |
+| **Media files** | Prepared | `js/storage.js` → Cloudflare R2 when configured |
 | **Local store** | Fallback | `HshsStore` still seeds UI offline |
 
 ---
 
-## 1. One-time Firebase console steps
+## Authentication
 
-1. Open https://console.firebase.google.com/project/school-gallery-62032  
-2. **Authentication → Sign-in method → enable Anonymous**  
-3. **Firestore Database** → create the database if missing (production mode is fine; rules below protect it)  
-4. Deploy rules + indexes from this repo:
+There is **one** Firebase Auth instance (`js/config.js`) and **one** API (`js/hshs-auth-api.js`).
+
+### Methods
+
+- Email + password
+- Google sign-in (`signInWithPopup`)
+- Guest browsing (no account required for public pages)
+
+Student IDs are **not** an authentication method and are not used as account identity.
+
+### Identity
+
+- **Firebase Auth UID** is the permanent account identity.
+- **Username** is the public HSHS identity (unique, URL-safe).
+- `users/{uid}` is the primary profile document.
+- `userIndex/username_{name}` maps a username to that UID.
+
+### Auth state
+
+`onAuthStateChanged` is the source of truth.
+
+| State | Meaning |
+|-------|---------|
+| `loading` | Session is being restored |
+| `guest` | No real account (public browse) |
+| `authenticated` | Signed-in email or Google user |
+
+Anonymous/guest Firebase sessions are not treated as a real account and must not overwrite a signed-in profile.
+
+Sessions persist across refresh, page changes, and browser restarts (`browserLocalPersistence`).
+
+### Profile fields (`users/{uid}`)
+
+`uid`, `fullName`, `username`, `email`, `photoURL`, `bio`, `classYear`, `house`, `role`, `createdAt`, `updatedAt`
+
+Passwords are never stored in Firestore.
+
+### Guest access
+
+Guests can open public pages. Creating posts, comments, likes, and chat messages requires a real signed-in UID (`request.auth.uid`).
+
+### Key files
+
+- `js/config.js` — Firebase app + persistence + auth boot
+- `js/hshs-auth-api.js` — sign in / sign up / Google / reset / profile
+- `js/hshs-auth.js` — login page UI
+- `js/hshs-auth-bridge.js` — stamps `authorId` from the Firebase UID
+- `index/login.html` — sign in / create account
+
+---
+
+## 1. Firebase console steps
+
+1. Open https://console.firebase.google.com/project/school-gallery-62032
+2. **Authentication → Sign-in method** → enable **Email/Password** and **Google**
+3. Deploy rules + indexes:
 
 ```bash
 npm i -g firebase-tools
@@ -26,92 +78,48 @@ firebase use school-gallery-62032
 firebase deploy --only firestore
 ```
 
-That deploys both `firestore.rules` and `firestore.indexes.json`.
-
 ### Collections in use
 
 | Path | Purpose |
 |------|---------|
+| `users/{uid}` | Account profile |
+| `userIndex/username_{name}` | Unique username → UID |
 | `posts/{id}` | Gallery / For You feed |
 | `photos/{id}` | Photo library |
-| `videos/{id}` | Vibe / long videos |
-| `comments/{id}` | Comments (`postId` field) |
+| `videos/{id}` | Studio / long videos |
+| `comments/{id}` | Comments |
 | `likes/{id}` | Like events |
 | `chats/{id}` | Campus threads |
 | `chats/{id}/messages/{msgId}` | Live messages |
 | `presence/{uid}` | Last seen |
 
-Media **bytes** never live in Firestore — only URLs + metadata.
+---
+
+## 2. Security model
+
+`firestore.rules` uses `request.auth.uid` as identity.
+
+- A user may create/update only `users/{uid}` for their own UID.
+- Posts, photos, videos, comments, and likes must use that same UID as `authorId`.
+- Unauthenticated users can read public content but cannot write authenticated collections.
+- Anonymous provider is **not** treated as a signed-in author.
 
 ---
 
-## 2. Cloudflare R2 (media storage)
+## 3. Cloudflare R2 (media storage)
 
-`js/storage.js` is the single upload entry point.
-
-### Recommended secure setup
-
-1. Create an R2 bucket (e.g. `hshs-media`).  
-2. Enable a **public** custom domain or R2.dev subdomain for reads.  
-3. Deploy a small **Cloudflare Worker** that returns a **presigned PUT URL** (so browser secrets stay out of the client).  
-4. Point the app at it:
-
-```js
-// In js/config.js or a one-liner before modules load:
-window.__R2 = {
-  signUrl: "https://your-worker.workers.dev/sign",
-  publicBaseUrl: "https://media.yourdomain.com"   // or https://pub-xxxxx.r2.dev
-};
-```
-
-`HshsStorage.upload(file)` will then:
-
-1. POST `{ key, contentType, size }` to `signUrl`  
-2. PUT the file to the returned presigned URL  
-3. Return `{ url, key, provider: "cloudflare-r2" }`  
-
-Until `__R2` is set, uploads fall back to compressed **data URLs** (photos) / **blob URLs** (videos) so the site keeps working offline and in demos.
-
-### Size limits (config)
-
-```js
-storage: {
-  provider: "cloudflare-r2",
-  maxFileSize: 104857600,   // 100 MB
-  maxPhotoSize: 52428800,   // 50 MB
-  maxVideoSize: 104857600
-}
-```
+`js/storage.js` is the upload entry point. Until `window.__R2` is set, uploads fall back to compressed data URLs / blob URLs.
 
 ---
 
-## 3. What the code does today
+## 4. Quick verification
 
-- **`js/config.js`** – Firebase app, anonymous auth, global `firestore` / `auth` / `CONFIG`  
-- **`js/db.js`** – Full CRUD helpers: `getPosts`, `createPost`, `createPhoto`, `createVideo`, comments, likes, chat, presence  
-- **`js/storage.js`** – R2-ready upload + local fallback  
-- **`js/hshs-chat-live.js`** – Live campus chat (already on Firestore)  
-- **`js/hshs-upload.js`** – Create studio; will prefer Storage + `db.create*` when available  
-- **`js/core/data.js`** – Bridge that prefers `db` when present  
-
-If Firestore is blocked (rules, network, Auth not enabled), chat and content still work on-device via localStorage / `HshsStore`.
-
----
-
-## 4. Quick verification checklist
-
-- [ ] Anonymous Auth enabled  
-- [ ] `firebase deploy --only firestore` succeeded  
-- [ ] Open site → DevTools console shows `[HSHS] Firestore database initialized` and no Auth errors  
-- [ ] Chat page shows “Live chat on” toast  
-- [ ] Create a post → network tab shows Firestore writes (or local fallback if offline)  
-- [ ] (Later) Set `window.__R2` → uploads hit R2 and return public URLs  
-
----
-
-## 5. Next optional hardening
-
-- Add email / Google sign-in alongside Anonymous  
-- Cloud Function or Worker to strip EXIF / generate thumbnails on R2 upload  
-- Stricter Firestore rules (e.g. only author can delete own posts) once real accounts exist  
-- Migrate seed Unsplash posts into Firestore once, then turn off local seed for production  
+- [ ] Email and Google sign-in enabled in Firebase
+- [ ] Guest can browse Home / Gallery / Photos without an account
+- [ ] Register with name + username + email + password creates `users/{uid}`
+- [ ] Login with email or username works
+- [ ] Google sign-in creates or keeps the profile
+- [ ] Password reset sends mail
+- [ ] Logout returns the UI to Guest
+- [ ] Refresh keeps a signed-in session
+- [ ] New posts store `authorId` equal to the Firebase UID
