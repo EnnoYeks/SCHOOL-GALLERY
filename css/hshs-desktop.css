@@ -1,10 +1,14 @@
 /* ============================================
    HSHS WORLD · DESKTOP SHELL
-   Loaded after mobile-first sheets so wide
-   screens get a real top nav + multi-column pages.
+   Wide screens stretch. No skinny center column.
    ============================================ */
 
 @media (min-width: 1025px) {
+  :root {
+    --hshs-shell-max: none;
+    --hshs-page-gutter: clamp(20px, 2.4vw, 40px);
+  }
+
   html.hshs-device-desktop,
   html.hshs-device-desktop body {
     overflow-x: hidden;
@@ -26,14 +30,13 @@
     padding-bottom: 0 !important;
   }
 
-  .hshs-upload-studio {
-    display: flex !important;
-  }
+  .hshs-upload-studio { display: flex !important; }
   .hshs-upload-studio[hidden],
   .hshs-upload-studio[aria-hidden="true"]:not(.is-open):not(.active) {
     display: none !important;
   }
 
+  /* ---------- TOP BAR fills the screen ---------- */
   .navbar,
   .navbar.hshs-flat-top,
   body.has-mobile-shell .navbar,
@@ -41,7 +44,7 @@
     position: sticky;
     top: 0;
     z-index: 80;
-    padding: 10px 0 !important;
+    padding: 10px var(--hshs-page-gutter) !important;
     background: rgba(7, 20, 51, 0.92) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(18px) saturate(140%);
@@ -50,22 +53,16 @@
 
   .navbar-container,
   .navbar-container.hshs-topbar {
-    width: min(1320px, calc(100% - 40px));
-    margin: 0 auto;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
     padding: 0 !important;
-    display: flex;
+    display: flex !important;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
   }
 
   .navbar .logo { flex: 0 0 auto; }
-
-  .navbar .search-container {
-    display: block !important;
-    flex: 1 1 220px;
-    max-width: 280px;
-    order: 3;
-  }
 
   .navbar .nav-links,
   body.has-mobile-shell .navbar .nav-links,
@@ -74,37 +71,40 @@
     flex: 1 1 auto;
     order: 2;
     min-width: 0;
-    max-width: none;
+    max-width: none !important;
     padding: 4px;
-    gap: 2px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
+    gap: 4px;
+    flex-wrap: wrap;
+    overflow: visible;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
   }
 
-  .navbar .nav-links::-webkit-scrollbar { display: none; }
-
   .navbar .nav-link {
     flex: 0 0 auto;
-    padding: 0.48rem 0.72rem;
+    padding: 0.5rem 0.85rem;
     border-radius: 12px;
-    font-size: 0.82rem;
+    font-size: 0.86rem;
     font-weight: 700;
     color: #cbd5e1;
     white-space: nowrap;
   }
 
-  .navbar .nav-link i { font-size: 0.9rem; }
+  .navbar .nav-link i { font-size: 0.92rem; }
 
   .navbar .nav-link:hover,
   .navbar .nav-link.active {
     color: #fff;
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
     transform: none;
+  }
+
+  .navbar .search-container {
+    display: block !important;
+    flex: 1 1 280px;
+    max-width: min(520px, 32vw) !important;
+    order: 3;
   }
 
   .navbar .nav-actions,
@@ -139,6 +139,7 @@
     object-fit: cover !important;
   }
 
+  /* ---------- PAGE SHELL uses the full row ---------- */
   .gallery-page,
   .photos-container,
   .videos-page,
@@ -153,106 +154,131 @@
   .spotlight-page,
   .trending-page,
   .chat-page,
-  .buzz-page {
-    padding-bottom: 48px !important;
+  .buzz-page,
+  .clips-page {
+    width: 100% !important;
+    max-width: none !important;
+    padding-left: var(--hshs-page-gutter) !important;
+    padding-right: var(--hshs-page-gutter) !important;
+    padding-bottom: 56px !important;
   }
 
   .home-wrap,
   .container,
-  .gallery-page,
-  .photos-container,
-  .videos-page,
-  .profile-page,
-  .settings-page,
-  .about-page,
-  .contact-page,
-  .admin-container {
-    width: min(1320px, calc(100% - 48px));
-    margin-inline: auto;
+  .admin-container,
+  .vibe-hero,
+  .home-section,
+  .home-cta.home-wrap,
+  .home-footer .home-wrap,
+  .home-cta,
+  .featured-section .container,
+  .quick-stats .container,
+  .trending-sections .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin-inline: 0 !important;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .vibe-hero,
   .home-section,
   .home-cta.home-wrap,
   .home-footer .home-wrap {
-    width: min(1320px, calc(100% - 48px));
-    margin-inline: auto;
+    padding-left: var(--hshs-page-gutter) !important;
+    padding-right: var(--hshs-page-gutter) !important;
   }
 
+  /* Home hero stretches */
   .vibe-hero-card {
-    min-height: 320px;
-    padding: 36px 40px;
-    display: grid;
-    grid-template-columns: minmax(280px, 1fr) minmax(220px, 0.7fr);
+    min-height: 340px;
+    padding: 40px 48px;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 40px;
   }
 
-  .vibe-hero-copy { max-width: 36rem; }
-  .vibe-hero-card h1 { font-size: clamp(2.6rem, 4vw, 3.6rem) !important; }
+  .vibe-hero-copy {
+    flex: 1 1 420px;
+    max-width: 42rem;
+  }
+
+  .vibe-hero-card h1 {
+    font-size: clamp(2.8rem, 4.2vw, 4.2rem) !important;
+  }
 
   .home-featured-grid {
     display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    overflow: visible;
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+    overflow: visible !important;
+    gap: 18px !important;
   }
 
   .home-feature-card {
-    min-width: 0;
-    width: auto;
-    height: 200px;
+    min-width: 0 !important;
+    width: auto !important;
+    height: 220px;
   }
 
   .home-stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    gap: 16px !important;
   }
 
   .home-split {
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+    gap: 18px !important;
   }
 
   .home-footer-grid,
   .home-wrap.home-footer-grid,
   .footer-content {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr 1fr 1fr;
-    gap: 28px;
+    display: grid !important;
+    grid-template-columns: minmax(240px, 1.6fr) repeat(3, minmax(160px, 1fr)) !important;
+    gap: 32px !important;
+    width: 100% !important;
+    max-width: none !important;
   }
 
+  /* Gallery / photos grow extra columns */
   .gallery-page { padding-top: 28px !important; }
   .gallery-hero-card {
-    padding: 32px 36px 28px;
-    min-height: 180px;
+    padding: 36px 40px 32px;
+    min-height: 200px;
   }
-  .gallery-hero-card h1 { font-size: clamp(2.4rem, 3.4vw, 3.4rem); }
+  .gallery-hero-card h1 { font-size: clamp(2.6rem, 3.6vw, 3.8rem); }
   .gallery-feed {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 16px;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+    gap: 18px !important;
   }
   .gallery-toolbar { top: 72px; }
 
-  .photos-container { padding: 28px 0 48px !important; }
+  .photos-container { padding-top: 28px !important; }
   .masonry-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
     gap: 16px !important;
   }
   .photo-card { height: 260px; }
 
-  .videos-page {
-    max-width: 1320px !important;
-    padding: 28px 0 56px !important;
-  }
+  .videos-page { padding-top: 28px !important; }
   .videos-hero {
-    min-height: 240px;
-    padding: 36px;
+    min-height: 260px;
+    padding: 40px 44px;
+    display: flex !important;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
   }
   .videos-container,
   .latest-list {
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    gap: 18px !important;
   }
   .latest-item {
     flex-direction: column;
@@ -263,18 +289,20 @@
   .latest-item .thumb {
     width: 100%;
     flex: 0 0 auto;
-    height: 160px;
+    height: 168px;
     border-radius: 12px 12px 0 0;
   }
   .latest-item .meta { padding: 12px 14px 16px; }
   .featured-row {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    overflow: visible;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)) !important;
+    overflow: visible !important;
+    gap: 18px;
   }
   .featured-video {
-    min-width: 0;
-    max-width: none;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: 100%;
   }
 
   .about-grid,
@@ -283,38 +311,37 @@
   .settings-layout,
   .hshs-about-grid,
   .hshs-contact-grid {
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 24px;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr) !important;
+    gap: 28px !important;
+    width: 100%;
   }
 
-  .admin-container { display: grid; grid-template-columns: 240px 1fr; gap: 24px; }
+  .admin-container {
+    display: grid !important;
+    grid-template-columns: 260px minmax(0, 1fr) !important;
+    gap: 28px !important;
+    width: 100% !important;
+  }
   .admin-sidebar { position: sticky; top: 88px; height: max-content; }
   .admin-main { margin-left: 0 !important; }
 
   .chat-shell,
   .hshs-chat-app,
   .messages-layout {
-    display: grid;
-    grid-template-columns: 320px 1fr;
+    display: grid !important;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr) !important;
     min-height: calc(100vh - 88px);
+    width: 100%;
   }
 }
 
-@media (min-width: 1280px) {
-  .gallery-feed {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+@media (min-width: 1600px) {
+  .home-featured-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
   }
+  .gallery-feed,
   .masonry-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
   }
-  .videos-container {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  }
-}
-
-@media (min-width: 1025px) and (max-width: 1279px) {
-  .navbar .nav-link span { display: none; }
-  .navbar .nav-link { padding: 0.5rem 0.62rem; }
-  .navbar .search-container { max-width: 200px; }
 }
