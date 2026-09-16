@@ -1,10 +1,15 @@
 // ============================================
-// HSHS WORLD - CONFIGURATION
+// HSHS WORLD - CONFIGURATION + AUTH BOOT
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
 
 const firebaseConfig = {
@@ -21,12 +26,9 @@ const app = initializeApp(firebaseConfig);
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
 
-// Analytics: only in browser; fail soft if blocked / unsupported
 let analytics = null;
 try {
-  if (typeof window !== "undefined") {
-    analytics = getAnalytics(app);
-  }
+  if (typeof window !== "undefined") analytics = getAnalytics(app);
 } catch (e) {
   console.warn("Analytics init skipped:", e && e.message);
 }
@@ -35,7 +37,7 @@ export { analytics };
 export const CONFIG = {
   app: {
     name: "HSHS World",
-    version: "1.1.0",
+    version: "1.2.0",
     school: "HAWTHORNE SCRIBNER HIGH SCHOOL",
     schoolMotto: "Educate Engage Empower.",
     schoolEmail: "info@hshs.ac.ug",
@@ -69,18 +71,32 @@ export const CONFIG = {
   }
 };
 
-onAuthStateChanged(auth, function (user) {
-  window.hshsAuthUser = user || null;
-  window.hshsUid = user ? user.uid : (localStorage.getItem("guestId") || null);
-  document.dispatchEvent(new CustomEvent("hshs:auth", { detail: { user: user || null } }));
-  if (window.HshsAnalytics && window.HshsAnalytics.setUser) {
-    window.HshsAnalytics.setUser(user || null);
+function applyAuthUser(user) {
+  var real = !!(user && !user.isAnonymous);
+  window.hshsAuthUser = real ? user : null;
+  window.hshsAuthState = user ? (real ? "authenticated" : "guest") : "guest";
+  if (real) {
+    window.hshsUid = user.uid;
+  } else if (!window.hshsUid) {
+    try { window.hshsUid = localStorage.getItem("guestId") || null; } catch (e) {}
   }
+  document.documentElement.dataset.hshsAuth = window.hshsAuthState;
+  document.dispatchEvent(new CustomEvent("hshs:auth", {
+    detail: { user: window.hshsAuthUser, state: window.hshsAuthState }
+  }));
+  if (window.HshsAnalytics && window.HshsAnalytics.setUser) {
+    window.HshsAnalytics.setUser(window.hshsAuthUser);
+  }
+}
+
+window.hshsAuthState = "loading";
+document.documentElement.dataset.hshsAuth = "loading";
+
+setPersistence(auth, browserLocalPersistence).catch(function (err) {
+  console.warn("Auth persistence fallback:", err && err.message);
 });
 
-signInAnonymously(auth).catch(function (err) {
-  console.warn("Anonymous sign-in skipped:", err && err.message);
-});
+onAuthStateChanged(auth, applyAuthUser);
 
 window.firebaseApp = app;
 window.firestore = firestore;
