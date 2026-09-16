@@ -37,14 +37,37 @@
     if (wrap) wrap.classList.remove('is-open');
   }
 
+  function openMorePanel() {
+    if (!isDesktop()) return openMobileMore();
+    mountMore();
+    var wrap = document.getElementById('hshsDesktopMore');
+    if (wrap) wrap.classList.add('is-open');
+  }
+
   function toggleMore(e) {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
+    if (!isDesktop()) return openMobileMore();
+    mountMore();
     var wrap = document.getElementById('hshsDesktopMore');
     if (!wrap) return;
     wrap.classList.toggle('is-open');
+  }
+
+  function openMobileMore() {
+    var tab = document.querySelector('#openMoreSheet, [data-tab="more"], .tab-more, a[href$="more.html"]');
+    if (tab) {
+      tab.click();
+      return;
+    }
+    if (typeof window.__hshsNavigate === 'function') window.__hshsNavigate(href('more.html'));
+    else location.href = href('more.html');
+  }
+
+  function isProfileTrigger(el) {
+    return !!(el && el.closest && el.closest('.profile-icon, .hshs-profile, #navProfile, .navbar .hshs-avatar, a[aria-label="Profile"]'));
   }
 
   function mountMore() {
@@ -80,6 +103,22 @@
     document.getElementById('hshsDeskMoreBtn').addEventListener('click', toggleMore);
     wrap.addEventListener('click', function (e) { e.stopPropagation(); });
     refreshMoreAuth();
+    wireProfileIcon();
+  }
+
+  function wireProfileIcon() {
+    var icons = document.querySelectorAll('.profile-icon, .hshs-profile');
+    icons.forEach(function (el) {
+      if (el.__hshsMoreBound) return;
+      el.__hshsMoreBound = true;
+      el.style.cursor = 'pointer';
+      el.setAttribute('title', 'More');
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMore(e);
+      }, true);
+    });
   }
 
   function refreshMoreAuth() {
@@ -106,10 +145,15 @@
   function boot() {
     applyDevice();
     if (isDesktop()) mountMore();
+    wireProfileIcon();
     applyDevice();
   }
 
-  document.addEventListener('click', closeMore);
+  document.addEventListener('click', function (e) {
+    if (isProfileTrigger(e.target)) return;
+    if (e.target.closest && e.target.closest('#hshsDesktopMore')) return;
+    closeMore();
+  });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeMore();
   });
@@ -118,7 +162,10 @@
   window.addEventListener('resize', function () {
     applyDevice();
     if (isDesktop()) mountMore();
+    wireProfileIcon();
   }, { passive: true });
+
+  window.__hshsOpenMore = openMorePanel;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
