@@ -15,7 +15,7 @@
       var n = document.querySelector('script[src*="navigation.js"]');
       if (n && n.src) base = n.src.replace(/js\/navigation\.js.*/, 'js/');
     } catch (e) {}
-    s.src = (base || 'js/') + 'hshs-auth-api.js?v=260911auth2';
+    s.src = (base || 'js/') + 'hshs-auth-api.js?v=260916auth2';
     document.head.appendChild(s);
   })();
 
@@ -27,6 +27,9 @@
   }
   function homeHref() {
     return inSub() ? '../index.html' : 'index.html';
+  }
+  function moreHref() {
+    return inSub() ? 'more.html' : 'index/more.html';
   }
 
   function profile() {
@@ -57,6 +60,20 @@
     else location.href = url;
   }
 
+  function openMore() {
+    if (typeof window.__hshsOpenMore === 'function') {
+      window.__hshsOpenMore();
+      return;
+    }
+    var tab = document.querySelector('#openMoreSheet, [data-tab="more"], .tab-more');
+    if (tab) {
+      tab.click();
+      return;
+    }
+    if (typeof window.__hshsNavigate === 'function') window.__hshsNavigate(moreHref());
+    else location.href = moreHref();
+  }
+
   function stampAuthorOnPayload(payload) {
     if (!payload || typeof payload !== 'object') return payload;
     var uid = currentUid();
@@ -64,7 +81,6 @@
     payload.authorId = uid || payload.authorId || '';
     payload.author = p.fullName || payload.author || 'HSHS Student';
     payload.authorUsername = p.username || payload.authorUsername || '';
-    payload.studentId = p.studentId || payload.studentId || '';
     payload.classTag = payload.classTag || p.classYear || 'Campus';
     return payload;
   }
@@ -177,7 +193,7 @@
     if (isRealUser()) return;
     if (sessionStorage.getItem('hshsAuthNudge') === '1') return;
     sessionStorage.setItem('hshsAuthNudge', '1');
-    var go = confirm('Sign in so your posts stay linked to your student account?\n\nOK = Sign in\nCancel = Continue as guest');
+    var go = confirm('Sign in so your posts stay linked to your account?\n\nOK = Sign in\nCancel = Continue as guest');
     if (go) {
       e.preventDefault();
       e.stopPropagation();
@@ -194,15 +210,13 @@
   }
 
   function wireProfileIcon() {
-    var profileEl = document.querySelector('.profile-icon');
+    var profileEl = document.querySelector('.profile-icon, .hshs-profile');
     if (!profileEl || profileEl.__authBridgeBound) return;
     profileEl.__authBridgeBound = true;
     profileEl.addEventListener('click', function (e) {
-      if (isRealUser()) return;
-      if (window.innerWidth > 1024) return;
       e.preventDefault();
       e.stopPropagation();
-      goLogin(location.pathname);
+      openMore();
     }, true);
   }
 
@@ -239,6 +253,7 @@
     goLogin: goLogin,
     currentUid: currentUid,
     stampAuthorOnPayload: stampAuthorOnPayload,
-    ensureAuthRow: ensureAuthRow
+    ensureAuthRow: ensureAuthRow,
+    openMore: openMore
   };
 })();
