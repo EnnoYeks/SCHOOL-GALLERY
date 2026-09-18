@@ -19,6 +19,7 @@ import { db } from "./db.js";
     unsubPresence: null,
     presenceTimer: 0,
     live: false,
+    connecting: false,
     presence: {}
   };
 
@@ -71,15 +72,21 @@ import { db } from "./db.js";
     banner.dataset.kind = kind || "info";
   }
 
-  function markLive(on) {
-    state.live = !!on;
+  function markMode(mode) {
+    state.live = mode === "live";
+    state.connecting = mode === "connecting";
     var page = $("hshsChatPage");
-    if (page) page.classList.toggle("is-live", state.live);
+    if (page) {
+      page.classList.toggle("is-live", state.live);
+      page.classList.toggle("is-local", !state.live);
+    }
     if (g.HshsMessagesUi && g.HshsMessagesUi.setMode) {
-      g.HshsMessagesUi.setMode(state.live ? "live" : "local");
+      g.HshsMessagesUi.setMode(mode);
     } else {
       var hero = document.querySelector(".msg-hero-titles p");
-      if (hero) hero.textContent = state.live ? "Live campus chat" : "On this device";
+      if (hero) {
+        hero.textContent = mode === "live" ? "Live campus chat" : (mode === "connecting" ? "Connecting…" : "On this device");
+      }
     }
   }
 
@@ -140,6 +147,7 @@ import { db } from "./db.js";
       group: !!row.group,
       members: row.members || [],
       memberIds: row.memberIds || [],
+      peerId: peer,
       online: pres.online,
       presenceLabel: pres.label,
       avatar: row.avatar || AV(row.name || row.id || "hshs")
@@ -213,14 +221,18 @@ import { db } from "./db.js";
 
   function watchList() {
     stopList();
-    if (!state.live || !state.uid || !db.watchChats) return;
+    if (!state.uid || !db.watchChats) return;
     state.unsubList = db.watchChats(state.uid, function (rows, err) {
       if (err) {
-        setBanner("Chat list paused — reconnecting when the network returns.", "warn");
+        if (state.live) setBanner("Chat list paused — reconnecting when the network returns.", "warn");
+        else goLocal("Chat is on this device until Firestore is available.");
         return;
       }
+      markMode("live");
       setBanner("");
       applyInbox(rows || []);
+      var open = state.active || (g.HshsMessagesUi && g.HshsMessagesUi.activeId && g.HshsMessagesUi.activeId());
+      if (open) watch(open);
     });
   }
 
@@ -245,13 +257,14 @@ import { db } from "./db.js";
   }
 
   async function heartbeat(online) {
-    if (!state.live || !state.uid || !db.setPresence) return;
+    if (!state.uid || !db.setPresence) return;
+    if (!state.live && !state.connecting) return;
     await db.setPresence(state.uid, { name: state.name, page: "chat", online: online !== false });
   }
 
   function startPresence() {
     stopPresence();
-    if (!state.live || !db.watchPresence) return;
+    if (!db.watchPresence) return;
     heartbeat(true);
     state.presenceTimer = setInterval(function () { heartbeat(true); }, 60000);
     state.unsubPresence = db.watchPresence(function (map) {
@@ -265,11 +278,11 @@ import { db } from "./db.js";
   }
 
   function onVis() {
-    if (!state.live) return;
+    if (!state.live && !state.connecting) return;
     heartbeat(document.visibilityState !== "hidden");
   }
   function onHide() {
-    if (!state.live) return;
+    if (!state.live && !state.connecting) return;
     heartbeat(false);
   }
 
@@ -306,7 +319,7 @@ import { db } from "./db.js";
 
   function goLocal(reason) {
     stopAll();
-    markLive(false);
+    markMode("local");
     if (reason) setBanner(reason, "info");
   }
 
@@ -323,7 +336,7 @@ import { db } from "./db.js";
     state.uid = user.uid;
     try {
       if (!db || !db.watchChats || !db.watchMessages) throw new Error("no db");
-      markLive(true);
+      markMode("connecting");
       setBanner("");
       watchList();
       startPresence();
