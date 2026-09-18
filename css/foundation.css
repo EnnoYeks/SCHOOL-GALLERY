@@ -18,7 +18,15 @@
 
 :root {
   --hshs-shell-max: 1400px;
+  --hshs-content-max: 1440px;
   --hshs-page-gutter: clamp(1rem, 3vw, 2rem);
+  --hshs-section-gap: clamp(1rem, 2vw, 1.75rem);
+  --hshs-card-gap: clamp(10px, 1.2vw, 16px);
+  --hshs-card-min: 220px;
+  --hshs-card-max: 320px;
+  --hshs-radius-sm: 10px;
+  --hshs-radius-md: 16px;
+  --hshs-radius-lg: 22px;
   --hshs-mobile-breakpoint: 768px;
   --hshs-tablet-breakpoint: 1024px;
   --hshs-glass-blur: 16px;
