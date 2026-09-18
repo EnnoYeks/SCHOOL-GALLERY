@@ -45,22 +45,23 @@
       if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
       else root.innerHTML = tpl;
     }
-    loadCss('css/hshs-chat.css?v=260918live1');
-    loadCss('css/hshs-messages.css?v=260918live1');
-    loadCss('css/hshs-chat-packs.css?v=260918live1');
-    loadCss('css/hshs-chat-finish.css?v=260918live1');
-    loadCss('css/hshs-chat-fixes.css?v=260918live1');
-    await loadOnce(base() + 'js/core/templates/chat.js?v=260918live1', 'hshs-tpl-chat');
+    loadCss('css/hshs-chat.css?v=260918live2');
+    loadCss('css/hshs-messages.css?v=260918live2');
+    loadCss('css/hshs-chat-packs.css?v=260918live2');
+    loadCss('css/hshs-chat-finish.css?v=260918live2');
+    loadCss('css/hshs-chat-fixes.css?v=260918live2');
+    await loadOnce(base() + 'js/core/templates/chat.js?v=260918live2', 'hshs-tpl-chat');
     tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl && root && !root.querySelector('#hshsChatPage')) {
       if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
       else root.innerHTML = tpl;
     }
-    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260918live1', 'hshs-msg-ui');
-    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260918live1', 'hshs-chat-packs');
-    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260918live1', 'hshs-chat-spring');
-    await loadOnce(base() + 'js/hshs-chat-attach.js?v=260918live1', 'hshs-chat-attach');
-    await loadOnce(base() + 'js/hshs-chat-live.js?v=260918live1', 'hshs-chat-live', true);
+    await loadOnce(base() + 'js/storage.js?v=260918live2', 'hshs-storage');
+    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260918live2', 'hshs-msg-ui');
+    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260918live2', 'hshs-chat-packs');
+    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260918live2', 'hshs-chat-spring');
+    await loadOnce(base() + 'js/hshs-chat-attach.js?v=260918live2', 'hshs-chat-attach');
+    await loadOnce(base() + 'js/hshs-chat-live.js?v=260918live2', 'hshs-chat-live', true);
     if (global.HshsMessagesUi) global.HshsMessagesUi.boot();
     if (global.HshsChatPacks) global.HshsChatPacks.boot();
     if (global.HshsChatAttach) global.HshsChatAttach.boot();
