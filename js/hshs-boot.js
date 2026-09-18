@@ -91,14 +91,14 @@
         try {
             var f = (new URL(href, location.href).pathname.split('/').pop() || 'index.html').toLowerCase();
             if (!f) f = 'index.html';
-            if (f === 'clips.html' || f === 'shorts.html') f = 'buzz.html';
-            if (f === 'contact.html') f = 'contat.html';
+            if (f === 'clips.html' || f === 'shorts.html' || f === 'vibe.html') f = 'buzz.html';
+            if (f === 'contat.html') f = 'contact.html';
             return f;
         } catch (e) { return href; }
     }
     function prefetchSite() {
         var cache = window.__hshsPageCache = window.__hshsPageCache || {};
-        var nested = ['gallery.html','spotlight.html','buzz.html','photos.html','videos.html','trending.html','polls.html','memories.html','about.html','profile.html','settings.html','contat.html'];
+        var nested = ['gallery.html','spotlight.html','buzz.html','photos.html','videos.html','trending.html','polls.html','memories.html','about.html','profile.html','settings.html','contact.html'];
         var inSub = location.pathname.indexOf('/index/') !== -1;
         var list = nested.map(function (f) {
             return new URL(inSub ? f : ('index/' + f), location.href).href;
