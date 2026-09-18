@@ -15,6 +15,7 @@
 @import url("./hshs-vibe-home.css");
 @import url("./hshs-wave.css");
 @import url("./hshs-desktop.css");
+@import url("./hshs-desktop-flex.css");
 
 :root {
   --hshs-shell-max: 1400px;

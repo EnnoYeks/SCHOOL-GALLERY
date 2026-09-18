@@ -1,0 +1,156 @@
+/* Additive desktop flex — loaded after hshs-desktop.css */
+@media (min-width: 1025px) {
+  :root {
+    --hshs-content-max: 1680px;
+    --hshs-card-min: 220px;
+  }
+
+  .home-featured-grid,
+  .gallery-feed,
+  .masonry-grid,
+  .videos-container,
+  .photos-grid,
+  .spotlightGrid,
+  .poll-grid,
+  .memories-grid,
+  .trending-grid,
+  #trendingGrid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(var(--hshs-card-min), 1fr)) !important;
+    justify-content: stretch;
+    gap: 16px !important;
+  }
+
+  .home-feature-card,
+  .photo-card,
+  .gallery-card,
+  .gallery-skel,
+  .student-card,
+  .poll-card,
+  .memories-card {
+    max-width: none;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #hshs-page { width: min(100%, var(--hshs-content-max)); margin-inline: auto; }
+
+  .navbar .logo { min-width: 0; max-width: 220px; }
+  .navbar .brand-copy strong {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1.02rem;
+    white-space: nowrap;
+  }
+  .navbar .brand-copy small {
+    display: block;
+    font-size: .68rem;
+    opacity: .72;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hshs-desk-back {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-right: 4px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .hshs-desk-back[hidden] { display: none !important; }
+  .hshs-desk-back:hover { background: linear-gradient(135deg,#2563eb,#1d4ed8); }
+
+  .hshs-toast, .hshs-chat-toast { bottom: 28px !important; z-index: 400 !important; }
+
+  html.hshs-device-desktop .hshs-chat-page.msg {
+    max-width: none;
+    margin: 0;
+    padding: 12px var(--hshs-page-gutter) 24px;
+    min-height: calc(100vh - 76px);
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    border-radius: 18px;
+    overflow: hidden;
+    background: #0b1633;
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-list-view,
+  html.hshs-device-desktop .hshs-chat-page.msg #hshsChatListView,
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-thread-view,
+  html.hshs-device-desktop .hshs-chat-page.msg #hshsThread {
+    display: flex !important;
+    flex-direction: column;
+    min-height: calc(100vh - 110px);
+    max-height: calc(100vh - 110px);
+  }
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-list-view,
+  html.hshs-device-desktop .hshs-chat-page.msg #hshsChatListView {
+    padding: 0;
+    border-right: 1px solid rgba(255,255,255,.08);
+    background: #0b1a3a;
+  }
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-thread-view[hidden] { display: flex !important; }
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-fab-compose,
+  html.hshs-device-desktop .hshs-chat-page.msg .hshs-thread-back { display: none !important; }
+  html.hshs-device-desktop body:has(.hshs-chat-page) .footer { display: none !important; }
+  html.hshs-device-desktop .hshs-desk-chat-empty {
+    display: none; flex: 1; flex-direction: column; align-items: center;
+    justify-content: center; gap: 8px; color: #94a3b8; text-align: center; padding: 32px;
+  }
+  html.hshs-device-desktop .hshs-chat-page.msg:not(.is-open) .hshs-desk-chat-empty,
+  html.hshs-device-desktop .hshs-chat-page.msg #hshsThread[hidden] .hshs-desk-chat-empty { display: flex; }
+  html.hshs-device-desktop .hshs-chat-page.msg.is-open .hshs-desk-chat-empty { display: none !important; }
+
+  html.hshs-device-desktop .hshs-settings { max-width: 1080px; margin: 28px auto 64px; }
+  html.hshs-device-desktop .hshs-set-layout {
+    display: grid; grid-template-columns: 220px minmax(0,1fr); gap: 24px; align-items: start;
+  }
+  html.hshs-device-desktop .hshs-set-tabs {
+    flex-direction: column; overflow: visible; padding: 8px; border-radius: 16px;
+    background: rgba(11,31,77,.45); border: 1px solid rgba(255,255,255,.08);
+  }
+  html.hshs-device-desktop .hshs-set-tab {
+    width: 100%; text-align: left; border-bottom: 0; border-radius: 12px; padding: 12px 14px;
+  }
+  html.hshs-device-desktop .hshs-set-tab.on {
+    background: linear-gradient(135deg,#2563eb,#1d4ed8); color: #fff;
+  }
+
+  html.hshs-device-desktop .hshs-memories-page,
+  html.hshs-device-desktop .hshs-polls-page,
+  html.hshs-device-desktop .spotlight-main {
+    width: min(100% - 48px, var(--hshs-content-max));
+    margin-inline: auto;
+    padding-top: 20px;
+  }
+  html.hshs-device-desktop .memories-hero,
+  html.hshs-device-desktop .polls-hero,
+  html.hshs-device-desktop .spotlight-hero {
+    padding: 28px 32px; border-radius: 22px; overflow: hidden;
+  }
+  html.hshs-device-desktop .featured-student-card {
+    display: grid; grid-template-columns: minmax(280px,.9fr) minmax(0,1.1fr); gap: 24px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .home-featured-grid .home-skeleton:nth-child(n+4),
+  .gallery-feed .gallery-skel:nth-child(n+5) { display: none; }
+  .hshs-desk-back, .hshs-desk-chat-empty { display: none !important; }
+}
+
+.brand-verified {
+  display: inline-flex; width: 15px; height: 15px; margin-left: 5px; vertical-align: middle;
+  filter: drop-shadow(0 0 4px rgba(56,151,240,.45));
+}
+.brand-verified svg { width: 15px; height: 15px; display: block; }
+.brand-tick { display: none !important; }
