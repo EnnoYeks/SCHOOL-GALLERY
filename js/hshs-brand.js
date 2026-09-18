@@ -39,7 +39,7 @@
     function dressLogo() {
         var logo = document.querySelector('.logo');
         if (!logo) return;
-        var copyHtml = '<strong>HSHS World <i class="fas fa-circle-check brand-tick" aria-hidden="true"></i></strong><small>Campus social</small>';
+        var copyHtml = '<strong>HSHS World <span class="brand-verified" title="Official HSHS World" aria-label="Verified"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#3897F0"/><path d="M7.2 12.4l2.6 2.6 7-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></strong><small>Campus social</small>';
         if (!logo.querySelector('.brand-copy')) {
             var mark = document.createElement('span');
             mark.className = 'brand-mark';
@@ -52,7 +52,7 @@
             logo.appendChild(copy);
         } else {
             var c = logo.querySelector('.brand-copy');
-            if (c && !c.querySelector('.brand-tick')) c.innerHTML = copyHtml;
+            if (c && !c.querySelector('.brand-verified')) c.innerHTML = copyHtml;
         }
         sizeBadge(logo);
         logo.setAttribute('title', APP);
