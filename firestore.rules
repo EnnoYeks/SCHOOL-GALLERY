@@ -162,26 +162,43 @@ service cloud.firestore {
     }
 
     match /chats/{chatId} {
-      allow read: if signedInAny();
+      allow read: if signedIn() && (
+        !('memberIds' in resource.data)
+        || request.auth.uid in resource.data.memberIds
+      );
+
       allow create: if signedIn()
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() < 80;
-      allow update: if signedIn()
-        && request.resource.data.name is string
-        && request.resource.data.name.size() < 80;
+        && request.resource.data.memberIds is list
+        && request.auth.uid in request.resource.data.memberIds
+        && optionalString('name', 80)
+        && optionalString('peerName', 80);
+
+      allow update: if signedIn() && (
+        !('memberIds' in resource.data)
+        || request.auth.uid in resource.data.memberIds
+      );
+
       allow delete: if false;
 
       match /messages/{msgId} {
-        allow read: if signedInAny();
+        allow read: if signedIn();
+
         allow create: if signedIn()
           && request.resource.data.senderId == request.auth.uid
           && request.resource.data.text is string
-          && request.resource.data.text.size() > 0
-          && request.resource.data.text.size() <= 2000;
+          && request.resource.data.text.size() <= 2000
+          && (
+            request.resource.data.text.size() > 0
+            || (
+              request.resource.data.kind is string
+              && request.resource.data.kind != 'text'
+            )
+          );
+
         allow update: if signedIn()
           && request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly(['reacts']);
+
         allow delete: if signedIn()
           && resource.data.senderId == request.auth.uid;
       }
