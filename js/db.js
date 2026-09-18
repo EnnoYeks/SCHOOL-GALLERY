@@ -98,9 +98,6 @@ class Database {
         }
     }
 
-    /**
-     * Create a feed post (gallery). Media URL comes from HshsStorage.
-     */
     async createPost(data) {
         try {
             const meta = await this.getAuthorMeta();
@@ -244,7 +241,6 @@ class Database {
                 createdAt: serverTimestamp()
             };
             const ref = await addDoc(collection(firestore, "comments"), payload);
-            // best-effort counter
             try {
                 const col = data.collection || "posts";
                 await updateDoc(doc(firestore, col, postId), { comments: increment(1) });
@@ -290,15 +286,70 @@ class Database {
         }
     }
 
-    // ---------- Chat (already live) ----------
-    async listChats() {
+    async listChats(uid) {
         try {
-            const q = query(collection(firestore, "chats"), orderBy("updatedAt", "desc"), limit(40));
-            const snap = await getDocs(q);
+            const ref = collection(firestore, "chats");
+            const qRef = uid
+                ? query(ref, where("memberIds", "array-contains", uid), orderBy("updatedAt", "desc"), limit(40))
+                : query(ref, orderBy("updatedAt", "desc"), limit(40));
+            const snap = await getDocs(qRef);
             return snap.docs.map(d => ({ id: d.id, ...d.data() }));
         } catch (error) {
             console.error("listChats", error);
-            return [];
+            try {
+                const snap = await getDocs(query(collection(firestore, "chats"), orderBy("updatedAt", "desc"), limit(40)));
+                const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (!uid) return rows;
+                return rows.filter(row => Array.isArray(row.memberIds) && row.memberIds.indexOf(uid) !== -1);
+            } catch (err) {
+                return [];
+            }
+        }
+    }
+
+    watchChats(uid, onChange) {
+        if (!uid || typeof onChange !== "function") return function () {};
+        const apply = (rows, err) => {
+            try { onChange(rows || [], err || null); } catch (e) {}
+        };
+        const listen = (qRef, filterUid) => onSnapshot(
+            qRef,
+            { includeMetadataChanges: true },
+            function (snap) {
+                let rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (filterUid) {
+                    rows = rows.filter(row => Array.isArray(row.memberIds) && row.memberIds.indexOf(filterUid) !== -1);
+                }
+                rows.sort(function (a, b) {
+                    const am = a.updatedAt && a.updatedAt.toMillis ? a.updatedAt.toMillis() : 0;
+                    const bm = b.updatedAt && b.updatedAt.toMillis ? b.updatedAt.toMillis() : 0;
+                    return bm - am;
+                });
+                apply(rows, null);
+            },
+            function (err) {
+                console.error("watchChats", err);
+                apply([], err);
+            }
+        );
+        try {
+            return listen(
+                query(
+                    collection(firestore, "chats"),
+                    where("memberIds", "array-contains", uid),
+                    orderBy("updatedAt", "desc"),
+                    limit(40)
+                ),
+                null
+            );
+        } catch (error) {
+            console.warn("watchChats falling back", error);
+            try {
+                return listen(query(collection(firestore, "chats"), orderBy("updatedAt", "desc"), limit(80)), uid);
+            } catch (err) {
+                apply([], err);
+                return function () {};
+            }
         }
     }
 
@@ -333,24 +384,38 @@ class Database {
 
     async sendMessage(chatId, data) {
         try {
+            const uid = data.senderId || (await this.getCurrentUserId());
+            const kind = data.kind || "text";
+            const text = String(data.text || data.fileName || kind || " ").slice(0, 2000) || " ";
             const payload = {
-                text: String(data.text || "").slice(0, 2000),
-                senderId: data.senderId || (await this.getCurrentUserId()),
+                text,
+                senderId: uid,
                 senderName: data.senderName || "Campus student",
-                kind: data.kind || "text",
+                kind,
                 fileName: data.fileName || "",
                 fileMeta: data.fileMeta || "",
+                src: data.src || "",
+                mediaKey: data.mediaKey || "",
+                mediaProvider: data.mediaProvider || "",
                 clientId: data.clientId || "",
+                reacts: {},
                 createdAt: serverTimestamp()
             };
             const ref = await addDoc(collection(firestore, "chats", chatId, "messages"), payload);
-            await updateDoc(doc(firestore, "chats", chatId), {
-                preview:
-                    payload.kind === "text"
-                        ? payload.text.slice(0, 80)
-                        : payload.kind + " attachment",
+            const chatPatch = {
+                preview: kind === "text" ? payload.text.slice(0, 80) : (kind + " attachment"),
+                lastMessage: kind === "text" ? payload.text.slice(0, 80) : (kind + " attachment"),
                 updatedAt: serverTimestamp()
-            });
+            };
+            try {
+                const chatSnap = await getDoc(doc(firestore, "chats", chatId));
+                const members = (chatSnap.exists() && chatSnap.data().memberIds) || [];
+                members.forEach(function (id) {
+                    if (!id) return;
+                    chatPatch["unread." + id] = id === uid ? 0 : increment(1);
+                });
+            } catch (e) {}
+            await setDoc(doc(firestore, "chats", chatId), chatPatch, { merge: true });
             return { id: ref.id, ...payload };
         } catch (error) {
             console.error("sendMessage", error);
@@ -358,7 +423,18 @@ class Database {
         }
     }
 
+    async updateMessage(chatId, msgId, patch) {
+        try {
+            await updateDoc(doc(firestore, "chats", chatId, "messages", msgId), patch);
+            return true;
+        } catch (error) {
+            console.error("updateMessage", error);
+            return false;
+        }
+    }
+
     watchMessages(chatId, onChange) {
+        if (!chatId || typeof onChange !== "function") return function () {};
         try {
             const q = query(
                 collection(firestore, "chats", chatId, "messages"),
@@ -367,21 +443,27 @@ class Database {
             );
             return onSnapshot(
                 q,
+                { includeMetadataChanges: true },
                 function (snap) {
-                    const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    onChange(rows);
+                    const rows = snap.docs.map(function (d) {
+                        return { id: d.id, pending: !!(d.metadata && d.metadata.hasPendingWrites), ...d.data() };
+                    });
+                    onChange(rows, null);
                 },
                 function (err) {
                     console.error("watchMessages", err);
+                    onChange(null, err);
                 }
             );
         } catch (error) {
             console.error("watchMessages", error);
+            onChange(null, error);
             return function () {};
         }
     }
 
     async setPresence(uid, info) {
+        if (!uid) return false;
         try {
             await setDoc(
                 doc(firestore, "presence", uid),
@@ -391,6 +473,27 @@ class Database {
             return true;
         } catch (error) {
             return false;
+        }
+    }
+
+    watchPresence(onChange) {
+        if (typeof onChange !== "function") return function () {};
+        try {
+            return onSnapshot(
+                collection(firestore, "presence"),
+                function (snap) {
+                    const map = {};
+                    snap.forEach(function (d) { map[d.id] = { id: d.id, ...d.data() }; });
+                    onChange(map, null);
+                },
+                function (err) {
+                    console.error("watchPresence", err);
+                    onChange({}, err);
+                }
+            );
+        } catch (error) {
+            console.error("watchPresence", error);
+            return function () {};
         }
     }
 }
