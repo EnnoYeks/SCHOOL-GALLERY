@@ -5,43 +5,41 @@ import { db } from "./db.js";
   if (g.__hshsChatLive) return;
   g.__hshsChatLive = true;
 
-  var STORE_KEY = "hshsWorldChat_v1";
-  var SEED = [
-    { id: "daniel", name: "Daniel Okello", user: "daniel_ok", preview: "Hey! How are you doing?", group: false },
-    { id: "aisha", name: "Aisha Nakitende", user: "aisha_n", preview: "Thanks! I'll check it out.", group: false },
-    { id: "brian", name: "Brian Kato", user: "brian_k", preview: "See you tomorrow bro", group: false },
-    { id: "faith", name: "Faith Namulondo", user: "faith_n", preview: "That's awesome!", group: false },
-    { id: "joseph", name: "Joseph Ssemmanda", user: "joseph_s", preview: "Alright, got it.", group: false },
-    { id: "gloria", name: "Gloria Nankinga", user: "gloria_n", preview: "Let's catch up soon.", group: false },
-    { id: "mercy", name: "Mercy Atim", user: "mercy", preview: "See you at assembly tomorrow", group: false },
-    { id: "maya", name: "Maya Okello", user: "maya_lens", preview: "New campus shots", group: false },
-    { id: "joel", name: "Joel Wambede", user: "joel_pref", preview: "Assembly at 8 sharp", group: false },
-    { id: "class4a", name: "Class 4A", user: "class4a", preview: "Maths homework is in the group", group: true, members: ["Ivan", "Aisha", "Brian", "Faith", "Mercy"] }
-  ];
+  var AV = function (seed) {
+    return "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(seed) + "&backgroundColor=1e3a5f";
+  };
 
-  var state = { ready: false, uid: "", name: "Campus student", active: null, unsub: null, seen: {}, live: false };
+  var state = {
+    ready: false,
+    uid: "",
+    name: "Campus student",
+    active: null,
+    unsubThread: null,
+    unsubList: null,
+    unsubPresence: null,
+    presenceTimer: 0,
+    live: false,
+    presence: {}
+  };
 
   function $(id) { return document.getElementById(id); }
 
-  function me() {
+  function realUser() {
+    var u = g.hshsAuthUser || (g.auth && g.auth.currentUser) || null;
+    if (!u || u.isAnonymous) return null;
+    return u;
+  }
+
+  function meName() {
     try {
+      if (g.hshsProfile && g.hshsProfile.fullName) return String(g.hshsProfile.fullName);
       if (g.HshsStore && g.HshsStore.currentUser) {
         var u = g.HshsStore.currentUser();
         if (u && u.name) return String(u.name);
       }
     } catch (e) {}
-    return "Campus student";
-  }
-
-  function uid() {
-    if (g.auth && g.auth.currentUser) return g.auth.currentUser.uid;
-    if (g.hshsUid) return g.hshsUid;
-    var id = localStorage.getItem("guestId");
-    if (!id) {
-      id = "guest-" + Math.random().toString(36).slice(2, 10);
-      localStorage.setItem("guestId", id);
-    }
-    return id;
+    var user = realUser();
+    return (user && (user.displayName || user.email)) || "Campus student";
   }
 
   function toast(msg) {
@@ -58,196 +56,315 @@ import { db } from "./db.js";
     toast._t = setTimeout(function () { el.classList.remove("is-on"); }, 1600);
   }
 
+  function setBanner(text, kind) {
+    var banner = $("hshsChatBanner");
+    if (!banner) return;
+    if (!text) {
+      banner.hidden = true;
+      banner.setAttribute("aria-hidden", "true");
+      banner.textContent = "";
+      return;
+    }
+    banner.hidden = false;
+    banner.setAttribute("aria-hidden", "false");
+    banner.textContent = text;
+    banner.dataset.kind = kind || "info";
+  }
+
   function markLive(on) {
     state.live = !!on;
     var page = $("hshsChatPage");
     if (page) page.classList.toggle("is-live", state.live);
-    var hero = document.querySelector(".msg-hero-titles p");
-    if (hero && on) hero.textContent = "Live campus chat";
-  }
-
-  function readStore() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY) || "null") || { inbox: [], threads: {} }; }
-    catch (e) { return { inbox: [], threads: {} }; }
-  }
-
-  function writeStore(payload) {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(payload)); } catch (e) {}
-  }
-
-  function activeId() {
-    if (state.active) return state.active;
-    var handle = $("hshsThreadHandle");
-    var name = $("hshsThreadName");
-    var key = ((handle && handle.textContent) || (name && name.textContent) || "").toLowerCase();
-    for (var i = 0; i < SEED.length; i++) {
-      var row = SEED[i];
-      if (key.indexOf(row.user) !== -1 || key.indexOf(row.name.toLowerCase()) !== -1) return row.id;
+    if (g.HshsMessagesUi && g.HshsMessagesUi.setMode) {
+      g.HshsMessagesUi.setMode(state.live ? "live" : "local");
+    } else {
+      var hero = document.querySelector(".msg-hero-titles p");
+      if (hero) hero.textContent = state.live ? "Live campus chat" : "On this device";
     }
-    var open = $("hshsChatPage");
-    return open && open.classList.contains("is-open") ? "daniel" : null;
   }
 
-  function toLocalMsg(row) {
-    var mine = row.senderId && row.senderId === state.uid;
+  function tsMillis(value) {
+    if (!value) return 0;
+    if (typeof value.toMillis === "function") return value.toMillis();
+    if (value.seconds) return value.seconds * 1000;
+    var n = Date.parse(value);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function fmtTime(value) {
+    var ms = tsMillis(value);
+    if (!ms) return "Now";
+    var d = new Date(ms);
+    var now = new Date();
+    var sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) {
+      var h = d.getHours(), m = d.getMinutes(), am = h >= 12 ? "PM" : "AM";
+      h = h % 12 || 12;
+      return h + ":" + (m < 10 ? "0" : "") + m + " " + am;
+    }
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
+  function presenceState(uid) {
+    var row = state.presence[uid];
+    if (!row) return { online: false, label: "Offline" };
+    var ago = Date.now() - tsMillis(row.lastSeen);
+    if (row.online && ago < 2 * 60 * 1000) return { online: true, label: "Online now" };
+    if (ago < 15 * 60 * 1000) return { online: false, label: "Active recently" };
+    return { online: false, label: "Offline" };
+  }
+
+  function otherMember(chat) {
+    var ids = (chat && chat.memberIds) || [];
+    for (var i = 0; i < ids.length; i++) if (ids[i] && ids[i] !== state.uid) return ids[i];
+    return chat && chat.peerId ? chat.peerId : "";
+  }
+
+  function mapChat(row) {
+    var peer = otherMember(row);
+    var pres = presenceState(peer);
+    var unread = 0;
+    if (row.unread && typeof row.unread === "object" && row.unread[state.uid] != null) {
+      unread = Number(row.unread[state.uid]) || 0;
+    } else {
+      unread = Number(row.unreadCount || 0) || 0;
+    }
     return {
-      mine: !!mine,
-      text: row.text || "",
-      time: "Now",
-      kind: row.kind && row.kind !== "text" ? row.kind : undefined,
-      fileName: row.fileName || "",
-      fileMeta: row.fileMeta || "",
-      sender: mine ? undefined : (row.senderName || "Friend")
+      id: row.id,
+      name: row.name || row.peerName || "HSHS Student",
+      user: row.user || row.peerUsername || "student",
+      preview: row.preview || row.lastMessage || "",
+      time: fmtTime(row.updatedAt),
+      unread: unread,
+      read: unread === 0,
+      group: !!row.group,
+      members: row.members || [],
+      memberIds: row.memberIds || [],
+      online: pres.online,
+      presenceLabel: pres.label,
+      avatar: row.avatar || AV(row.name || row.id || "hshs")
     };
   }
 
+  function mapMessage(row) {
+    var mine = !!(row.senderId && row.senderId === state.uid);
+    var reacts = row.reacts;
+    if (reacts && !Array.isArray(reacts)) {
+      reacts = Object.keys(reacts).map(function (k) { return reacts[k]; }).filter(Boolean);
+    }
+    return {
+      id: row.id,
+      clientId: row.clientId || "",
+      mine: mine,
+      text: row.text || "",
+      time: fmtTime(row.createdAt),
+      kind: row.kind && row.kind !== "text" ? row.kind : undefined,
+      src: row.src || "",
+      fileName: row.fileName || "",
+      fileMeta: row.fileMeta || "",
+      sender: mine ? undefined : (row.senderName || "Friend"),
+      read: mine,
+      pending: !!row.pending,
+      reacts: reacts || []
+    };
+  }
+
+  function stopList() {
+    if (state.unsubList) {
+      try { state.unsubList(); } catch (e) {}
+      state.unsubList = null;
+    }
+  }
+
+  function stopThread() {
+    if (state.unsubThread) {
+      try { state.unsubThread(); } catch (e) {}
+      state.unsubThread = null;
+    }
+    state.active = null;
+  }
+
+  function stopPresence() {
+    if (state.unsubPresence) {
+      try { state.unsubPresence(); } catch (e) {}
+      state.unsubPresence = null;
+    }
+    if (state.presenceTimer) {
+      clearInterval(state.presenceTimer);
+      state.presenceTimer = 0;
+    }
+  }
+
+  function stopAll() {
+    stopList();
+    stopThread();
+    stopPresence();
+  }
+
+  function applyInbox(rows) {
+    if (!g.HshsMessagesUi || !g.HshsMessagesUi.setInbox) return;
+    g.HshsMessagesUi.setInbox((rows || []).map(mapChat));
+  }
+
   function applyThread(chatId, rows) {
-    var store = readStore();
-    store.threads = store.threads || {};
-    store.threads[chatId] = rows.map(toLocalMsg);
-    var last = rows[rows.length - 1];
-    if (last) {
-      store.inbox = store.inbox || [];
-      var hit = store.inbox.filter(function (r) { return r.id === chatId; })[0];
-      if (hit) {
-        hit.preview = last.kind && last.kind !== "text" ? last.kind : String(last.text || "").slice(0, 48);
-        hit.time = "Now";
+    if (!g.HshsMessagesUi || !g.HshsMessagesUi.applyRemoteThread) return;
+    g.HshsMessagesUi.applyRemoteThread(chatId, (rows || []).map(mapMessage));
+  }
+
+  function watchList() {
+    stopList();
+    if (!state.live || !state.uid || !db.watchChats) return;
+    state.unsubList = db.watchChats(state.uid, function (rows, err) {
+      if (err) {
+        setBanner("Chat list paused — reconnecting when the network returns.", "warn");
+        return;
       }
-    }
-    writeStore(store);
-    if (activeId() === chatId) paintRemote(chatId, rows);
-  }
-
-  function paintRemote(chatId, rows) {
-    var box = $("hshsThreadMsgs");
-    if (!box || !$("hshsThread") || $("hshsThread").hidden) return;
-    var last = rows[rows.length - 1];
-    if (!last || last.senderId === state.uid) return;
-    if (state.seen[last.id]) return;
-    state.seen[last.id] = 1;
-    var welcome = $("hshsThreadWelcome");
-    if (welcome) welcome.hidden = true;
-    box.hidden = false;
-    var msg = toLocalMsg(last);
-    var inner = msg.kind === "file"
-      ? '<div class="hshs-file-chip"><i class="fas fa-file-lines"></i><span><b>' + (msg.fileName || "Document") + "</b><small>" + (msg.fileMeta || "File") + "</small></span></div>"
-      : '<div class="hshs-bubble-text">' + String(msg.text || "").replace(/</g, "&lt;") + "</div>";
-    var sender = msg.sender ? '<span class="hshs-sender">' + msg.sender + "</span>" : "";
-    var row = document.createElement("div");
-    row.className = "hshs-row theirs";
-    row.innerHTML = '<div class="hshs-bubble theirs">' + sender + inner + "<time>Now</time></div>";
-    box.appendChild(row);
-    box.scrollTop = box.scrollHeight;
-  }
-
-  async function seedIfNeeded() {
-    var existing = await db.listChats();
-    if (existing && existing.length) return existing;
-    for (var i = 0; i < SEED.length; i++) {
-      var row = SEED[i];
-      await db.upsertChat(row.id, {
-        name: row.name,
-        user: row.user,
-        preview: row.preview,
-        group: !!row.group,
-        members: row.members || [],
-        campus: true
-      });
-    }
-    return SEED;
-  }
-
-  function watch(chatId) {
-    if (state.unsub) {
-      try { state.unsub(); } catch (e) {}
-      state.unsub = null;
-    }
-    if (!chatId) return;
-    state.active = chatId;
-    state.unsub = db.watchMessages(chatId, function (rows) {
-      applyThread(chatId, rows);
+      setBanner("");
+      applyInbox(rows || []);
     });
   }
 
+  function watch(chatId) {
+    if (!state.live || !chatId) return;
+    if (state.active === chatId && state.unsubThread) return;
+    stopThread();
+    state.active = chatId;
+    if (!db.watchMessages) return;
+    state.unsubThread = db.watchMessages(chatId, function (rows, err) {
+      if (err) {
+        setBanner("This conversation paused. Messages stay on this device until it reconnects.", "warn");
+        return;
+      }
+      setBanner("");
+      applyThread(chatId, rows || []);
+    });
+  }
+
+  function unwatchThread() {
+    stopThread();
+  }
+
+  async function heartbeat(online) {
+    if (!state.live || !state.uid || !db.setPresence) return;
+    await db.setPresence(state.uid, { name: state.name, page: "chat", online: online !== false });
+  }
+
+  function startPresence() {
+    stopPresence();
+    if (!state.live || !db.watchPresence) return;
+    heartbeat(true);
+    state.presenceTimer = setInterval(function () { heartbeat(true); }, 60000);
+    state.unsubPresence = db.watchPresence(function (map) {
+      state.presence = map || {};
+      if (g.HshsMessagesUi && g.HshsMessagesUi.setPresenceMap) {
+        g.HshsMessagesUi.setPresenceMap(state.presence);
+      }
+    });
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", onHide);
+  }
+
+  function onVis() {
+    if (!state.live) return;
+    heartbeat(document.visibilityState !== "hidden");
+  }
+  function onHide() {
+    if (!state.live) return;
+    heartbeat(false);
+  }
+
   async function publish(text, extra) {
-    var chatId = activeId();
-    if (!chatId || !state.live) return;
     extra = extra || {};
+    if (!state.live) return null;
+    var chatId = extra.chatId || state.active || (g.HshsMessagesUi && g.HshsMessagesUi.activeId && g.HshsMessagesUi.activeId());
+    if (!chatId) return null;
+    var clean = String(text || extra.fileName || "").replace(/<[^>]+>/g, " ").trim();
+    var src = extra.src || "";
+    var remote = !extra.localOnly && /^https?:\/\//i.test(src);
     var saved = await db.sendMessage(chatId, {
-      text: String(text || extra.fileName || "").slice(0, 2000),
+      text: extra.kind && extra.kind !== "text" ? (clean || extra.fileName || extra.kind) : clean,
       senderId: state.uid,
       senderName: state.name,
       kind: extra.kind || "text",
       fileName: extra.fileName || "",
       fileMeta: extra.fileMeta || "",
-      clientId: "c" + Date.now()
+      src: remote ? src : "",
+      mediaKey: extra.mediaKey || "",
+      mediaProvider: extra.mediaProvider || (remote ? "remote" : ""),
+      clientId: extra.clientId || ("c" + Date.now())
     });
     if (!saved) toast("Saved on this device only");
+    return saved;
   }
 
-  function hookSend() {
-    var form = $("hshsThreadForm");
-    if (form && !form.dataset.liveBound) {
-      form.dataset.liveBound = "1";
-      form.addEventListener("submit", function () {
-        var input = $("hshsThreadInput");
-        var text = input ? String(input.value || "").trim() : "";
-        if (text) setTimeout(function () { publish(text, { kind: "text" }); }, 0);
-      }, true);
-    }
-    var ui = g.HshsMessagesUi;
-    if (ui && ui.appendMine && !ui.__liveHooked) {
-      ui.__liveHooked = true;
-      var orig = ui.appendMine;
-      ui.appendMine = function (text, extra) {
-        var out = orig.apply(this, arguments);
-        if (extra && extra.kind && extra.kind !== "text") publish(text, extra);
-        return out;
-      };
-    }
-    var list = $("hshsChatList");
-    if (list && !list.dataset.liveBound) {
-      list.dataset.liveBound = "1";
-      list.addEventListener("click", function (e) {
-        var row = e.target.closest("[data-demo]");
-        if (!row) return;
-        var item = SEED[Number(row.getAttribute("data-demo"))];
-        if (item) setTimeout(function () { watch(item.id); }, 80);
-      });
-    }
+  async function react(msgId, emo) {
+    if (!state.live || !state.active || !msgId || !db.updateMessage) return false;
+    var patch = {};
+    patch["reacts." + state.uid] = emo;
+    return db.updateMessage(state.active, msgId, patch);
+  }
+
+  function goLocal(reason) {
+    stopAll();
+    markLive(false);
+    if (reason) setBanner(reason, "info");
   }
 
   async function start() {
     if (!$("hshsChatPage")) return;
-    state.uid = uid();
-    state.name = me();
-    hookSend();
+    var user = realUser();
+    state.name = meName();
+
+    if (!user) {
+      goLocal("");
+      return;
+    }
+
+    state.uid = user.uid;
     try {
-      await seedIfNeeded();
-      await db.setPresence(state.uid, { name: state.name, page: "chat" });
+      if (!db || !db.watchChats || !db.watchMessages) throw new Error("no db");
       markLive(true);
-      toast("Live chat on");
-      var open = activeId();
+      setBanner("");
+      watchList();
+      startPresence();
+      var open = g.HshsMessagesUi && g.HshsMessagesUi.activeId && g.HshsMessagesUi.activeId();
       if (open) watch(open);
     } catch (err) {
-      markLive(false);
       console.warn("Chat stays local:", err);
+      goLocal("Chat is on this device until Firestore is available.");
     }
-    setTimeout(hookSend, 250);
   }
 
   function boot() {
-    if (!$("hshsChatPage")) return;
+    if (!$("hshsChatPage")) {
+      stopAll();
+      return;
+    }
     start();
   }
 
-  document.addEventListener("hshs:page", boot);
+  document.addEventListener("hshs:page", function (e) {
+    var name = e && e.detail && e.detail.page;
+    if (name && name !== "chat") {
+      stopAll();
+      heartbeat(false);
+      return;
+    }
+    boot();
+  });
   document.addEventListener("hshs:auth", function () {
-    state.uid = uid();
     if ($("hshsChatPage")) start();
+    else stopAll();
   });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else setTimeout(boot, 120);
 
-  g.HshsChatLive = { boot: boot, watch: watch, publish: publish };
+  g.HshsChatLive = {
+    boot: boot,
+    watch: watch,
+    unwatchThread: unwatchThread,
+    publish: publish,
+    react: react,
+    isLive: function () { return !!state.live; }
+  };
 })(typeof window !== "undefined" ? window : globalThis);
