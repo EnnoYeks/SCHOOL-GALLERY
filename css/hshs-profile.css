@@ -81,3 +81,12 @@ html[data-hshs-page="profile"] .mobile-tabbar{background:#071433!important;borde
 .pf-sheet-card{width:100%;background:#0b1f4d;border-radius:16px 16px 0 0;padding:16px 16px 28px;display:flex;flex-direction:column;gap:8px}
 .pf-sheet input,.pf-sheet textarea{border:1px solid #1e3a8a;border-radius:8px;background:#071433;color:#fff;padding:10px;font:inherit}
 .pf-save{min-height:44px;border:0;border-radius:10px;background:#fbbf24;color:#071433;font-weight:800}
+
+.pf-btn.is-on{background:#1d4ed8;border-color:#1d4ed8}
+.pf-people-list{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto}
+.pf-person{display:flex;align-items:center;gap:10px;padding:8px 4px;color:#fff;text-decoration:none}
+.pf-person b{width:36px;height:36px;border-radius:50%;background:#1d4ed8;display:grid;place-items:center}
+.pf-person span{display:flex;flex-direction:column}
+.pf-person small{color:#94a3b8}
+.pf-sheet-h{display:flex;justify-content:space-between;align-items:center}
+#hshsPeoplePicker .pf-sheet-card{max-height:80vh}

@@ -17,14 +17,12 @@ class SearchManager {
                 this.handleSearch(e.target.value);
             });
 
-            // Close results when clicking outside
             document.addEventListener('click', (e) => {
                 if (e.target !== this.searchInput) {
                     this.searchResults.classList.remove('active');
                 }
             });
 
-            // Open results on focus
             this.searchInput.addEventListener('focus', () => {
                 if (this.searchInput.value.length > 0) {
                     this.searchResults.classList.add('active');
@@ -47,9 +45,23 @@ class SearchManager {
     }
 
     async performSearch(query) {
-        const results = await db.search(query, 'all');
+        let results = [];
+        try {
+            if (window.db && typeof window.db.search === 'function') results = await window.db.search(query, 'all');
+        } catch (e) { results = []; }
+        if ((!results || !results.length) && window.HshsPeople && HshsPeople.search) {
+            const people = await HshsPeople.search(query);
+            results = (people || []).map((u) => ({
+                kind: 'user',
+                uid: u.uid,
+                title: u.name,
+                username: u.username,
+                category: 'account',
+                image: u.photoURL || ''
+            }));
+        }
 
-        if (results.length === 0) {
+        if (!results || results.length === 0) {
             this.displayNoResults(query);
             return;
         }
@@ -60,26 +72,29 @@ class SearchManager {
 
     displayResults(results) {
         const html = results.slice(0, 8).map(result => {
-            const icon = result.image ? 'fa-image' : result.thumbnail ? 'fa-video' : 'fa-file';
+            const isUser = result.kind === 'user';
+            const icon = isUser ? 'fa-user' : (result.image ? 'fa-image' : result.thumbnail ? 'fa-video' : 'fa-file');
+            const href = isUser
+                ? ((location.pathname.indexOf('/index/') !== -1 ? '' : 'index/') + 'profile.html?uid=' + encodeURIComponent(result.uid || result.id || ''))
+                : '#';
             return `
-                <div class="search-result-item" style="
-                    padding: 0.75rem 1rem;
+                <a class="search-result-item" href="${href}" style="
+                    display:block; padding: 0.75rem 1rem;
                     border-bottom: 1px solid var(--border-color);
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                " onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
+                    cursor: pointer; text-decoration:none; color:inherit;
+                ">
                     <div style="display: flex; gap: 0.75rem; align-items: center;">
                         <i class="fas ${icon}" style="color: var(--primary-color);"></i>
                         <div style="flex: 1; min-width: 0;">
                             <div style="font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                ${result.title}
+                                ${result.title || ''}
                             </div>
                             <div style="font-size: 0.8rem; color: var(--text-secondary);">
-                                ${result.category ? Utils.capitalize(result.category) : 'Post'}
+                                ${isUser ? ('@' + (result.username || 'student')) : (result.category ? Utils.capitalize(result.category) : 'Post')}
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             `;
         }).join('');
 
@@ -97,7 +112,6 @@ class SearchManager {
     }
 }
 
-// Advanced Search Class
 class AdvancedSearch {
     constructor() {
         this.filters = {
@@ -116,7 +130,6 @@ class AdvancedSearch {
     async search(query) {
         let results = await db.search(query, 'all');
 
-        // Apply filters
         if (this.filters.category && this.filters.category !== 'all') {
             results = results.filter(r => r.category === this.filters.category);
         }
@@ -125,7 +138,6 @@ class AdvancedSearch {
             results = this.filterByPopularity(results, this.filters.popularity);
         }
 
-        // Sort results
         results = this.sortResults(results, this.filters.sortBy);
 
         return results;
@@ -169,11 +181,9 @@ class AdvancedSearch {
     }
 }
 
-// Initialize search
 const searchManager = new SearchManager();
 const advancedSearch = new AdvancedSearch();
 
-// Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { SearchManager, AdvancedSearch };
 }
