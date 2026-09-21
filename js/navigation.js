@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260921people2';
+var HSHS_ASSET_VER = '260921desk1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addCss('hshs-settings-css', 'hshs-settings.css');
     addCss('hshs-school-css', 'hshs-school.css');
     addCss('hshs-desktop-css', 'hshs-desktop.css');
+    addCss('hshs-desktop-upload-css', 'hshs-desktop-upload.css');
     add('hshs-lock-js', 'hshs-lock.js');
     add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');
@@ -179,4 +180,5 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-settings-js', 'hshs-settings.js');
     add('hshs-school-js', 'hshs-school.js');
     add('hshs-desktop-js', 'hshs-desktop.js');
+    add('hshs-desktop-upload-js', 'hshs-desktop-upload.js');
 })();
