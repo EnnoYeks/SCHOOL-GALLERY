@@ -11,6 +11,7 @@
     polls: { path: 'index/polls.html', module: 'polls', template: 'polls', title: 'Polls · HSHS World' },
     memories: { path: 'index/memories.html', module: 'memories', template: 'memories', title: 'Memories · HSHS World' },
     more: { path: 'index/more.html', module: 'more', template: 'more', title: 'More · HSHS World' },
+    search: { path: 'index/search.html', module: 'search', template: 'search', title: 'Search · HSHS World' },
     about: { path: 'index/about.html', module: 'about', template: 'about', title: 'About · HSHS World' },
     contact: { path: 'index/contact.html', module: 'contact', template: 'contact', title: 'Contact · HSHS World' },
     profile: { path: 'index/profile.html', module: 'profile', template: 'profile', title: 'Profile · HSHS World' },
