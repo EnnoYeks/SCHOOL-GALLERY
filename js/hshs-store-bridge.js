@@ -5,14 +5,16 @@
   if (window.__hshsStoreBridge) return;
   window.__hshsStoreBridge = true;
 
-  var V2_KEY = 'hshsWorldStore_v2';
+  var V2_KEY = 'hshsWorldStore_v3';
+  var LEGACY_V2 = 'hshsWorldStore_v2';
   var V1_KEY = 'hshsWorldStore_v1';
 
-  // Migrate v1 -> v2 when appropriate
   try {
-    if (!localStorage.getItem(V2_KEY) && localStorage.getItem(V1_KEY)) {
-      localStorage.setItem(V2_KEY, localStorage.getItem(V1_KEY));
-      console.info('HSHS: migrated store v1 -> v2');
+    if (!localStorage.getItem(V2_KEY)) {
+      localStorage.setItem(V2_KEY, JSON.stringify({
+        users: [], posts: [], follows: [], friendRequests: [], friends: [],
+        notifications: [], likes: [], saves: [], comments: [], sessionUserId: null
+      }));
     }
   } catch (e) { /* ignore localStorage errors */ }
 
@@ -23,7 +25,6 @@
     try { localStorage.setItem(V2_KEY, JSON.stringify(s)); } catch (e) { /* ignore */ }
   }
 
-  // If HshsStore isn't present yet, provide a minimal safe shim so other scripts don't throw.
   if (!window.HshsStore) {
     var shim = {
       getState: function () { return readLocal(); },
@@ -52,7 +53,6 @@
     };
     window.HshsStore = shim;
   } else {
-    // Ensure store reads/writes persist to V2 key when possible
     try {
       var originalGetState = window.HshsStore.getState;
       if (typeof originalGetState === 'function') {
@@ -68,13 +68,12 @@
     } catch (e) {}
   }
 
-  // Expose a safe helper for other code to read/write the local store key
   window.HshsStoreBridge = {
     STORE_KEY: V2_KEY,
     read: readLocal,
     write: writeLocal,
     migrateIfNeeded: function () {
-      try { if (!localStorage.getItem(V2_KEY) && localStorage.getItem(V1_KEY)) { localStorage.setItem(V2_KEY, localStorage.getItem(V1_KEY)); } } catch (e) {}
+      try { if (!localStorage.getItem(V2_KEY) && localStorage.getItem(V1_KEY)) { localStorage.setItem(V2_KEY, JSON.stringify({ users: [], posts: [], follows: [], friendRequests: [], friends: [], notifications: [], likes: [], saves: [], comments: [], sessionUserId: null })); } } catch (e) {}
     }
   };
 })();
