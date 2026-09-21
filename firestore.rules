@@ -181,7 +181,7 @@ service cloud.firestore {
       allow delete: if false;
 
       match /messages/{msgId} {
-        allow read: if signedIn();
+        allow read: if signedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.memberIds;
 
         allow create: if signedIn()
           && request.resource.data.senderId == request.auth.uid
