@@ -3,24 +3,69 @@
   if (g.__hshsChatNodemo) return;
   g.__hshsChatNodemo = true;
 
+  function av(seed) {
+    return 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(seed || 'hshs') + '&backgroundColor=1e3a5f';
+  }
+
+  async function openPeer(peer) {
+    if (!peer || !peer.uid) return;
+    var live = g.HshsChatLive;
+    if (live && live.openPeer && live.openPeer !== openPeer) return live.openPeer(peer);
+    var db = g.db;
+    if (!db || !db.startDirectChat) {
+      if (g.HshsPeople && g.HshsPeople.startChat) {
+        var res0 = await g.HshsPeople.startChat(peer);
+        if (res0 && res0.ok && g.HshsMessagesUi && g.HshsMessagesUi.openThread) {
+          g.HshsMessagesUi.openThread({
+            id: res0.chatId, name: peer.name, user: peer.username, peerId: peer.uid,
+            avatar: peer.photoURL || peer.avatar || av(peer.name), preview: '', time: 'Now'
+          });
+        }
+      }
+      return;
+    }
+    var res = await db.startDirectChat(peer);
+    if (!res || !res.ok) return;
+    if (g.HshsMessagesUi && g.HshsMessagesUi.openThread) {
+      g.HshsMessagesUi.openThread({
+        id: res.chatId,
+        name: peer.name || peer.fullName || 'HSHS Student',
+        user: peer.username || 'student',
+        peerId: peer.uid,
+        memberIds: [peer.uid],
+        avatar: peer.photoURL || peer.avatar || av(peer.name),
+        preview: '',
+        time: 'Now'
+      });
+    }
+    if (live && live.watch) live.watch(res.chatId);
+  }
+
+  async function openFromQuery() {
+    var params = new URLSearchParams(location.search);
+    var uid = params.get('uid');
+    var handle = params.get('u');
+    if (!uid && !handle) return;
+    var peer = null;
+    try {
+      if (g.HshsPeople) {
+        if (uid && g.HshsPeople.getUser) peer = await g.HshsPeople.getUser(uid);
+        if (!peer && handle && g.HshsPeople.getByUsername) peer = await g.HshsPeople.getByUsername(handle);
+      }
+      if (!peer && g.db && g.db.getUser) peer = uid ? await g.db.getUser(uid) : await g.db.getUserByUsername(handle);
+    } catch (e) {}
+    if (peer) openPeer(peer);
+  }
+
   function emptyLocalDemo() {
     try { localStorage.removeItem('hshsWorldChat_v1'); } catch (e) {}
-    var ui = g.HshsMessagesUi;
-    if (ui && ui.setInbox) ui.setInbox([]);
     var box = document.getElementById('hshsChatList');
-    if (box && /Daniel Okello|Aisha Nakitende|Class 4A|Maya Okello|Joel Wambede/.test(box.textContent || '')) {
+    if (box && /Daniel Okello|Aisha Nakitende|Class 4A|Maya Okello|Joel Wambede|Brian Kato|Faith Namulondo/.test(box.textContent || '')) {
       box.innerHTML = '<div class="hshs-chat-empty">No conversations yet. Search a classmate and start a chat.</div>';
     }
   }
 
   function bindCompose() {
-    function openPicker() {
-      if (g.HshsMessagesUi && g.HshsMessagesUi.openPeoplePicker) {
-        g.HshsMessagesUi.openPeoplePicker();
-        return;
-      }
-      ensurePicker();
-    }
     ['hshsComposeFab', 'hshsComposeTop'].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el || el.dataset.nodemo === '1') return;
@@ -28,13 +73,9 @@
       el.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        openPicker();
+        ensurePicker();
       }, true);
     });
-  }
-
-  function av(seed) {
-    return 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(seed || 'hshs') + '&backgroundColor=1e3a5f';
   }
 
   function ensurePicker() {
@@ -85,15 +126,23 @@
         var peer = rows.filter(function (u) { return u.uid === uid; })[0];
         var picker = document.getElementById('hshsPeoplePicker');
         if (picker) picker.hidden = true;
-        if (peer && g.HshsChatLive && g.HshsChatLive.openPeer) g.HshsChatLive.openPeer(peer);
+        if (peer) openPeer(peer);
       };
     });
   }
 
+  function attachLive() {
+    if (!g.HshsChatLive) g.HshsChatLive = {};
+    if (!g.HshsChatLive.openPeer) g.HshsChatLive.openPeer = openPeer;
+    if (!g.HshsChatLive.openFromQuery) g.HshsChatLive.openFromQuery = openFromQuery;
+  }
+
   function boot() {
     if (!document.getElementById('hshsChatPage')) return;
+    attachLive();
     emptyLocalDemo();
     bindCompose();
+    openFromQuery();
     setTimeout(emptyLocalDemo, 250);
     setTimeout(bindCompose, 250);
   }
