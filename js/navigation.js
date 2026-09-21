@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260921people3';
+var HSHS_ASSET_VER = '260921top1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -17,6 +17,7 @@ class Navigation {
         const notificationDropdown = document.getElementById('notificationDropdown');
         if (notificationIcon && notificationDropdown) {
             notificationIcon.addEventListener('click', (e) => {
+                if (window.matchMedia('(max-width: 1024px)').matches) return;
                 e.stopPropagation();
                 notificationDropdown.classList.toggle('active');
             });
@@ -25,6 +26,7 @@ class Navigation {
         const profileDropdown = document.getElementById('profileDropdown');
         if (profileIcon && profileDropdown) {
             profileIcon.addEventListener('click', (e) => {
+                if (window.matchMedia('(max-width: 1024px)').matches) return;
                 e.stopPropagation();
                 profileDropdown.classList.toggle('active');
             });
@@ -151,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addCss('hshs-school-css', 'hshs-school.css');
     addCss('hshs-desktop-css', 'hshs-desktop.css');
     addCss('hshs-desktop-upload-css', 'hshs-desktop-upload.css');
+    addCss('hshs-topbar-css', 'hshs-topbar.css');
     add('hshs-lock-js', 'hshs-lock.js');
     add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');
@@ -181,4 +184,5 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-school-js', 'hshs-school.js');
     add('hshs-desktop-js', 'hshs-desktop.js');
     add('hshs-desktop-upload-js', 'hshs-desktop-upload.js');
+    add('hshs-topbar-js', 'hshs-topbar.js');
 })();
