@@ -2,6 +2,11 @@
     if (window.__hshsSearchBtn) return;
     window.__hshsSearchBtn = true;
 
+    function searchUrl() {
+        var inIndex = location.pathname.indexOf('/index/') !== -1;
+        return (inIndex ? '' : 'index/') + 'search.html';
+    }
+
     function placeButton() {
         var actions = document.querySelector('.nav-actions');
         if (!actions || document.getElementById('hshsSearchBtn')) return;
@@ -15,25 +20,19 @@
         btn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            document.body.classList.toggle('search-open');
-            var input = document.getElementById('searchInput');
-            if (document.body.classList.contains('search-open') && input) {
-                setTimeout(function () { input.focus(); }, 40);
-            }
+            var dest = searchUrl();
+            try {
+                if (typeof window.__hshsNavigate === 'function') {
+                    window.__hshsNavigate(dest);
+                    return;
+                }
+            } catch (err) {}
+            location.href = dest;
         });
-    }
-
-    function closeSearch(e) {
-        if (e && e.target && (e.target.closest('#hshsSearchBtn') || e.target.closest('.search-container'))) return;
-        document.body.classList.remove('search-open');
     }
 
     function boot() {
         placeButton();
-        document.addEventListener('click', closeSearch);
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') document.body.classList.remove('search-open');
-        });
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
