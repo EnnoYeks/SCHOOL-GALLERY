@@ -10,6 +10,7 @@
   </a>
   <div class="hshs-menu-list" id="hshsMoreMenu">
     <p class="hshs-menu-kicker">You</p>
+    <a class="hshs-menu-item" href="search.html"><i class="fas fa-magnifying-glass"></i><span><b>Search</b><small>Find people, photos and videos</small></span><i class="fas fa-chevron-right"></i></a>
     <a class="hshs-menu-item" href="profile.html"><i class="fas fa-user"></i><span><b>Profile</b><small>View and edit your profile</small></span><i class="fas fa-chevron-right"></i></a>
     <a class="hshs-menu-item" href="chat.html"><i class="fas fa-envelope"></i><span><b>Messages</b><small>Chats with friends and clubs</small></span><i class="fas fa-chevron-right"></i></a>
     <a class="hshs-menu-item" href="notifications.html"><i class="fas fa-bell"></i><span><b>Notifications</b><small>Alerts, mentions and school updates</small></span><i class="fas fa-chevron-right"></i></a>
