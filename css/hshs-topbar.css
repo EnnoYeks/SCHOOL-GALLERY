@@ -1,0 +1,86 @@
+/* Force the live top icons on real phones */
+@media (max-width: 1024px) {
+  body.has-mobile-shell .navbar,
+  body.has-mobile-shell .navbar.hshs-flat-top {
+    pointer-events: auto !important;
+  }
+
+  body.has-mobile-shell .navbar .nav-actions,
+  .navbar .nav-actions,
+  .navbar .hshs-top-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 80;
+  }
+
+  body.has-mobile-shell .profile-icon,
+  body.has-mobile-shell .hshs-profile,
+  body.has-mobile-shell .notification-icon,
+  .navbar .profile-icon,
+  .navbar .hshs-profile,
+  .navbar .notification-icon,
+  .navbar .hshs-search-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    border-radius: 50% !important;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .navbar .notification-icon {
+    background: rgba(12, 18, 36, .55);
+    color: #fff;
+    border: 0;
+  }
+
+  .navbar .profile-icon,
+  .navbar .hshs-profile {
+    overflow: hidden;
+    border: 2px solid #fbbf24 !important;
+    background: #102a62;
+  }
+
+  .navbar .profile-img,
+  .navbar .hshs-avatar,
+  .navbar #profileImg,
+  .navbar .profile-icon img,
+  .navbar .hshs-profile img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+  }
+
+  body.has-mobile-shell .notification-icon .notification-dropdown,
+  body.has-mobile-shell .profile-icon .profile-dropdown,
+  body.has-mobile-shell #notificationDropdown,
+  body.has-mobile-shell #profileDropdown,
+  .navbar .notification-dropdown,
+  .navbar .profile-dropdown {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  body.has-mobile-shell .theme-toggle,
+  body.has-mobile-shell #themeToggle,
+  body.has-mobile-shell .mobile-menu-toggle {
+    display: none !important;
+  }
+
+  .navbar .hshs-desk-more {
+    display: none !important;
+  }
+}
