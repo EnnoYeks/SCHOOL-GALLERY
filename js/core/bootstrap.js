@@ -29,7 +29,7 @@
   }
 
   function ver(url) {
-    var v = '260912gsap';
+    var v = '260921s1';
     return url + (url.indexOf('?') === -1 ? '?' : '&') + 'v=' + v;
   }
 
@@ -53,7 +53,7 @@
       add('stylesheet', ver(cssBase + 'hshs-fonts.css'), 'hshs-fonts-css');
     } catch (e) {}
 
-    var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
+    var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','search','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
 
     try {
       await loadScript(ver(base + 'core/app.js'), 'hshs-core-app');
