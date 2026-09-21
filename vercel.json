@@ -40,6 +40,8 @@
     { "source": "/about", "destination": "/index/about.html" },
     { "source": "/more.html", "destination": "/index/more.html" },
     { "source": "/more", "destination": "/index/more.html" },
+    { "source": "/search.html", "destination": "/index/search.html" },
+    { "source": "/search", "destination": "/index/search.html" },
     { "source": "/chat.html", "destination": "/index/chat.html" },
     { "source": "/chat", "destination": "/index/chat.html" },
     { "source": "/profile.html", "destination": "/index/profile.html" },
