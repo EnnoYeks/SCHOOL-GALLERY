@@ -287,21 +287,32 @@ class Database {
     }
 
     async listChats(uid) {
+        if (!uid) return [];
         try {
-            const ref = collection(firestore, "chats");
-            const qRef = uid
-                ? query(ref, where("memberIds", "array-contains", uid), orderBy("updatedAt", "desc"), limit(40))
-                : query(ref, orderBy("updatedAt", "desc"), limit(40));
-            const snap = await getDocs(qRef);
+            const snap = await getDocs(query(
+                collection(firestore, "chats"),
+                where("memberIds", "array-contains", uid),
+                orderBy("updatedAt", "desc"),
+                limit(40)
+            ));
             return snap.docs.map(d => ({ id: d.id, ...d.data() }));
         } catch (error) {
-            console.error("listChats", error);
+            console.warn("listChats index fallback", error);
             try {
-                const snap = await getDocs(query(collection(firestore, "chats"), orderBy("updatedAt", "desc"), limit(40)));
+                const snap = await getDocs(query(
+                    collection(firestore, "chats"),
+                    where("memberIds", "array-contains", uid),
+                    limit(40)
+                ));
                 const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                if (!uid) return rows;
-                return rows.filter(row => Array.isArray(row.memberIds) && row.memberIds.indexOf(uid) !== -1);
+                rows.sort((a, b) => {
+                    const am = a.updatedAt && a.updatedAt.toMillis ? a.updatedAt.toMillis() : 0;
+                    const bm = b.updatedAt && b.updatedAt.toMillis ? b.updatedAt.toMillis() : 0;
+                    return bm - am;
+                });
+                return rows;
             } catch (err) {
+                console.error("listChats", err);
                 return [];
             }
         }
@@ -312,14 +323,11 @@ class Database {
         const apply = (rows, err) => {
             try { onChange(rows || [], err || null); } catch (e) {}
         };
-        const listen = (qRef, filterUid) => onSnapshot(
+        const listen = (qRef) => onSnapshot(
             qRef,
             { includeMetadataChanges: true },
             function (snap) {
-                let rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                if (filterUid) {
-                    rows = rows.filter(row => Array.isArray(row.memberIds) && row.memberIds.indexOf(filterUid) !== -1);
-                }
+                const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 rows.sort(function (a, b) {
                     const am = a.updatedAt && a.updatedAt.toMillis ? a.updatedAt.toMillis() : 0;
                     const bm = b.updatedAt && b.updatedAt.toMillis ? b.updatedAt.toMillis() : 0;
@@ -328,24 +336,33 @@ class Database {
                 apply(rows, null);
             },
             function (err) {
-                console.error("watchChats", err);
+                console.warn("watchChats", err && err.code, err);
+                if (err && String(err.code || "").indexOf("failed-precondition") !== -1) {
+                    try {
+                        return listen(query(
+                            collection(firestore, "chats"),
+                            where("memberIds", "array-contains", uid),
+                            limit(40)
+                        ));
+                    } catch (e) {}
+                }
                 apply([], err);
             }
         );
         try {
-            return listen(
-                query(
+            return listen(query(
+                collection(firestore, "chats"),
+                where("memberIds", "array-contains", uid),
+                orderBy("updatedAt", "desc"),
+                limit(40)
+            ));
+        } catch (error) {
+            try {
+                return listen(query(
                     collection(firestore, "chats"),
                     where("memberIds", "array-contains", uid),
-                    orderBy("updatedAt", "desc"),
                     limit(40)
-                ),
-                null
-            );
-        } catch (error) {
-            console.warn("watchChats falling back", error);
-            try {
-                return listen(query(collection(firestore, "chats"), orderBy("updatedAt", "desc"), limit(80)), uid);
+                ));
             } catch (err) {
                 apply([], err);
                 return function () {};
@@ -460,6 +477,219 @@ class Database {
             onChange(null, error);
             return function () {};
         }
+    }
+
+    realUid() {
+        const u = (typeof window !== "undefined" && window.hshsAuthUser) || (auth && auth.currentUser) || null;
+        if (!u || u.isAnonymous) return "";
+        return u.uid;
+    }
+
+    followDocId(followerId, followingId) {
+        return String(followerId || "") + "_" + String(followingId || "");
+    }
+
+    shapeUser(id, raw) {
+        raw = raw || {};
+        return {
+            id: raw.uid || id,
+            uid: raw.uid || id,
+            name: raw.fullName || raw.name || "HSHS Student",
+            fullName: raw.fullName || raw.name || "HSHS Student",
+            username: String(raw.username || "").replace(/^@/, "").toLowerCase(),
+            role: raw.role || "Student",
+            classYear: raw.classYear || "",
+            house: raw.house || "",
+            bio: raw.bio || "",
+            email: raw.email || "",
+            avatar: raw.photoURL || raw.avatar || "",
+            photoURL: raw.photoURL || raw.avatar || "",
+            cover: raw.coverURL || raw.cover || "",
+            coverURL: raw.coverURL || raw.cover || ""
+        };
+    }
+
+    async listUsers(max = 80) {
+        try {
+            const snap = await getDocs(query(collection(firestore, "users"), limit(max)));
+            return snap.docs.map((d) => this.shapeUser(d.id, d.data()));
+        } catch (error) {
+            console.error("listUsers", error);
+            return [];
+        }
+    }
+
+    async getUser(uid) {
+        if (!uid) return null;
+        try {
+            const snap = await getDoc(doc(firestore, "users", uid));
+            if (!snap.exists()) return null;
+            return this.shapeUser(snap.id, snap.data());
+        } catch (error) {
+            console.error("getUser", error);
+            return null;
+        }
+    }
+
+    async getUserByUsername(username) {
+        const value = String(username || "").replace(/^@/, "").toLowerCase().trim();
+        if (!value) return null;
+        try {
+            const idx = await getDoc(doc(firestore, "userIndex", "username_" + value));
+            if (idx.exists() && idx.data().uid) return this.getUser(idx.data().uid);
+        } catch (e) {}
+        try {
+            const snap = await getDocs(query(collection(firestore, "users"), where("username", "==", value), limit(1)));
+            if (snap.empty) return null;
+            const d = snap.docs[0];
+            return this.shapeUser(d.id, d.data());
+        } catch (error) {
+            console.error("getUserByUsername", error);
+            return null;
+        }
+    }
+
+    async searchUsers(q, max = 24) {
+        const rows = await this.listUsers(80);
+        const needle = String(q || "").toLowerCase().trim().replace(/^@/, "");
+        const filtered = needle
+            ? rows.filter((u) => [u.name, u.username, u.role, u.classYear, u.bio].join(" ").toLowerCase().indexOf(needle) !== -1)
+            : rows;
+        return filtered.slice(0, max);
+    }
+
+    async search(q) {
+        const people = await this.searchUsers(q, 8);
+        return people.map((u) => ({
+            kind: "user",
+            id: u.uid,
+            uid: u.uid,
+            title: u.name,
+            username: u.username,
+            category: "account",
+            image: u.photoURL || ""
+        }));
+    }
+
+    async isFollowing(targetId) {
+        const me = this.realUid();
+        if (!me || !targetId || me === targetId) return false;
+        try {
+            const snap = await getDoc(doc(firestore, "follows", this.followDocId(me, targetId)));
+            return snap.exists();
+        } catch (error) {
+            return false;
+        }
+    }
+
+    async followCounts(uid) {
+        if (!uid) return { followers: 0, following: 0 };
+        try {
+            const followers = await getDocs(query(collection(firestore, "follows"), where("followingId", "==", uid), limit(200)));
+            const following = await getDocs(query(collection(firestore, "follows"), where("followerId", "==", uid), limit(200)));
+            return { followers: followers.size, following: following.size };
+        } catch (error) {
+            console.error("followCounts", error);
+            return { followers: 0, following: 0 };
+        }
+    }
+
+    async toggleFollow(targetId) {
+        const me = this.realUid();
+        if (!me) return { ok: false, error: "Sign in first.", following: false };
+        if (!targetId || targetId === me) return { ok: false, error: "Choose another student.", following: false };
+        const id = this.followDocId(me, targetId);
+        try {
+            const ref = doc(firestore, "follows", id);
+            const snap = await getDoc(ref);
+            if (snap.exists()) {
+                await deleteDoc(ref);
+                return { ok: true, following: false, counts: await this.followCounts(targetId) };
+            }
+            await setDoc(ref, {
+                followerId: me,
+                followingId: targetId,
+                createdAt: serverTimestamp()
+            });
+            return { ok: true, following: true, counts: await this.followCounts(targetId) };
+        } catch (error) {
+            console.error("toggleFollow", error);
+            const code = String((error && error.code) || "");
+            const msg = code.indexOf("permission") !== -1
+                ? "Follow rules are not live yet. Deploy firestore.rules."
+                : (error.message || "Could not follow.");
+            return { ok: false, error: msg, following: false };
+        }
+    }
+
+    async mapFollowUsers(field, uid) {
+        if (!uid) return [];
+        try {
+            const snap = await getDocs(query(collection(firestore, "follows"), where(field, "==", uid), limit(80)));
+            const ids = snap.docs.map((d) => {
+                const data = d.data() || {};
+                return field === "followerId" ? data.followingId : data.followerId;
+            }).filter(Boolean);
+            const rows = [];
+            for (const id of ids) {
+                const user = await this.getUser(id);
+                if (user) rows.push(user);
+            }
+            return rows;
+        } catch (error) {
+            console.error("mapFollowUsers", error);
+            return [];
+        }
+    }
+
+    async listFollowing(uid) { return this.mapFollowUsers("followerId", uid); }
+    async listFollowers(uid) { return this.mapFollowUsers("followingId", uid); }
+
+    async mediaByAuthor(uid, limitValue = 48) {
+        if (!uid) return [];
+        const out = [];
+        const cols = [["posts", "photo"], ["photos", "photo"], ["videos", "video"]];
+        for (const [name, fallback] of cols) {
+            try {
+                const snap = await getDocs(query(collection(firestore, name), where("authorId", "==", uid), orderBy("createdAt", "desc"), limit(limitValue)));
+                snap.docs.forEach((d) => out.push(this.normalizeItem({ id: d.id, type: fallback, ...d.data() })));
+            } catch (error) {
+                try {
+                    const snap = await getDocs(query(collection(firestore, name), where("authorId", "==", uid), limit(limitValue)));
+                    snap.docs.forEach((d) => out.push(this.normalizeItem({ id: d.id, type: fallback, ...d.data() })));
+                } catch (err) {}
+            }
+        }
+        const seen = {};
+        return out.filter((item) => {
+            const key = item.id || item.imageUrl || item.title;
+            if (seen[key]) return false;
+            seen[key] = true;
+            return true;
+        });
+    }
+
+    async startDirectChat(peer) {
+        const me = this.realUid();
+        if (!me) return { ok: false, error: "Sign in first." };
+        if (!peer || !peer.uid) return { ok: false, error: "Choose a student." };
+        if (peer.uid === me) return { ok: false, error: "That is you." };
+        const ids = [me, peer.uid].sort();
+        const chatId = ids.join("_");
+        const peerName = peer.name || peer.fullName || "HSHS Student";
+        const ok = await this.upsertChat(chatId, {
+            memberIds: ids,
+            peerId: peer.uid,
+            peerName,
+            peerUsername: peer.username || "",
+            name: peerName,
+            user: peer.username || "",
+            avatar: peer.photoURL || peer.avatar || "",
+            group: false,
+            preview: "",
+            lastMessage: ""
+        });
+        return ok ? { ok: true, chatId, peer } : { ok: false, error: "Could not start chat." };
     }
 
     async setPresence(uid, info) {
