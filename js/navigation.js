@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260921top1';
+var HSHS_ASSET_VER = '260921final1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -185,4 +185,5 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-desktop-js', 'hshs-desktop.js');
     add('hshs-desktop-upload-js', 'hshs-desktop-upload.js');
     add('hshs-topbar-js', 'hshs-topbar.js');
+    add('hshs-final-guard-js', 'hshs-final-guard.js');
 })();
