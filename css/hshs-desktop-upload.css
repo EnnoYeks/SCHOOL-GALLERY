@@ -1,0 +1,160 @@
+@media (min-width: 1025px) {
+  html.hshs-desk-studio body.studio-open .navbar,
+  html.hshs-device-desktop body.studio-open .navbar {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  html.hshs-device-desktop body.studio-open .mobile-tabbar {
+    display: none !important;
+  }
+  html.hshs-device-desktop .hshs-studio {
+    inset: auto;
+    top: 78px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(1080px, calc(100vw - 40px));
+    height: min(760px, calc(100vh - 100px));
+    max-width: none !important;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #071433;
+    box-shadow: 0 0 0 100vmax rgba(2, 8, 23, .62), 0 28px 80px rgba(0,0,0,.5);
+  }
+  html.hshs-device-desktop .hshs-cam { background: #071433; }
+  html.hshs-device-desktop .hshs-cam-stage {
+    inset: 16px;
+    border-radius: 18px;
+    background: #0b1a3a;
+  }
+  html.hshs-device-desktop .hshs-create {
+    display: grid;
+    grid-template-columns: minmax(300px, 1.05fr) minmax(320px, 1fr);
+    grid-template-rows: 58px minmax(0, 1fr) 72px;
+    height: 100%;
+    overflow: hidden;
+    padding: 0;
+    background: #071433;
+  }
+  html.hshs-device-desktop .hshs-create-head {
+    grid-column: 1 / -1;
+    position: static;
+    background: #071433;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding: 10px 16px;
+  }
+  html.hshs-device-desktop .hshs-create-preview {
+    width: auto;
+    height: auto;
+    margin: 16px;
+    border-radius: 18px;
+    align-self: stretch;
+    background: #0b1a3a;
+  }
+  html.hshs-device-desktop .hshs-create-form {
+    overflow: auto;
+    padding: 16px 22px 8px;
+    gap: 12px;
+  }
+  html.hshs-device-desktop .hshs-create-bar {
+    position: static;
+    grid-column: 1 / -1;
+    background: #071433;
+    border-top: 1px solid rgba(255,255,255,.08);
+    padding: 12px 18px;
+  }
+  html.hshs-device-desktop .hshs-create-go {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  }
+  html.hshs-device-desktop .hshs-field:has(#hshsLink) { display: none; }
+  html.hshs-device-desktop .hshs-sheet { background: #071433; }
+
+  .hshs-desk-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #071433;
+    font: 800 0.84rem Nunito, sans-serif;
+    cursor: pointer;
+  }
+  .hshs-desk-upload:hover { filter: brightness(1.06); }
+
+  .hshs-desk-start {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #071433;
+    padding: 28px;
+  }
+  .hshs-desk-start-x {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    cursor: pointer;
+  }
+  .hshs-desk-drop {
+    width: min(560px, 100%);
+    min-height: 360px;
+    border: 2px dashed rgba(251,191,36,.35);
+    border-radius: 24px;
+    background: rgba(11,26,58,.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+    padding: 36px 28px;
+    cursor: pointer;
+  }
+  .hshs-desk-drop > i { font-size: 2.2rem; color: #fbbf24; }
+  .hshs-desk-drop strong { font-size: 1.45rem; color: #fff; }
+  .hshs-desk-drop p { margin: 0; color: #94a3b8; max-width: 28rem; line-height: 1.45; }
+  .hshs-desk-drop small { color: #64748b; }
+  .hshs-desk-start-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+  }
+  .hshs-desk-start-primary,
+  .hshs-desk-start-ghost {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 12px;
+    font: 800 .9rem Nunito, sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hshs-desk-start-primary {
+    border: 0;
+    background: linear-gradient(135deg,#2563eb,#1d4ed8);
+    color: #fff;
+  }
+  .hshs-desk-start-ghost {
+    border: 1px solid rgba(255,255,255,.16);
+    background: transparent;
+    color: #fff;
+  }
+}
+
+@media (max-width: 1024px) {
+  .hshs-desk-upload, .hshs-desk-start { display: none !important; }
+}
