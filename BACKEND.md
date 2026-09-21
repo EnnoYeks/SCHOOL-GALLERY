@@ -5,10 +5,18 @@ The app talks to Firebase project **`school-gallery-62032`**.
 | Layer | Status | Notes |
 |-------|--------|--------|
 | **Auth** | Live | Email/password + Google. Firebase UID is the account identity. |
-| **Firestore** | Live | posts, photos, videos, comments, likes, chats, messages, presence, users |
-| **Chat** | Live | `js/hshs-chat-live.js` + `db.js` |
+| **Firestore** | Live | posts, photos, videos, comments, likes, chats, messages, presence, users, follows |
+| **Chat** | Live | `js/hshs-chat-live.js` + `db.js`. Inbox is live classmates only. |
+| **People** | Live | Search, follow, profile, start chat |
 | **Media files** | Prepared | `js/storage.js` → Cloudflare R2 when configured |
-| **Local store** | Fallback | `HshsStore` still seeds UI offline |
+| **Local store** | Fallback only | Empty seed. No demo accounts. |
+
+Before the final school move, deploy rules and indexes:
+
+```bash
+firebase use school-gallery-62032
+firebase deploy --only firestore:rules,firestore:indexes
+```
 
 ---
 
@@ -89,6 +97,7 @@ firebase deploy --only firestore
 | `videos/{id}` | Studio / long videos |
 | `comments/{id}` | Comments |
 | `likes/{id}` | Like events |
+| `follows/{id}` | Follow graph (`{me}_{them}`) |
 | `chats/{id}` | Campus threads |
 | `chats/{id}/messages/{msgId}` | Live messages |
 | `presence/{uid}` | Last seen |
@@ -101,6 +110,7 @@ firebase deploy --only firestore
 
 - A user may create/update only `users/{uid}` for their own UID.
 - Posts, photos, videos, comments, and likes must use that same UID as `authorId`.
+- Chat list and messages are limited to signed-in members of that thread.
 - Unauthenticated users can read public content but cannot write authenticated collections.
 - Anonymous provider is **not** treated as a signed-in author.
 
@@ -115,6 +125,7 @@ firebase deploy --only firestore
 ## 4. Quick verification
 
 - [ ] Email and Google sign-in enabled in Firebase
+- [ ] Rules + indexes deployed
 - [ ] Guest can browse Home / Gallery / Photos without an account
 - [ ] Register with name + username + email + password creates `users/{uid}`
 - [ ] Login with email or username works
@@ -123,3 +134,5 @@ firebase deploy --only firestore
 - [ ] Logout returns the UI to Guest
 - [ ] Refresh keeps a signed-in session
 - [ ] New posts store `authorId` equal to the Firebase UID
+- [ ] Search finds signed-in classmates
+- [ ] Follow + Message opens a live thread with no demo names
