@@ -90,7 +90,7 @@ function applyAuthUser(user) {
 }
 
 window.hshsAuthState = "loading";
-ocument.documentElement.dataset.hshsAuth = "loading";
+document.documentElement.dataset.hshsAuth = "loading";
 
 setPersistence(auth, browserLocalPersistence).catch(function (err) {
   console.warn("Auth persistence fallback:", err && err.message);
