@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260924look1';
+var HSHS_ASSET_VER = '260924fix2';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
