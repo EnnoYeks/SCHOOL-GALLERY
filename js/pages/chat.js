@@ -45,11 +45,13 @@
       if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
       else root.innerHTML = tpl;
     }
-    loadCss('css/hshs-chat.css?v=260921people3');
-    loadCss('css/hshs-messages.css?v=260921people3');
-    loadCss('css/hshs-chat-packs.css?v=260921people3');
-    loadCss('css/hshs-chat-finish.css?v=260921people3');
-    loadCss('css/hshs-chat-fixes.css?v=260921people3');
+    loadCss('css/hshs-chat.css?v=260924look1');
+    loadCss('css/hshs-messages.css?v=260924look1');
+    loadCss('css/hshs-chat-packs.css?v=260924look1');
+    loadCss('css/hshs-chat-finish.css?v=260924look1');
+    loadCss('css/hshs-chat-fixes.css?v=260924look1');
+    loadCss('css/hshs-official.css?v=260924look1');
+    if (global.__hshsEnsureOfficialCss) global.__hshsEnsureOfficialCss();
     await loadOnce(base() + 'js/core/templates/chat.js?v=260921people3', 'hshs-tpl-chat');
     tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl && root && !root.querySelector('#hshsChatPage')) {

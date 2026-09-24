@@ -29,7 +29,7 @@
   }
 
   function ver(url) {
-    var v = '260921s1';
+    var v = '260924look1';
     return url + (url.indexOf('?') === -1 ? '?' : '&') + 'v=' + v;
   }
 
@@ -51,6 +51,7 @@
       add('preconnect', 'https://fonts.gstatic.com', 'hshs-gf-pre2', { crossorigin: '' });
       add('stylesheet', 'https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap', 'hshs-google-fonts');
       add('stylesheet', ver(cssBase + 'hshs-fonts.css'), 'hshs-fonts-css');
+      add('stylesheet', ver(cssBase + 'hshs-official.css'), 'hshs-official-css');
     } catch (e) {}
 
     var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','search','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
