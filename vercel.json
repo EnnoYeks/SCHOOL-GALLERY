@@ -4,7 +4,7 @@
       "source": "/",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
-        { "key": "X-HSHS-Build", "value": "vibe-feed" }
+        { "key": "X-HSHS-Build", "value": "official-look" }
       ]
     },
     { "source": "/(.*).html", "headers": [{ "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }] },
@@ -28,6 +28,7 @@
     { "source": "/clips.html", "destination": "/index/buzz.html" },
     { "source": "/clips", "destination": "/index/buzz.html" },
     { "source": "/shorts.html", "destination": "/index/buzz.html" },
+    { "source": "/shorts", "destination": "/index/buzz.html" },
     { "source": "/trending.html", "destination": "/index/trending.html" },
     { "source": "/trending", "destination": "/index/trending.html" },
     { "source": "/spotlight.html", "destination": "/index/spotlight.html" },
@@ -58,6 +59,10 @@
     { "source": "/contact", "destination": "/index/contact.html" },
     { "source": "/contat.html", "destination": "/index/contact.html" },
     { "source": "/contat", "destination": "/index/contact.html" },
+    { "source": "/login.html", "destination": "/index/login.html" },
+    { "source": "/login", "destination": "/index/login.html" },
+    { "source": "/edit-profile.html", "destination": "/index/edit-profile.html" },
+    { "source": "/edit-profile", "destination": "/index/edit-profile.html" },
     { "source": "/index/clips.html", "destination": "/index/buzz.html" }
   ],
   "cleanUrls": false,
