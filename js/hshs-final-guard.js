@@ -2,7 +2,8 @@
   if (window.__hshsFinalGuard) return;
   window.__hshsFinalGuard = true;
 
-  var DEMO = /Daniel Okello|Aisha Nakitende|Class 4A|Maya Okello|Joel Wambede|Brian Kato|Faith Namulondo|Gloria Nankinga|Mercy Atim|Joseph Ssemmanda|Amina Namukasa|Sports Day 2026|Graduation Ceremony/;
+  var DEMO = /Daniel Okello|Aisha Nakitende|Class 4A|Maya Okello|Joel Wambede|Brian Kato|Faith Namulondo|Gloria Nankinga|Mercy Atim|Joseph Ssemmanda|Amina Namukasa|Sports Day 2026|Graduation Ceremony|Morning Assembly|Science Fair/;
+  var DEMO_ID = /^(u-demo|u-prefect|u-sports|u-choir|u-lab|u-house|u-maya|u-brian|p1|p2|p3|p4|p5|fr-seed1|n-seed1|c1)$/;
 
   function wipeStorage() {
     ['hshsWorldChat_v1', 'hshsWorldStore_v1', 'hshsWorldStore_v2', 'hshsWorldStore_v3'].forEach(function (k) {
@@ -10,7 +11,11 @@
     });
   }
 
-  function emptyArr() { return []; }
+  function isDemo(item) {
+    if (!item) return false;
+    if (DEMO_ID.test(String(item.id || '')) || DEMO_ID.test(String(item.authorId || ''))) return true;
+    return DEMO.test(JSON.stringify(item));
+  }
 
   function hardenStore() {
     var store = window.HshsStore;
@@ -18,33 +23,25 @@
     try {
       var s = typeof store.getState === 'function' ? store.getState() : null;
       if (s) {
-        var blob = JSON.stringify(s.users || []) + JSON.stringify(s.posts || []) + JSON.stringify(s.notifications || []);
-        if (DEMO.test(blob) || (s.users && s.users.some(function (u) { return String(u.id || '').indexOf('u-demo') === 0; }))) {
-          s.users = [];
-          s.posts = [];
-          s.follows = [];
-          s.friendRequests = [];
-          s.friends = [];
-          s.notifications = [];
-          s.comments = [];
-          try { localStorage.setItem('hshsWorldStore_v4', JSON.stringify(s)); } catch (e) {}
-        }
+        s.users = (s.users || []).filter(function (u) { return !isDemo(u); });
+        s.posts = (s.posts || []).filter(function (p) { return !isDemo(p); });
+        s.notifications = (s.notifications || []).filter(function (n) { return !isDemo(n); });
+        s.comments = (s.comments || []).filter(function (c) { return !isDemo(c); });
+        s.follows = (s.follows || []).filter(function (f) { return !DEMO_ID.test(f.followerId || '') && !DEMO_ID.test(f.followingId || ''); });
+        try { localStorage.setItem('hshsWorldStore_v4', JSON.stringify(s)); } catch (e) {}
       }
     } catch (e) {}
-    ['listPosts', 'listUsers', 'listNotifications', 'featured', 'trending', 'search', 'searchPeople'].forEach(function (name) {
-      if (typeof store[name] === 'function') {
-        var orig = store[name];
-        store[name] = function () {
-          var out = orig.apply(store, arguments);
-          if (!Array.isArray(out)) return out;
-          return out.filter(function (item) {
-            var blob = JSON.stringify(item || {});
-            return !DEMO.test(blob) && String((item && (item.id || item.authorId)) || '').indexOf('u-demo') !== 0 && String((item && item.id) || '').indexOf('p') !== 0;
-          });
-        };
-      } else {
-        store[name] = emptyArr;
-      }
+    ['listPosts', 'listUsers', 'listNotifications', 'featured', 'trending', 'search', 'searchPeople', 'postsByUser'].forEach(function (name) {
+      if (typeof store[name] !== 'function') return;
+      if (store[name].__hshsNoDemo) return;
+      var orig = store[name];
+      var wrapped = function () {
+        var out = orig.apply(store, arguments);
+        if (!Array.isArray(out)) return out;
+        return out.filter(function (item) { return !isDemo(item); });
+      };
+      wrapped.__hshsNoDemo = true;
+      store[name] = wrapped;
     });
   }
 
