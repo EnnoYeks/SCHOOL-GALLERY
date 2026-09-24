@@ -46,7 +46,7 @@ export const CONFIG = {
     schoolAnniversaryDate: "2026-08-15"
   },
   theme: {
-    defaultMode: "light",
+    defaultMode: "dark",
     defaultTheme: "default",
     animationSpeed: 0.3,
     enableParticles: true,
@@ -90,7 +90,7 @@ function applyAuthUser(user) {
 }
 
 window.hshsAuthState = "loading";
-document.documentElement.dataset.hshsAuth = "loading";
+ocument.documentElement.dataset.hshsAuth = "loading";
 
 setPersistence(auth, browserLocalPersistence).catch(function (err) {
   console.warn("Auth persistence fallback:", err && err.message);
