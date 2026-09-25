@@ -1,0 +1,116 @@
+/* Unified top bar + chat desktop chrome */
+
+.navbar .hshs-settings-btn,
+.navbar #hshsSettingsBtn,
+.navbar .theme-toggle {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+  text-decoration: none !important;
+}
+
+html.hshs-device-desktop .navbar .theme-toggle#themeToggle {
+  display: none !important;
+}
+
+.navbar,
+.navbar.hshs-flat-top,
+body.has-mobile-shell .navbar {
+  background: rgba(7, 20, 51, 0.72) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
+@media (max-width: 768px) {
+  .navbar,
+  .navbar.hshs-flat-top,
+  body.has-mobile-shell .navbar {
+    background: rgba(7, 20, 51, 0.94) !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (min-width: 1025px) {
+  html.hshs-device-desktop .hshs-chat-page.msg {
+    max-width: none !important;
+    width: min(1440px, calc(100% - 32px));
+    margin: 12px auto 24px !important;
+    padding: 0 !important;
+    min-height: calc(100vh - 92px);
+    display: grid !important;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr) !important;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-list-view,
+  html.hshs-device-desktop .hshs-chat-page.msg #hshsChatListView,
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-thread-view,
+  html.hshs-device-desktop .hshs-chat-page.msg #hshsThread {
+    display: flex !important;
+    flex-direction: column;
+    min-height: calc(100vh - 92px);
+    max-height: calc(100vh - 92px);
+    width: auto !important;
+  }
+
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-list-view,
+  html.hshs-device-desktop .hshs-chat-page.msg #hshsChatListView {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(7, 20, 51, 0.45);
+  }
+
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-hero {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-thread-view[hidden],
+  html.hshs-device-desktop .hshs-chat-page.msg #hshsThread[hidden] {
+    display: flex !important;
+  }
+
+  html.hshs-device-desktop .hshs-chat-page.msg .msg-fab-compose,
+  html.hshs-device-desktop .hshs-chat-page.msg .hshs-thread-back {
+    display: none !important;
+  }
+
+  html.hshs-device-desktop .hshs-desk-chat-empty {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #cbd5e1;
+    text-align: center;
+    padding: 32px;
+  }
+
+  html.hshs-device-desktop .hshs-chat-page.msg:not(.is-open) .hshs-desk-chat-empty,
+  html.hshs-device-desktop .hshs-chat-page.msg #hshsThread[hidden] .hshs-desk-chat-empty {
+    display: flex !important;
+  }
+
+  html.hshs-device-desktop .hshs-chat-page.msg.is-open .hshs-desk-chat-empty {
+    display: none !important;
+  }
+
+  html.hshs-device-desktop body:has(.hshs-chat-page) .footer {
+    display: none !important;
+  }
+}
