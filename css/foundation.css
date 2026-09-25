@@ -17,6 +17,7 @@
 @import url("./hshs-desktop.css");
 @import url("./hshs-desktop-flex.css");
 @import url("./hshs-glass.css");
+@import url("./hshs-chrome.css");
 
 :root {
   --hshs-shell-max: 1400px;
