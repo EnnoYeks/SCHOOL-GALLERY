@@ -32,9 +32,9 @@
         ]),
         R().el('div', { className: 'nav-actions' }, [
           R().el('div', { className: 'notification-icon' }, [R().icon('fa-bell'), R().el('span', { className: 'notification-badge', id: 'notificationBadge', text: '0' })]),
-          R().el('button', { className: 'theme-toggle', id: 'themeToggle', type: 'button' }, [R().icon('fa-moon')]),
+          R().el('a', { href: b + 'index/settings.html', className: 'hshs-settings-btn theme-toggle', id: 'hshsSettingsBtn', title: 'Settings' }, [R().icon('fa-gear')]),
           R().el('div', { className: 'profile-icon' }, [
-            R().el('img', { src: 'https://via.placeholder.com/40', alt: 'Profile', className: 'profile-img', id: 'profileImg' })
+            R().el('img', { src: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1d4ed8"/><circle cx="32" cy="24" r="10" fill="white"/><path d="M14 54c4-12 14-18 18-18s14 6 18 18" fill="white"/></svg>'), alt: 'Profile', className: 'profile-img', id: 'profileImg' })
           ]),
           R().el('button', { className: 'mobile-menu-toggle', id: 'mobileMenuToggle', type: 'button' }, [R().icon('fa-bars')])
         ])
