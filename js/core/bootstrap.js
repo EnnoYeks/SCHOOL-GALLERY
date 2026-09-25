@@ -52,6 +52,7 @@
       add('stylesheet', 'https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap', 'hshs-google-fonts');
       add('stylesheet', ver(cssBase + 'hshs-fonts.css'), 'hshs-fonts-css');
       add('stylesheet', ver(cssBase + 'hshs-official.css'), 'hshs-official-css');
+      add('stylesheet', ver(cssBase + 'hshs-glass.css'), 'hshs-glass-css');
     } catch (e) {}
 
     var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','search','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
