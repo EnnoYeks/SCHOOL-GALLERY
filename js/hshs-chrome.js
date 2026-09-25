@@ -9,7 +9,7 @@
     return inSub() ? 'settings.html' : 'index/settings.html';
   }
   function cssHref(file) {
-    return (inSub() ? '../css/' : 'css/') + file + '?v=260926chrome';
+    return (inSub() ? '../css/' : 'css/') + file + '?v=260926chrome2';
   }
   function ensureCss(id, file) {
     if (document.getElementById(id)) return;
@@ -35,6 +35,16 @@
       if (el.tagName === 'BUTTON') el.style.display = 'none';
     });
   }
+  function cleanChatCopy() {
+    document.querySelectorAll('.msg-hero-titles p').forEach(function (el) {
+      var t = String(el.textContent || '');
+      if (/on this device/i.test(t) || /stay connected/i.test(t)) el.textContent = 'Campus chat';
+    });
+    var list = document.getElementById('hshsChatList');
+    if (list && /Daniel Okello|Aisha Nakitende|Class 4A|Maya Okello/.test(list.textContent || '')) {
+      list.innerHTML = '<div class="hshs-chat-empty">No conversations yet. Search a classmate and start a chat.</div>';
+    }
+  }
   function boot() {
     ensureCss('hshs-desktop-flex-css', 'hshs-desktop-flex.css');
     ensureCss('hshs-glass-css', 'hshs-glass.css');
@@ -43,6 +53,7 @@
       try { window.HshsShell.ensureShell(); } catch (e) {}
     }
     unifySettings();
+    cleanChatCopy();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
