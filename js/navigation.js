@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260926chrome2';
+var HSHS_ASSET_VER = '260926nodemo1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -191,4 +191,5 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-topbar-js', 'hshs-topbar.js');
     add('hshs-chrome-js', 'hshs-chrome.js');
     add('hshs-final-guard-js', 'hshs-final-guard.js');
+    add('hshs-nodemo-hard-js', 'hshs-nodemo-hard.js');
 })();
