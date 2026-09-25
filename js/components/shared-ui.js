@@ -43,7 +43,12 @@
     if (backdrop) backdrop.classList.remove('open');
     document.body.classList.remove('more-open');
   }
-  function ensureShell() { markActiveNav(); }
+  function ensureShell() {
+    if (global.HshsShell && typeof global.HshsShell.ensureShell === 'function') {
+      try { global.HshsShell.ensureShell(); } catch (e) {}
+    }
+    markActiveNav();
+  }
   global.HshsSharedUI = {
     getNavbar: getNavbar, getTabbar: getTabbar, getMoreSheet: getMoreSheet,
     getFooter: getFooter, getPageRoot: getPageRoot, getSearchInput: getSearchInput,

@@ -41,7 +41,7 @@ body.has-mobile-shell .navbar {
 }
 
 @media (min-width: 1025px) {
-  html.hshs-device-desktop .hshs-chat-page.msg {
+  .hshs-chat-page.msg {
     max-width: none !important;
     width: min(1440px, calc(100% - 32px));
     margin: 12px auto 24px !important;
@@ -56,10 +56,10 @@ body.has-mobile-shell .navbar {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
 
-  html.hshs-device-desktop .hshs-chat-page.msg .msg-list-view,
-  html.hshs-device-desktop .hshs-chat-page.msg #hshsChatListView,
-  html.hshs-device-desktop .hshs-chat-page.msg .msg-thread-view,
-  html.hshs-device-desktop .hshs-chat-page.msg #hshsThread {
+  .hshs-chat-page.msg .msg-list-view,
+  .hshs-chat-page.msg #hshsChatListView,
+  .hshs-chat-page.msg .msg-thread-view,
+  .hshs-chat-page.msg #hshsThread {
     display: flex !important;
     flex-direction: column;
     min-height: calc(100vh - 92px);
@@ -67,29 +67,29 @@ body.has-mobile-shell .navbar {
     width: auto !important;
   }
 
-  html.hshs-device-desktop .hshs-chat-page.msg .msg-list-view,
-  html.hshs-device-desktop .hshs-chat-page.msg #hshsChatListView {
+  .hshs-chat-page.msg .msg-list-view,
+  .hshs-chat-page.msg #hshsChatListView {
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(7, 20, 51, 0.45);
   }
 
-  html.hshs-device-desktop .hshs-chat-page.msg .msg-hero {
+  .hshs-chat-page.msg .msg-hero {
     background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
 
-  html.hshs-device-desktop .hshs-chat-page.msg .msg-thread-view[hidden],
-  html.hshs-device-desktop .hshs-chat-page.msg #hshsThread[hidden] {
+  .hshs-chat-page.msg .msg-thread-view[hidden],
+  .hshs-chat-page.msg #hshsThread[hidden] {
     display: flex !important;
   }
 
-  html.hshs-device-desktop .hshs-chat-page.msg .msg-fab-compose,
-  html.hshs-device-desktop .hshs-chat-page.msg .hshs-thread-back {
+  .hshs-chat-page.msg .msg-fab-compose,
+  .hshs-chat-page.msg .hshs-thread-back {
     display: none !important;
   }
 
-  html.hshs-device-desktop .hshs-desk-chat-empty {
+  .hshs-desk-chat-empty {
     display: none;
     flex: 1;
     flex-direction: column;
@@ -101,16 +101,16 @@ body.has-mobile-shell .navbar {
     padding: 32px;
   }
 
-  html.hshs-device-desktop .hshs-chat-page.msg:not(.is-open) .hshs-desk-chat-empty,
-  html.hshs-device-desktop .hshs-chat-page.msg #hshsThread[hidden] .hshs-desk-chat-empty {
+  .hshs-chat-page.msg:not(.is-open) .hshs-desk-chat-empty,
+  .hshs-chat-page.msg #hshsThread[hidden] .hshs-desk-chat-empty {
     display: flex !important;
   }
 
-  html.hshs-device-desktop .hshs-chat-page.msg.is-open .hshs-desk-chat-empty {
+  .hshs-chat-page.msg.is-open .hshs-desk-chat-empty {
     display: none !important;
   }
 
-  html.hshs-device-desktop body:has(.hshs-chat-page) .footer {
+  body:has(.hshs-chat-page) .footer {
     display: none !important;
   }
 }
