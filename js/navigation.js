@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260926glass';
+var HSHS_ASSET_VER = '260926chrome2';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -156,6 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
     addCss('hshs-topbar-css', 'hshs-topbar.css');
     addCss('hshs-official-css', 'hshs-official.css');
     addCss('hshs-glass-css', 'hshs-glass.css');
+    addCss('hshs-desktop-flex-css', 'hshs-desktop-flex.css');
+    addCss('hshs-chrome-css', 'hshs-chrome.css');
     add('hshs-lock-js', 'hshs-lock.js');
     add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');
@@ -187,5 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-desktop-js', 'hshs-desktop.js');
     add('hshs-desktop-upload-js', 'hshs-desktop-upload.js');
     add('hshs-topbar-js', 'hshs-topbar.js');
+    add('hshs-chrome-js', 'hshs-chrome.js');
     add('hshs-final-guard-js', 'hshs-final-guard.js');
 })();

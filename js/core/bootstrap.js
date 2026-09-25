@@ -111,6 +111,7 @@
     document.dispatchEvent(new CustomEvent('hshs:foundation-ready', { detail: { version: (window.HshsApp && window.HshsApp.version) || '1.0.0-phase1', route: window.HshsRegistry ? window.HshsRegistry.activeRoute() : null } }));
     document.documentElement.classList.remove('hshs-js-booting');
     document.documentElement.classList.add('hshs-js-ready');
+    try { if (window.HshsShell && window.HshsShell.ensureShell) window.HshsShell.ensureShell(); } catch (e) {}
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
