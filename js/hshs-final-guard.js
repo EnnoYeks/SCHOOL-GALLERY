@@ -7,7 +7,10 @@
 
   function wipeStorage() {
     ['hshsWorldChat_v1', 'hshsWorldStore_v1', 'hshsWorldStore_v2', 'hshsWorldStore_v3'].forEach(function (k) {
-      try { localStorage.removeItem(k); } catch (e) {}
+      try {
+        var raw = localStorage.getItem(k);
+        if (raw && DEMO.test(raw)) localStorage.removeItem(k);
+      } catch (e) {}
     });
   }
 
