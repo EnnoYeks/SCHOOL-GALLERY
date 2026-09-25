@@ -125,6 +125,7 @@
     await loadOnce(assetBase() + 'css/home.css?v=260906p3', 'hshs-home-css');
     await loadOnce(assetBase() + 'css/hshs-home-polish.css?v=260906hero', 'hshs-home-polish-css');
     await loadOnce(assetBase() + 'css/hshs-vibe-home.css?v=260906split2', 'hshs-vibe-home-css');
+    await loadOnce(assetBase() + 'css/hshs-glass.css?v=260926glass', 'hshs-glass-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
     else if (tpl) root.innerHTML = tpl;
