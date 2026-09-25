@@ -1,1 +1,96 @@
-/* HSHS WORLD Glassmorphism - see repo commit for full file after push */
+/* HSHS WORLD Glassmorphism. Keeps navy + gold/amber. */
+:root {
+  --hshs-navy: #071433;
+  --hshs-navy-deep: #0b1f4d;
+  --hshs-gold: #eab308;
+  --hshs-amber: #f5c518;
+  --hshs-glass-bg: rgba(255, 255, 255, 0.08);
+  --hshs-glass-bg-strong: rgba(255, 255, 255, 0.12);
+  --hshs-glass-border: rgba(255, 255, 255, 0.15);
+  --hshs-glass-blur: 12px;
+  --hshs-glass-sat: 180%;
+  --hshs-glass-radius: 18px;
+  --hshs-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --hshs-glass-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --hshs-glass-fallback: rgba(7, 20, 51, 0.88);
+  --hshs-glass-fallback-soft: rgba(11, 31, 77, 0.92);
+  --hshs-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.hshs-glass, .navbar, .navbar.hshs-flat-top, .vibe-hero-glass, .vibe-hero-copy, .home-stat, .home-split-card, .home-trend-item, .home-event-card, .home-panel, .home-feature-card, .home-cta, .home-empty, .gallery-card, .post-card, .media-card, .video-card, .buzz-card, .student-card, .spotlight-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--hshs-glass-bg) !important;
+  border: 1px solid var(--hshs-glass-border) !important;
+  border-radius: var(--hshs-glass-radius) !important;
+  box-shadow: var(--hshs-glass-shadow) !important;
+  -webkit-backdrop-filter: blur(var(--hshs-glass-blur)) saturate(var(--hshs-glass-sat));
+  backdrop-filter: blur(var(--hshs-glass-blur)) saturate(var(--hshs-glass-sat));
+}
+.vibe-hero-glass, .vibe-hero-copy, .home-stat, .home-split-card, .home-panel, .home-cta { background: var(--hshs-glass-bg-strong) !important; }
+.hshs-glass::before, .navbar::before, .vibe-hero-glass::before, .vibe-hero-copy::before, .home-stat::before, .home-split-card::before, .home-trend-item::before, .home-event-card::before, .home-panel::before, .home-cta::before {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none; z-index: 1; border-radius: inherit; opacity: 0.07;
+  background-image: var(--hshs-grain); background-size: 180px 180px; mix-blend-mode: overlay;
+}
+.navbar > *, .vibe-hero-glass > *, .vibe-hero-copy > *, .home-stat > *, .home-split-card > *, .home-trend-item > *, .home-event-card > *, .home-panel > *, .home-cta > * { position: relative; z-index: 2; }
+.navbar, .vibe-hero-copy, .home-stat, .home-split-card, .home-trend-item, .home-event-card, .home-panel, .home-cta, .home-section-title, .home-feature-body, .gallery-card-copy { text-shadow: var(--hshs-glass-text-shadow); }
+.vibe-hero-copy h1, .home-section-title, .home-stat strong, .home-feature-card h3, .home-cta h2, .navbar .logo, .brand-copy strong { font-weight: 800 !important; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+.home-stat span, .vibe-desc, .home-section-sub, .home-feature-meta { font-weight: 600; }
+.navbar, .navbar.hshs-flat-top, html.hshs-nav-scrolled .navbar, html.hshs-nav-scrolled .navbar.hshs-flat-top, body.has-mobile-shell .navbar, body.has-mobile-shell .navbar.hshs-flat-top {
+  background: rgba(255, 255, 255, 0.08) !important; border: 0 !important; border-bottom: 1px solid var(--hshs-glass-border) !important; border-radius: 0 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; backdrop-filter: blur(12px) saturate(180%) !important;
+}
+.navbar-container, .navbar-container.hshs-topbar, body.has-mobile-shell .navbar-container, body.has-mobile-shell .navbar-container.hshs-topbar { background: transparent !important; border: 0 !important; box-shadow: none !important; overflow: visible; }
+.navbar .hshs-search-btn, .navbar .notification-icon, .navbar .profile-icon, .navbar .hshs-profile {
+  background: rgba(255, 255, 255, 0.1) !important; border: 1px solid var(--hshs-glass-border) !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(10px) saturate(160%); backdrop-filter: blur(10px) saturate(160%);
+}
+.navbar .hshs-search-btn { background: rgba(234, 179, 8, 0.92) !important; color: #102047 !important; border-color: rgba(255, 255, 255, 0.28) !important; }
+.vibe-hero-card {
+  background: linear-gradient(135deg, #0b1f4d 0%, #12306b 42%, #1d4ed8 68%, #eab308 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important; border-radius: 24px !important; box-shadow: var(--hshs-glass-shadow) !important; overflow: hidden; isolation: isolate;
+}
+.vibe-hero-photos, .vibe-hero-crest, .vibe-hero-sparkles { z-index: 0; }
+.vibe-hero-glass, .vibe-hero-copy {
+  position: relative; z-index: 2; max-width: 28rem; padding: 18px 18px 20px; border-radius: 20px !important;
+  background: rgba(255, 255, 255, 0.1) !important; border: 1px solid var(--hshs-glass-border) !important; box-shadow: var(--hshs-glass-shadow) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important; backdrop-filter: blur(12px) saturate(180%) !important;
+}
+.vibe-hero-glass .vibe-hero-copy { background: transparent !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; padding: 0; max-width: none; overflow: visible; }
+.vibe-hero-glass .vibe-hero-copy::before { display: none; }
+.vibe-pill { background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.18); color: #fff; font-weight: 800; }
+.vibe-btn-ghost { background: rgba(255, 255, 255, 0.08) !important; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.home-feature-card { background: rgba(255, 255, 255, 0.08) !important; }
+.home-feature-overlay { background: linear-gradient(180deg, transparent, rgba(7, 20, 51, 0.72)) !important; }
+.home-split-card { background: linear-gradient(135deg, rgba(18, 32, 68, 0.35), rgba(29, 78, 216, 0.18) 62%, rgba(234, 179, 8, 0.12)), rgba(255, 255, 255, 0.1) !important; }
+.home-empty { background: rgba(255, 255, 255, 0.06) !important; color: #f8fafc !important; }
+.home-cta { background: radial-gradient(circle at 50% 0, rgba(29, 78, 216, 0.28), transparent 55%), rgba(255, 255, 255, 0.1) !important; }
+.home-event-date { background: rgba(7, 20, 51, 0.55); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.navbar .profile-icon, .navbar .hshs-profile, .navbar .hshs-search-btn, .navbar .notification-icon, .logo i, .logo .brand-mark { overflow: hidden; border-radius: 50% !important; }
+.navbar::before { border-radius: 0; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .hshs-glass, .navbar, .navbar.hshs-flat-top, .vibe-hero-glass, .vibe-hero-copy, .home-stat, .home-split-card, .home-trend-item, .home-event-card, .home-panel, .home-feature-card, .home-cta, .home-empty, .gallery-card, .post-card, .media-card, .video-card, .buzz-card, html.hshs-nav-scrolled .navbar, body.has-mobile-shell .navbar {
+    background: var(--hshs-glass-fallback) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .hshs-glass, .navbar, .vibe-hero-glass, .vibe-hero-copy, .home-stat, .home-split-card, .home-trend-item, .home-event-card, .home-panel, .home-cta, .home-empty {
+    background: var(--hshs-glass-fallback-soft) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  }
+}
+@media (max-width: 768px) {
+  .hshs-glass, .navbar, .navbar.hshs-flat-top, html.hshs-nav-scrolled .navbar, body.has-mobile-shell .navbar, body.has-mobile-shell .navbar.hshs-flat-top, .vibe-hero-glass, .vibe-hero-copy, .home-stat, .home-split-card, .home-trend-item, .home-event-card, .home-panel, .home-feature-card, .home-cta, .home-empty, .gallery-card, .post-card, .media-card, .video-card, .buzz-card {
+    background: rgba(12, 28, 68, 0.86) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  }
+  .navbar .hshs-search-btn, .navbar .notification-icon, .navbar .profile-icon, .navbar .hshs-profile { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  .navbar .hshs-search-btn { background: #f5c518 !important; }
+  .navbar .notification-icon { background: rgba(18, 32, 68, 0.95) !important; }
+  .hshs-glass::before, .navbar::before, .vibe-hero-glass::before, .vibe-hero-copy::before, .home-stat::before, .home-split-card::before, .home-trend-item::before, .home-event-card::before, .home-panel::before, .home-cta::before { display: none; }
+  .vibe-hero-card { background: linear-gradient(135deg, #0b1f4d 0%, #12306b 42%, #1d4ed8 68%, #eab308 100%) !important; }
+  .vibe-hero-glass, .vibe-hero-copy { background: rgba(7, 20, 51, 0.72) !important; }
+}
+html.hshs-no-backdrop .hshs-glass, html.hshs-no-backdrop .navbar, html.hshs-no-backdrop .vibe-hero-glass, html.hshs-no-backdrop .vibe-hero-copy, html.hshs-no-backdrop .home-stat, html.hshs-no-backdrop .home-split-card, html.hshs-no-backdrop .home-trend-item, html.hshs-no-backdrop .home-event-card, html.hshs-no-backdrop .home-panel, html.hshs-no-backdrop .home-cta, html.hshs-no-backdrop .home-empty {
+  background: var(--hshs-glass-fallback) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+}
+@media (prefers-reduced-motion: reduce) { .hshs-glass::before, .navbar::before, .vibe-hero-copy::before { display: none; } }
