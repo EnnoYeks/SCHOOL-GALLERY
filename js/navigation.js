@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260924fix2';
+var HSHS_ASSET_VER = '260926glass';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -155,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addCss('hshs-desktop-upload-css', 'hshs-desktop-upload.css');
     addCss('hshs-topbar-css', 'hshs-topbar.css');
     addCss('hshs-official-css', 'hshs-official.css');
+    addCss('hshs-glass-css', 'hshs-glass.css');
     add('hshs-lock-js', 'hshs-lock.js');
     add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');
