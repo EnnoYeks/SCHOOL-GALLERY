@@ -49,6 +49,12 @@
   }
 
   function boot() {
+    if (!document.getElementById('hshs-nodemo-style')) {
+      var st = document.createElement('style');
+      st.id = 'hshs-nodemo-style';
+      st.textContent = '#galleryFeed:empty::after,#masonryGrid:empty::after,#trendingGrid:empty::after{content:"Nothing here yet.";display:block;padding:24px;opacity:.7}#topTrendingHero:empty,#topTrendingSide:empty{display:none}@media(max-width:768px){.trending-title-row{flex-direction:column;align-items:flex-start;gap:12px}.trending-filters{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}}';
+      document.head.appendChild(st);
+    }
     wipeKeys();
     scrubStore();
     scrubDom();
