@@ -9,14 +9,18 @@
 
     function placeButton() {
         var actions = document.querySelector('.nav-actions');
-        if (!actions || document.getElementById('hshsSearchBtn')) return;
-        var btn = document.createElement('button');
-        btn.id = 'hshsSearchBtn';
-        btn.className = 'hshs-search-btn';
-        btn.type = 'button';
-        btn.setAttribute('aria-label', 'Search');
-        btn.innerHTML = '<i class="fas fa-magnifying-glass"></i>';
-        actions.insertBefore(btn, actions.firstChild);
+        var btn = document.getElementById('hshsSearchBtn');
+        if (!btn && actions) {
+            btn = document.createElement('button');
+            btn.id = 'hshsSearchBtn';
+            btn.className = 'hshs-search-btn';
+            btn.type = 'button';
+            btn.setAttribute('aria-label', 'Search');
+            btn.innerHTML = '<i class="fas fa-magnifying-glass"></i>';
+            actions.insertBefore(btn, actions.firstChild);
+        }
+        if (!btn || btn.dataset.bound === '1') return;
+        btn.dataset.bound = '1';
         btn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
