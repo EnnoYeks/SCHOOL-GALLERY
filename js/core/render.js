@@ -34,7 +34,23 @@
     clear(root);
     if (Array.isArray(content)) content.forEach(function (c) { if (c) root.appendChild(c); });
     else if (content) root.appendChild(content);
+    if (mountedReal(root)) revealPage();
     return root;
+  }
+  function revealPage() {
+    if (typeof window.__hshsRevealPage === 'function') {
+      window.__hshsRevealPage();
+      return;
+    }
+    var r = document.documentElement;
+    r.classList.remove('hshs-booting');
+    r.classList.add('hshs-ready');
+    window.__hshsBootDone = true;
+    var boot = document.getElementById('hshs-boot');
+    if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+  }
+  function mountedReal(root) {
+    return root && root.id === 'hshs-page' && !root.querySelector('.hshs-load-skel') && root.childElementCount > 0;
   }
   function mountHTML(target, html) {
     var root = typeof target === 'string' ? document.querySelector(target) : target;
@@ -43,6 +59,7 @@
     var wrap = document.createElement('div');
     wrap.innerHTML = html || '';
     while (wrap.firstChild) root.appendChild(wrap.firstChild);
+    if (mountedReal(root)) revealPage();
     return root;
   }
   function icon(name, extra) {
