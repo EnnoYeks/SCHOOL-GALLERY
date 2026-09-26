@@ -6,7 +6,7 @@
   var state = { type:'all', category:'all', query:'', all:[], items:[], offset:0, loading:false, done:false, observer:null, view:-1 };
   function isPage(){ var p=(location.pathname.split('/').pop()||'').toLowerCase(); return p==='gallery.html'||p==='gallery'; }
   function base(){ return location.pathname.indexOf('/index/')!==-1?'../':''; }
-  function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c];}); }
   function count(v){ v=Number(v)||0; return v>999?(v/1000).toFixed(v>9999?0:1).replace('.0','')+'k':String(v); }
   function date(v){ if(global.Utils&&Utils.formatDate) return Utils.formatDate(v); var d=v&&v.toDate?v.toDate():new Date(v); return isNaN(d)?'Recently':d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
   function kindOf(p){ var t=String(p.type||p.media_type||'').toLowerCase(); if(t.indexOf('video')!==-1||p.videoUrl||p.video_url) return 'video'; return 'photo'; }
@@ -32,7 +32,7 @@
     document.addEventListener('keydown',function(e){ if(!isPage())return; if(e.key==='Escape') closeViewer(); if(state.view<0)return; if(e.key==='ArrowLeft'&&state.view>0) openViewer(state.view-1); if(e.key==='ArrowRight'&&state.view<state.items.length-1) openViewer(state.view+1); });
     var sentinel=document.getElementById('gallerySentinel'); if(sentinel&&'IntersectionObserver'in global){ state.observer=new IntersectionObserver(function(es){ if(!es[0].isIntersecting||state.done||state.loading) return; state.offset+=PAGE_SIZE; paint(); },{rootMargin:'600px 0px'}); state.observer.observe(sentinel); }
   }
-  function mount(){ if(!isPage()||!global.HshsRender) return; document.documentElement.dataset.hshsPage=PAGE; var root=document.getElementById('hshs-page'); if(!root){ root=document.createElement('div'); root.id='hshs-page'; document.body.appendChild(root);} var tpl=global.HshsTemplates&&HshsTemplates[PAGE]; if(tpl)(global.HshsRender.mountHTML?global.HshsRender.mountHTML(root,tpl):root.innerHTML=tpl); loadCss(); bind(); loadAll(); }
+  function mount(){ if(!isPage()||!global.HshsRender) return; document.documentElement.dataset.hshsPage=PAGE; var root=document.getElementById('hshs-page'); if(!root){ root=document.createElement('div'); root.id='hshs-page'; document.body.appendChild(root);} if(!document.getElementById('galleryFeed')){ var tpl=global.HshsTemplates&&HshsTemplates[PAGE]; if(tpl)(global.HshsRender.mountHTML?global.HshsRender.mountHTML(root,tpl):root.innerHTML=tpl); } loadCss(); if(root.dataset.hshsBound!=='1'){ root.dataset.hshsBound='1'; bind(); } loadAll(); }
   function boot(){ var go=function(){ if(isPage()) mount(); }; if(global.HshsApp&&typeof HshsApp.whenReady==='function') HshsApp.whenReady(go); else if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go,{once:true}); else go(); }
   global.HshsGallery={ mount:mount, refresh:function(){ mount(); } };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
