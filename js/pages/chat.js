@@ -3,35 +3,13 @@
   var PAGE = 'chat';
   if (global['__hshs' + PAGE + 'PageModule']) return;
   global['__hshs' + PAGE + 'PageModule'] = true;
+  var BLANK = '<main id="hshsChatBlank" class="hshs-chat-blank-canvas" aria-label="Chat"></main>';
   function isPage() {
     var f = (location.pathname.split('/').pop() || '').toLowerCase();
     return f === 'chat.html';
   }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
-  function loadOnce(src, id, asModule) {
-    return new Promise(function (resolve) {
-      if (id && document.getElementById(id)) return resolve();
-      var s = document.createElement('script');
-      if (id) s.id = id;
-      s.src = src;
-      if (asModule) s.type = 'module';
-      s.async = false;
-      s.onload = function () { resolve(); };
-      s.onerror = function () { resolve(); };
-      document.head.appendChild(s);
-    });
-  }
-  function loadCss(href) {
-    var key = href.split('?')[0];
-    if (document.querySelector('link[data-hshs-css="' + key + '"]')) return;
-    var l = document.createElement('link');
-    l.rel = 'stylesheet';
-    l.href = base() + href;
-    l.setAttribute('data-hshs-css', key);
-    document.head.appendChild(l);
-  }
-  async function mount() {
-    if (!isPage() || !global.HshsRender) return;
+  function mount() {
+    if (!isPage()) return;
     if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     var root = document.getElementById('hshs-page');
     if (!root) {
@@ -40,36 +18,10 @@
       document.body.appendChild(root);
     }
     document.documentElement.setAttribute('data-hshs-page', PAGE);
-    var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
-    if (tpl) {
-      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
-      else root.innerHTML = tpl;
-    }
-    loadCss('css/hshs-chat.css?v=260924look1');
-    loadCss('css/hshs-messages.css?v=260924look1');
-    loadCss('css/hshs-chat-packs.css?v=260924look1');
-    loadCss('css/hshs-chat-finish.css?v=260924look1');
-    loadCss('css/hshs-chat-fixes.css?v=260924look1');
-    loadCss('css/hshs-official.css?v=260924look1');
-    if (global.__hshsEnsureOfficialCss) global.__hshsEnsureOfficialCss();
-    await loadOnce(base() + 'js/core/templates/chat.js?v=260921people3', 'hshs-tpl-chat');
-    tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
-    if (tpl && root && !root.querySelector('#hshsChatPage')) {
-      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
-      else root.innerHTML = tpl;
-    }
-    await loadOnce(base() + 'js/storage.js?v=260921people3', 'hshs-storage');
-    await loadOnce(base() + 'js/hshs-people.js?v=260921people3', 'hshs-people');
-    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260926empty2', 'hshs-msg-ui');
-    await loadOnce(base() + 'js/hshs-chat-nodemo.js?v=260926empty2', 'hshs-chat-nodemo');
-    await loadOnce(base() + 'js/hshs-chat-packs.js?v=260921people3', 'hshs-chat-packs');
-    await loadOnce(base() + 'js/hshs-chat-spring.js?v=260921people3', 'hshs-chat-spring');
-    await loadOnce(base() + 'js/hshs-chat-attach.js?v=260921people3', 'hshs-chat-attach');
-    await loadOnce(base() + 'js/hshs-chat-live.js?v=260921people3', 'hshs-chat-live', true);
-    if (global.HshsMessagesUi) global.HshsMessagesUi.boot();
-    if (global.HshsChatPacks) global.HshsChatPacks.boot();
-    if (global.HshsChatAttach) global.HshsChatAttach.boot();
-    if (global.HshsChatLive) global.HshsChatLive.boot();
+    if (global.HshsTemplates) global.HshsTemplates.chat = BLANK;
+    global.__hshsTplChat = true;
+    if (global.HshsRender && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, BLANK);
+    else root.innerHTML = BLANK;
   }
   function boot() {
     function go() {
@@ -79,7 +31,7 @@
     }
     document.addEventListener('hshs:foundation-ready', go, { once: true });
     if (global.HshsApp && global.HshsApp.whenReady) global.HshsApp.whenReady(go);
-    if (document.readyState !== 'loading') setTimeout(go, 80);
+    if (document.readyState !== 'loading') setTimeout(go, 40);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();

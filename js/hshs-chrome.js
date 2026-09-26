@@ -43,14 +43,7 @@
     addScript('hshs-shared-header-js', 'hshs-shared-header.js');
   }
   function cleanChatCopy() {
-    document.querySelectorAll('.msg-hero-titles p').forEach(function (el) {
-      var t = String(el.textContent || '');
-      if (/on this device/i.test(t) || /stay connected/i.test(t)) el.textContent = 'Campus chat';
-    });
-    var list = document.getElementById('hshsChatList');
-    if (list && /Daniel Okello|Aisha Nakitende|Class 4A|Maya Okello/.test(list.textContent || '')) {
-      list.innerHTML = '<div class="hshs-chat-empty">No conversations yet. Search a classmate and start a chat.</div>';
-    }
+    if ((location.pathname.split('/').pop() || '').toLowerCase() === 'chat.html') return;
   }
   function boot() {
     ensureCss('hshs-desktop-flex-css', 'hshs-desktop-flex.css');

@@ -9,51 +9,61 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
-  <link rel="stylesheet" href="../css/hshs-fonts.css?v=260926empty2">
-  <link rel="stylesheet" href="../css/foundation.css?v=260926empty2">
-  <link rel="stylesheet" href="../css/hshs-glass.css?v=260926empty2">
+  <link rel="stylesheet" href="../css/hshs-fonts.css?v=260926blank1">
+  <link rel="stylesheet" href="../css/foundation.css?v=260926blank1">
+  <link rel="stylesheet" href="../css/hshs-glass.css?v=260926blank1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script>(function(){var r=document.documentElement;r.classList.add('hshs-ready','hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');var s=document.createElement('div');var ok=('backdropFilter' in s.style)||('webkitBackdropFilter' in s.style);if(!ok)r.classList.add('hshs-no-backdrop');})();</script>
+  <script>(function(){var r=document.documentElement;r.classList.add('hshs-ready','hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');var s=document.createElement('div');var ok=('backdropFilter' in s.style)||('webkitBackdropFilter' in s.style);if(!ok)r.classList.add('hshs-no-backdrop');window.__hshsTplChat=true;window.HshsTemplates=window.HshsTemplates||{};window.HshsTemplates.chat='<main id="hshsChatBlank" class="hshs-chat-blank-canvas" aria-label="Chat"></main>';})();</script>
   <style>
-    .hshs-chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;min-height:42vh;padding:28px 18px;color:#94a3b8}
-    .hshs-chat-empty i{color:#fbbf24;font-size:1.6rem}
-    .hshs-chat-empty strong{color:#fff;font-size:1.05rem}
-    .hshs-chat-empty span{font-size:.86rem}
+    .hshs-chat-blank-canvas{min-height:calc(100dvh - 128px);background:transparent}
+    .hshs-chat-page,.msg-hero,.msg-search,.msg-list-view,.msg-list-scroll,.msg-fab-compose,.msg-thread-view,.hshs-chat-empty,#hshsChatPage,#hshsChatList,#hshsComposeFab,#hshsThread{display:none!important}
   </style>
 </head>
 <body class="dark-mode">
   <div id="hshs-page"></div>
-  <script type="module" src="../js/config.js?v=260926empty2"></script>
-  <script type="module" src="../js/db.js?v=260926empty2"></script>
-  <script src="../js/utils.js?v=260926empty2"></script>
-  <script src="../js/theme.js?v=260926empty2"></script>
-  <script src="../js/navigation.js?v=260926empty2"></script>
-  <script src="../js/mobile-navigation.js?v=260926empty2"></script>
-  <script src="../js/search.js?v=260926empty2"></script>
-  <script src="../js/core/navigation-perf.js?v=260926empty2"></script>
-  <script src="../js/mobile-shell.js?v=260926empty2"></script>
-  <script src="../js/core/bootstrap.js?v=260926empty2"></script>
-  <script type="module" src="../js/hshs-chat-live.js?v=260926empty2"></script>
-  <script src="../js/pages/chat.js?v=260926empty2"></script>
+  <script type="module" src="../js/config.js?v=260926blank1"></script>
+  <script type="module" src="../js/db.js?v=260926blank1"></script>
+  <script src="../js/utils.js?v=260926blank1"></script>
+  <script src="../js/theme.js?v=260926blank1"></script>
+  <script src="../js/navigation.js?v=260926blank1"></script>
+  <script src="../js/mobile-navigation.js?v=260926blank1"></script>
+  <script src="../js/search.js?v=260926blank1"></script>
+  <script src="../js/core/navigation-perf.js?v=260926blank1"></script>
+  <script src="../js/mobile-shell.js?v=260926blank1"></script>
+  <script src="../js/core/bootstrap.js?v=260926blank1"></script>
+  <script src="../js/pages/chat.js?v=260926blank1"></script>
   <script>
   (function () {
-    function emptyList() {
-      try { localStorage.removeItem('hshsWorldChat_v1'); } catch (e) {}
-      var box = document.getElementById('hshsChatList');
-      if (!box || (box.querySelector('.hshs-chat-empty') && !box.querySelector('.msg-row, .hshs-contact'))) return;
-      box.innerHTML = '<div class="hshs-chat-empty"><i class="fas fa-comment-dots"></i><strong>No conversations yet</strong><span>Your chats will show up here.</span></div>';
+    var BLANK = '<main id="hshsChatBlank" class="hshs-chat-blank-canvas" aria-label="Chat"></main>';
+    function blank() {
+      window.__hshsTplChat = true;
+      window.HshsTemplates = window.HshsTemplates || {};
+      window.HshsTemplates.chat = BLANK;
+      var root = document.getElementById('hshs-page');
+      if (!root) return;
+      var old = root.querySelector('.hshs-chat-page, .msg-hero, .msg-search, .msg-list-view, .msg-fab-compose, .hshs-chat-empty, #hshsChatPage, #hshsThread');
+      if (old) {
+        var keep = [];
+        root.querySelectorAll('.navbar, .mobile-tabbar, #mobileTabbar').forEach(function (el) { keep.push(el); });
+        root.innerHTML = BLANK;
+        keep.forEach(function (el) { document.body.appendChild(el); });
+        return;
+      }
+      if (!root.querySelector('#hshsChatBlank')) root.innerHTML = BLANK;
     }
-    function watch() {
-      var box = document.getElementById('hshsChatList');
-      emptyList();
-      if (!box || box.dataset.emptyWatch) return;
-      box.dataset.emptyWatch = '1';
-      new MutationObserver(function () {
-        if (box.querySelector('.msg-row, .hshs-contact')) emptyList();
-      }).observe(box, { childList: true });
+    var busy = false;
+    function safeBlank() {
+      if (busy) return;
+      busy = true;
+      try { blank(); } catch (e) {}
+      busy = false;
     }
-    document.addEventListener('hshs:page', function () { setTimeout(watch, 40); });
-    [120, 450, 1000, 1800].forEach(function (ms) { setTimeout(watch, ms); });
+    document.addEventListener('hshs:page', function () { setTimeout(safeBlank, 20); });
+    document.addEventListener('hshs:foundation-ready', function () { setTimeout(safeBlank, 20); });
+    [40, 180, 500, 1200].forEach(function (ms) { setTimeout(safeBlank, ms); });
+    if (document.body) {
+      new MutationObserver(function () { setTimeout(safeBlank, 0); }).observe(document.body, { childList: true, subtree: true });
+    }
   })();
   </script>
 </body>
