@@ -40,12 +40,20 @@
     function emptyList() {
       try { localStorage.removeItem('hshsWorldChat_v1'); } catch (e) {}
       var box = document.getElementById('hshsChatList');
-      if (!box) return;
-      if (box.querySelector('.hshs-chat-empty') && !box.querySelector('.msg-row')) return;
+      if (!box || box.querySelector('.hshs-chat-empty') && !box.querySelector('.msg-row')) return;
       box.innerHTML = '<div class="hshs-chat-empty"><i class="fas fa-comment-dots"></i><strong>No conversations yet</strong><span>Your chats will show up here.</span></div>';
     }
-    document.addEventListener('hshs:page', function () { setTimeout(emptyList, 40); });
-    [120, 450, 1000, 1800].forEach(function (ms) { setTimeout(emptyList, ms); });
+    function watch() {
+      var box = document.getElementById('hshsChatList');
+      emptyList();
+      if (!box || box.dataset.emptyWatch) return;
+      box.dataset.emptyWatch = '1';
+      new MutationObserver(function () {
+        if (box.querySelector('.msg-row')) emptyList();
+      }).observe(box, { childList: true });
+    }
+    document.addEventListener('hshs:page', function () { setTimeout(watch, 40); });
+    [120, 450, 1000, 1800].forEach(function (ms) { setTimeout(watch, ms); });
   })();
   </script>
 </body>
