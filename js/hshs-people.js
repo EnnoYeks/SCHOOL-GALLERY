@@ -49,10 +49,11 @@
         email: user.email || (p && p.email) || '',
         photoURL: (p && p.photoURL) || user.photoURL || '',
         role: (p && p.role) || 'Student',
-        classYear: (p && p.classYear) || ''
+        classYear: (p && p.classYear) || '',
+        house: (p && p.house) || ''
       });
     }
-    return null;
+    return p && p.uid ? p : null;
   }
   function authState() {
     if (g.hshsAuthState) return g.hshsAuthState;
@@ -100,10 +101,37 @@
     });
   }
 
+  var FOLLOW_KEY = 'hshsLocalFollows';
+  function localFollows() {
+    try { return JSON.parse(localStorage.getItem(FOLLOW_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function setLocalFollow(uid, on) {
+    var map = localFollows();
+    if (on) map[uid] = 1;
+    else delete map[uid];
+    try { localStorage.setItem(FOLLOW_KEY, JSON.stringify(map)); } catch (e) {}
+    return !!map[uid];
+  }
+  function signedEnough() {
+    if (realUser()) return true;
+    var p = localProfile();
+    return !!(p && p.uid);
+  }
   async function toggleFollow(uid) {
-    if (!realUser()) return { ok: false, error: 'Sign in first.', following: false };
-    if (!db() || !db().toggleFollow) return { ok: false, error: 'Follow is not ready.', following: false };
-    return db().toggleFollow(uid);
+    if (!uid) return { ok: false, error: 'Missing person.', following: false };
+    if (!signedEnough()) return { ok: false, error: 'Sign in first.', following: false };
+    if (db() && db().toggleFollow) {
+      try {
+        var res = await db().toggleFollow(uid);
+        if (res && res.ok) {
+          setLocalFollow(uid, !!res.following);
+          return res;
+        }
+      } catch (e) {}
+    }
+    var on = !localFollows()[uid];
+    setLocalFollow(uid, on);
+    return { ok: true, following: on, local: true };
   }
 
   function profileUrl(user) {
@@ -129,7 +157,13 @@
     getByUsername: getByUsername,
     search: search,
     toggleFollow: toggleFollow,
-    isFollowing: function (uid) { return db() && db().isFollowing ? db().isFollowing(uid) : Promise.resolve(false); },
+    followingLocal: function (uid) { return !!localFollows()[uid]; },
+    isFollowing: function (uid) {
+      if (db() && db().isFollowing) {
+        return db().isFollowing(uid).then(function (v) { return !!v || !!localFollows()[uid]; }).catch(function () { return !!localFollows()[uid]; });
+      }
+      return Promise.resolve(!!localFollows()[uid]);
+    },
     followCounts: function (uid) { return db() && db().followCounts ? db().followCounts(uid) : Promise.resolve({ followers: 0, following: 0 }); },
     listFollowers: function (uid) { return db() && db().listFollowers ? db().listFollowers(uid) : Promise.resolve([]);
     },

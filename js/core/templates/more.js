@@ -1,13 +1,15 @@
 (function(g){'use strict';g.HshsTemplates=g.HshsTemplates||{};g.HshsTemplates['more']=`<main class="hshs-account-page" aria-label="More HSHS World">
+  <div class="hshs-page-head hshs-shared-head"><h1>More</h1></div>
   <a class="hshs-me-card" href="profile.html" id="morePageMe">
     <span class="hshs-me-pic" id="morePagePic"><i class="fas fa-user"></i></span>
     <span class="hshs-me-copy">
-      <strong id="morePageName">Guest student</strong>
-      <small id="morePageEmail">student@hshs.ac.ug</small>
+      <strong id="morePageName">Not signed in</strong>
+      <small id="morePageEmail">Browsing as guest</small>
       <em id="morePageRole">HSHS Student</em>
     </span>
     <span class="hshs-me-go"><i class="fas fa-user"></i> View Profile</span>
   </a>
+  <p class="hshs-session-badge is-guest" id="morePageStatus"><i class="fas fa-user"></i> Guest</p>
   <div class="hshs-menu-list" id="hshsMoreMenu">
     <p class="hshs-menu-kicker">You</p>
     <a class="hshs-menu-item" href="search.html"><i class="fas fa-magnifying-glass"></i><span><b>Search</b><small>Find people, photos and videos</small></span><i class="fas fa-chevron-right"></i></a>

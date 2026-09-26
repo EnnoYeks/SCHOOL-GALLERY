@@ -6,7 +6,7 @@
       <section class="pf-cover" id="pfCover"></section>
       <section class="pf-band">
         <div class="pf-ava-wrap"><div class="pf-ava" id="pfAva"><span id="pfAvaFall">?</span><img id="pfAvaImg" alt=""></div></div>
-        <div class="pf-names"><h1 id="pfUser">profile</h1><p class="pf-display" id="pfName"></p><p class="pf-role" id="pfRole"></p></div>
+        <div class="pf-names"><div class="pf-session" id="pfSession"></div><h1 id="pfName">Profile</h1><p class="pf-handle" id="pfUser"></p><p class="pf-role" id="pfRole"></p></div>
         <div class="pf-tools" id="pfTools"></div>
       </section>
       <p class="pf-bio" id="pfBio"></p>
@@ -32,6 +32,12 @@
       <button class="pf-modal-x" type="button" data-pf="close-modal" aria-label="Close"><i class="fas fa-xmark"></i></button>
       <div class="pf-modal-stage" id="pfModalStage"></div>
       <p class="pf-modal-cap" id="pfModalCap"></p>
+    </div>
+    <div class="pf-sheet" id="pfTagSheet" hidden>
+      <div class="pf-sheet-card">
+        <div class="pf-sheet-h"><strong id="pfTagTitle">Update</strong><button type="button" data-pf="close-tag">Done</button></div>
+        <div class="pf-tag-options" id="pfTagOptions"></div>
+      </div>
     </div>
     <div class="pf-sheet" id="pfEdit" hidden>
       <div class="pf-sheet-card">

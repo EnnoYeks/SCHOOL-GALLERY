@@ -20,20 +20,27 @@
     document.head.appendChild(l);
   }
   function unifySettings() {
-    var moon = document.getElementById('themeToggle');
-    if (moon && moon.tagName === 'BUTTON') {
-      var a = document.createElement('a');
-      a.id = 'hshsSettingsBtn';
-      a.className = 'hshs-settings-btn theme-toggle';
-      a.href = settingsHref();
-      a.title = 'Settings';
-      a.setAttribute('aria-label', 'Settings');
-      a.innerHTML = '<i class="fas fa-gear"></i>';
-      moon.replaceWith(a);
-    }
-    document.querySelectorAll('#themeToggle').forEach(function (el) {
-      if (el.tagName === 'BUTTON') el.style.display = 'none';
+    document.querySelectorAll('.navbar .hshs-settings-btn, .navbar #hshsSettingsBtn, .navbar a[title="Settings"], .navbar a[aria-label="Settings"], .navbar #themeToggle').forEach(function (el) {
+      el.remove();
     });
+  }
+  function ensureShared() {
+    if (!document.getElementById('hshs-shared-header-css')) {
+      var l = document.createElement('link');
+      l.id = 'hshs-shared-header-css';
+      l.rel = 'stylesheet';
+      l.href = (inSub() ? '../css/' : 'css/') + 'hshs-shared-header.css?v=260926ui6';
+      document.head.appendChild(l);
+    }
+    function addScript(id, file) {
+      if (document.getElementById(id)) return;
+      var s = document.createElement('script');
+      s.id = id;
+      s.src = (inSub() ? '../js/' : 'js/') + file + '?v=260926ui6';
+      document.body.appendChild(s);
+    }
+    addScript('hshs-upload-cancel-js', 'hshs-upload-cancel.js');
+    addScript('hshs-shared-header-js', 'hshs-shared-header.js');
   }
   function cleanChatCopy() {
     document.querySelectorAll('.msg-hero-titles p').forEach(function (el) {
@@ -52,6 +59,7 @@
     if (window.HshsShell && window.HshsShell.ensureShell) {
       try { window.HshsShell.ensureShell(); } catch (e) {}
     }
+    ensureShared();
     unifySettings();
     cleanChatCopy();
   }
