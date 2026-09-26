@@ -13,62 +13,57 @@
   <link rel="stylesheet" href="../css/foundation.css?v=260926audit1">
   <link rel="stylesheet" href="../css/hshs-glass.css?v=260926audit1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script>(function(){var r=document.documentElement;r.classList.add('hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');var s=document.createElement('div');var ok=('backdropFilter' in s.style)||('webkitBackdropFilter' in s.style);if(!ok)r.classList.add('hshs-no-backdrop');})();</script>
+  <link rel="preload" as="image" href="https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png">
+  <link rel="stylesheet" href="../css/hshs-shared-header.css?v=260926css1">
+  <style id="hshs-header-first">
+    .navbar{position:sticky;top:0;z-index:1000;background:#071433;border-bottom:1px solid rgba(251,191,36,.32);min-height:64px}
+    .navbar-container{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:64px;padding:8px 12px}
+    .logo{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:#fff}
+    .brand-mark,.brand-mark img{width:44px;height:44px;flex:0 0 44px;border-radius:50%;object-fit:contain;display:block}
+    .brand-copy{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+    .brand-copy strong{display:flex;align-items:center;gap:4px;font-size:1.05rem;font-weight:800;color:#fff}
+    .brand-copy small{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#cbd5e1}
+    .brand-verified,.brand-verified svg{width:14px;height:14px;display:inline-block}
+    .nav-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+    .notification-icon,.profile-icon,.hshs-session-chip{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#102a62;color:#fde68a;text-decoration:none}
+    .profile-icon{border:2px solid #fbbf24;overflow:hidden;padding:0}
+    .profile-icon img{width:100%;height:100%;object-fit:cover;display:block}
+    .hshs-session-chip em{display:none}
+    .search-container,.nav-links,.mobile-menu-toggle{display:none}
+  </style>
   <style>
     html, body { background: #071433; margin: 0; }
     #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
     .hshs-load-skel {
       position: fixed;
       inset: 0;
-      z-index: 8000;
+      z-index: 20;
+      top: 72px;
       min-height: 100vh;
-      background:
-        radial-gradient(520px 280px at 50% 18%, rgba(212, 175, 55, 0.16), transparent 62%),
-        #071433;
+      background: #071433;
       overflow: hidden;
       opacity: 1 !important;
       visibility: visible !important;
     }
     body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
-    body:has(.hshs-load-skel) .navbar,
-    body:has(.hshs-load-skel) .mobile-tabbar { visibility: hidden !important; }
-    .hshs-load-skel::before,
-    .hshs-load-skel::after {
-      content: "";
-      position: absolute;
-      left: 16px;
-      right: 16px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.04);
-    }
-    .hshs-load-skel::before { top: 88px; height: 148px; }
-    .hshs-load-skel::after {
-      top: 252px;
-      height: 72px;
-      box-shadow: 0 88px 0 rgba(255, 255, 255, 0.04), 0 176px 0 rgba(255, 255, 255, 0.04);
-    }
-    .hshs-load-skel-shine {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(100deg, transparent 18%, rgba(251, 191, 36, 0.16) 48%, transparent 78%);
-      transform: translateX(-120%);
-      animation: hshs-skel-shimmer 1.35s ease-in-out infinite;
-      pointer-events: none;
-    }
-    @keyframes hshs-skel-shimmer {
-      0% { transform: translateX(-120%); }
-      100% { transform: translateX(120%); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .hshs-load-skel-shine { animation: none; opacity: 0.35; }
-    }
   </style>
 </head>
 <body class="dark-mode">
-    <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
-    <div class="hshs-load-skel" role="status" aria-label="Loading">
-      <span class="hshs-load-skel-shine" aria-hidden="true"></span>
+<nav class="navbar hshs-flat-top" aria-label="HSHS World">
+  <div class="navbar-container hshs-topbar">
+    <a class="logo" href="../index.html" title="HSHS World">
+      <span class="brand-mark"><img src="https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png" alt="Hawthorne Scribner High School badge" width="44" height="44"></span>
+      <span class="brand-copy"><strong>HSHS World <span class="brand-verified" aria-label="Verified"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#3897F0"/><path d="M7.2 12.4l2.6 2.6 7-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></strong><small>Campus social</small></span>
+    </a>
+    <div class="nav-actions hshs-top-actions">
+      <a class="notification-icon" href="notifications.html" aria-label="Notifications"><i class="fas fa-bell"></i></a>
+      <span class="hshs-session-chip is-guest" id="hshsSessionChip" title="Browsing as guest"><i class="fas fa-user"></i><em>Guest</em></span>
+      <a class="profile-icon hshs-profile" href="profile.html" aria-label="Profile"><img id="profileImg" class="profile-img" alt="Profile" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231d4ed8'/%3E%3Ccircle cx='32' cy='24' r='10' fill='white'/%3E%3Cpath d='M14 54c4-12 14-18 18-18s14 6 18 18' fill='white'/%3E%3C/svg%3E"></a>
     </div>
+  </div>
+</nav>
+  <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
+    <div class="hshs-load-skel" role="status" aria-label="Loading"></div>
   </div>
   <script>
     (function () {
@@ -81,8 +76,6 @@
         window.__hshsBootDone = true;
         var boot = document.getElementById('hshs-boot');
         if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
-        var cover = document.getElementById('hshs-tt-overlay');
-        if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
       }
       window.__hshsRevealPage = reveal;
       function dropSkel() {
@@ -93,11 +86,8 @@
         if (!root.querySelector('.hshs-load-skel')) return root.childElementCount > 0;
         return root.childElementCount > 1;
       }
-      function headerReady() {
-        return !!document.querySelector('.logo .brand-mark img, .logo .brand-copy');
-      }
       function check() {
-        if (!settled() || !headerReady()) return;
+        if (!settled()) return;
         if (window.__hshsSkelWatch) window.__hshsSkelWatch.disconnect();
         dropSkel();
         reveal();
@@ -105,13 +95,9 @@
       if (window.MutationObserver) {
         var obs = new MutationObserver(check);
         window.__hshsSkelWatch = obs;
-        obs.observe(document.documentElement, { childList: true, subtree: true });
+        obs.observe(root, { childList: true });
       }
-      setTimeout(function () {
-        if (!root.querySelector('.hshs-load-skel')) return;
-        dropSkel();
-        reveal();
-      }, 4500);
+      setTimeout(function () { dropSkel(); reveal(); }, 4500);
     })();
   </script>
   <script type="module" src="../js/config.js?v=260926audit1"></script>
