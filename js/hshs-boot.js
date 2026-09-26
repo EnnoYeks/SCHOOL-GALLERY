@@ -17,6 +17,7 @@
         return parts.css >= 1 && parts.dom >= 1 && parts.shell >= 1 && parts.fonts >= 1 && parts.page >= 1;
     }
     function mountSplash() {
+        if (document.querySelector('.hshs-load-skel')) return;
         document.documentElement.classList.add('hshs-booting');
         var box = document.getElementById('hshs-boot');
         if (!box) {
