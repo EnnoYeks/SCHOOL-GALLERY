@@ -12,104 +12,122 @@
   <link rel="stylesheet" href="../css/hshs-fonts.css?v=260926audit1">
   <link rel="stylesheet" href="../css/foundation.css?v=260926audit1">
   <link rel="stylesheet" href="../css/hshs-glass.css?v=260926audit1">
+  <link rel="stylesheet" href="../css/gallery.css?v=260926lock1" data-hshs-gallery-css="css/gallery.css">
+  <link rel="stylesheet" href="../css/hshs-wave.css?v=260926lock1" data-hshs-gallery-css="css/hshs-wave.css">
+  <link rel="stylesheet" href="../css/hshs-shared-header.css?v=260926css1">
+  <link id="hshs-no-flicker-css" rel="stylesheet" href="../css/hshs-no-flicker.css?v=260926lock1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preload" as="image" href="https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png">
-  <link rel="stylesheet" href="../css/hshs-shared-header.css?v=260926css1">
   <style id="hshs-header-first">
-    .navbar{position:sticky;top:0;z-index:1000;background:#071433;border-bottom:1px solid rgba(251,191,36,.32);min-height:64px}
-    .navbar-container{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:64px;padding:8px 12px}
-    .logo{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:#fff}
+    html,body{background:#071433;margin:0}
+    #hshsTop,#hshsTop.navbar{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;position:sticky;top:0;z-index:1000;width:100%;background:#071433!important;border-bottom:1px solid rgba(251,191,36,.32);min-height:64px}
+    html.hshs-booting #hshsTop,html.hshs-booting body>#hshsTop{display:flex!important;opacity:1!important;visibility:visible!important}
+    .navbar-container{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:64px;padding:8px 12px}
+    .logo{display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 auto;text-decoration:none;color:#fff;max-height:none!important}
+    .brand-copy,.brand-copy strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .brand-mark,.brand-mark img{width:44px;height:44px;flex:0 0 44px;border-radius:50%;object-fit:contain;display:block}
     .brand-copy{display:flex;flex-direction:column;line-height:1.1;min-width:0}
     .brand-copy strong{display:flex;align-items:center;gap:4px;font-size:1.05rem;font-weight:800;color:#fff}
     .brand-copy small{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#cbd5e1}
     .brand-verified,.brand-verified svg{width:14px;height:14px;display:inline-block}
-    .nav-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
-    .notification-icon,.profile-icon,.hshs-session-chip{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#102a62;color:#fde68a;text-decoration:none}
-    .profile-icon{border:2px solid #fbbf24;overflow:hidden;padding:0}
+    .nav-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex:0 0 auto}
+    .notification-icon,.profile-icon,.hshs-session-chip,.hshs-search-btn{width:40px;height:40px;min-width:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#102a62;color:#fde68a;text-decoration:none;border:0;padding:0}
+    .hshs-search-btn{background:#1d4ed8;color:#fff}
+    .profile-icon{border:2px solid #fbbf24;overflow:hidden}
     .profile-icon img{width:100%;height:100%;object-fit:cover;display:block}
     .hshs-session-chip em{display:none}
     .search-container,.nav-links,.mobile-menu-toggle{display:none}
-  </style>
-  <style>
-    html, body { background: #071433; margin: 0; }
-    #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
-    .hshs-load-skel {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      top: 72px;
-      min-height: 100vh;
-      background: #071433;
-      overflow: hidden;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-    body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
+    #hshs-page{min-height:100vh;background:#071433;opacity:1!important;visibility:visible!important}
   </style>
 </head>
 <body class="dark-mode">
-<nav class="navbar hshs-flat-top" aria-label="HSHS World">
+<nav class="navbar hshs-flat-top" id="hshsTop" aria-label="HSHS World" style="display:flex!important;opacity:1!important;visibility:visible!important;width:100%;background:#071433;">
   <div class="navbar-container hshs-topbar">
     <a class="logo" href="../index.html" title="HSHS World">
       <span class="brand-mark"><img src="https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png" alt="Hawthorne Scribner High School badge" width="44" height="44"></span>
       <span class="brand-copy"><strong>HSHS World <span class="brand-verified" aria-label="Verified"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#3897F0"/><path d="M7.2 12.4l2.6 2.6 7-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></strong><small>Campus social</small></span>
     </a>
     <div class="nav-actions hshs-top-actions">
+      <button class="hshs-search-btn" id="hshsSearchBtn" type="button" aria-label="Search"><i class="fas fa-magnifying-glass"></i></button>
       <a class="notification-icon" href="notifications.html" aria-label="Notifications"><i class="fas fa-bell"></i></a>
       <span class="hshs-session-chip is-guest" id="hshsSessionChip" title="Browsing as guest"><i class="fas fa-user"></i><em>Guest</em></span>
       <a class="profile-icon hshs-profile" href="profile.html" aria-label="Profile"><img id="profileImg" class="profile-img" alt="Profile" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231d4ed8'/%3E%3Ccircle cx='32' cy='24' r='10' fill='white'/%3E%3Cpath d='M14 54c4-12 14-18 18-18s14 6 18 18' fill='white'/%3E%3C/svg%3E"></a>
     </div>
   </div>
 </nav>
-  <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
-    <div class="hshs-load-skel" role="status" aria-label="Loading"></div>
+<div id="hshs-page" style="opacity:1!important;visibility:visible!important">
+  <main class="gallery-page">
+    <section class="gallery-hero">
+      <div class="gallery-hero-card">
+        <span class="gallery-pill">Campus feed</span>
+        <h1>Gallery</h1>
+        <p>Photos, clips and school moments in one place.</p>
+        <div class="gallery-hero-actions">
+          <button class="gallery-btn-primary" type="button" id="galleryShareBtn"><i class="fas fa-plus"></i> Share a moment</button>
+          <a class="gallery-btn-ghost" href="videos.html"><i class="fas fa-clapperboard"></i> HSHS Studio</a>
+        </div>
+      </div>
+    </section>
+    <section class="gallery-toolbar" aria-label="Gallery filters">
+      <div class="gallery-search">
+        <i class="fas fa-magnifying-glass"></i>
+        <input id="gallerySearch" type="search" placeholder="Search moments, clubs, sports…" aria-label="Search gallery">
+      </div>
+      <div class="gallery-types" id="galleryTypes" role="tablist">
+        <button class="gallery-chip is-on" type="button" data-type="all">All</button>
+        <button class="gallery-chip" type="button" data-type="photo">Photos</button>
+        <button class="gallery-chip" type="button" data-type="video">Videos</button>
+      </div>
+      <div class="gallery-toolbar-head"><strong>Explore</strong><span id="galleryResultCount">Loading…</span></div>
+      <div class="category-filter" id="categoryFilter">
+        <button class="category-btn active" data-category="all">All</button>
+        <button class="category-btn" data-category="academics">Academics</button>
+        <button class="category-btn" data-category="sports">Sports</button>
+        <button class="category-btn" data-category="clubs">Clubs</button>
+        <button class="category-btn" data-category="events">Events</button>
+        <button class="category-btn" data-category="arts">Arts</button>
+        <button class="category-btn" data-category="music">Music</button>
+        <button class="category-btn" data-category="graduation">Graduation</button>
+      </div>
+    </section>
+    <section class="gallery-feed" id="galleryFeed" aria-live="polite"></section>
+    <div class="gallery-loader" id="galleryLoader" hidden><div class="hshs-wave"><i></i><i></i><i></i></div></div>
+    <div class="gallery-sentinel" id="gallerySentinel" aria-hidden="true"></div>
+    <section class="gallery-empty" id="galleryEmpty" hidden>
+      <div class="empty-orb"><i class="far fa-images"></i></div>
+      <h2>No moments yet</h2>
+      <p>When photos or videos are shared to HSHS World, they will land here.</p>
+    </section>
+  </main>
+  <div class="gallery-viewer" id="galleryViewer" hidden>
+    <button class="gv-close" type="button" data-gv="close" aria-label="Close"><i class="fas fa-xmark"></i></button>
+    <button class="gv-nav prev" type="button" data-gv="prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+    <button class="gv-nav next" type="button" data-gv="next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+    <div class="gv-stage" id="galleryViewerStage"></div>
+    <div class="gv-meta"><strong id="gvTitle"></strong><small id="gvBy"></small>
+      <div class="gv-actions">
+        <button type="button" data-gv-act="like"><i class="fas fa-heart"></i></button>
+        <button type="button" data-gv-act="save"><i class="fas fa-bookmark"></i></button>
+        <button type="button" data-gv-act="share"><i class="fas fa-share"></i></button>
+      </div>
+    </div>
   </div>
-  <script>
-    (function () {
-      var root = document.getElementById('hshs-page');
-      if (!root) return;
-      function reveal() {
-        var r = document.documentElement;
-        r.classList.remove('hshs-booting');
-        r.classList.add('hshs-ready');
-        window.__hshsBootDone = true;
-        var boot = document.getElementById('hshs-boot');
-        if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
-      }
-      window.__hshsRevealPage = reveal;
-      function dropSkel() {
-        var sk = root.querySelector('.hshs-load-skel');
-        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
-      }
-      function settled() {
-        if (!root.querySelector('.hshs-load-skel')) return root.childElementCount > 0;
-        return root.childElementCount > 1;
-      }
-      function check() {
-        if (!settled()) return;
-        if (window.__hshsSkelWatch) window.__hshsSkelWatch.disconnect();
-        dropSkel();
-        reveal();
-      }
-      if (window.MutationObserver) {
-        var obs = new MutationObserver(check);
-        window.__hshsSkelWatch = obs;
-        obs.observe(root, { childList: true });
-      }
-      setTimeout(function () { dropSkel(); reveal(); }, 4500);
-    })();
-  </script>
-  <script type="module" src="../js/config.js?v=260926audit1"></script>
-  <script type="module" src="../js/db.js?v=260926audit1"></script>
-  <script src="../js/utils.js?v=260926audit1" defer></script>
-  <script src="../js/theme.js?v=260926audit1" defer></script>
-  <script src="../js/navigation.js?v=260926gallery1" defer></script>
-  <script src="../js/mobile-navigation.js?v=260926audit1" defer></script>
-  <script src="../js/search.js?v=260926audit1" defer></script>
-  <script src="../js/core/navigation-perf.js?v=260926audit1" defer></script>
-  <script src="../js/mobile-shell.js?v=260926audit1" defer></script>
-  <script src="../js/core/bootstrap.js?v=260926allpages1" defer></script>
-  <script src="../js/pages/gallery.js?v=260926audit1" defer></script>
+</div>
+<script>
+  document.documentElement.classList.remove('hshs-booting');
+  document.documentElement.classList.add('hshs-ready');
+  window.__hshsBootDone = true;
+</script>
+<script type="module" src="../js/config.js?v=260926audit1"></script>
+<script type="module" src="../js/db.js?v=260926audit1"></script>
+<script src="../js/utils.js?v=260926audit1" defer></script>
+<script src="../js/theme.js?v=260926audit1" defer></script>
+<script src="../js/navigation.js?v=260926lock1" defer></script>
+<script src="../js/mobile-navigation.js?v=260926audit1" defer></script>
+<script src="../js/search.js?v=260926audit1" defer></script>
+<script src="../js/core/navigation-perf.js?v=260926audit1" defer></script>
+<script src="../js/mobile-shell.js?v=260926audit1" defer></script>
+<script src="../js/core/bootstrap.js?v=260926allpages1" defer></script>
+<script src="../js/pages/gallery.js?v=260926lock1" defer></script>
 </body>
 </html>
