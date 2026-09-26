@@ -68,16 +68,57 @@
       <span class="hshs-load-skel-shine" aria-hidden="true"></span>
     </div>
   </div>
+  <script>
+    (function () {
+      var root = document.getElementById('hshs-page');
+      if (!root) return;
+      function reveal() {
+        var r = document.documentElement;
+        r.classList.remove('hshs-booting');
+        r.classList.add('hshs-ready');
+        window.__hshsBootDone = true;
+        var boot = document.getElementById('hshs-boot');
+        if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+        var cover = document.getElementById('hshs-tt-overlay');
+        if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
+      }
+      window.__hshsRevealPage = reveal;
+      function dropSkel() {
+        var sk = root.querySelector('.hshs-load-skel');
+        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+      }
+      function settled() {
+        if (!root.querySelector('.hshs-load-skel')) return root.childElementCount > 0;
+        return root.childElementCount > 1;
+      }
+      function check() {
+        if (!settled()) return;
+        if (window.__hshsSkelWatch) window.__hshsSkelWatch.disconnect();
+        dropSkel();
+        reveal();
+      }
+      if (window.MutationObserver) {
+        var obs = new MutationObserver(check);
+        window.__hshsSkelWatch = obs;
+        obs.observe(root, { childList: true });
+      }
+      setTimeout(function () {
+        if (document.documentElement.classList.contains('hshs-ready') && !root.querySelector('.hshs-load-skel')) return;
+        dropSkel();
+        reveal();
+      }, 12000);
+    })();
+  </script>
   <script type="module" src="js/config.js?v=260926audit1"></script>
   <script type="module" src="js/db.js?v=260926audit1"></script>
   <script defer src="js/utils.js?v=260926audit1"></script>
   <script defer src="js/theme.js?v=260926audit1"></script>
-  <script defer src="js/navigation.js?v=260926flicker1"></script>
+  <script defer src="js/navigation.js?v=260926allpages1"></script>
   <script defer src="js/mobile-navigation.js?v=260926ui4"></script>
   <script defer src="js/search.js?v=260926audit1"></script>
   <script defer src="js/core/navigation-perf.js?v=260926audit1"></script>
   <script defer src="js/mobile-shell.js?v=260926ui4"></script>
-  <script defer src="js/core/bootstrap.js?v=260926ui4"></script>
+  <script defer src="js/core/bootstrap.js?v=260926allpages1"></script>
   <script defer src="js/pages/home.js?v=260926flicker1"></script>
   <link rel="stylesheet" href="css/hshs-shared-header.css?v=260926ui4">
   <script defer src="js/hshs-shared-header.js?v=260926ui4"></script>
