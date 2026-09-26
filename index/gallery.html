@@ -20,7 +20,7 @@
     .hshs-load-skel {
       position: fixed;
       inset: 0;
-      z-index: 5000;
+      z-index: 8000;
       min-height: 100vh;
       background:
         radial-gradient(520px 280px at 50% 18%, rgba(212, 175, 55, 0.16), transparent 62%),
@@ -30,6 +30,8 @@
       visibility: visible !important;
     }
     body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
+    body:has(.hshs-load-skel) .navbar,
+    body:has(.hshs-load-skel) .mobile-tabbar { visibility: hidden !important; }
     .hshs-load-skel::before,
     .hshs-load-skel::after {
       content: "";
@@ -91,8 +93,11 @@
         if (!root.querySelector('.hshs-load-skel')) return root.childElementCount > 0;
         return root.childElementCount > 1;
       }
+      function headerReady() {
+        return !!document.querySelector('.logo .brand-mark img, .logo .brand-copy');
+      }
       function check() {
-        if (!settled()) return;
+        if (!settled() || !headerReady()) return;
         if (window.__hshsSkelWatch) window.__hshsSkelWatch.disconnect();
         dropSkel();
         reveal();
@@ -100,20 +105,20 @@
       if (window.MutationObserver) {
         var obs = new MutationObserver(check);
         window.__hshsSkelWatch = obs;
-        obs.observe(root, { childList: true });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
       }
       setTimeout(function () {
-        if (document.documentElement.classList.contains('hshs-ready') && !root.querySelector('.hshs-load-skel')) return;
+        if (!root.querySelector('.hshs-load-skel')) return;
         dropSkel();
         reveal();
-      }, 12000);
+      }, 4500);
     })();
   </script>
   <script type="module" src="../js/config.js?v=260926audit1"></script>
   <script type="module" src="../js/db.js?v=260926audit1"></script>
   <script src="../js/utils.js?v=260926audit1" defer></script>
   <script src="../js/theme.js?v=260926audit1" defer></script>
-  <script src="../js/navigation.js?v=260926cancel1" defer></script>
+  <script src="../js/navigation.js?v=260926gallery1" defer></script>
   <script src="../js/mobile-navigation.js?v=260926audit1" defer></script>
   <script src="../js/search.js?v=260926audit1" defer></script>
   <script src="../js/core/navigation-perf.js?v=260926audit1" defer></script>
