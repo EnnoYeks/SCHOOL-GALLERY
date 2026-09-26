@@ -14,6 +14,12 @@
   <link rel="stylesheet" href="../css/hshs-glass.css?v=260926audit1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>(function(){var r=document.documentElement;r.classList.add('hshs-ready','hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');var s=document.createElement('div');var ok=('backdropFilter' in s.style)||('webkitBackdropFilter' in s.style);if(!ok)r.classList.add('hshs-no-backdrop');})();</script>
+  <style>
+    .hshs-chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;min-height:42vh;padding:28px 18px;color:#94a3b8}
+    .hshs-chat-empty i{color:#fbbf24;font-size:1.6rem}
+    .hshs-chat-empty strong{color:#fff;font-size:1.05rem}
+    .hshs-chat-empty span{font-size:.86rem}
+  </style>
 </head>
 <body class="dark-mode">
   <div id="hshs-page"></div>
@@ -28,6 +34,19 @@
   <script src="../js/mobile-shell.js?v=260926audit1"></script>
   <script src="../js/core/bootstrap.js?v=260926audit1"></script>
   <script type="module" src="../js/hshs-chat-live.js?v=260926audit1"></script>
-  <script src="../js/pages/chat.js?v=260926audit1"></script>
+  <script src="../js/pages/chat.js?v=260926empty1"></script>
+  <script>
+  (function () {
+    function emptyList() {
+      try { localStorage.removeItem('hshsWorldChat_v1'); } catch (e) {}
+      var box = document.getElementById('hshsChatList');
+      if (!box) return;
+      if (box.querySelector('.hshs-chat-empty') && !box.querySelector('.msg-row')) return;
+      box.innerHTML = '<div class="hshs-chat-empty"><i class="fas fa-comment-dots"></i><strong>No conversations yet</strong><span>Your chats will show up here.</span></div>';
+    }
+    document.addEventListener('hshs:page', function () { setTimeout(emptyList, 40); });
+    [120, 450, 1000, 1800].forEach(function (ms) { setTimeout(emptyList, ms); });
+  })();
+  </script>
 </body>
 </html>

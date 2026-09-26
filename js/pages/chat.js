@@ -60,8 +60,8 @@
     }
     await loadOnce(base() + 'js/storage.js?v=260921people3', 'hshs-storage');
     await loadOnce(base() + 'js/hshs-people.js?v=260921people3', 'hshs-people');
-    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260921people3', 'hshs-msg-ui');
-    await loadOnce(base() + 'js/hshs-chat-nodemo.js?v=260921people3', 'hshs-chat-nodemo');
+    await loadOnce(base() + 'js/hshs-messages-ui.js?v=260926empty1', 'hshs-msg-ui');
+    await loadOnce(base() + 'js/hshs-chat-nodemo.js?v=260926empty1', 'hshs-chat-nodemo');
     await loadOnce(base() + 'js/hshs-chat-packs.js?v=260921people3', 'hshs-chat-packs');
     await loadOnce(base() + 'js/hshs-chat-spring.js?v=260921people3', 'hshs-chat-spring');
     await loadOnce(base() + 'js/hshs-chat-attach.js?v=260921people3', 'hshs-chat-attach');
