@@ -23,6 +23,7 @@
       visibility: visible !important;
     }
     body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
+    body:has(.hshs-load-skel) p { visibility: hidden; }
     .hshs-load-skel::before,
     .hshs-load-skel::after {
       content: "";
@@ -62,16 +63,12 @@
   <p>This page moved. <a href="contact.html" style="color:#eab308">Continue</a>.</p>
   <script>
     (function () {
-      function reveal() {
+      setTimeout(function () {
         var sk = document.querySelector('.hshs-load-skel');
         if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
-        var r = document.documentElement;
-        r.classList.remove('hshs-booting');
-        r.classList.add('hshs-ready');
-        window.__hshsBootDone = true;
-      }
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', reveal, { once: true });
-      else reveal();
+        document.documentElement.classList.remove('hshs-booting');
+        document.documentElement.classList.add('hshs-ready');
+      }, 2500);
     })();
   </script>
 </body>
