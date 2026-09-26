@@ -10,11 +10,17 @@ html.hshs-booting .navbar,
 html.hshs-booting .hero {
   display: none !important;
 }
-html.hshs-booting body > *:not(#hshs-boot) {
+html.hshs-booting body > *:not(#hshs-boot):not(#hshs-page) {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
 }
+html.hshs-booting #hshs-page,
+.hshs-load-skel {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
 html.hshs-ready body > *:not(#hshs-boot),
 html:not(.hshs-booting) body > *:not(#hshs-boot) {
   opacity: 1 !important;
