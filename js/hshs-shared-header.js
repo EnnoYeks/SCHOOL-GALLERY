@@ -44,6 +44,38 @@
     chip.title = who ? ('Signed in' + (name ? ' as ' + name : '') + (email ? ' · ' + email : '')) : 'Browsing as guest';
   }
 
+  function paintMoreCard() {
+    var name = document.getElementById('morePageName');
+    if (!name) return;
+    var who = signedIn();
+    var emailEl = document.getElementById('morePageEmail');
+    var roleEl = document.getElementById('morePageRole');
+    var pic = document.getElementById('morePagePic');
+    var badge = document.getElementById('morePageStatus');
+    var card = document.getElementById('morePageMe');
+    if (!who) return;
+    var label = who.name || who.fullName || who.displayName || who.username || 'HSHS Student';
+    var email = who.email || (who.username ? '@' + String(who.username).replace(/^@/, '') : 'Signed in');
+    var role = who.role || 'Student';
+    if (who.classYear) role += ' · ' + who.classYear;
+    name.textContent = label;
+    if (emailEl) emailEl.textContent = email;
+    if (roleEl) roleEl.textContent = role;
+    var photo = who.photoURL || who.avatar || who.profilePhoto || '';
+    if (!photo) {
+      var nav = document.getElementById('profileImg');
+      var src = nav && nav.getAttribute('src') || '';
+      if (src && src.indexOf('data:image/svg') !== 0) photo = src;
+    }
+    if (pic && photo) pic.innerHTML = '<img src="' + String(photo).replace(/"/g, '') + '" alt="">';
+    else if (pic) pic.innerHTML = '<b>' + String(label).charAt(0).toUpperCase() + '</b>';
+    if (badge) {
+      badge.className = 'hshs-session-badge is-in';
+      badge.innerHTML = '<i class="fas fa-circle-check"></i> Signed in';
+    }
+    if (card) card.classList.add('is-signed-in');
+  }
+
   function boot() {
     try { if (window.HshsShell && window.HshsShell.ensureShell) window.HshsShell.ensureShell(); } catch (e) {}
     document.body.classList.add('has-mobile-shell');
@@ -51,6 +83,7 @@
     for (var i = 1; i < navs.length; i++) navs[i].remove();
     stripSettings();
     paintChip();
+    paintMoreCard();
   }
 
   document.addEventListener('hshs:auth', boot);

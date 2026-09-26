@@ -29,14 +29,14 @@
       var l = document.createElement('link');
       l.id = 'hshs-shared-header-css';
       l.rel = 'stylesheet';
-      l.href = (inSub() ? '../css/' : 'css/') + 'hshs-shared-header.css?v=260926ui6';
+      l.href = (inSub() ? '../css/' : 'css/') + 'hshs-shared-header.css?v=260926more2';
       document.head.appendChild(l);
     }
     function addScript(id, file) {
       if (document.getElementById(id)) return;
       var s = document.createElement('script');
       s.id = id;
-      s.src = (inSub() ? '../js/' : 'js/') + file + '?v=260926ui6';
+      s.src = (inSub() ? '../js/' : 'js/') + file + '?v=260926more2';
       document.body.appendChild(s);
     }
     addScript('hshs-upload-cancel-js', 'hshs-upload-cancel.js');

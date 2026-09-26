@@ -22,20 +22,73 @@
       return {'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c];
     });
   }
-  function getUser() {
-    try { var u = global.firebase && global.firebase.auth ? global.firebase.auth().currentUser : null; if (u) return u; } catch (e) {}
-    try { var a = global.HshsAuth && global.HshsAuth.currentUser; if (a) return a; } catch (e) {}
-    return null;
+  function signedAccount() {
+    var live = null;
+    try { if (global.HshsPeople && global.HshsPeople.me) live = global.HshsPeople.me(); } catch (e) {}
+    var auth = null;
+    try { auth = global.hshsAuthUser && !global.hshsAuthUser.isAnonymous ? global.hshsAuthUser : null; } catch (e) {}
+    if (!auth) {
+      try { auth = global.auth && global.auth.currentUser && !global.auth.currentUser.isAnonymous ? global.auth.currentUser : null; } catch (e) {}
+    }
+    if (!auth) {
+      try { auth = global.firebase && global.firebase.auth && global.firebase.auth().currentUser; } catch (e) {}
+      if (auth && auth.isAnonymous) auth = null;
+    }
+    var p = {};
+    try { p = JSON.parse(localStorage.getItem('userProfile') || 'null') || {}; } catch (e) {}
+    var signed = !!(live || auth || (p && p.uid && (p.email || p.fullName || p.name || p.username)));
+    if (!signed) return null;
+    var name = (live && (live.name || live.fullName)) || (auth && (auth.displayName || auth.name)) || p.fullName || p.name || p.username || 'HSHS Student';
+    var email = (live && live.email) || (auth && auth.email) || p.email || '';
+    var username = (live && live.username) || p.username || '';
+    var role = (live && live.role) || p.role || 'Student';
+    var klass = (live && live.classYear) || p.classYear || '';
+    var photo = (live && (live.photoURL || live.avatar)) || (auth && auth.photoURL) || p.photoURL || p.profilePhoto || p.avatar || '';
+    if (!photo) {
+      var nav = document.getElementById('profileImg');
+      var src = nav && nav.getAttribute('src') || '';
+      if (src && src.indexOf('data:image/svg') !== 0 && src.indexOf('placeholder') === -1) photo = src;
+    }
+    return {
+      name: name,
+      email: email || (username ? '@' + String(username).replace(/^@/, '') : 'Signed in'),
+      role: role + (klass ? ' · ' + klass : ''),
+      photo: photo
+    };
   }
   function hydrateProfile() {
-    var user = getUser();
     var name = document.getElementById('morePageName');
     var email = document.getElementById('morePageEmail');
-    if (!name || !email || !user) return;
-    name.textContent = user.displayName || 'HSHS Student';
-    email.textContent = user.email || 'Your HSHS profile';
+    if (!name || !email) return;
+    var info = signedAccount();
+    var role = document.getElementById('morePageRole');
     var pic = document.getElementById('morePagePic');
-    if (pic && user.photoURL) pic.innerHTML = '<img src="' + escapeHtml(user.photoURL) + '" alt="" loading="lazy">';
+    var badge = document.getElementById('morePageStatus');
+    var card = document.getElementById('morePageMe');
+    if (!info) {
+      name.textContent = 'Not signed in';
+      email.textContent = 'Browsing as guest';
+      if (role) role.textContent = 'Guest';
+      if (badge) {
+        badge.className = 'hshs-session-badge is-guest';
+        badge.innerHTML = '<i class="fas fa-user"></i> Guest';
+      }
+      if (card) card.classList.remove('is-signed-in');
+      return;
+    }
+    name.textContent = info.name;
+    email.textContent = info.email;
+    if (role) role.textContent = info.role;
+    if (pic) {
+      pic.innerHTML = info.photo
+        ? '<img src="' + escapeHtml(info.photo) + '" alt="">'
+        : '<b>' + escapeHtml(String(info.name || '?').charAt(0).toUpperCase()) + '</b>';
+    }
+    if (badge) {
+      badge.className = 'hshs-session-badge is-in';
+      badge.innerHTML = '<i class="fas fa-circle-check"></i> Signed in';
+    }
+    if (card) card.classList.add('is-signed-in');
   }
   function mount() {
     if (!isPage() || !global.HshsRender) return;
@@ -54,6 +107,9 @@
     if (global.HshsApp && global.HshsApp.whenReady) global.HshsApp.whenReady(go);
     else document.addEventListener('hshs:foundation-ready', go, { once: true });
     document.addEventListener('hshs:page', function () { if (isPage()) setTimeout(go, 0); });
+    document.addEventListener('hshs:auth', function () { if (isPage()) hydrateProfile(); });
+    document.addEventListener('hshs:profile', function () { if (isPage()) hydrateProfile(); });
+    [80, 350, 900, 1800].forEach(function (ms) { setTimeout(function () { if (isPage()) hydrateProfile(); }, ms); });
   }
   global.HshsMore = { mount: mount };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
