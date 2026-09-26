@@ -29,7 +29,7 @@
   }
 
   function ver(url) {
-    var v = '260924look1';
+    var v = '260926blank1';
     return url + (url.indexOf('?') === -1 ? '?' : '&') + 'v=' + v;
   }
 
