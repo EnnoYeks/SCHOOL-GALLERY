@@ -10,28 +10,74 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../css/hshs-auth.css?v=260916auth3">
-  <script>(function(){document.documentElement.classList.add('hshs-ready');})();</script>
+  <link id="hshs-page-css" rel="stylesheet" href="../css/hshs-auth.css?v=260926allpages2">
+  <style>
+    html, body { background: #071433; margin: 0; }
+    #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
+    .hshs-load-skel {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      min-height: 100vh;
+      background:
+        radial-gradient(520px 280px at 50% 18%, rgba(212, 175, 55, 0.16), transparent 62%),
+        #071433;
+      overflow: hidden;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
+    .hshs-load-skel::before,
+    .hshs-load-skel::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .hshs-load-skel::before { top: 88px; height: 148px; }
+    .hshs-load-skel::after {
+      top: 252px;
+      height: 72px;
+      box-shadow: 0 88px 0 rgba(255, 255, 255, 0.04), 0 176px 0 rgba(255, 255, 255, 0.04);
+    }
+    .hshs-load-skel-shine {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(100deg, transparent 18%, rgba(251, 191, 36, 0.16) 48%, transparent 78%);
+      transform: translateX(-120%);
+      animation: hshs-skel-shimmer 1.35s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes hshs-skel-shimmer {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hshs-load-skel-shine { animation: none; opacity: 0.35; }
+    }
+  </style>
 </head>
 <body class="hshs-auth-page hshs-auth-body">
+    <div class="hshs-load-skel" role="status" aria-label="Loading">
+      <span class="hshs-load-skel-shine" aria-hidden="true"></span>
+    </div>
   <div class="hshs-auth-shell" id="hshsAuthRoot">
     <div class="hshs-auth-brand">
       <img src="https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png" alt="HSHS" width="64" height="64">
       <h1>HSHS World</h1>
       <p>Hawthorne Scribner · Educate. Engage. Empower.</p>
     </div>
-
     <div class="hshs-auth-card">
       <div class="hshs-auth-tabs">
         <button type="button" data-auth-mode="login" class="is-on">Sign in</button>
         <button type="button" data-auth-mode="signup">Create account</button>
       </div>
-
       <button type="button" class="hshs-auth-submit" id="googleSignIn" style="background:#fff;color:#102047;margin-bottom:14px;box-shadow:none;border:1px solid rgba(255,255,255,.16)">
         <i class="fab fa-google"></i> Continue with Google
       </button>
       <p class="hshs-auth-hint" style="text-align:center">or use email and password</p>
-
       <form id="authLoginForm" class="hshs-auth-panel" data-auth-panel="login">
         <label class="hshs-field">
           <span>Email or username</span>
@@ -54,7 +100,6 @@
         </div>
         <button type="submit" class="hshs-auth-submit">Sign in</button>
       </form>
-
       <form id="authSignupForm" class="hshs-auth-panel" data-auth-panel="signup" hidden>
         <label class="hshs-field">
           <span>Full name</span>
@@ -94,7 +139,6 @@
         </label>
         <button type="submit" class="hshs-auth-submit">Create account</button>
       </form>
-
       <form id="authResetForm" class="hshs-auth-panel" hidden>
         <p class="hshs-auth-hint">We will send a reset link to your email.</p>
         <label class="hshs-field">
@@ -107,17 +151,45 @@
         <button type="submit" class="hshs-auth-submit">Send reset link</button>
         <p class="hshs-auth-footer"><a href="#login" id="backToLogin">Back to sign in</a></p>
       </form>
-
       <p id="authMsg" class="hshs-auth-msg" role="status"></p>
       <p id="authAlreadyIn" hidden></p>
     </div>
-
     <a class="hshs-auth-skip" href="../index.html">Continue as guest</a>
     <p class="hshs-auth-footer">By continuing you agree to the Hawthorne Scribner High School community guidelines.</p>
   </div>
-
-  <script type="module" src="../js/config.js?v=260916auth3"></script>
-  <script type="module" src="../js/hshs-auth-api.js?v=260916auth3"></script>
-  <script src="../js/hshs-auth.js?v=260916auth3"></script>
+  <script>
+    (function () {
+      function reveal() {
+        var sk = document.querySelector('.hshs-load-skel');
+        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+        var r = document.documentElement;
+        r.classList.remove('hshs-booting');
+        r.classList.add('hshs-ready');
+        window.__hshsBootDone = true;
+        var boot = document.getElementById('hshs-boot');
+        if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+      }
+      window.__hshsRevealPage = reveal;
+      var done = false;
+      function go() {
+        if (done) return;
+        done = true;
+        requestAnimationFrame(function () { requestAnimationFrame(reveal); });
+      }
+      var link = document.getElementById('hshs-page-css');
+      function cssReady() {
+        if (!link) return true;
+        try { return !!(link.sheet && link.sheet.cssRules); } catch (e) { return !!link.sheet; }
+      }
+      function tryGo() { if (cssReady()) go(); }
+      if (link) link.addEventListener('load', go);
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryGo);
+      else tryGo();
+      setTimeout(go, 2500);
+    })();
+  </script>
+  <script type="module" src="../js/config.js?v=260926allpages2"></script>
+  <script type="module" src="../js/hshs-auth-api.js?v=260926allpages2"></script>
+  <script defer src="../js/hshs-auth.js?v=260926allpages2"></script>
 </body>
 </html>
