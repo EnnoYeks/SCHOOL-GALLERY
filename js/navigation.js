@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260926cancel1';
+var HSHS_ASSET_VER = '260926gallery1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -132,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(s);
     }
     function addCss(id, file) {
-        if (document.getElementId && document.getElementById(id)) return;
         if (document.getElementById(id)) return;
         var link = document.createElement('link');
         link.id = id;
