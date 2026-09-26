@@ -4,9 +4,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page not found · HSHS World</title>
-  <link rel="stylesheet" href="/css/foundation.css?v=260926audit1">
+  <link id="hshs-page-css" rel="stylesheet" href="/css/foundation.css?v=260926allpages2">
   <link rel="stylesheet" href="/css/hshs-glass.css?v=260926audit1">
   <style>
+    html, body { background: #071433; margin: 0; }
+    #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
+    .hshs-load-skel {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      min-height: 100vh;
+      background:
+        radial-gradient(520px 280px at 50% 18%, rgba(212, 175, 55, 0.16), transparent 62%),
+        #071433;
+      overflow: hidden;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
+    .hshs-load-skel::before,
+    .hshs-load-skel::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .hshs-load-skel::before { top: 88px; height: 148px; }
+    .hshs-load-skel::after {
+      top: 252px;
+      height: 72px;
+      box-shadow: 0 88px 0 rgba(255, 255, 255, 0.04), 0 176px 0 rgba(255, 255, 255, 0.04);
+    }
+    .hshs-load-skel-shine {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(100deg, transparent 18%, rgba(251, 191, 36, 0.16) 48%, transparent 78%);
+      transform: translateX(-120%);
+      animation: hshs-skel-shimmer 1.35s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes hshs-skel-shimmer {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hshs-load-skel-shine { animation: none; opacity: 0.35; }
+    }
+  </style>
+  <style>
+    body.hshs-classic-404 { position: relative; z-index: 1; }
     body.hshs-classic-404 { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 32px 20px; background: #071433; color: #f7f2e8; font-family: Nunito, system-ui, sans-serif; }
     .panel { width: min(640px, 100%); padding: 36px 28px; }
     .crest { width: 48px; height: 48px; border-radius: 50%; border: 1px solid #c9a227; display: grid; place-items: center; color: #c9a227; font-weight: 800; }
@@ -17,6 +65,9 @@
   </style>
 </head>
 <body class="hshs-classic-404 dark-mode">
+    <div class="hshs-load-skel" role="status" aria-label="Loading">
+      <span class="hshs-load-skel-shine" aria-hidden="true"></span>
+    </div>
   <div class="panel hshs-glass">
     <div class="crest" aria-hidden="true">H</div>
     <h1>This path is not on campus</h1>
@@ -41,5 +92,36 @@
       <li><a href="/index/contact.html">Contact</a></li>
     </ul>
   </div>
+  <script>
+    (function () {
+      function reveal() {
+        var sk = document.querySelector('.hshs-load-skel');
+        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+        var r = document.documentElement;
+        r.classList.remove('hshs-booting');
+        r.classList.add('hshs-ready');
+        window.__hshsBootDone = true;
+        var boot = document.getElementById('hshs-boot');
+        if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+      }
+      window.__hshsRevealPage = reveal;
+      var done = false;
+      function go() {
+        if (done) return;
+        done = true;
+        requestAnimationFrame(function () { requestAnimationFrame(reveal); });
+      }
+      var link = document.getElementById('hshs-page-css');
+      function cssReady() {
+        if (!link) return true;
+        try { return !!(link.sheet && link.sheet.cssRules); } catch (e) { return !!link.sheet; }
+      }
+      function tryGo() { if (cssReady()) go(); }
+      if (link) link.addEventListener('load', go);
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryGo);
+      else tryGo();
+      setTimeout(go, 2500);
+    })();
+  </script>
 </body>
 </html>
