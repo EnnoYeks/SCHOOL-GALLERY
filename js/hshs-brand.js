@@ -99,4 +99,23 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
     document.addEventListener('hshs:page', start);
+    var tries = 0;
+    var iv = setInterval(function () {
+        if (!document.querySelector('.logo .brand-mark img')) start();
+        tries += 1;
+        if (document.querySelector('.logo .brand-mark img') || tries > 40) clearInterval(iv);
+    }, 200);
+    if (typeof MutationObserver !== 'undefined') {
+        var mo = new MutationObserver(function () {
+            if (!document.querySelector('.logo .brand-mark img')) start();
+        });
+        function watch() {
+            if (document.body && !document.body.__hshsBrandWatch) {
+                document.body.__hshsBrandWatch = true;
+                mo.observe(document.body, { childList: true, subtree: true });
+            }
+        }
+        watch();
+        document.addEventListener('DOMContentLoaded', watch);
+    }
 })();
