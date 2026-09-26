@@ -13,11 +13,17 @@ html.hshs-booting .nav-links,
 html.hshs-booting #hshs-tt-overlay {
   display: none !important;
 }
-html.hshs-booting body > *:not(#hshs-boot) {
+html.hshs-booting body > *:not(#hshs-boot):not(#hshs-page) {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
 }
+html.hshs-booting #hshs-page,
+.hshs-load-skel {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
 #hshs-boot {
   position: fixed; inset: 0; z-index: 4000;
   display: flex; align-items: center; justify-content: center;
