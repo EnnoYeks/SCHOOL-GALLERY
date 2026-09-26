@@ -9,15 +9,64 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../css/hshs-edit-profile.css?v=260911ep2">
+  <link id="hshs-page-css" rel="stylesheet" href="../css/hshs-edit-profile.css?v=260926allpages2">
+  <style>
+    html, body { background: #071433; margin: 0; }
+    #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
+    .hshs-load-skel {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      min-height: 100vh;
+      background:
+        radial-gradient(520px 280px at 50% 18%, rgba(212, 175, 55, 0.16), transparent 62%),
+        #071433;
+      overflow: hidden;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
+    .hshs-load-skel::before,
+    .hshs-load-skel::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .hshs-load-skel::before { top: 88px; height: 148px; }
+    .hshs-load-skel::after {
+      top: 252px;
+      height: 72px;
+      box-shadow: 0 88px 0 rgba(255, 255, 255, 0.04), 0 176px 0 rgba(255, 255, 255, 0.04);
+    }
+    .hshs-load-skel-shine {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(100deg, transparent 18%, rgba(251, 191, 36, 0.16) 48%, transparent 78%);
+      transform: translateX(-120%);
+      animation: hshs-skel-shimmer 1.35s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes hshs-skel-shimmer {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hshs-load-skel-shine { animation: none; opacity: 0.35; }
+    }
+  </style>
 </head>
 <body class="ep-page ep-body">
+    <div class="hshs-load-skel" role="status" aria-label="Loading">
+      <span class="hshs-load-skel-shine" aria-hidden="true"></span>
+    </div>
   <header class="ep-top">
     <a class="ep-icon-btn" href="profile.html" id="epBack" aria-label="Back"><i class="fas fa-arrow-left"></i></a>
     <h1>Edit profile</h1>
     <button type="button" class="ep-save-top" data-ep-save>Save</button>
   </header>
-
   <main class="ep-wrap">
     <section class="ep-hero">
       <div class="ep-cover" id="epCover">
@@ -36,7 +85,6 @@
       <input type="file" id="epAvatarFile" class="ep-hidden" accept="image/*">
       <input type="file" id="epCoverFile" class="ep-hidden" accept="image/*">
     </section>
-
     <section class="ep-section">
       <h2><i class="fas fa-eye"></i> Preview</h2>
       <p class="ep-lead">How others will see you on campus.</p>
@@ -48,7 +96,6 @@
         </div>
       </div>
     </section>
-
     <section class="ep-section">
       <h2><i class="fas fa-id-badge"></i> Identity</h2>
       <p class="ep-lead">Core details used across HSHS World.</p>
@@ -60,7 +107,6 @@
       <label class="ep-field"><span>Headline <em>optional</em></span><input id="epHeadline" type="text" maxlength="80" placeholder="e.g. S4 STEM · Prefects Board"></label>
       <label class="ep-field"><span>Bio <em id="epBioCount">0/160</em></span><textarea id="epBio" maxlength="160" placeholder="A short intro for your school community"></textarea></label>
     </section>
-
     <section class="ep-section">
       <h2><i class="fas fa-graduation-cap"></i> School</h2>
       <p class="ep-lead">Helps classmates find and tag you correctly.</p>
@@ -71,7 +117,6 @@
       <label class="ep-field"><span>House</span><select id="epHouse"><option value="">—</option></select></label>
       <label class="ep-field"><span>Interests</span><div class="ep-chips" id="epInterests"></div></label>
     </section>
-
     <section class="ep-section">
       <h2><i class="fas fa-address-card"></i> Contact & links</h2>
       <p class="ep-lead">Control what appears on your public profile.</p>
@@ -87,7 +132,6 @@
         <label class="ep-field"><span>TikTok</span><input id="epTiktok" type="text" placeholder="@handle"></label>
       </div>
     </section>
-
     <section class="ep-section">
       <h2><i class="fas fa-shield-halved"></i> Privacy & visibility</h2>
       <p class="ep-lead">Choose what classmates can see about you.</p>
@@ -98,7 +142,6 @@
       <div class="ep-toggle-row"><div><strong>Allow messages</strong><small>Classmates can start a chat with you</small></div><label class="ep-switch"><input type="checkbox" id="epAllowMessages" checked><span></span></label></div>
       <div class="ep-toggle-row"><div><strong>Show activity</strong><small>Likes & comments appear in activity</small></div><label class="ep-switch"><input type="checkbox" id="epShowActivity" checked><span></span></label></div>
     </section>
-
     <section class="ep-section">
       <h2><i class="fas fa-key"></i> Security</h2>
       <p class="ep-lead">Password changes use the email on your account.</p>
@@ -107,22 +150,50 @@
         <a class="ep-chip-btn" href="login.html" style="display:inline-flex;text-decoration:none;align-items:center;justify-content:center"><i class="fas fa-right-to-bracket"></i> Sign-in page</a>
       </div>
     </section>
-
     <p id="epMsg" class="ep-msg" role="status"></p>
     <div class="ep-footer-actions">
       <button type="button" class="ep-btn-ghost" id="epCancel">Cancel</button>
       <button type="button" class="ep-btn-primary" data-ep-save>Save profile</button>
     </div>
-
     <section class="ep-section ep-danger-zone" style="margin-top:18px">
       <h2><i class="fas fa-triangle-exclamation"></i> Account</h2>
       <p class="ep-lead">Signing out clears this device session only.</p>
       <button type="button" class="ep-link-danger" id="epSignOut">Sign out of HSHS World</button>
     </section>
   </main>
-
-  <script type="module" src="../js/config.js?v=260911ep2"></script>
-  <script type="module" src="../js/hshs-auth-api.js?v=260911ep2"></script>
-  <script src="../js/hshs-edit-profile.js?v=260911ep2"></script>
+  <script>
+    (function () {
+      function reveal() {
+        var sk = document.querySelector('.hshs-load-skel');
+        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+        var r = document.documentElement;
+        r.classList.remove('hshs-booting');
+        r.classList.add('hshs-ready');
+        window.__hshsBootDone = true;
+        var boot = document.getElementById('hshs-boot');
+        if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+      }
+      window.__hshsRevealPage = reveal;
+      var done = false;
+      function go() {
+        if (done) return;
+        done = true;
+        requestAnimationFrame(function () { requestAnimationFrame(reveal); });
+      }
+      var link = document.getElementById('hshs-page-css');
+      function cssReady() {
+        if (!link) return true;
+        try { return !!(link.sheet && link.sheet.cssRules); } catch (e) { return !!link.sheet; }
+      }
+      function tryGo() { if (cssReady()) go(); }
+      if (link) link.addEventListener('load', go);
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryGo);
+      else tryGo();
+      setTimeout(go, 2500);
+    })();
+  </script>
+  <script type="module" src="../js/config.js?v=260926allpages2"></script>
+  <script type="module" src="../js/hshs-auth-api.js?v=260926allpages2"></script>
+  <script defer src="../js/hshs-edit-profile.js?v=260926allpages2"></script>
 </body>
 </html>
