@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '260926empty2';
+var HSHS_ASSET_VER = '260926allpages1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
         st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}';
-        document.documentElement.classList.add('hshs-booting');
+        if (!document.querySelector('.hshs-load-skel')) document.documentElement.classList.add('hshs-booting');
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
         document.documentElement.classList.toggle('hshs-device-desktop', !mobile);
