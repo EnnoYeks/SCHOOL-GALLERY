@@ -131,6 +131,11 @@
     else if (tpl) root.innerHTML = tpl;
     renderData();
     global.__hshsHomeMounted = true;
+    document.documentElement.classList.remove('hshs-booting');
+    document.documentElement.classList.add('hshs-ready');
+    window.__hshsBootDone = true;
+    var boot = document.getElementById('hshs-boot');
+    if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
     document.dispatchEvent(new CustomEvent('hshs:page'));
   }
   function boot() {
