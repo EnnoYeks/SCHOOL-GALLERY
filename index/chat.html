@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
   <meta name="description" content="HSHS World · School community media platform">
   <meta name="theme-color" content="#071433">
-  <title>Chat · HSHS World</title>
+  <title>Messages · HSHS World</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
   <link rel="stylesheet" href="../css/hshs-fonts.css?v=260926allpages2">
   <link rel="stylesheet" href="../css/foundation.css?v=260926allpages2">
   <link rel="stylesheet" href="../css/hshs-glass.css?v=260926allpages2">
+  <link rel="stylesheet" href="../css/hshs-chat-ui.css?v=260927chat1" data-hshs-chat-css="1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script>(function(){var r=document.documentElement;r.classList.add('hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');var s=document.createElement('div');var ok=('backdropFilter' in s.style)||('webkitBackdropFilter' in s.style);if(!ok)r.classList.add('hshs-no-backdrop');window.__hshsTplChat=true;window.HshsTemplates=window.HshsTemplates||{};window.HshsTemplates.chat='<main id="hshsChatBlank" class="hshs-chat-blank-canvas" aria-label="Chat"></main>';})();</script>
+  <script>(function(){var r=document.documentElement;r.classList.add('hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');var s=document.createElement('div');var ok=('backdropFilter' in s.style)||('webkitBackdropFilter' in s.style);if(!ok)r.classList.add('hshs-no-backdrop');})();</script>
   <style>
     html, body { background: #071433; margin: 0; }
     #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
@@ -61,10 +62,6 @@
       .hshs-load-skel-shine { animation: none; opacity: 0.35; }
     }
   </style>
-  <style>
-    .hshs-chat-blank-canvas{min-height:calc(100dvh - 128px);background:transparent}
-    .hshs-chat-page,.msg-hero,.msg-search,.msg-list-view,.msg-list-scroll,.msg-fab-compose,.msg-thread-view,.hshs-chat-empty,#hshsChatPage,#hshsChatList,#hshsComposeFab,#hshsThread{display:none!important}
-  </style>
 </head>
 <body class="dark-mode">
   <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
@@ -108,9 +105,6 @@
       }
       setTimeout(function () {
         if (document.documentElement.classList.contains('hshs-ready') && !root.querySelector('.hshs-load-skel')) return;
-        if (!root.querySelector('#hshsChatBlank')) {
-          root.insertAdjacentHTML('afterbegin', '<main id="hshsChatBlank" class="hshs-chat-blank-canvas" aria-label="Chat"></main>');
-        }
         dropSkel();
         reveal();
       }, 12000);
@@ -126,38 +120,8 @@
   <script defer src="../js/core/navigation-perf.js?v=260926allpages2"></script>
   <script defer src="../js/mobile-shell.js?v=260926allpages2"></script>
   <script defer src="../js/core/bootstrap.js?v=260926allpages2"></script>
-  <script defer src="../js/pages/chat.js?v=260926allpages2"></script>
-  <script>
-  (function () {
-    var BLANK = '<main id="hshsChatBlank" class="hshs-chat-blank-canvas" aria-label="Chat"></main>';
-    function blank() {
-      window.__hshsTplChat = true;
-      window.HshsTemplates = window.HshsTemplates || {};
-      window.HshsTemplates.chat = BLANK;
-      var root = document.getElementById('hshs-page');
-      if (!root) return;
-      var old = root.querySelector('.hshs-chat-page, .msg-hero, .msg-search, .msg-list-view, .msg-fab-compose, .hshs-chat-empty, #hshsChatPage, #hshsThread');
-      if (!old) return;
-      var sk = root.querySelector('.hshs-load-skel');
-      var keep = [];
-      root.querySelectorAll('.navbar, .mobile-tabbar, #mobileTabbar').forEach(function (el) { keep.push(el); });
-      root.innerHTML = BLANK;
-      if (sk) root.appendChild(sk);
-      keep.forEach(function (el) { document.body.appendChild(el); });
-    }
-    var busy = false;
-    function safeBlank() {
-      if (busy) return;
-      busy = true;
-      try { blank(); } catch (e) {}
-      busy = false;
-    }
-    document.addEventListener('hshs:page', function () { setTimeout(safeBlank, 20); });
-    document.addEventListener('hshs:foundation-ready', function () { setTimeout(safeBlank, 20); });
-    if (document.body) {
-      new MutationObserver(function () { setTimeout(safeBlank, 0); }).observe(document.body, { childList: true, subtree: true });
-    }
-  })();
-  </script>
+  <script type="module" src="../js/hshs-chat-live.js?v=260926allpages2"></script>
+  <script defer src="../js/hshs-chat-ui.js?v=260927chat1"></script>
+  <script defer src="../js/pages/chat.js?v=260927chat1"></script>
 </body>
 </html>
