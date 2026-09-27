@@ -1,0 +1,47 @@
+/* ============================================
+   HSHS WORLD — MESSAGES
+   List + thread. No attachments, voice notes, or calls.
+   ============================================ */
+
+html[data-hshs-page="chat"] body,
+body:has(.hshs-chat-page) {
+  background: #071433 !important;
+  color: #fff;
+}
+
+html[data-hshs-page="chat"] footer.footer {
+  display: none !important;
+}
+
+html[data-hshs-page="chat"] .mobile-tabbar {
+  background: #071433 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.hshs-chat-thread-open .mobile-tabbar,
+body.hshs-chat-compose-open .mobile-tabbar {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.hshs-chat-page {
+  position: relative;
+  z-index: 2;
+  display: flex !important;
+  flex-direction: column;
+  max-width: 640px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: #071433;
+}
+
+.msg-thread-view[hidden],
+.msg-compose-sheet[hidden],
+.msg-emoji-sheet[hidden],
+.msg-thread-welcome[hidden],
+.msg-thread-body[hidden],
+.msg-online-dot[hidden],
+.msg-banner[hidden],
+.msg-search-clear[hidden] {
+  display: none !important;
+}
