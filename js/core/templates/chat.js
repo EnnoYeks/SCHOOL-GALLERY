@@ -10,16 +10,22 @@
         <h1>Messages</h1>
         <p>Connecting…</p>
       </div>
-      <button type="button" class="msg-compose-btn" id="hshsComposeTop" aria-label="New message"><i class="fas fa-square-pen"></i></button>
+      <button type="button" class="msg-compose-btn" id="hshsComposeTop" aria-label="New message"><i class="fas fa-pen-to-square"></i></button>
     </div>
     <div class="msg-banner" id="hshsChatBanner" hidden></div>
   </div>
 
   <form class="msg-search" id="hshsChatSearchForm" role="search" autocomplete="off">
     <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-    <input id="hshsChatSearch" type="search" placeholder="Search messages" enterkeyhint="search" aria-label="Search messages">
+    <input id="hshsChatSearch" type="search" placeholder="Search or start a new chat" enterkeyhint="search" aria-label="Search messages">
     <button type="button" class="msg-search-clear" id="hshsSearchClear" hidden aria-label="Clear search"><i class="fas fa-xmark"></i></button>
   </form>
+
+  <div class="msg-filters" id="hshsChatFilters" aria-label="Filters">
+    <button type="button" class="msg-filter-chip is-on" data-filter="all">All</button>
+    <button type="button" class="msg-filter-chip" data-filter="unread">Unread</button>
+    <button type="button" class="msg-filter-chip" data-filter="groups">Groups</button>
+  </div>
 
   <div class="msg-list-view" id="hshsChatListView">
     <div class="msg-list-scroll" id="hshsChatList"></div>
@@ -27,7 +33,7 @@
 
   <section class="msg-thread-view" id="hshsThread" hidden aria-label="Conversation">
     <header class="msg-thread-head">
-      <button type="button" class="msg-thread-back" id="hshsThreadBack" aria-label="Back to messages"><i class="fas fa-chevron-left"></i></button>
+      <button type="button" class="msg-thread-back" id="hshsThreadBack" aria-label="Back to messages"><i class="fas fa-arrow-left"></i></button>
       <a class="msg-thread-id" id="hshsThreadProfileLink" href="#">
         <span class="msg-thread-avatar-wrap">
           <span class="msg-thread-avatar" id="hshsThreadAvatar"></span>
@@ -49,7 +55,7 @@
 
     <form class="msg-input-bar" id="hshsThreadForm" autocomplete="off">
       <button type="button" class="msg-emoji-btn" id="hshsEmojiBtn" aria-label="Emoji"><i class="fas fa-face-smile"></i></button>
-      <input id="hshsThreadInput" type="text" maxlength="2000" placeholder="Message…" enterkeyhint="send" aria-label="Message">
+      <input id="hshsThreadInput" type="text" maxlength="2000" placeholder="Message" enterkeyhint="send" aria-label="Message">
       <button type="submit" class="msg-send-btn" id="hshsSendBtn" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
       <div class="msg-emoji-sheet" id="hshsEmojiSheet" hidden></div>
     </form>
@@ -59,7 +65,7 @@
     <div class="msg-compose-backdrop" id="hshsComposeBackdrop"></div>
     <div class="msg-compose-panel">
       <div class="msg-compose-head">
-        <strong>New message</strong>
+        <strong>New chat</strong>
         <button type="button" class="msg-compose-close" id="hshsComposeClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
       </div>
       <div class="msg-compose-search">

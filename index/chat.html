@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
   <meta name="description" content="HSHS World · School community media platform">
-  <meta name="theme-color" content="#071433">
+  <meta name="theme-color" content="#0b141a">
   <title>Messages · HSHS World</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,20 +12,18 @@
   <link rel="stylesheet" href="../css/hshs-fonts.css?v=260926allpages2">
   <link rel="stylesheet" href="../css/foundation.css?v=260926allpages2">
   <link rel="stylesheet" href="../css/hshs-glass.css?v=260926allpages2">
-  <link rel="stylesheet" href="../css/hshs-chat-ui.css?v=260927glass1" data-hshs-chat-css="1">
+  <link rel="stylesheet" href="../css/hshs-chat-ui.css?v=260927wa1" data-hshs-chat-css="1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>(function(){var r=document.documentElement;r.classList.add('hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');var s=document.createElement('div');var ok=('backdropFilter' in s.style)||('webkitBackdropFilter' in s.style);if(!ok)r.classList.add('hshs-no-backdrop');})();</script>
   <style>
-    html, body { background: #071433; margin: 0; }
-    #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
+    html, body { background: #0b141a; margin: 0; }
+    #hshs-page { min-height: 100vh; background: #0b141a; opacity: 1 !important; visibility: visible !important; }
     .hshs-load-skel {
       position: fixed;
       inset: 0;
       z-index: 5000;
       min-height: 100vh;
-      background:
-        radial-gradient(520px 280px at 50% 18%, rgba(212, 175, 55, 0.16), transparent 62%),
-        #071433;
+      background: #0b141a;
       overflow: hidden;
       opacity: 1 !important;
       visibility: visible !important;
@@ -37,37 +35,20 @@
       position: absolute;
       left: 16px;
       right: 16px;
-      border-radius: 16px;
+      border-radius: 10px;
       background: rgba(255, 255, 255, 0.04);
     }
-    .hshs-load-skel::before { top: 88px; height: 148px; }
+    .hshs-load-skel::before { top: 88px; height: 40px; }
     .hshs-load-skel::after {
-      top: 252px;
-      height: 72px;
-      box-shadow: 0 88px 0 rgba(255, 255, 255, 0.04), 0 176px 0 rgba(255, 255, 255, 0.04);
-    }
-    .hshs-load-skel-shine {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(100deg, transparent 18%, rgba(251, 191, 36, 0.16) 48%, transparent 78%);
-      transform: translateX(-120%);
-      animation: hshs-skel-shimmer 1.35s ease-in-out infinite;
-      pointer-events: none;
-    }
-    @keyframes hshs-skel-shimmer {
-      0% { transform: translateX(-120%); }
-      100% { transform: translateX(120%); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .hshs-load-skel-shine { animation: none; opacity: 0.35; }
+      top: 148px;
+      height: 56px;
+      box-shadow: 0 72px 0 rgba(255, 255, 255, 0.04), 0 144px 0 rgba(255, 255, 255, 0.04), 0 216px 0 rgba(255, 255, 255, 0.04);
     }
   </style>
 </head>
 <body class="dark-mode">
   <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
-    <div class="hshs-load-skel" role="status" aria-label="Loading">
-      <span class="hshs-load-skel-shine" aria-hidden="true"></span>
-    </div>
+    <div class="hshs-load-skel" role="status" aria-label="Loading"></div>
   </div>
   <script>
     (function () {
@@ -121,7 +102,7 @@
   <script defer src="../js/mobile-shell.js?v=260926allpages2"></script>
   <script defer src="../js/core/bootstrap.js?v=260926allpages2"></script>
   <script type="module" src="../js/hshs-chat-live.js?v=260926allpages2"></script>
-  <script defer src="../js/hshs-chat-ui.js?v=260927glass1"></script>
-  <script defer src="../js/pages/chat.js?v=260927glass1"></script>
+  <script defer src="../js/hshs-chat-ui.js?v=260927wa1"></script>
+  <script defer src="../js/pages/chat.js?v=260927wa1"></script>
 </body>
 </html>
