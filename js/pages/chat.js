@@ -16,7 +16,7 @@
     if (document.querySelector('link[data-hshs-chat-css]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = base() + 'css/hshs-chat-ui.css?v=260927wa1';
+    l.href = base() + 'css/hshs-chat-ui.css?v=260928ref1';
     l.setAttribute('data-hshs-chat-css', '1');
     document.head.appendChild(l);
   }
