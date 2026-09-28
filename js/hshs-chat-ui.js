@@ -22,6 +22,7 @@
   var holdReact = { timer: 0, idx: -1, x: 0, y: 0 };
   var lastPaintSig = {};
   var queryOpened = false;
+  var activeFilter = 'all';
 
   function $(id) { return document.getElementById(id); }
   function root() { return $('hshsChatPage'); }
@@ -91,15 +92,18 @@
     }
 
     var rows = INBOX.filter(function (c) {
+      if (activeFilter === 'unread' && !c.unread) return false;
+      if (activeFilter === 'groups' && !c.group) return false;
       if (!q) return true;
       return (c.name + ' ' + c.user + ' ' + c.preview).toLowerCase().indexOf(q) !== -1;
     });
 
     if (!rows.length) {
+      var empty = activeFilter === 'unread' ? 'No unread conversations.' : (activeFilter === 'groups' ? 'No group conversations yet.' : 'No conversations yet.');
       box.innerHTML = q
         ? '<div class="msg-empty"><i class="fas fa-magnifying-glass"></i><h3>No matches</h3><p>Try a different name.</p></div>'
-        : '<div class="msg-empty"><i class="fas fa-comment-dots"></i><h3>No conversations yet</h3>' +
-          '<p>Start a chat with a classmate.</p><button type="button" class="msg-empty-cta" id="hshsEmptyCompose">New message</button></div>';
+        : '<div class="msg-empty"><i class="fas fa-comment-dots"></i><h3>' + esc(empty) + '</h3>' +
+          (activeFilter === 'all' ? '<p>Start a chat with a classmate.</p><button type="button" class="msg-empty-cta" id="hshsEmptyCompose">New message</button>' : '') + '</div>';
       var cta = $('hshsEmptyCompose');
       if (cta) cta.onclick = openCompose;
       return;
@@ -387,18 +391,35 @@
   function renderComposeResults(rows, emptyText) {
     var box = $('hshsComposeResults');
     if (!box) return;
-    if (!rows.length) {
+    var people = rows || [];
+    var groups = INBOX.filter(function (c) { return c.group; });
+    if (!people.length && !groups.length) {
       box.innerHTML = '<div class="msg-compose-empty">' + esc(emptyText || 'No classmates found.') + '</div>';
       return;
     }
-    box.innerHTML = rows.map(function (u) {
-      var photo = u.photoURL || u.avatar || '';
-      var av = photo ? '<img src="' + esc(photo) + '" alt="">' : initials(u.name || u.fullName);
-      var handle = u.username ? '@' + u.username : 'HSHS student';
-      return '<button type="button" class="msg-compose-row" data-uid="' + esc(u.uid || u.id || '') + '">' +
-        '<span class="msg-compose-av">' + av + '</span>' +
-        '<span><b>' + esc(u.name || u.fullName || 'HSHS Student') + '</b><small>' + esc(handle) + '</small></span></button>';
-    }).join('');
+    var html = '';
+    if (people.length) {
+      html += '<div class="msg-compose-section-title">Suggested</div>';
+      html += people.map(function (u) {
+        var photo = u.photoURL || u.avatar || '';
+        var av = photo ? '<img src="' + esc(photo) + '" alt="">' : initials(u.name || u.fullName);
+        var handle = u.username ? '@' + u.username : 'HSHS student';
+        return '<button type="button" class="msg-compose-row" data-uid="' + esc(u.uid || u.id || '') + '">' +
+          '<span class="msg-compose-av">' + av + '</span>' +
+          '<span><b>' + esc(u.name || u.fullName || 'HSHS Student') + '</b><small>' + esc(handle) + '</small></span>' +
+          '<i class="fas fa-comment-dots" aria-hidden="true"></i></button>';
+      }).join('');
+    }
+    if (groups.length) {
+      html += '<div class="msg-compose-section-title">Groups</div>';
+      html += groups.map(function (c) {
+        return '<button type="button" class="msg-compose-row msg-compose-group-row" data-chat="' + esc(c.id) + '">' +
+          '<span class="msg-compose-av">👥</span>' +
+          '<span><b>' + esc(c.name || 'Group chat') + '</b><small>' + esc(memberCount(c) ? memberCount(c) + ' members' : 'Group chat') + '</small></span>' +
+          '<i class="fas fa-comment-dots" aria-hidden="true"></i></button>';
+      }).join('');
+    }
+    box.innerHTML = html;
   }
   function lookupUsers(q) {
     if (q) {
@@ -505,6 +526,15 @@
       if (chat) openThread(chat);
     });
 
+    var filters = $('hshsChatFilters');
+    if (filters) filters.addEventListener('click', function (e) {
+      var chip = e.target.closest('[data-filter]');
+      if (!chip) return;
+      activeFilter = chip.getAttribute('data-filter') || 'all';
+      filters.querySelectorAll('[data-filter]').forEach(function (b) { b.classList.toggle('is-on', b === chip); });
+      fillList(search && search.value);
+    });
+
     var back = $('hshsThreadBack');
     if (back) back.onclick = showList;
 
@@ -569,9 +599,16 @@
     });
     var composeResults = $('hshsComposeResults');
     if (composeResults) composeResults.addEventListener('click', function (e) {
-      var row = e.target.closest('[data-uid]');
-      if (!row) return;
-      pickComposeUser(row.getAttribute('data-uid'));
+      var userRow = e.target.closest('[data-uid]');
+      if (userRow) {
+        pickComposeUser(userRow.getAttribute('data-uid'));
+        return;
+      }
+      var groupRow = e.target.closest('[data-chat]');
+      if (groupRow) {
+        var group = findChat(groupRow.getAttribute('data-chat'));
+        if (group) { closeCompose(); openThread(group); }
+      }
     });
 
     document.addEventListener('click', function (e) {
