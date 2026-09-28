@@ -244,6 +244,7 @@
     if (input) { input.placeholder = 'Message ' + first(item.name) + '…'; input.value = ''; }
     var btn = $('hshsSendBtn');
     if (btn) btn.classList.remove('is-ready');
+    updateComposerMode();
 
     var msgs = THREADS[threadId(item)] || [];
     if (msgs.length) paintMsgs(msgs, item, { forceScroll: true, force: true });
@@ -306,6 +307,18 @@
     publishText(msg.text, msg.clientId);
   }
 
+  function updateComposerMode() {
+    var input = $('hshsThreadInput');
+    var send = $('hshsSendBtn');
+    var voice = $('hshsVoiceBtn');
+    var hasText = !!(input && (input.value || '').trim());
+    if (send) {
+      send.hidden = !hasText;
+      send.classList.toggle('is-ready', hasText);
+    }
+    if (voice) voice.hidden = hasText;
+  }
+
   function sendText() {
     var input = $('hshsThreadInput');
     if (!input) return;
@@ -316,6 +329,7 @@
     appendMine(text);
     var btn = $('hshsSendBtn');
     if (btn) btn.classList.remove('is-ready');
+    updateComposerMode();
   }
 
   function hideReactPop() {
@@ -541,10 +555,14 @@
     var form = $('hshsThreadForm');
     if (form) form.addEventListener('submit', function (e) { e.preventDefault(); sendText(); });
 
+    var voice = $('hshsVoiceBtn');
+    if (voice) voice.onclick = function () {
+      toast('Voice recording is ready for the next chat update');
+    };
+
     var input = $('hshsThreadInput');
     if (input) input.addEventListener('input', function () {
-      var btn = $('hshsSendBtn');
-      if (btn) btn.classList.toggle('is-ready', !!(input.value || '').trim());
+      updateComposerMode();
     });
 
     var emojiBtn = $('hshsEmojiBtn');
@@ -587,6 +605,8 @@
     if (composeTop) composeTop.onclick = openCompose;
     var composeClose = $('hshsComposeClose');
     if (composeClose) composeClose.onclick = closeCompose;
+    var composeBack = $('hshsComposeBack');
+    if (composeBack) composeBack.onclick = closeCompose;
     var composeBackdrop = $('hshsComposeBackdrop');
     if (composeBackdrop) composeBackdrop.onclick = closeCompose;
     var composeSearch = $('hshsComposeSearch');
