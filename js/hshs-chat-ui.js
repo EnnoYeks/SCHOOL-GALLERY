@@ -241,7 +241,7 @@
     var profileLink = $('hshsThreadProfileLink');
     if (profileLink) profileLink.href = item.group ? '#' : ('profile.html?uid=' + encodeURIComponent(item.peerId || ''));
     var input = $('hshsThreadInput');
-    if (input) { input.placeholder = 'Message ' + first(item.name) + '…'; input.value = ''; }
+    if (input) { input.placeholder = 'Type a message...'; input.value = ''; }
     var btn = $('hshsSendBtn');
     if (btn) btn.classList.remove('is-ready');
     updateComposerMode();
@@ -551,6 +551,8 @@
 
     var back = $('hshsThreadBack');
     if (back) back.onclick = showList;
+    var threadMenu = $('hshsThreadMenu');
+    if (threadMenu) threadMenu.onclick = function () { toast('Conversation options coming soon'); };
 
     var form = $('hshsThreadForm');
     if (form) form.addEventListener('submit', function (e) { e.preventDefault(); sendText(); });
