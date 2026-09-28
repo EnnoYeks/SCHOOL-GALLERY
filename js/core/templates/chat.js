@@ -44,6 +44,7 @@
           <small id="hshsThreadMeta">Offline</small>
         </span>
       </a>
+      <button type="button" class="msg-thread-menu" id="hshsThreadMenu" aria-label="Conversation options"><i class="fas fa-ellipsis-vertical"></i></button>
     </header>
 
     <div class="msg-thread-body" id="hshsThreadMsgs" hidden></div>
@@ -65,7 +66,7 @@
     <div class="msg-compose-backdrop" id="hshsComposeBackdrop"></div>
     <div class="msg-compose-panel">
       <div class="msg-compose-head">
-        <strong>New chat</strong>
+        <strong>New message</strong>
         <button type="button" class="msg-compose-close" id="hshsComposeClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
       </div>
       <div class="msg-compose-search">
