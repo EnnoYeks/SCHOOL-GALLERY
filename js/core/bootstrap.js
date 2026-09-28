@@ -64,7 +64,10 @@
       await loadScript(ver(base + 'core/render.js'), 'hshs-core-render');
       for (var i = 0; i < TEMPLATE_NAMES.length; i++) {
         var n = TEMPLATE_NAMES[i];
-        try { await loadScript(ver(base + 'core/templates/' + n + '.js'), 'hshs-tpl-' + n); } catch (e) {}
+        try {
+          var templateUrl = base + 'core/templates/' + n + '.js';
+          await loadScript(n === 'chat' ? templateUrl + '?v=260928chat1' : ver(templateUrl), 'hshs-tpl-' + n);
+        } catch (e) {}
       }
       await loadScript(ver(base + 'components/ui.js'), 'hshs-comp-ui');
       await loadScript(ver(base + 'components/shell.js'), 'hshs-comp-shell');
