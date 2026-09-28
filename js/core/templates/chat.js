@@ -55,9 +55,10 @@
     </div>
 
     <form class="msg-input-bar" id="hshsThreadForm" autocomplete="off">
-      <button type="button" class="msg-emoji-btn" id="hshsEmojiBtn" aria-label="Emoji"><i class="fas fa-face-smile"></i></button>
-      <input id="hshsThreadInput" type="text" maxlength="2000" placeholder="Message" enterkeyhint="send" aria-label="Message">
-      <button type="submit" class="msg-send-btn" id="hshsSendBtn" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+      <button type="button" class="msg-emoji-btn" id="hshsEmojiBtn" aria-label="Emoji"><i class="far fa-face-smile"></i></button>
+      <input id="hshsThreadInput" type="text" maxlength="2000" placeholder="Type a message..." enterkeyhint="send" aria-label="Message">
+      <button type="button" class="msg-voice-btn" id="hshsVoiceBtn" aria-label="Voice message"><i class="fas fa-microphone"></i></button>
+      <button type="submit" class="msg-send-btn" id="hshsSendBtn" aria-label="Send message" hidden><i class="fas fa-paper-plane"></i></button>
       <div class="msg-emoji-sheet" id="hshsEmojiSheet" hidden></div>
     </form>
   </section>
@@ -66,8 +67,9 @@
     <div class="msg-compose-backdrop" id="hshsComposeBackdrop"></div>
     <div class="msg-compose-panel">
       <div class="msg-compose-head">
+        <button type="button" class="msg-compose-back" id="hshsComposeBack" aria-label="Back to messages"><i class="fas fa-chevron-left"></i></button>
         <strong>New message</strong>
-        <button type="button" class="msg-compose-close" id="hshsComposeClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
+        <button type="button" class="msg-compose-close" id="hshsComposeClose" aria-label="Close" hidden><i class="fas fa-xmark"></i></button>
       </div>
       <div class="msg-compose-search">
         <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
