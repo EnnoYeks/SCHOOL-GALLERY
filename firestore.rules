@@ -46,8 +46,43 @@ service cloud.firestore {
             && request.resource.data[field].size() <= maxItems);
     }
 
+    function bumpByOne(field) {
+      return !(field in request.resource.data)
+        || !(field in resource.data)
+        || request.resource.data[field] == resource.data[field]
+        || request.resource.data[field] == resource.data[field] + 1
+        || request.resource.data[field] == resource.data[field] - 1;
+    }
+
+    function engagementOnly() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['likes', 'comments', 'shares', 'likeCount', 'commentCount'])
+        && bumpByOne('likes')
+        && bumpByOne('comments')
+        && bumpByOne('shares')
+        && bumpByOne('likeCount')
+        && bumpByOne('commentCount');
+    }
+
+    function campusKeyOk(key) {
+      return key in [
+        'campus_sports',
+        'campus_choir',
+        'campus_s4',
+        'campus_prefects',
+        'campus_announce'
+      ];
+    }
+
+    function isChatMember() {
+      return signedIn()
+        && resource.data.memberIds is list
+        && request.auth.uid in resource.data.memberIds;
+    }
+
     match /users/{uid} {
-      allow read: if true;
+      allow read: if signedIn() || isSelf(uid);
 
       allow create, update: if isSelf(uid)
         && request.resource.data.uid == uid
@@ -60,18 +95,37 @@ service cloud.firestore {
         && optionalString('classYear', 40)
         && optionalString('house', 40)
         && optionalString('role', 40)
-        && optionalString('photoURL', 900000)
-        && optionalString('avatar', 900000)
-        && optionalString('coverURL', 900000)
-        && optionalString('cover', 900000)
+        && optionalString('photoURL', 200000)
+        && optionalString('avatar', 200000)
+        && optionalString('coverURL', 200000)
+        && optionalString('cover', 200000)
+        && optionalString('phone', 40)
+        && optionalString('whatsapp', 40)
+        && optionalString('studentId', 40)
+        && optionalString('location', 80)
+        && optionalString('website', 200)
+        && optionalString('instagram', 40)
+        && optionalString('tiktok', 40)
+        && optionalString('pronouns', 40)
         && optionalList('interests', 20)
-        && optionalBool('isAnonymous');
+        && optionalBool('isAnonymous')
+        && optionalBool('allowMessages')
+        && optionalBool('privateAccount')
+        && optionalBool('showEmail')
+        && optionalBool('showPhone')
+        && optionalBool('showStudentId')
+        && optionalBool('showActivity');
 
       allow delete: if false;
+
+      match /private/{docId} {
+        allow read, create, update: if isSelf(uid) && docId == 'contact';
+        allow delete: if isSelf(uid);
+      }
     }
 
     match /userIndex/{id} {
-      allow read: if true;
+      allow read: if signedIn();
 
       allow create: if signedIn()
         && request.resource.data.uid == request.auth.uid
@@ -82,7 +136,8 @@ service cloud.firestore {
 
       allow update: if signedIn()
         && resource.data.uid == request.auth.uid
-        && request.resource.data.uid == request.auth.uid;
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.field == 'username';
 
       allow delete: if signedIn()
         && resource.data.uid == request.auth.uid;
@@ -95,10 +150,7 @@ service cloud.firestore {
         && optionalString('title', 200)
         && optionalString('type', 40)
         && optionalList('destinations', 20);
-      allow update: if isAuthor()
-        || (signedIn()
-            && request.resource.data.diff(resource.data).affectedKeys()
-                .hasOnly(['likes', 'comments', 'shares', 'likeCount', 'commentCount']));
+      allow update: if isAuthor() || engagementOnly();
       allow delete: if isAuthor();
     }
 
@@ -106,12 +158,9 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAuthorOnCreate()
         && optionalString('caption', 2000)
-        && optionalString('url', 900000)
+        && optionalString('url', 200000)
         && optionalString('type', 40);
-      allow update: if isAuthor()
-        || (signedIn()
-            && request.resource.data.diff(resource.data).affectedKeys()
-                .hasOnly(['likes', 'comments', 'shares', 'likeCount', 'commentCount']));
+      allow update: if isAuthor() || engagementOnly();
       allow delete: if isAuthor();
     }
 
@@ -121,10 +170,7 @@ service cloud.firestore {
         && optionalString('caption', 2000)
         && optionalString('url', 2000)
         && optionalString('type', 40);
-      allow update: if isAuthor()
-        || (signedIn()
-            && request.resource.data.diff(resource.data).affectedKeys()
-                .hasOnly(['likes', 'comments', 'shares', 'likeCount', 'commentCount']));
+      allow update: if isAuthor() || engagementOnly();
       allow delete: if isAuthor();
     }
 
@@ -162,45 +208,76 @@ service cloud.firestore {
     }
 
     match /chats/{chatId} {
-      allow read: if signedIn() && (
-        !('memberIds' in resource.data)
-        || request.auth.uid in resource.data.memberIds
-        || resource.data.campus == true
-      );
+      allow read: if isChatMember()
+        || (
+          signedIn()
+          && resource.data.campus == true
+          && resource.data.campusKey is string
+          && campusKeyOk(resource.data.campusKey)
+        );
 
       allow create: if signedIn()
         && request.resource.data.memberIds is list
         && request.auth.uid in request.resource.data.memberIds
+        && request.resource.data.memberIds.size() > 0
+        && request.resource.data.memberIds.size() <= 50
         && optionalString('name', 80)
         && optionalString('peerName', 80)
         && optionalBool('group')
         && optionalBool('campus')
-        && optionalString('campusKey', 40);
+        && optionalString('campusKey', 40)
+        && (
+          request.resource.data.campus != true
+          || (
+            campusKeyOk(request.resource.data.campusKey)
+            && chatId == request.resource.data.campusKey
+          )
+        );
 
       allow update: if signedIn() && (
-        !('memberIds' in resource.data)
-        || request.auth.uid in resource.data.memberIds
+        (
+          isChatMember()
+          && request.resource.data.memberIds == resource.data.memberIds
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['preview', 'lastMessage', 'updatedAt', 'unread', 'avatar', 'name'])
+        )
         || (
           resource.data.campus == true
+          && request.resource.data.campus == true
+          && request.resource.data.campusKey == resource.data.campusKey
+          && campusKeyOk(resource.data.campusKey)
+          && request.resource.data.memberIds is list
+          && request.resource.data.memberIds.hasAll(resource.data.memberIds)
+          && request.resource.data.memberIds.size() == resource.data.memberIds.size() + 1
           && request.auth.uid in request.resource.data.memberIds
+          && !(request.auth.uid in resource.data.memberIds)
+        )
+        || (
+          isChatMember()
+          && request.resource.data.memberIds is list
+          && resource.data.memberIds.hasAll(request.resource.data.memberIds)
+          && request.resource.data.memberIds.size() == resource.data.memberIds.size() - 1
+          && !(request.auth.uid in request.resource.data.memberIds)
         )
       );
 
       allow delete: if false;
 
       match /messages/{msgId} {
-        allow read: if signedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.memberIds;
+        allow read: if signedIn()
+          && get(/databases/$(database)/documents/chats/$(chatId)).data.memberIds is list
+          && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.memberIds;
 
         allow create: if signedIn()
+          && get(/databases/$(database)/documents/chats/$(chatId)).data.memberIds is list
+          && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.memberIds
           && request.resource.data.senderId == request.auth.uid
           && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 2000
           && (
-            request.resource.data.text.size() > 0
-            || (
-              request.resource.data.kind is string
-              && request.resource.data.kind != 'text'
-            )
+            !('kind' in request.resource.data)
+            || request.resource.data.kind == 'text'
           );
 
         allow update: if signedIn()
@@ -223,7 +300,7 @@ service cloud.firestore {
     }
 
     match /presence/{uid} {
-      allow read: if signedInAny();
+      allow read: if signedIn();
       allow create, update: if isSelf(uid);
       allow delete: if isSelf(uid);
     }
