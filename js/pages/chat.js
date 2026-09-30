@@ -13,12 +13,20 @@
   function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
 
   function loadCss() {
-    if (document.querySelector('link[data-hshs-chat-css]')) return;
-    var l = document.createElement('link');
-    l.rel = 'stylesheet';
-    l.href = base() + 'css/hshs-chat-ui.css?v=260930grp1';
-    l.setAttribute('data-hshs-chat-css', '1');
-    document.head.appendChild(l);
+    if (!document.querySelector('link[data-hshs-chat-css]')) {
+      var l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.href = base() + 'css/hshs-chat-ui.css?v=260930desk1';
+      l.setAttribute('data-hshs-chat-css', '1');
+      document.head.appendChild(l);
+    }
+    if (!document.querySelector('link[data-hshs-chat-desk]')) {
+      var d = document.createElement('link');
+      d.rel = 'stylesheet';
+      d.href = base() + 'css/hshs-chat-desktop.css?v=260930desk1';
+      d.setAttribute('data-hshs-chat-desk', '1');
+      document.head.appendChild(d);
+    }
   }
 
   function templateReady() {
