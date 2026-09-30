@@ -106,8 +106,25 @@
       return;
     }
     if (MODE === 'local' && signedIn() && !INBOX.length && !q) {
-      box.innerHTML = '<div class="msg-empty"><i class="fas fa-wifi"></i>' +
-        '<h3>Reconnecting</h3><p>You are signed in. Conversations will show up when the network returns.</p></div>';
+      var roomCards = CAMPUS_ROOMS.slice(0, 3).map(function (r) {
+        return '<button type="button" class="chat-empty-room" data-empty-campus="' + esc(r.id) + '">' +
+          '<i class="fas ' + esc(r.icon) + '" aria-hidden="true"></i>' +
+          '<b>' + esc(r.name.replace(' Room', '')) + '</b>' +
+          '<small>' + esc(r.blurb) + '</small></button>';
+      }).join('');
+      box.innerHTML =
+        '<div class="msg-empty">' +
+          '<i class="fas fa-comment-dots"></i>' +
+          '<h3>Your inbox is quiet.</h3>' +
+          '<p>Your chats will appear here. Start with a classmate or jump into a campus room.</p>' +
+          '<button type="button" class="msg-empty-cta" id="hshsEmptyCompose">Start a chat</button>' +
+        '</div>' +
+        '<div class="chat-empty-start">' +
+          '<div class="chat-empty-start-head"><strong>JUMP INTO CAMPUS</strong><span>QUICK START</span></div>' +
+          '<div class="chat-empty-rooms">' + roomCards + '</div>' +
+        '</div>';
+      var emptyCta = $('hshsEmptyCompose');
+      if (emptyCta) emptyCta.onclick = openCompose;
       return;
     }
 
@@ -604,6 +621,13 @@
       if (chat) openThread(chat);
     });
 
+    var emptyList = $('hshsChatList');
+    if (emptyList) emptyList.addEventListener('click', function (e) {
+      var room = e.target.closest('[data-empty-campus]');
+      if (!room) return;
+      pickCampus(room.getAttribute('data-empty-campus'));
+    });
+
     var filters = $('hshsChatFilters');
     if (filters) filters.addEventListener('click', function (e) {
       var chip = e.target.closest('[data-filter]');
@@ -668,6 +692,20 @@
         if (row) retryAt(Number(row.getAttribute('data-mi')));
       });
     }
+
+    var markRead = $('hshsMarkRead');
+    if (markRead) markRead.onclick = function () {
+      INBOX.forEach(function (c) { c.unread = 0; });
+      fillList($('hshsChatSearch') && $('hshsChatSearch').value);
+      toast('All caught up');
+    };
+
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' && !e.shiftKey) {
+        var searchBox = $('hshsChatSearch');
+        if (searchBox) { e.preventDefault(); searchBox.focus(); }
+      }
+    });
 
     var composeTop = $('hshsComposeTop');
     if (composeTop) composeTop.onclick = openCompose;
