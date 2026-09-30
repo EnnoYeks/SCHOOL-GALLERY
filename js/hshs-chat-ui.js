@@ -626,6 +626,13 @@
       updateComposerMode();
     });
 
+    var quick = $('hshsChatQuick');
+    if (quick) quick.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-quick]');
+      if (!b) return;
+      if (input) { input.value = b.getAttribute('data-quick') || ''; updateComposerMode(); input.focus(); }
+    });
+
     var emojiBtn = $('hshsEmojiBtn');
     if (emojiBtn) emojiBtn.onclick = function () {
       var sheet = $('hshsEmojiSheet');
