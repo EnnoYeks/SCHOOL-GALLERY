@@ -93,6 +93,8 @@
   function fillList(q) {
     var box = $('hshsChatList');
     if (!box) return;
+    var sectionHead = $('hshsChatSectionHead');
+    if (sectionHead) sectionHead.hidden = true;
     q = String(q || '').toLowerCase().trim();
 
     if (MODE !== 'live' && !signedIn()) {
@@ -136,6 +138,7 @@
     });
 
     if (!rows.length) {
+      if (sectionHead) sectionHead.hidden = true;
       var empty = activeFilter === 'unread' ? 'No unread conversations.' : (activeFilter === 'groups' ? 'No group conversations yet.' : 'No conversations yet.');
       box.innerHTML = q
         ? '<div class="msg-empty"><i class="fas fa-magnifying-glass"></i><h3>No matches</h3><p>Try a different name.</p></div>'
@@ -146,6 +149,11 @@
       return;
     }
 
+    if (sectionHead) {
+      sectionHead.hidden = false;
+      var readAll = $('hshsMarkRead');
+      if (readAll) readAll.hidden = !rows.some(function (c) { return !!c.unread; });
+    }
     box.innerHTML = rows.map(function (c) {
       var metaRight = c.unread ? '<span class="msg-badge">' + esc(c.unread) + '</span>' : '';
       var online = (!c.group && c.online) ? '<i class="msg-online-dot"></i>' : '';
