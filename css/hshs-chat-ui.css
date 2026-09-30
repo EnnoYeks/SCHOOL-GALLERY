@@ -339,3 +339,5 @@ html[data-hshs-page="chat"] .mobile-tabbar{display:none!important}
 }
 .msg-react-pop button{border:0;background:transparent;padding:3px 4px;border-radius:8px;font-size:.9rem}
 .msg-react-pop button:hover{background:#182641}
+
+@media (max-width:560px){.chat-search-key{display:none}.chat-hero-copy{align-items:flex-start}.chat-mode-pill{margin-top:2px}.chat-empty-rooms{grid-template-columns:repeat(3,minmax(0,1fr))}.chat-empty-room{min-width:0}.chat-empty-room small{display:none}}
