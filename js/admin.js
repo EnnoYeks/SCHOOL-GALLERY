@@ -12,28 +12,15 @@ class AdminDashboard {
     }
 
     staffCode() {
-        try {
-            return localStorage.getItem('hshsStaffCode') || 'HSHS-STAFF';
-        } catch (e) {
-            return 'HSHS-STAFF';
-        }
+        return '';
     }
 
     checkAdminAccess() {
-        try {
-            if (window.Utils && Utils.getData) return !!Utils.getData('adminToken');
-            return !!localStorage.getItem('adminToken');
-        } catch (e) {
-            return false;
-        }
+        // Admin is not a client-side role. Use Firebase console.
+        return false;
     }
 
-    saveToken() {
-        try {
-            if (window.Utils && Utils.setData) Utils.setData('adminToken', 'ok');
-            localStorage.setItem('adminToken', 'ok');
-        } catch (e) {}
-    }
+    saveToken() {}
 
     clearToken() {
         try {
@@ -50,18 +37,10 @@ class AdminDashboard {
         if (!form) return;
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            const input = document.getElementById('adminLockInput');
-            const value = (input && input.value || '').trim();
-            if (value !== this.staffCode()) {
-                if (err) {
-                    err.hidden = false;
-                    err.textContent = 'That staff code is not right.';
-                }
-                return;
+            if (err) {
+                err.hidden = false;
+                err.textContent = 'Admin is not available in the browser. Use the Firebase console.';
             }
-            this.saveToken();
-            this.unlockDesk();
-            this.init();
         });
     }
 
