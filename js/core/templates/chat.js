@@ -4,23 +4,34 @@
   g.HshsTemplates.chat = `
 <main class="hshs-chat-page" id="hshsChatPage" aria-label="HSHS World chat">
   <header class="chat-home-head">
-    <div class="chat-brand-row">
+    <div class="chat-topline">
       <a class="chat-back" href="more.html" aria-label="Back"><i class="fas fa-chevron-left"></i></a>
-      <div class="chat-brand">
-        <span class="chat-kicker">HSHS WORLD</span>
-        <h1>Chats <span class="chat-live-pulse"></span></h1>
-      </div>
+      <span class="chat-kicker">HSHS WORLD · MESSAGES</span>
       <button type="button" class="chat-new-btn" id="hshsComposeTop" aria-label="New chat"><i class="fas fa-plus"></i></button>
     </div>
-    <p class="chat-subtitle">Talk with classmates. Keep it real. 💬</p>
+    <div class="chat-hero-copy">
+      <div>
+        <h1>Messages <span class="chat-live-pulse"></span></h1>
+        <p class="chat-subtitle">Your people. Your classes. Your campus. 💬</p>
+      </div>
+      <span class="chat-mode-pill"><i class="fas fa-sparkles"></i> HSHS chat</span>
+    </div>
+    <div class="chat-hero-stats" aria-label="Chat features">
+      <span><i class="fas fa-user-group"></i> Classmates</span>
+      <span><i class="fas fa-layer-group"></i> Groups</span>
+      <span><i class="fas fa-bolt"></i> Fast replies</span>
+    </div>
     <div class="chat-banner" id="hshsChatBanner" hidden></div>
   </header>
 
-  <form class="chat-search" id="hshsChatSearchForm" role="search" autocomplete="off">
-    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-    <input id="hshsChatSearch" type="search" placeholder="Search classmates or chats" enterkeyhint="search" aria-label="Search chats">
-    <button type="button" id="hshsSearchClear" hidden aria-label="Clear search"><i class="fas fa-xmark"></i></button>
-  </form>
+  <div class="chat-search-wrap">
+    <form class="chat-search" id="hshsChatSearchForm" role="search" autocomplete="off">
+      <span class="chat-search-icon"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></span>
+      <input id="hshsChatSearch" type="search" placeholder="Search people or conversations..." enterkeyhint="search" aria-label="Search chats">
+      <span class="chat-search-key">⌘ K</span>
+      <button type="button" id="hshsSearchClear" hidden aria-label="Clear search"><i class="fas fa-xmark"></i></button>
+    </form>
+  </div>
 
   <nav class="chat-filters" id="hshsChatFilters" aria-label="Chat filters">
     <button type="button" class="chat-filter is-on" data-filter="all">All</button>
@@ -29,6 +40,10 @@
   </nav>
 
   <section class="chat-list-view" id="hshsChatListView">
+    <div class="chat-section-head" id="hshsChatSectionHead">
+      <span>RECENT CONVERSATIONS</span>
+      <button type="button" id="hshsMarkRead" hidden>Mark all read</button>
+    </div>
     <div class="chat-list" id="hshsChatList"></div>
   </section>
 
