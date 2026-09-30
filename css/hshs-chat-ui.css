@@ -279,3 +279,12 @@ html[data-hshs-page="chat"] .mobile-tabbar{display:none!important}
 @media (min-width:760px){.hshs-chat-page{max-width:760px}}
 @media (min-width:1025px){.hshs-chat-page{min-height:calc(100dvh - 84px);margin-top:84px;border-left:1px solid var(--chat-line);border-right:1px solid var(--chat-line)}}
 @media (prefers-reduced-motion:reduce){.msg-bubble{animation:none}}
+
+/* Message reaction popover */
+.msg-react-pop{
+  position:absolute;left:8px;bottom:calc(100% + 7px);z-index:20;display:flex;gap:3px;
+  padding:5px 6px;border:1px solid var(--chat-line);border-radius:999px;background:#0d182c;
+  box-shadow:0 10px 30px rgba(0,0,0,.32);white-space:nowrap
+}
+.msg-react-pop button{border:0;background:transparent;padding:3px 4px;border-radius:8px;font-size:.9rem}
+.msg-react-pop button:hover{background:#182641}
