@@ -28,7 +28,7 @@
     <form class="chat-search" id="hshsChatSearchForm" role="search" autocomplete="off">
       <span class="chat-search-icon"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></span>
       <input id="hshsChatSearch" type="search" placeholder="Search people or conversations..." enterkeyhint="search" aria-label="Search chats">
-      <span class="chat-search-key">⌘ K</span>
+      <span class="chat-search-key">Ctrl K</span>
       <button type="button" id="hshsSearchClear" hidden aria-label="Clear search"><i class="fas fa-xmark"></i></button>
     </form>
   </div>
