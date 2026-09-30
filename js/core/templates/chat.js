@@ -50,15 +50,14 @@
     <div class="msg-thread-body" id="hshsThreadMsgs" hidden></div>
     <div class="msg-thread-welcome" id="hshsThreadWelcome" hidden>
       <i class="fas fa-comment-dots"></i>
-      <p>No messages yet. Say hi.</p>
+      <p>No messages yet. Start the conversation.</p>
       <button type="button" class="msg-wave-btn" id="hshsSayHi">Wave hello</button>
     </div>
 
     <form class="msg-input-bar" id="hshsThreadForm" autocomplete="off">
       <button type="button" class="msg-emoji-btn" id="hshsEmojiBtn" aria-label="Emoji"><i class="far fa-face-smile"></i></button>
       <input id="hshsThreadInput" type="text" maxlength="2000" placeholder="Type a message..." enterkeyhint="send" aria-label="Message">
-      <button type="button" class="msg-voice-btn" id="hshsVoiceBtn" aria-label="Voice message"><i class="fas fa-microphone"></i></button>
-      <button type="submit" class="msg-send-btn" id="hshsSendBtn" aria-label="Send message" hidden><i class="fas fa-paper-plane"></i></button>
+      <button type="submit" class="msg-send-btn" id="hshsSendBtn" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
       <div class="msg-emoji-sheet" id="hshsEmojiSheet" hidden></div>
     </form>
   </section>
@@ -73,7 +72,7 @@
       </div>
       <div class="msg-compose-search">
         <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-        <input id="hshsComposeSearch" type="search" placeholder="Search classmates" aria-label="Search classmates" autocomplete="off">
+        <input id="hshsComposeSearch" type="search" placeholder="Search people or groups..." aria-label="Search classmates" autocomplete="off">
       </div>
       <div class="msg-compose-results" id="hshsComposeResults"></div>
     </div>

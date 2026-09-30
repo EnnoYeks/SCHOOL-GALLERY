@@ -692,6 +692,51 @@ class Database {
         return ok ? { ok: true, chatId, peer } : { ok: false, error: "Could not start chat." };
     }
 
+    async joinCampusGroup(room) {
+        const me = this.realUid();
+        if (!me) return { ok: false, error: "Sign in first." };
+        if (!room || !room.id || !room.name) return { ok: false, error: "Choose a group." };
+        const chatId = String(room.id).slice(0, 40);
+        let members = [me];
+        let preview = "";
+        try {
+            const snap = await getDoc(doc(firestore, "chats", chatId));
+            if (snap.exists()) {
+                const data = snap.data() || {};
+                members = Array.from(new Set([].concat(data.memberIds || [], [me]).filter(Boolean)));
+                preview = data.preview || data.lastMessage || "";
+            }
+        } catch (e) {}
+        const ok = await this.upsertChat(chatId, {
+            memberIds: members,
+            group: true,
+            campus: true,
+            campusKey: chatId,
+            name: String(room.name).slice(0, 80),
+            preview,
+            lastMessage: preview
+        });
+        return ok ? { ok: true, chatId, group: true } : { ok: false, error: "Could not join group." };
+    }
+
+    async createGroupChat(name, memberUids) {
+        const me = this.realUid();
+        if (!me) return { ok: false, error: "Sign in first." };
+        const ids = Array.from(new Set([me].concat(memberUids || []).filter(Boolean)));
+        if (ids.length < 2) return { ok: false, error: "Add at least one classmate." };
+        const title = String(name || "Group").trim().slice(0, 80) || "Group";
+        const chatId = "g_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const ok = await this.upsertChat(chatId, {
+            memberIds: ids,
+            group: true,
+            campus: false,
+            name: title,
+            preview: "",
+            lastMessage: ""
+        });
+        return ok ? { ok: true, chatId, group: true } : { ok: false, error: "Could not create group." };
+    }
+
     async setPresence(uid, info) {
         if (!uid) return false;
         try {

@@ -145,6 +145,8 @@ import { db } from "./db.js";
       unread: unread,
       read: unread === 0,
       group: !!row.group,
+      campus: !!row.campus,
+      campusKey: row.campusKey || (row.campus ? row.id : ''),
       members: row.members || [],
       memberIds: row.memberIds || [],
       peerId: peer,

@@ -14,6 +14,14 @@
     '⚽','🎨','🎵','🌞','🌙','📖','✏️','🏫','🍀','🎯','🏆','🫡'];
   var REACTS = ['👍', '⭐', '😂', '😮', '😢', '🙏'];
 
+  var CAMPUS_ROOMS = [
+    { id: 'campus_sports', name: 'Sports Room', icon: 'fa-trophy', blurb: 'Match days and training' },
+    { id: 'campus_choir', name: 'Choir Room', icon: 'fa-music', blurb: 'Practice and songs' },
+    { id: 'campus_s4', name: 'S4 Class', icon: 'fa-book-open', blurb: 'Notes, homework, assembly' },
+    { id: 'campus_prefects', name: 'Prefects', icon: 'fa-shield-halved', blurb: 'Duty and campus order' },
+    { id: 'campus_announce', name: 'HSHS Announcements', icon: 'fa-bullhorn', blurb: 'School-wide updates' }
+  ];
+
   var INBOX = [];
   var THREADS = {};
   var PRESENCE = {};
@@ -36,7 +44,19 @@
     return String(name || '?').replace(/[^A-Za-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean)
       .map(function (p) { return p[0]; }).join('').slice(0, 2).toUpperCase() || '?';
   }
+  function campusRoom(item) {
+    var id = item && (item.campusKey || item.id) || '';
+    for (var i = 0; i < CAMPUS_ROOMS.length; i++) if (CAMPUS_ROOMS[i].id === id) return CAMPUS_ROOMS[i];
+    return null;
+  }
+  function groupIcon(item) {
+    var room = campusRoom(item);
+    return (room && room.icon) || 'fa-users';
+  }
   function avatarHtml(item) {
+    if (item && item.group) {
+      return '<i class="fas ' + groupIcon(item) + '" aria-hidden="true"></i>';
+    }
     if (item && item.avatar) return '<img src="' + esc(item.avatar) + '" alt="" loading="lazy">';
     return initials(item && item.name);
   }
@@ -193,10 +213,11 @@
         : '';
       var sender = (!m.mine && item && item.group && m.sender) ? '<span class="msg-sender">' + esc(m.sender) + '</span>' : '';
       var pendingCls = m.pending ? ' is-pending' : (m.failed ? ' is-failed' : '');
+      var ticks = m.mine && !m.pending && !m.failed ? '<i class="msg-ticks fas fa-check-double" aria-hidden="true"></i>' : '';
       var body = '<div class="msg-bubble-text">' + esc(m.text || '').replace(/\n/g, '<br>') + '</div>';
       return chip + '<div class="msg-row-line ' + (m.mine ? 'mine' : 'theirs') + '" data-mi="' + i + '" data-mid="' + esc(m.id || m.clientId || '') + '">' + av +
         '<div class="msg-bubble ' + (m.mine ? 'mine' : 'theirs') + pendingCls + '">' + sender + body +
-        reactHtml(m) + '<time>' + esc(statusText(m)) + '</time></div></div>';
+        reactHtml(m) + '<time>' + esc(statusText(m)) + ticks + '</time></div></div>';
     }).join('');
     box.innerHTML = html;
     if (stick) box.scrollTop = box.scrollHeight;
@@ -312,11 +333,12 @@
     var send = $('hshsSendBtn');
     var voice = $('hshsVoiceBtn');
     var hasText = !!(input && (input.value || '').trim());
+    if (voice) voice.hidden = true;
     if (send) {
-      send.hidden = !hasText;
+      send.hidden = false;
+      send.disabled = !hasText;
       send.classList.toggle('is-ready', hasText);
     }
-    if (voice) voice.hidden = hasText;
   }
 
   function sendText() {
@@ -406,9 +428,19 @@
     var box = $('hshsComposeResults');
     if (!box) return;
     var people = rows || [];
-    var groups = INBOX.filter(function (c) { return c.group; });
-    if (!people.length && !groups.length) {
-      box.innerHTML = '<div class="msg-compose-empty">' + esc(emptyText || 'No classmates found.') + '</div>';
+    var q = (($('hshsComposeSearch') && $('hshsComposeSearch').value) || '').toLowerCase().trim();
+    var campus = CAMPUS_ROOMS.filter(function (r) {
+      if (!q) return true;
+      return (r.name + ' ' + r.blurb).toLowerCase().indexOf(q) !== -1;
+    });
+    var joined = INBOX.filter(function (c) {
+      if (!c.group) return false;
+      if (campusRoom(c)) return false;
+      if (!q) return true;
+      return (c.name + ' ' + (c.preview || '')).toLowerCase().indexOf(q) !== -1;
+    });
+    if (!people.length && !campus.length && !joined.length) {
+      box.innerHTML = '<div class="msg-compose-empty">' + esc(emptyText || 'No classmates or groups found.') + '</div>';
       return;
     }
     var html = '';
@@ -424,15 +456,21 @@
           '<i class="fas fa-comment-dots" aria-hidden="true"></i></button>';
       }).join('');
     }
-    if (groups.length) {
-      html += '<div class="msg-compose-section-title">Groups</div>';
-      html += groups.map(function (c) {
-        return '<button type="button" class="msg-compose-row msg-compose-group-row" data-chat="' + esc(c.id) + '">' +
-          '<span class="msg-compose-av">👥</span>' +
-          '<span><b>' + esc(c.name || 'Group chat') + '</b><small>' + esc(memberCount(c) ? memberCount(c) + ' members' : 'Group chat') + '</small></span>' +
-          '<i class="fas fa-comment-dots" aria-hidden="true"></i></button>';
-      }).join('');
-    }
+    html += '<div class="msg-compose-section-title">Groups</div>';
+    html += campus.map(function (r) {
+      var existing = findChat(r.id);
+      var count = existing ? memberCount(existing) : 0;
+      return '<button type="button" class="msg-compose-row msg-compose-group-row" data-campus="' + esc(r.id) + '">' +
+        '<span class="msg-compose-av is-group"><i class="fas ' + r.icon + '" aria-hidden="true"></i></span>' +
+        '<span><b>' + esc(r.name) + '</b><small>' + esc(count ? count + ' members' : r.blurb) + '</small></span>' +
+        '<i class="fas fa-comment-dots" aria-hidden="true"></i></button>';
+    }).join('');
+    html += joined.map(function (c) {
+      return '<button type="button" class="msg-compose-row msg-compose-group-row" data-chat="' + esc(c.id) + '">' +
+        '<span class="msg-compose-av is-group"><i class="fas ' + groupIcon(c) + '" aria-hidden="true"></i></span>' +
+        '<span><b>' + esc(c.name || 'Group chat') + '</b><small>' + esc(memberCount(c) ? memberCount(c) + ' members' : 'Group chat') + '</small></span>' +
+        '<i class="fas fa-comment-dots" aria-hidden="true"></i></button>';
+    }).join('');
     box.innerHTML = html;
   }
   function lookupUsers(q) {
@@ -458,6 +496,32 @@
       renderComposeResults((rows || []).filter(function (u) { return u.uid !== myUid(); }), 'No classmates found.');
     }).catch(function () { renderComposeResults([], 'Search failed. Try again.'); });
   }
+  function pickCampus(id) {
+    var room = null;
+    for (var i = 0; i < CAMPUS_ROOMS.length; i++) if (CAMPUS_ROOMS[i].id === id) room = CAMPUS_ROOMS[i];
+    if (!room) return;
+    var existing = findChat(room.id);
+    if (existing) { closeCompose(); openThread(existing); return; }
+    if (!g.db || !g.db.joinCampusGroup) { toast('Groups are not available yet'); return; }
+    Promise.resolve(g.db.joinCampusGroup(room)).then(function (res) {
+      if (!res || !res.ok) { toast(res && res.error || 'Could not join group'); return; }
+      closeCompose();
+      var item = findChat(res.chatId) || {
+        id: res.chatId,
+        name: room.name,
+        group: true,
+        campus: true,
+        campusKey: room.id,
+        memberIds: [myUid()].filter(Boolean),
+        preview: '',
+        time: 'Now',
+        unread: 0
+      };
+      if (!findChat(res.chatId)) INBOX.unshift(item);
+      openThread(item);
+    }).catch(function () { toast('Could not join group'); });
+  }
+
   function pickComposeUser(uid) {
     if (!uid || !g.db || !g.db.getUser || !g.db.startDirectChat) return;
     Promise.resolve(g.db.getUser(uid)).then(function (peer) {
@@ -557,11 +621,6 @@
     var form = $('hshsThreadForm');
     if (form) form.addEventListener('submit', function (e) { e.preventDefault(); sendText(); });
 
-    var voice = $('hshsVoiceBtn');
-    if (voice) voice.onclick = function () {
-      toast('Voice recording is ready for the next chat update');
-    };
-
     var input = $('hshsThreadInput');
     if (input) input.addEventListener('input', function () {
       updateComposerMode();
@@ -574,7 +633,7 @@
     };
 
     var hi = $('hshsSayHi');
-    if (hi) hi.onclick = function () { appendMine('Hi 👋'); };
+    if (hi) hi.onclick = function () { appendMine(active && active.group ? 'Hi everyone' : 'Hi'); };
 
     var msgs = $('hshsThreadMsgs');
     if (msgs) {
@@ -624,6 +683,11 @@
       var userRow = e.target.closest('[data-uid]');
       if (userRow) {
         pickComposeUser(userRow.getAttribute('data-uid'));
+        return;
+      }
+      var campusRow = e.target.closest('[data-campus]');
+      if (campusRow) {
+        pickCampus(campusRow.getAttribute('data-campus'));
         return;
       }
       var groupRow = e.target.closest('[data-chat]');
