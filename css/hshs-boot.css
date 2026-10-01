@@ -34,11 +34,15 @@ body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
   transition: opacity .38s ease;
 }
 #hshs-boot.is-off { opacity: 0; pointer-events: none; }
-html.hshs-ready body > *:not(#hshs-boot),
-html:not(.hshs-booting) body > *:not(#hshs-boot) {
+html.hshs-ready body > *:not(#hshs-boot) {
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
+}
+html:not(.hshs-ready) #hshs-page > :not(.hshs-load-skel) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 .hshs-boot-card {
   width: min(240px, 72vw);

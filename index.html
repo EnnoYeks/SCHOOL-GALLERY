@@ -16,6 +16,18 @@
   <style>
     html, body { background: #071433; margin: 0; }
     #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
+    html:not(.hshs-ready) #hshs-page > :not(.hshs-load-skel) {
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+    html.hshs-ready #hshs-page > :not(.hshs-load-skel) {
+      animation: hshs-pop-in 220ms ease;
+    }
+    @keyframes hshs-pop-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
     .hshs-load-skel {
       position: fixed;
       inset: 0;
@@ -73,14 +85,34 @@
       var root = document.getElementById('hshs-page');
       if (!root) return;
       function reveal() {
-        var r = document.documentElement;
-        r.classList.remove('hshs-booting');
-        r.classList.add('hshs-ready');
-        window.__hshsBootDone = true;
-        var boot = document.getElementById('hshs-boot');
-        if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
-        var cover = document.getElementById('hshs-tt-overlay');
-        if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
+        if (window.__hshsRevealQueued) return;
+        window.__hshsRevealQueued = true;
+        function go() {
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              var r = document.documentElement;
+              r.classList.remove('hshs-booting');
+              r.classList.add('hshs-ready');
+              window.__hshsBootDone = true;
+              dropSkel();
+              var boot = document.getElementById('hshs-boot');
+              if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+              var cover = document.getElementById('hshs-tt-overlay');
+              if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
+            });
+          });
+        }
+        var pending = 0;
+        var links = document.querySelectorAll('link[rel="stylesheet"]');
+        for (var i = 0; i < links.length; i++) {
+          if (links[i].sheet) continue;
+          pending++;
+          links[i].addEventListener('load', done);
+          links[i].addEventListener('error', done);
+        }
+        function done() { pending--; if (pending <= 0) go(); }
+        if (pending <= 0) go();
+        setTimeout(go, 700);
       }
       window.__hshsRevealPage = reveal;
       function dropSkel() {
@@ -94,7 +126,6 @@
       function check() {
         if (!settled()) return;
         if (window.__hshsSkelWatch) window.__hshsSkelWatch.disconnect();
-        dropSkel();
         reveal();
       }
       if (window.MutationObserver) {

@@ -38,27 +38,39 @@
     return root;
   }
   function revealPage() {
-    if (typeof window.__hshsRevealPage === 'function') {
-      window.__hshsRevealPage();
-      return;
-    }
-    var r = document.documentElement;
-    r.classList.remove('hshs-booting');
-    r.classList.add('hshs-ready');
-    window.__hshsBootDone = true;
-    var boot = document.getElementById('hshs-boot');
-    if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        if (typeof window.__hshsRevealPage === 'function') {
+          window.__hshsRevealPage();
+          return;
+        }
+        if (window.__hshsRevealQueued) return;
+        window.__hshsRevealQueued = true;
+        var r = document.documentElement;
+        r.classList.remove('hshs-booting');
+        r.classList.add('hshs-ready');
+        window.__hshsBootDone = true;
+        var boot = document.getElementById('hshs-boot');
+        if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+        var sk = document.querySelector('#hshs-page .hshs-load-skel');
+        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+      });
+    });
   }
   function mountedReal(root) {
-    return root && root.id === 'hshs-page' && !root.querySelector('.hshs-load-skel') && root.childElementCount > 0;
+    if (!root || root.id !== 'hshs-page') return false;
+    var sk = root.querySelector('.hshs-load-skel');
+    return root.childElementCount > (sk ? 1 : 0);
   }
   function mountHTML(target, html) {
     var root = typeof target === 'string' ? document.querySelector(target) : target;
     if (!root) return null;
+    var skel = root.querySelector('.hshs-load-skel');
     clear(root);
     var wrap = document.createElement('div');
     wrap.innerHTML = html || '';
     while (wrap.firstChild) root.appendChild(wrap.firstChild);
+    if (skel) root.appendChild(skel);
     if (mountedReal(root)) revealPage();
     return root;
   }

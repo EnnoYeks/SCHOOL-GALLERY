@@ -13,6 +13,18 @@
   <style>
     html, body { background: #071433; margin: 0; }
     #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
+    html:not(.hshs-ready) #hshs-page > :not(.hshs-load-skel) {
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+    html.hshs-ready #hshs-page > :not(.hshs-load-skel) {
+      animation: hshs-pop-in 220ms ease;
+    }
+    @keyframes hshs-pop-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
     .hshs-load-skel {
       position: fixed;
       inset: 0;
