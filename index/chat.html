@@ -17,17 +17,50 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>(function(){var r=document.documentElement;r.classList.add('hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');var s=document.createElement('div');var ok=('backdropFilter' in s.style)||('webkitBackdropFilter' in s.style);if(!ok)r.classList.add('hshs-no-backdrop');})();</script>
   <style>
-    html, body { background: #0b141a; margin: 0; }
-    #hshs-page { min-height: 100vh; background: #0b141a; opacity: 1 !important; visibility: visible !important; }
+    :root {
+      --chat-shell-bg: #090f1d;
+      --chat-shell-accent: rgba(100, 143, 255, 0.32);
+    }
+    html, body {
+      margin: 0;
+      background: var(--chat-shell-bg);
+      color: #edf6ff;
+      font-family: "Nunito", "Segoe UI", sans-serif;
+    }
+    html {
+      background: var(--chat-shell-bg);
+    }
+    body {
+      visibility: hidden;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    html.hshs-ready body {
+      visibility: visible;
+    }
+    #hshs-page {
+      min-height: 100vh;
+      background: var(--chat-shell-bg);
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
     .hshs-load-skel {
       position: fixed;
       inset: 0;
       z-index: 5000;
       min-height: 100vh;
-      background: #0b141a;
+      background:
+        radial-gradient(520px 240px at 50% 18%, rgba(91, 123, 255, 0.18), transparent 60%),
+        linear-gradient(180deg, #090f1d 0%, #0b1527 100%);
       overflow: hidden;
       opacity: 1 !important;
       visibility: visible !important;
+      transition: opacity 220ms ease, visibility 220ms ease;
+    }
+    html.hshs-ready .hshs-load-skel {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none;
     }
     body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
     .hshs-load-skel::before,
@@ -36,77 +69,100 @@
       position: absolute;
       left: 16px;
       right: 16px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.04);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
     }
-    .hshs-load-skel::before { top: 88px; height: 40px; }
+    .hshs-load-skel::before { top: 88px; height: 44px; }
     .hshs-load-skel::after {
-      top: 148px;
-      height: 56px;
-      box-shadow: 0 72px 0 rgba(255, 255, 255, 0.04), 0 144px 0 rgba(255, 255, 255, 0.04), 0 216px 0 rgba(255, 255, 255, 0.04);
+      top: 156px;
+      height: 62px;
+      box-shadow: 0 78px 0 rgba(255, 255, 255, 0.04), 0 156px 0 rgba(255, 255, 255, 0.04), 0 234px 0 rgba(255, 255, 255, 0.04);
+    }
+    .hshs-load-skel-shine {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(100deg, transparent 18%, rgba(78, 123, 255, 0.16) 48%, transparent 78%);
+      transform: translateX(-120%);
+      animation: hshs-skel-shimmer 1.35s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes hshs-skel-shimmer {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
     }
   </style>
 </head>
 <body class="dark-mode">
   <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
-    <div class="hshs-load-skel" role="status" aria-label="Loading"></div>
+    <div class="hshs-load-skel" role="status" aria-label="Loading">
+      <span class="hshs-load-skel-shine" aria-hidden="true"></span>
+    </div>
   </div>
   <script>
     (function () {
       var root = document.getElementById('hshs-page');
       if (!root) return;
+
       function reveal() {
         if (window.__hshsRevealQueued) return;
         window.__hshsRevealQueued = true;
-        function go() {
+
+        requestAnimationFrame(function () {
           requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              var r = document.documentElement;
-              r.classList.remove('hshs-booting');
-              r.classList.add('hshs-ready');
-              window.__hshsBootDone = true;
-              dropSkel();
-              var boot = document.getElementById('hshs-boot');
-              if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
-              var cover = document.getElementById('hshs-tt-overlay');
-              if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
-            });
+            var r = document.documentElement;
+            r.classList.remove('hshs-booting');
+            r.classList.add('hshs-ready');
+            window.__hshsBootDone = true;
+            var sk = root.querySelector('.hshs-load-skel');
+            if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+            var boot = document.getElementById('hshs-boot');
+            if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+            var cover = document.getElementById('hshs-tt-overlay');
+            if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
           });
-        }
-        var pending = 0;
-        var links = document.querySelectorAll('link[rel="stylesheet"]');
-        for (var i = 0; i < links.length; i++) {
-          if (links[i].sheet) continue;
-          pending++;
-          links[i].addEventListener('load', done);
-          links[i].addEventListener('error', done);
-        }
-        function done() { pending--; if (pending <= 0) go(); }
-        if (pending <= 0) go();
-        setTimeout(go, 700);
+        });
       }
+
       window.__hshsRevealPage = reveal;
-      function dropSkel() {
-        var sk = root.querySelector('.hshs-load-skel');
-        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
-      }
+
       function settled() {
         if (!root.querySelector('.hshs-load-skel')) return root.childElementCount > 0;
         return root.childElementCount > 1;
       }
+
       function check() {
         if (!settled()) return;
         if (window.__hshsSkelWatch) window.__hshsSkelWatch.disconnect();
         reveal();
       }
+
       if (window.MutationObserver) {
         var obs = new MutationObserver(check);
         window.__hshsSkelWatch = obs;
         obs.observe(root, { childList: true });
       }
+
+      var pending = 0;
+      var styleLinks = document.querySelectorAll('link[rel="stylesheet"]');
+      for (var i = 0; i < styleLinks.length; i++) {
+        if (!styleLinks[i].sheet) {
+          pending += 1;
+          styleLinks[i].addEventListener('load', done, { once: true });
+          styleLinks[i].addEventListener('error', done, { once: true });
+        }
+      }
+
+      function done() {
+        pending = Math.max(0, pending - 1);
+        if (pending <= 0) reveal();
+      }
+
+      if (pending <= 0) {
+        setTimeout(reveal, 260);
+      }
+
       setTimeout(function () {
         if (document.documentElement.classList.contains('hshs-ready') && !root.querySelector('.hshs-load-skel')) return;
-        dropSkel();
         reveal();
       }, 12000);
     })();
