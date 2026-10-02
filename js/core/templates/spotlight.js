@@ -1,56 +1,11 @@
-(function (g) {
-  'use strict';
-  g.HshsTemplates = g.HshsTemplates || {};
-  g.HshsTemplates.spotlight = [
-    '<main class="sp-page">',
-    '<section class="sp-hero">',
-    '<div class="sp-hero-copy">',
-    '<span class="sp-kicker">Hawthorne Scribner · Campus hall</span>',
-    '<h1>Student Spotlight</h1>',
-    '<p>Achievements, teams, clubs, and classroom moments worth a closer look.</p>',
-    '</div>',
-    '<div class="sp-hero-mark" aria-hidden="true"><i class="fas fa-award"></i></div>',
-    '</section>',
-    '<section class="sp-stats" id="spStats" aria-label="Spotlight totals"></section>',
-    '<section class="sp-feature" aria-labelledby="spFeatureTitle">',
-    '<div class="sp-section-head"><span>This week</span><h2 id="spFeatureTitle">Featured</h2></div>',
-    '<div id="featuredStudent" class="sp-feature-card">Loading spotlight…</div>',
-    '</section>',
-    '<section class="sp-board" aria-labelledby="spBoardTitle">',
-    '<div class="sp-section-head"><span>Campus halls</span><h2 id="spBoardTitle">Browse by area</h2></div>',
-    '<div class="sp-filters" id="spFilters" role="tablist"></div>',
-    '<div id="spotlightGrid" class="sp-grid"></div>',
-    '</section>',
-    '<section class="sp-split">',
-    '<div class="sp-panel">',
-    '<div class="sp-section-head"><span>Ranked from real posts</span><h2>Hall of Fame</h2></div>',
-    '<div id="hallOfFameList" class="sp-hall"></div>',
-    '</div>',
-    '<div class="sp-panel">',
-    '<div class="sp-section-head"><span>What gets featured</span><h2>Categories</h2></div>',
-    '<div id="spotlightCategories" class="sp-cats"></div>',
-    '</div>',
-    '</section>',
-    '<section class="sp-nominate" id="spotlightCta">',
-    '<div class="sp-section-head"><span>For staff review</span><h2>Nominate a student</h2></div>',
-    '<p class="sp-note">Nominations stay on this device until a staff member features the moment in the gallery.</p>',
-    '<form id="spNominateForm" class="sp-form">',
-    '<label>Student name<input name="name" maxlength="48" required placeholder="First name and class"></label>',
-    '<label>Class<input name="classTag" maxlength="24" placeholder="S2, S4 East…"></label>',
-    '<label>Area<select name="category"><option>Academics</option><option>Sports</option><option>Arts</option><option>Leadership</option><option>Community</option><option>Events</option></select></label>',
-    '<label>Achievement<textarea name="note" maxlength="180" required placeholder="What should the school notice?"></textarea></label>',
-    '<button type="submit"><i class="fas fa-star"></i> Save nomination</button>',
-    '<p id="spFormStatus" class="sp-status" role="status"></p>',
-    '</form>',
-    '<div id="spNominations" class="sp-noms"></div>',
-    '</section>',
-    '<div class="sp-sheet" id="studentModal" hidden>',
-    '<button class="sp-sheet-back" id="modalOverlay" type="button" aria-label="Close"></button>',
-    '<div class="sp-sheet-card" role="dialog" aria-modal="true" aria-labelledby="spSheetTitle">',
-    '<button class="sp-sheet-close" id="closeModal" type="button" aria-label="Close"><i class="fas fa-times"></i></button>',
-    '<div id="modalBody"></div>',
-    '</div>',
-    '</div>',
-    '</main>'
-  ].join('');
-})(typeof window !== 'undefined' ? window : this);
+(function(g){'use strict';g.HshsTemplates=g.HshsTemplates||{};g.HshsTemplates.spotlight=`
+<main class="sp-page" aria-label="HSHS Spotlight">
+<header class="sp-page-head"><a class="sp-back" href="more.html" aria-label="Back"><i class="fas fa-chevron-left"></i></a><div><span class="sp-eyebrow">HSHS WORLD</span><h1>Spotlight</h1><p>Celebrate the people and moments making HSHS shine.</p></div><span class="sp-head-mark"><i class="fas fa-star"></i></span></header>
+<section class="sp-hero"><div class="sp-hero-copy"><span class="sp-kicker"><i class="fas fa-sparkles"></i> THIS WEEK</span><h2>Where HSHS moments get their moment.</h2><p>Discover standout students, achievements, talents, leadership and everyday moments worth remembering.</p><a class="sp-hero-cta" href="#spNominateForm"><i class="fas fa-award"></i> Nominate someone</a></div><div class="sp-hero-orbit" aria-hidden="true"><i class="fas fa-star"></i></div></section>
+<section class="sp-stats" id="spStats" aria-label="Spotlight statistics"></section>
+<section class="sp-feature"><div class="sp-section-head"><div><span class="sp-eyebrow">THE FEATURE</span><h2>In the spotlight</h2></div><i class="fas fa-bolt"></i></div><div id="featuredStudent"></div></section>
+<section class="sp-board"><div class="sp-section-head"><div><span class="sp-eyebrow">DISCOVER</span><h2>Explore the halls</h2></div></div><div class="sp-filters" id="spFilters" role="tablist"></div><div class="sp-grid" id="spotlightGrid"></div></section>
+<section class="sp-lower"><article class="sp-panel"><div class="sp-section-head"><div><span class="sp-eyebrow">CAMPUS ENERGY</span><h2>Hall of Fame</h2></div><i class="fas fa-ranking-star"></i></div><p class="sp-note">A live activity view built from engagement on HSHS posts.</p><div id="hallOfFameList"></div></article><article class="sp-panel"><div class="sp-section-head"><div><span class="sp-eyebrow">DISCOVER</span><h2>Spotlight categories</h2></div><i class="fas fa-compass"></i></div><div class="sp-cats" id="spotlightCategories"></div></article></section>
+<section class="sp-nominate"><div class="sp-nominate-copy"><span class="sp-eyebrow">MAKE SOMEONE'S DAY</span><h2>Know someone who deserves a spotlight?</h2><p>Recognise a student for an achievement, talent, leadership moment or positive contribution to school life.</p></div><form class="sp-form" id="spNominateForm"><div class="sp-form-grid"><label>Student name<input name="name" maxlength="80" required placeholder="Who are you nominating?"></label><label>Class / tag<input name="classTag" maxlength="30" placeholder="e.g. S4 · 2026"></label><label>Category<select name="category"><option>Academics</option><option>Sports</option><option>Arts</option><option>Leadership</option><option>Community</option><option>Events</option></select></label><label class="sp-wide">Why should they be recognised?<textarea name="note" maxlength="300" rows="3" required placeholder="Tell HSHS why this moment matters..."></textarea></label></div><div class="sp-form-actions"><button type="submit"><i class="fas fa-paper-plane"></i> Submit nomination</button><span id="spFormStatus" role="status"></span></div></form><div id="spNominations"></div></section>
+<div class="sp-sheet" id="studentModal" hidden><button class="sp-sheet-back" id="modalOverlay" type="button" aria-label="Close"></button><article class="sp-sheet-card" role="dialog" aria-modal="true" aria-labelledby="spSheetTitle"><button class="sp-sheet-close" id="closeModal" type="button" aria-label="Close"><i class="fas fa-xmark"></i></button><div id="modalBody"></div></article></div>
+</main>`;})(typeof window!=='undefined'?window:this);
