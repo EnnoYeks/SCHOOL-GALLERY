@@ -66,7 +66,7 @@
         var n = TEMPLATE_NAMES[i];
         try {
           var templateUrl = base + 'core/templates/' + n + '.js';
-          await loadScript(n === 'chat' ? templateUrl + '?v=260928chat1' : ver(templateUrl), 'hshs-tpl-' + n);
+          await loadScript(n === 'chat' ? templateUrl + '?v=260928chat1' : n === 'spotlight' ? templateUrl + '?v=261002spot1' : ver(templateUrl), 'hshs-tpl-' + n);
         } catch (e) {}
       }
       await loadScript(ver(base + 'components/ui.js'), 'hshs-comp-ui');

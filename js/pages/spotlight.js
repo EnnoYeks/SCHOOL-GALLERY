@@ -1,1 +1,271 @@
-(function(global){'use strict';var PAGE='spotlight';if(global.__hshsSpotlightPageModule)return;global.__hshsSpotlightPageModule=true;function isPage(){return(location.pathname.split('/').pop()||'').toLowerCase()==='spotlight.html';}function base(){return location.pathname.indexOf('/index/')!==-1?'../':'';}function loadCss(){if(document.querySelector('link[data-hshs-css="css/spotlight.css"]'))return;var l=document.createElement('link');l.rel='stylesheet';l.href=base()+'css/spotlight.css?v=260906s1';l.setAttribute('data-hshs-css','css/spotlight.css');document.head.appendChild(l);}function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'})[c];});}function dateValue(v){var d=v&&v.toDate?v.toDate():new Date(v||0);return isNaN(d.getTime())?0:d.getTime();}function score(p){return Number(p.likes||0)*3+Number(p.comments||0)*2+Number(p.views||0)*.05+Number(p.shares||0); }function media(p){return p.imageUrl||p.image||p.thumbnailUrl||p.mediaURL||p.mediaUrl||'';}function author(p){return p.author||p.authorName||p.displayName||p.userName||'HSHS Student';}function renderCard(p){var img=media(p);return '<article class="student-card" data-id="'+esc(p.id)+'"><div class="student-image">'+(img?'<img src="'+esc(img)+'" alt="'+esc(author(p))+'" loading="lazy">':'<div aria-hidden="true"></div>')+'<span class="student-category-badge">'+esc(p.category||p.type||'Spotlight')+'</span></div><div class="student-info"><h3 class="student-name">'+esc(author(p))+'</h3><div class="student-achievement">'+esc(p.title||'Featured achievement')+'</div><p class="student-bio">'+esc(p.description||'A highlighted contribution from the HSHS community.')+'</p><div class="student-meta"><span>'+esc(p.classTag||'HSHS')+'</span><span>'+new Date(dateValue(p.createdAt||p.timestamp)).toLocaleDateString()+'</span></div><div class="student-engagement"><span class="engagement-item"><i class="fas fa-heart"></i>'+Number(p.likes||0)+'</span><span class="engagement-item"><i class="fas fa-eye"></i>'+Number(p.views||0)+'</span><span class="engagement-item"><i class="fas fa-comment"></i>'+Number(p.comments||0)+'</span></div></div></article>';}function mount(){if(!isPage()||!global.HshsRender)return;var root=document.getElementById('hshs-page');if(!root)return;var tpl=global.HshsTemplates&&global.HshsTemplates[PAGE];if(tpl){global.HshsRender.mountHTML?global.HshsRender.mountHTML(root,tpl):root.innerHTML=tpl;}loadCss();loadData();}async function loadData(){var featured=document.getElementById('featuredStudent'),grid=document.getElementById('spotlightGrid');if(!featured||!grid)return;var db=global.db;if(!db||!db.getPosts){featured.innerHTML='<div class="empty-state">Spotlight data is not available yet.</div>';grid.innerHTML='';return;}try{var posts=await db.getPosts(60,0);posts=(posts||[]).filter(function(p){return !!(p&&p.id);}).sort(function(a,b){return score(b)-score(a)||dateValue(b.createdAt||b.timestamp)-dateValue(a.createdAt||a.timestamp);});if(!posts.length){featured.innerHTML='<div class="empty-state"><i class="fas fa-star"></i><p>No students have been featured yet.</p></div>';grid.innerHTML='';renderExtras([]);return;}var top=posts[0];var img=media(top);featured.innerHTML='<div class="featured-student-image">'+(img?'<img src="'+esc(img)+'" alt="'+esc(author(top))+'">':'<div class="featured-image-empty"><i class="fas fa-user"></i></div>')+'<span class="badge">Featured</span></div><div class="featured-student-info"><h3 class="featured-student-name">'+esc(author(top))+'</h3><div class="featured-student-title">'+esc(top.title||'HSHS Spotlight')+'</div><p class="featured-student-bio">'+esc(top.description||'Recognized through real HSHS community activity.')+'</p><div class="featured-stats"><div class="featured-stat"><div class="featured-stat-value">'+Number(top.likes||0)+'</div><div class="featured-stat-label">Likes</div></div><div class="featured-stat"><div class="featured-stat-value">'+Number(top.views||0)+'</div><div class="featured-stat-label">Views</div></div><div class="featured-stat"><div class="featured-stat-value">'+Number(top.comments||0)+'</div><div class="featured-stat-label">Comments</div></div></div><div class="featured-actions"><button class="btn-action btn-primary-action" data-spotlight-id="'+esc(top.id)+'"><i class="fas fa-eye"></i> View Spotlight</button></div></div>';grid.innerHTML=posts.slice(0,12).map(renderCard).join('');renderExtras(posts);wireModal(posts);}catch(e){console.error('[HSHS] Spotlight load failed',e);featured.innerHTML='<div class="empty-state">We could not load Spotlight right now.</div>';grid.innerHTML='';}}function renderExtras(posts){var by={};posts.forEach(function(p){var n=author(p);if(!by[n])by[n]={name:n,points:0,posts:0};by[n].points+=Math.round(score(p));by[n].posts++;});var people=Object.keys(by).map(function(k){return by[k];}).sort(function(a,b){return b.points-a.points;}).slice(0,10);var hall=document.getElementById('hallOfFameList');if(hall)hall.innerHTML=people.length?people.map(function(x,i){return '<div class="leaderboard-item"><span class="rank-col">'+(i+1)+'</span><span class="name-col">'+esc(x.name)+'</span><span class="points-col">'+x.points+'</span></div>';}).join(''):'<div class="empty-state">No ranking data yet.</div>';var ach=document.getElementById('achievementsList');if(ach)ach.innerHTML=posts.slice(0,8).map(function(p){return '<article class="achievement-card"><div class="achievement-icon"><i class="fas fa-medal"></i></div><div><h3>'+esc(p.title||'HSHS Achievement')+'</h3><p>'+esc(author(p))+'</p></div></article>';}).join('')||'<div class="empty-state">No achievements yet.</div>';var cats=document.getElementById('spotlightCategories');if(cats){var counts={};posts.forEach(function(p){var c=String(p.category||p.type||'other').toLowerCase();counts[c]=(counts[c]||0)+1;});var names={academic:['book','Academic Excellence'],academics:['book','Academic Excellence'],sports:['basketball-ball','Sports'],arts:['palette','Arts & Culture'],community:['heart','Community'],leadership:['crown','Leadership'],events:['calendar','Events'],video:['video','Videos'],photo:['images','Photos'],other:['star','Other']};cats.innerHTML=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];}).slice(0,8).map(function(c){var n=names[c]||names.other;return '<div class="category-card"><div class="category-icon"><i class="fas fa-'+n[0]+'"></i></div><h3>'+esc(n[1])+'</h3><p>'+counts[c]+'</p></div>';}).join('');}}function wireModal(posts){var modal=document.getElementById('studentModal'),body=document.getElementById('modalBody'),close=document.getElementById('closeModal'),overlay=document.getElementById('modalOverlay');if(!modal||!body)return;function open(id){var p=posts.find(function(x){return String(x.id)===String(id);});if(!p)return;var img=media(p);body.innerHTML=(img?'<img src="'+esc(img)+'" alt="'+esc(author(p))+'" style="width:100%;max-height:360px;object-fit:cover;border-radius:14px;margin-bottom:1rem">':'')+'<h2>'+esc(author(p))+'</h2><p><strong>'+esc(p.title||'HSHS Spotlight')+'</strong></p><p>'+esc(p.description||'')+'</p><p>'+Number(p.likes||0)+' likes · '+Number(p.views||0)+' views · '+Number(p.comments||0)+' comments</p>';modal.hidden=false;modal.classList.add('open');}function shut(){modal.hidden=true;modal.classList.remove('open');}gridClicks();function gridClicks(){document.querySelectorAll('[data-spotlight-id]').forEach(function(b){b.onclick=function(){open(b.getAttribute('data-spotlight-id'));};});document.querySelectorAll('.student-card[data-id]').forEach(function(c){c.onclick=function(){open(c.getAttribute('data-id'));};});}if(close)close.onclick=shut;if(overlay)overlay.onclick=shut;}function boot(){function go(){if(!isPage())return;if(global.HshsRender)mount();else setTimeout(go,40);}if(global.HshsApp&&global.HshsApp.whenReady)global.HshsApp.whenReady(go);else document.addEventListener('hshs:foundation-ready',go,{once:true});}document.addEventListener('hshs:page',function(){if(isPage())boot();});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();})(typeof window!=='undefined'?window:this);
+(function (global) {
+  'use strict';
+  if (global.__hshsSpotlightPageModule) return;
+  global.__hshsSpotlightPageModule = true;
+
+  var PAGE = 'spotlight';
+  var STORE = 'hshs-spotlight-nominations';
+  var HALLS = [
+    { id: 'all', label: 'All', icon: 'fa-border-all' },
+    { id: 'academics', label: 'Academics', icon: 'fa-book' },
+    { id: 'sports', label: 'Sports', icon: 'fa-basketball-ball' },
+    { id: 'arts', label: 'Arts', icon: 'fa-palette' },
+    { id: 'leadership', label: 'Leadership', icon: 'fa-crown' },
+    { id: 'community', label: 'Community', icon: 'fa-heart' },
+    { id: 'events', label: 'Events', icon: 'fa-calendar' }
+  ];
+  var state = { posts: [], filter: 'all' };
+
+  function isPage() {
+    return (location.pathname.split('/').pop() || '').toLowerCase() === 'spotlight.html';
+  }
+  function base() {
+    return location.pathname.indexOf('/index/') !== -1 ? '../' : '';
+  }
+  function loadCss() {
+    if (document.querySelector('link[data-hshs-css="css/spotlight.css"]')) return;
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = base() + 'css/spotlight.css?v=261002spot1';
+    l.setAttribute('data-hshs-css', 'css/spotlight.css');
+    document.head.appendChild(l);
+  }
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>'"]/g, function (c) {
+      return { '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '"' }[c];
+    });
+  }
+  function dateValue(v) {
+    var d = v && v.toDate ? v.toDate() : new Date(v || 0);
+    return isNaN(d.getTime()) ? 0 : d.getTime();
+  }
+  function score(p) {
+    return Number(p.likes || 0) * 3 + Number(p.comments || 0) * 2 + Number(p.views || 0) * 0.05 + Number(p.shares || 0);
+  }
+  function media(p) {
+    return p.imageUrl || p.image || p.thumbnailUrl || p.mediaURL || p.mediaUrl || '';
+  }
+  function author(p) {
+    return p.author || p.authorName || p.displayName || p.userName || 'HSHS Student';
+  }
+  function hallOf(p) {
+    var raw = String(p.category || p.type || 'community').toLowerCase();
+    if (/sport/.test(raw)) return 'sports';
+    if (/art|music|drama/.test(raw)) return 'arts';
+    if (/lead/.test(raw)) return 'leadership';
+    if (/event|grad/.test(raw)) return 'events';
+    if (/academ|science|book|study/.test(raw)) return 'academics';
+    if (/communit|club|service/.test(raw)) return 'community';
+    return 'community';
+  }
+  function hallLabel(id) {
+    var hit = HALLS.filter(function (h) { return h.id === id; })[0];
+    return hit ? hit.label : 'Community';
+  }
+  function initial(name) {
+    return esc(String(name || 'H').trim().charAt(0).toUpperCase() || 'H');
+  }
+  function readNoms() {
+    try { return JSON.parse(localStorage.getItem(STORE) || '[]'); } catch (e) { return []; }
+  }
+  function writeNoms(list) {
+    localStorage.setItem(STORE, JSON.stringify(list.slice(0, 24)));
+  }
+
+  function featureHtml(p) {
+    if (!p) {
+      return '<div class="sp-empty"><i class="fas fa-star"></i><strong>The week is still open</strong><p>When a school post is shared, the most active moment becomes the featured spotlight.</p></div>';
+    }
+    var img = media(p);
+    return '<article class="sp-feature-body">' +
+      '<div class="sp-feature-media">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span>' + initial(author(p)) + '</span>') + '</div>' +
+      '<div><span class="sp-pill">' + esc(hallLabel(hallOf(p))) + '</span><h3>' + esc(author(p)) + '</h3><p class="sp-title">' + esc(p.title || 'Campus moment') + '</p><p>' + esc(p.description || 'Recognized from real HSHS gallery activity.') + '</p>' +
+      '<div class="sp-metrics"><span><i class="fas fa-heart"></i> ' + Number(p.likes || 0) + '</span><span><i class="fas fa-eye"></i> ' + Number(p.views || 0) + '</span><span><i class="fas fa-comment"></i> ' + Number(p.comments || 0) + '</span></div>' +
+      '<button type="button" class="sp-open" data-spotlight-id="' + esc(p.id) + '">Open spotlight</button></div></article>';
+  }
+  function cardHtml(p) {
+    var img = media(p);
+    return '<button type="button" class="sp-card" data-spotlight-id="' + esc(p.id) + '">' +
+      '<div class="sp-card-media">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span>' + initial(author(p)) + '</span>') + '</div>' +
+      '<div><span>' + esc(hallLabel(hallOf(p))) + '</span><strong>' + esc(author(p)) + '</strong><small>' + esc(p.title || 'Featured moment') + '</small></div></button>';
+  }
+  function visible() {
+    return state.posts.filter(function (p) {
+      return state.filter === 'all' || hallOf(p) === state.filter;
+    });
+  }
+  function renderStats() {
+    var box = document.getElementById('spStats');
+    if (!box) return;
+    var people = {};
+    state.posts.forEach(function (p) { people[author(p)] = 1; });
+    box.innerHTML = [
+      [state.posts.length, 'Moments'],
+      [Object.keys(people).length, 'Students'],
+      [readNoms().length, 'Nominations']
+    ].map(function (x) {
+      return '<div><b>' + x[0] + '</b><span>' + x[1] + '</span></div>';
+    }).join('');
+  }
+  function renderFilters() {
+    var box = document.getElementById('spFilters');
+    if (!box) return;
+    box.innerHTML = HALLS.map(function (h) {
+      return '<button type="button" class="' + (state.filter === h.id ? 'is-on' : '') + '" data-filter="' + h.id + '"><i class="fas ' + h.icon + '"></i> ' + h.label + '</button>';
+    }).join('');
+    box.onclick = function (e) {
+      var btn = e.target.closest('[data-filter]');
+      if (!btn) return;
+      state.filter = btn.getAttribute('data-filter');
+      renderBoard();
+    };
+  }
+  function renderBoard() {
+    var grid = document.getElementById('spotlightGrid');
+    var featured = document.getElementById('featuredStudent');
+    var list = visible();
+    if (featured) featured.innerHTML = featureHtml(list[0] || state.posts[0] || null);
+    if (!grid) return;
+    grid.innerHTML = list.length
+      ? list.slice(0, 12).map(cardHtml).join('')
+      : '<div class="sp-empty"><i class="fas fa-compass"></i><strong>Nothing in this hall yet</strong><p>Share a photo or video in that area, or nominate someone below.</p></div>';
+    renderFilters();
+    renderStats();
+    renderHall();
+    renderCats();
+    wireModal();
+  }
+  function renderHall() {
+    var hall = document.getElementById('hallOfFameList');
+    if (!hall) return;
+    var by = {};
+    state.posts.forEach(function (p) {
+      var n = author(p);
+      if (!by[n]) by[n] = { name: n, points: 0 };
+      by[n].points += Math.round(score(p));
+    });
+    var people = Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return b.points - a.points; }).slice(0, 6);
+    hall.innerHTML = people.length ? people.map(function (x, i) {
+      return '<div class="sp-rank"><b>' + (i + 1) + '</b><span>' + esc(x.name) + '</span><em>' + x.points + '</em></div>';
+    }).join('') : '<div class="sp-empty compact"><strong>Hall of Fame starts with real posts</strong><p>Likes, comments, and views decide the order.</p></div>';
+  }
+  function renderCats() {
+    var cats = document.getElementById('spotlightCategories');
+    if (!cats) return;
+    cats.innerHTML = HALLS.filter(function (h) { return h.id !== 'all'; }).map(function (h) {
+      var n = state.posts.filter(function (p) { return hallOf(p) === h.id; }).length;
+      return '<button type="button" data-filter="' + h.id + '"><i class="fas ' + h.icon + '"></i><strong>' + h.label + '</strong><small>' + n + ' moment' + (n === 1 ? '' : 's') + '</small></button>';
+    }).join('');
+    cats.onclick = function (e) {
+      var btn = e.target.closest('[data-filter]');
+      if (!btn) return;
+      state.filter = btn.getAttribute('data-filter');
+      var board = document.querySelector('.sp-board');
+      if (board) board.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      renderBoard();
+    };
+  }
+  function renderNoms() {
+    var box = document.getElementById('spNominations');
+    if (!box) return;
+    var list = readNoms();
+    box.innerHTML = list.length ? '<h3>Saved on this device</h3>' + list.map(function (n) {
+      return '<article><b>' + esc(n.name) + '</b><span>' + esc(n.category) + (n.classTag ? ' · ' + esc(n.classTag) : '') + '</span><p>' + esc(n.note) + '</p></article>';
+    }).join('') : '';
+    renderStats();
+  }
+  function wireForm() {
+    var form = document.getElementById('spNominateForm');
+    if (!form || form.dataset.ready) return;
+    form.dataset.ready = '1';
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var data = new FormData(form);
+      var item = {
+        name: String(data.get('name') || '').trim(),
+        classTag: String(data.get('classTag') || '').trim(),
+        category: String(data.get('category') || 'Community'),
+        note: String(data.get('note') || '').trim(),
+        at: Date.now()
+      };
+      if (!item.name || !item.note) return;
+      var list = readNoms();
+      list.unshift(item);
+      writeNoms(list);
+      form.reset();
+      var status = document.getElementById('spFormStatus');
+      if (status) status.textContent = 'Nomination saved on this device.';
+      renderNoms();
+    });
+  }
+  function wireModal() {
+    var modal = document.getElementById('studentModal');
+    var body = document.getElementById('modalBody');
+    if (!modal || !body || modal.dataset.ready) return;
+    modal.dataset.ready = '1';
+    function shut() { modal.hidden = true; }
+    function open(id) {
+      var p = state.posts.filter(function (x) { return String(x.id) === String(id); })[0];
+      if (!p) return;
+      var img = media(p);
+      body.innerHTML = (img ? '<img src="' + esc(img) + '" alt="">' : '<div class="sp-sheet-mark">' + initial(author(p)) + '</div>') +
+        '<span class="sp-pill">' + esc(hallLabel(hallOf(p))) + '</span><h2 id="spSheetTitle">' + esc(author(p)) + '</h2><p><strong>' + esc(p.title || 'HSHS Spotlight') + '</strong></p><p>' + esc(p.description || '') + '</p>';
+      modal.hidden = false;
+    }
+    document.getElementById('hshs-page').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-spotlight-id]');
+      if (btn) open(btn.getAttribute('data-spotlight-id'));
+    });
+    var close = document.getElementById('closeModal');
+    var overlay = document.getElementById('modalOverlay');
+    if (close) close.onclick = shut;
+    if (overlay) overlay.onclick = shut;
+  }
+  function mount() {
+    if (!isPage() || !global.HshsRender) return;
+    var root = document.getElementById('hshs-page');
+    if (!root) return;
+    var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
+    if (tpl) {
+      if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
+      else root.innerHTML = tpl;
+    }
+    loadCss();
+    renderNoms();
+    wireForm();
+    loadData();
+  }
+  async function loadData() {
+    var featured = document.getElementById('featuredStudent');
+    var db = global.db;
+    if (!db || !db.getPosts) {
+      state.posts = [];
+      if (featured) featured.innerHTML = featureHtml(null);
+      renderBoard();
+      return;
+    }
+    try {
+      var posts = await db.getPosts(60, 0);
+      state.posts = (posts || []).filter(function (p) { return p && p.id; }).sort(function (a, b) {
+        return score(b) - score(a) || dateValue(b.createdAt || b.timestamp) - dateValue(a.createdAt || a.timestamp);
+      });
+      renderBoard();
+    } catch (e) {
+      console.error('[HSHS] Spotlight load failed', e);
+      state.posts = [];
+      if (featured) featured.innerHTML = '<div class="sp-empty"><strong>Spotlight could not load</strong><p>Check the connection and open the page again.</p></div>';
+    }
+  }
+  function boot() {
+    function go() {
+      if (!isPage()) return;
+      if (global.HshsRender) mount();
+      else setTimeout(go, 40);
+    }
+    if (global.HshsApp && global.HshsApp.whenReady) global.HshsApp.whenReady(go);
+    else document.addEventListener('hshs:foundation-ready', go, { once: true });
+  }
+  document.addEventListener('hshs:page', function () { if (isPage()) boot(); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
+})(typeof window !== 'undefined' ? window : this);
