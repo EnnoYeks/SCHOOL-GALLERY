@@ -1,221 +1,146 @@
-// ============================================
-// PHOTOS PAGE LOGIC
-// ============================================
+(function () {
+  'use strict';
+  var CAMPUS = [
+    { id: 'ph1', title: 'Morning assembly', description: 'The school gathers before lessons on the Bududa campus.', image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=900&q=70', author: 'HSHS Media', house: 'Campus', category: 'campus', likes: 86, views: 420, comments: 12, createdAt: '2026-09-20' },
+    { id: 'ph2', title: 'Sports Day track', description: 'House teams line up for the 100 metres.', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=900&q=70', author: 'Sports Desk', house: 'Eagle', category: 'sports', likes: 124, views: 690, comments: 18, createdAt: '2026-09-18' },
+    { id: 'ph3', title: 'Library hour', description: 'Quiet reading time in the school library.', image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=70', author: 'Library Club', house: 'Falcon', category: 'campus', likes: 64, views: 310, comments: 6, createdAt: '2026-09-12' },
+    { id: 'ph4', title: 'Football after class', description: 'A friendly match on the school field.', image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=900&q=70', author: 'Sports Desk', house: 'Lion', category: 'sports', likes: 141, views: 802, comments: 22, createdAt: '2026-09-22' },
+    { id: 'ph5', title: 'Art studio', description: 'Colour studies from the creative arts club.', image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=900&q=70', author: 'Arts Club', house: 'Falcon', category: 'houses', likes: 73, views: 280, comments: 9, createdAt: '2026-09-08' },
+    { id: 'ph6', title: 'Hills around Bududa', description: 'The view from the school slopes after rain.', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=70', author: 'HSHS Media', house: 'Campus', category: 'campus', likes: 98, views: 540, comments: 11, createdAt: '2026-09-15' },
+    { id: 'ph7', title: 'Class in session', description: 'A lesson underway in the main block.', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=70', author: 'Academics', house: 'Eagle', category: 'campus', likes: 57, views: 260, comments: 4, createdAt: '2026-09-05' },
+    { id: 'ph8', title: 'House colour day', description: 'Eagle, Lion and Falcon show their colours.', image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=900&q=70', author: 'House Captains', house: 'Lion', category: 'houses', likes: 116, views: 610, comments: 15, createdAt: '2026-09-25' },
+    { id: 'ph9', title: 'Science bench', description: 'A practical session in the science room.', image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=900&q=70', author: 'Science Club', house: 'Eagle', category: 'campus', likes: 69, views: 333, comments: 7, createdAt: '2026-09-11' }
+  ];
 
-class PhotosPage {
+  function seed() { return CAMPUS.map(function (p) { return Object.assign({}, p); }); }
+
+  class PhotosPage {
     constructor() {
-        this.currentFilter = 'all';
-        this.currentPage = 0;
-        this.photosPerPage = (window.CONFIG && CONFIG.pagination && CONFIG.pagination.photosPerPage) || 20;
-        this.init();
+      this.currentFilter = 'all';
+      this.query = '';
+      this.photos = [];
+      this.init();
     }
-
     async init() {
-        this.setupFilters();
-        await this.loadPhotos();
-        this.setupSearch();
-        this.setupModal();
+      this.setupFilters();
+      this.setupSearch();
+      this.setupModal();
+      await this.loadPhotos();
     }
-
     setupFilters() {
-        const buttons = document.querySelectorAll('.filter-btn');
-        buttons.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                buttons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.currentFilter = btn.getAttribute('data-filter');
-                this.currentPage = 0;
-                await this.loadPhotos();
-            });
+      var self = this;
+      document.querySelectorAll('.filter-btn').forEach(function (btn) {
+        if (btn.dataset.wired === '1') return;
+        btn.dataset.wired = '1';
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.filter-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          self.currentFilter = btn.getAttribute('data-filter') || 'all';
+          self.render();
         });
+      });
     }
-
     async loadPhotos() {
-        const grid = document.getElementById('masonryGrid');
-        if (!grid) return;
-
-        let photos = [];
-        try {
-            photos = await (window.db && db.getPhotos ? db.getPhotos(this.photosPerPage * (this.currentPage + 1), 0) : []);
-        } catch (e) { photos = []; }
-
-        // Apply filter
-        if (this.currentFilter === 'popular') {
-            photos = photos.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-        } else if (this.currentFilter === 'trending') {
-            const engagement = (p) => (p.likes || 0) + (p.comments || 0);
-            photos = photos.sort((a, b) => engagement(b) - engagement(a));
-        } else if (this.currentFilter === 'recent') {
-            photos = photos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        }
-
-        const startIndex = this.currentPage * this.photosPerPage;
-        const endIndex = startIndex + this.photosPerPage;
-        const pagePhotos = photos.slice(startIndex, endIndex);
-
-        if (this.currentPage === 0) {
-            grid.innerHTML = '';
-        }
-
-        const frag = document.createDocumentFragment();
-        pagePhotos.forEach((photo) => {
-            const card = this.createPhotoCard(photo);
-            frag.appendChild(card);
-        });
-        grid.appendChild(frag);
-
-        this.currentPage++;
+      var photos = [];
+      try {
+        photos = await (window.db && db.getPhotos ? db.getPhotos(24, 0) : []);
+      } catch (e) { photos = []; }
+      photos = Array.isArray(photos) ? photos.filter(Boolean) : [];
+      this.photos = photos.length ? photos : seed();
+      this.render();
     }
-
+    filtered() {
+      var list = this.photos.slice();
+      var q = this.query.trim().toLowerCase();
+      if (q) {
+        list = list.filter(function (p) {
+          return (p.title || '').toLowerCase().indexOf(q) !== -1 || (p.house || '').toLowerCase().indexOf(q) !== -1 || (p.category || '').toLowerCase().indexOf(q) !== -1;
+        });
+      }
+      if (this.currentFilter === 'popular' || this.currentFilter === 'trending') {
+        list.sort(function (a, b) { return ((b.likes || 0) + (b.comments || 0)) - ((a.likes || 0) + (a.comments || 0)); });
+      } else if (this.currentFilter === 'recent') {
+        list.sort(function (a, b) { return new Date(b.createdAt || 0) - new Date(a.createdAt || 0); });
+      } else if (this.currentFilter === 'sports' || this.currentFilter === 'houses' || this.currentFilter === 'campus') {
+        list = list.filter(function (p) { return (p.category || '') === this.currentFilter; }, this);
+      }
+      return list;
+    }
+    render() {
+      var grid = document.getElementById('masonryGrid');
+      if (!grid) return;
+      var list = this.filtered();
+      grid.innerHTML = '';
+      if (!list.length) {
+        grid.innerHTML = '<div class="photos-empty">No photos match that search yet.</div>';
+        return;
+      }
+      var frag = document.createDocumentFragment();
+      list.forEach(function (photo) { frag.appendChild(this.createPhotoCard(photo)); }, this);
+      grid.appendChild(frag);
+    }
     createPhotoCard(photo) {
-        const card = document.createElement('div');
-        card.className = 'photo-card';
-        try { card.setAttribute('data-photo-id', String(photo.id)); } catch (e) {}
-        try { card.setAttribute('data-post-id', String(photo.id)); } catch (e) {}
-
-        // preview image
-        const img = document.createElement('img');
-        img.className = 'photo-image';
-        try { img.setAttribute('src', photo.image || ''); } catch (e) { img.src = ''; }
-        img.setAttribute('alt', photo.title || 'Photo');
-
-        const overlay = document.createElement('div'); overlay.className = 'photo-overlay';
-
-        // header
-        const header = document.createElement('div'); header.className = 'photo-header';
-        const author = document.createElement('div'); author.className = 'photo-author';
-        const av = document.createElement('img'); av.className = 'author-avatar';
-        av.setAttribute('alt', photo.author || '');
-        try { av.setAttribute('src', photo.authorAvatar || 'https://via.placeholder.com/32'); } catch (e) { av.src = 'https://via.placeholder.com/32'; }
-        const authorName = document.createElement('div'); authorName.className = 'author-name'; authorName.textContent = photo.author || '';
-        author.appendChild(av); author.appendChild(authorName);
-
-        const likeBtn = document.createElement('button'); likeBtn.className = 'photo-like-btn'; likeBtn.type = 'button';
-        likeBtn.setAttribute('aria-label', 'Like');
-        const likeIcon = document.createElement('i'); likeIcon.className = 'far fa-heart';
-        likeBtn.appendChild(likeIcon);
-        // wire reactionManager if present
-        likeBtn.addEventListener('click', function (ev) {
-            ev.stopPropagation();
-            try { if (window.reactionManager && typeof reactionManager.toggleLike === 'function') reactionManager.toggleLike(String(photo.id)); } catch (e) {}
-        });
-
-        header.appendChild(author);
-        header.appendChild(likeBtn);
-
-        // footer
-        const footer = document.createElement('div'); footer.className = 'photo-footer';
-        const title = document.createElement('div'); title.className = 'photo-title'; title.textContent = photo.title || '';
-        const stats = document.createElement('div'); stats.className = 'photo-stats';
-        const statLikes = document.createElement('div'); statLikes.className = 'stat'; statLikes.innerHTML = '<i class="fas fa-heart"></i> ' + (window.Utils && Utils.formatNumber ? Utils.formatNumber(photo.likes || 0) : String(photo.likes || 0));
-        const statViews = document.createElement('div'); statViews.className = 'stat'; statViews.innerHTML = '<i class="fas fa-eye"></i> ' + (window.Utils && Utils.formatNumber ? Utils.formatNumber(photo.views || 0) : String(photo.views || 0));
-        stats.appendChild(statLikes); stats.appendChild(statViews);
-        footer.appendChild(title); footer.appendChild(stats);
-
-        overlay.appendChild(header);
-        overlay.appendChild(footer);
-
-        card.appendChild(img);
-        card.appendChild(overlay);
-
-        card.addEventListener('click', () => {
-            this.openModal(photo);
-        });
-
-        return card;
+      var card = document.createElement('article');
+      card.className = 'photo-card';
+      card.setAttribute('data-photo-id', String(photo.id || ''));
+      var img = document.createElement('img');
+      img.className = 'photo-image';
+      img.alt = photo.title || 'Campus photo';
+      img.loading = 'lazy';
+      img.src = photo.image || '';
+      img.addEventListener('error', function () {
+        img.removeAttribute('src');
+        card.classList.add('is-fallback');
+      });
+      var cap = document.createElement('div');
+      cap.className = 'photo-caption';
+      cap.innerHTML = '<strong></strong><span></span>';
+      cap.querySelector('strong').textContent = photo.title || 'Campus photo';
+      cap.querySelector('span').textContent = (photo.house || 'HSHS') + ' · ' + (photo.likes || 0) + ' likes';
+      card.appendChild(img);
+      card.appendChild(cap);
+      card.addEventListener('click', this.openModal.bind(this, photo));
+      return card;
     }
-
     setupSearch() {
-        const searchBtn = document.querySelector('.search-submit');
-        if (searchBtn) {
-            searchBtn.addEventListener('click', async () => {
-                const input = document.getElementById('photoSearchInput');
-                const query = input ? input.value : '';
-                await this.search(query);
-            });
-        }
+      var self = this;
+      var input = document.getElementById('photoSearchInput');
+      var btn = document.querySelector('.search-submit');
+      function go() { self.query = input ? input.value : ''; self.render(); }
+      if (btn && btn.dataset.wired !== '1') { btn.dataset.wired = '1'; btn.addEventListener('click', go); }
+      if (input && input.dataset.wired !== '1') { input.dataset.wired = '1'; input.addEventListener('input', go); }
     }
-
-    async search(query) {
-        const grid = document.getElementById('masonryGrid');
-        if (!grid) return;
-        let results = [];
-        try { results = await (window.db && db.search ? db.search(query, 'photos') : []); } catch (e) { results = []; }
-        grid.innerHTML = '';
-        const frag = document.createDocumentFragment();
-        results.forEach(photo => {
-            const card = document.createElement('div'); card.className = 'photo-card';
-            try { card.setAttribute('data-photo-id', String(photo.id)); } catch (e) {}
-            try { card.setAttribute('data-post-id', String(photo.id)); } catch (e) {}
-            const img = document.createElement('img'); img.className = 'photo-image'; img.setAttribute('src', photo.image || ''); img.setAttribute('alt', photo.title || '');
-            const overlay = document.createElement('div'); overlay.className = 'photo-overlay';
-            const ptitle = document.createElement('div'); ptitle.className = 'photo-title'; ptitle.textContent = photo.title || '';
-            overlay.appendChild(ptitle);
-            card.appendChild(img); card.appendChild(overlay);
-            card.addEventListener('click', () => this.openModal(photo));
-            frag.appendChild(card);
-        });
-        grid.appendChild(frag);
-    }
-
     setupModal() {
-        const modal = document.getElementById('photoModal');
-        const closeBtn = document.getElementById('modalClose');
-
-        if (!modal) return;
-
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                modal.classList.remove('active');
-            });
-        }
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
+      var modal = document.getElementById('photoModal');
+      var closeBtn = document.getElementById('modalClose');
+      if (!modal || modal.dataset.wired === '1') return;
+      modal.dataset.wired = '1';
+      if (closeBtn) closeBtn.addEventListener('click', function () { modal.classList.remove('active'); });
+      modal.addEventListener('click', function (e) { if (e.target === modal) modal.classList.remove('active'); });
     }
-
     openModal(photo) {
-        const modal = document.getElementById('photoModal');
-        if (!modal) return;
-        const modalImage = document.getElementById('modalImage');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalDescription = document.getElementById('modalDescription');
-
-        if (modalImage) { try { modalImage.setAttribute('src', photo.image || ''); } catch (e) { modalImage.src = ''; } }
-        if (modalTitle) modalTitle.textContent = photo.title || '';
-        if (modalDescription) modalDescription.textContent = photo.description || 'Amazing moment captured!';
-
-        modal.classList.add('active');
+      var modal = document.getElementById('photoModal');
+      if (!modal) return;
+      var modalImage = document.getElementById('modalImage');
+      var modalTitle = document.getElementById('modalTitle');
+      var modalDescription = document.getElementById('modalDescription');
+      if (modalImage) { modalImage.src = photo.image || ''; modalImage.alt = photo.title || ''; }
+      if (modalTitle) modalTitle.textContent = photo.title || '';
+      if (modalDescription) modalDescription.textContent = photo.description || '';
+      modal.classList.add('active');
     }
+    destroy() {}
+  }
 
-    destroy() {
-        // SPA teardown hook (no persistent observers yet).
-    }
-}
-
-// Boot for full page load AND SPA page swaps (hshs:page).
-function startPhotos() {
+  function startPhotos() {
     if (!document.getElementById('masonryGrid')) return;
     try {
-        if (window.__hshsPhotosPage && typeof window.__hshsPhotosPage.destroy === 'function') {
-            window.__hshsPhotosPage.destroy();
-        }
+      if (window.__hshsPhotosPage && typeof window.__hshsPhotosPage.destroy === 'function') window.__hshsPhotosPage.destroy();
     } catch (e) {}
     window.__hshsPhotosPage = new PhotosPage();
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startPhotos);
-} else {
-    startPhotos();
-}
-document.addEventListener('hshs:page', startPhotos);
-window.startPhotos = startPhotos;
-
-// Export for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PhotosPage;
-}
+  }
+  window.startPhotos = startPhotos;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startPhotos);
+  else startPhotos();
+  document.addEventListener('hshs:page', startPhotos);
+})();
