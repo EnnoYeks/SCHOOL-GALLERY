@@ -32,7 +32,7 @@
   }
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>'"]/g, function (c) {
-      return { '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '"' }[c];
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c];
     });
   }
   function dateValue(v) {
