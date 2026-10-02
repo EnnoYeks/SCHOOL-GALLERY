@@ -28,7 +28,7 @@
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = base() + href + '?v=261002photos1';
+    l.href = base() + href + '?v=261002photos2';
     l.setAttribute('data-hshs-css', href);
     document.head.appendChild(l);
   }
@@ -51,6 +51,7 @@
     if (!isPage()) return;
     if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     loadCss('css/photos.css');
+    loadCss('css/photos-campus.css');
     if (!mountTemplate()) return;
     await loadOnce(base() + 'js/photos.js?v=261002photos1', 'hshs-leg-photos');
     try {
