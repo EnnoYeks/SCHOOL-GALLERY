@@ -3,7 +3,7 @@
   var PAGE = 'trending';
   if (global['__hshs' + PAGE + 'PageModule']) return;
   global['__hshs' + PAGE + 'PageModule'] = true;
-  function isPage() { return (location.pathname.split('/').pop() || '').toLowerCase() === 'trending.html'; }
+  function isPage() { return global.HshsRoute ? global.HshsRoute.is(PAGE) : ((location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '') === PAGE); }
   function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
   function loadOnce(src, id) {
     return new Promise(function (resolve) {
@@ -14,7 +14,7 @@
   }
   function loadCss(href) {
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=260907d1';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=261002route1';
     l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
   }
   function mount() {
@@ -26,16 +26,17 @@
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
     loadCss('css/trending.css'); loadCss('css/hshs-hub.css');
-    loadOnce(base() + 'js/trending.js?v=260907d1', 'hshs-leg-trending').then(function () {
+    loadOnce(base() + 'js/trending.js?v=261002route1', 'hshs-leg-trending').then(function () {
       if (typeof global.startTrending === 'function') global.startTrending();
-      return loadOnce(base() + 'js/hshs-discover-ui.js?v=260907d1', 'hshs-discover');
-    }).then(function () { if (global.HshsDiscoverUi) global.HshsDiscoverUi.boot(); });
+      return loadOnce(base() + 'js/hshs-discover-ui.js?v=261002route1', 'hshs-discover');
+    }).then(function () { if (global.HshsDiscoverUi) global.HshsDiscoverUi.boot(); if (global.HshsRoute) global.HshsRoute.reveal(); });
   }
   function boot() {
     function go() { if (!isPage()) return; if (!global.HshsRender) { setTimeout(go, 40); return; } mount(); }
     if (global.HshsApp && typeof global.HshsApp.whenReady === 'function') global.HshsApp.whenReady(go);
     else if (global.HshsRender) go();
     else document.addEventListener('hshs:foundation-ready', go, { once: true });
+    go(); setTimeout(go, 400);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
   document.addEventListener('hshs:page', function () { if (isPage()) mount(); });
