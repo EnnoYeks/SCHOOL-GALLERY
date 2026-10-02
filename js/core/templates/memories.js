@@ -79,4 +79,5 @@
     <div class="memories-my-copy"><span class="memories-kicker"><i class="far fa-bookmark"></i> YOUR ARCHIVE</span><h2>My Memories</h2><p>Keep the moments you want to come back to. Your saved memories will live here.</p></div>
     <a class="memories-outline-btn memories-my-btn" href="../index/saved.html">Open saved memories <i class="fas fa-arrow-right"></i></a>
   </section>
-</main`;})(typeof window!=='undefined'?window:this);
+</main>
+`;})(typeof window!=='undefined'?window:this);
