@@ -16,7 +16,7 @@
     var f = (path.split('/').pop() || 'index.html').toLowerCase();
     if (!f || f === 'index.html') return 'index.html';
     if (f === 'clips.html' || f === 'shorts.html') return 'buzz.html';
-    if (f === 'contact.html') return 'contat.html';
+    if (f === 'contat.html') return 'contact.html';
     return f;
   }
   function idx(file) {

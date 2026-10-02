@@ -54,7 +54,8 @@
             R().el('h4', { text: 'Quick Links' }),
             R().el('a', { href: b + 'index.html', text: 'Home' }),
             R().el('a', { href: b + 'index/gallery.html', text: 'Gallery' }),
-            R().el('a', { href: b + 'index/videos.html', text: 'Vibe' }),
+            R().el('a', { href: b + 'index/buzz.html', text: 'Vibe' }),
+            R().el('a', { href: b + 'index/videos.html', text: 'Buzz' }),
             R().el('a', { href: b + 'index/about.html', text: 'About' })
           ]),
           R().el('div', { className: 'footer-section' }, [

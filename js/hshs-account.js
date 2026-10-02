@@ -140,8 +140,8 @@
         html += '<p class="hshs-menu-kicker">Campus</p>';
         html += menuItem(sub('gallery.html'), 'fa-image', 'Gallery', 'All photos and videos');
         html += menuItem(sub('photos.html'), 'fa-camera', 'Photos', 'School photo albums');
-        html += menuItem(sub('videos.html'), 'fa-play', 'Vibe', 'Campus videos');
-        html += menuItem(sub('buzz.html'), 'fa-bolt', 'Buzz', 'Short clips from around school');
+        html += menuItem(sub('videos.html'), 'fa-play', 'Buzz', 'Long school videos');
+        html += menuItem(sub('buzz.html'), 'fa-bolt', 'Vibe', 'Short campus clips');
         html += '<p class="hshs-menu-kicker">Discover</p>';
         html += menuItem(sub('trending.html'), 'fa-fire', 'Trending', 'What the school is talking about');
         html += menuItem(sub('spotlight.html'), 'fa-trophy', 'Spotlight', 'Featured students and moments');
@@ -151,7 +151,7 @@
         html += menuItem(sub('settings.html'), 'fa-gear', 'Settings', 'Theme, account and preferences');
         html += menuItem(sub('settings.html') + '#privacy', 'fa-shield-halved', 'Privacy', 'Privacy settings and controls');
         html += menuItem(sub('about.html'), 'fa-graduation-cap', 'About', 'About HSHS World');
-        html += menuItem(sub('contat.html'), 'fa-circle-question', 'Help & Support', 'Get help and contact support');
+        html += menuItem(sub('contact.html'), 'fa-circle-question', 'Help & Support', 'Get help and contact support');
         try {
             if (localStorage.getItem('adminToken')) {
                 html += menuItem(sub('admin.html'), 'fa-user-shield', 'Staff desk', 'Admin tools');

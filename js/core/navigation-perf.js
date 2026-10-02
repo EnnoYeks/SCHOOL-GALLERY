@@ -8,14 +8,28 @@
   var started = false;
   var targets = ['gallery.html', 'buzz.html', 'photos.html', 'videos.html', 'trending.html', 'more.html'];
 
+  function projectBase() {
+    var path = location.pathname;
+    var marker = '/SCHOOL-GALLERY/';
+    var at = path.indexOf(marker);
+    if (at !== -1) return path.slice(0, at) + marker;
+    var idx = path.indexOf('/index/');
+    if (idx !== -1) return path.slice(0, idx + 1);
+    if (/(^|\/)index\.html$/i.test(path)) return path.replace(/index\.html$/i, '');
+    return path.endsWith('/') ? path : path.replace(/[^/]*$/, '');
+  }
+
   function canonical(url) {
     try {
       var u = new URL(url, location.href);
       var file = (u.pathname.split('/').pop() || '').toLowerCase();
-      if (file === 'contact.html') u.pathname = u.pathname.replace(/contact\.html$/i, 'contat.html');
+      if (file === 'contat.html') u.pathname = u.pathname.replace(/contat\.html$/i, 'contact.html');
       if (file === 'clips.html' || file === 'shorts.html') u.pathname = u.pathname.replace(/(clips|shorts)\.html$/i, 'buzz.html');
-      if (['gallery.html','photos.html','videos.html','trending.html','spotlight.html','polls.html','memories.html','about.html','contat.html','profile.html','settings.html','admin.html','buzz.html','chat.html','more.html'].indexOf(file) !== -1 && u.pathname.indexOf('/index/') === -1) {
-        u.pathname = '/index/' + file;
+      var pages = ['gallery.html','photos.html','videos.html','trending.html','spotlight.html','polls.html','memories.html','about.html','contact.html','profile.html','settings.html','admin.html','buzz.html','chat.html','more.html','login.html','search.html','saved.html','notifications.html'];
+      if (pages.indexOf(file) !== -1 && u.pathname.indexOf('/index/') === -1) {
+        var base = projectBase();
+        if (base.charAt(base.length - 1) !== '/') base += '/';
+        u.pathname = base + 'index/' + file;
       }
       return u;
     } catch (e) { return null; }
