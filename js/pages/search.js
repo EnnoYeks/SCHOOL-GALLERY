@@ -25,12 +25,12 @@
     if (document.querySelector('link[data-hshs-search-css]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = base() + 'css/hshs-account.css?v=260921s1';
+    l.href = base() + 'css/hshs-account.css?v=261002follow1';
     l.setAttribute('data-hshs-search-css', '1');
     document.head.appendChild(l);
     var s = document.createElement('link');
     s.rel = 'stylesheet';
-    s.href = base() + 'css/hshs-search.css?v=260921s1';
+    s.href = base() + 'css/hshs-search.css?v=261002follow1';
     document.head.appendChild(s);
   }
   function recents() {
@@ -51,21 +51,32 @@
     if (g.HshsPeople && g.HshsPeople.profileUrl) return g.HshsPeople.profileUrl(u);
     return 'profile.html?uid=' + encodeURIComponent(u.uid || u.id || '');
   }
-  function personRow(u, opts) {
-    opts = opts || {};
-    var name = u.name || u.fullName || 'HSHS Student';
-    var user = String(u.username || 'student').replace(/^@/, '');
+  function realPeople(rows) {
+    var api = g.HshsPeople;
+    var self = api && api.me ? api.me() : null;
+    return (rows || []).filter(function (u) {
+      if (api && api.isRealAccount && !api.isRealAccount(u)) return false;
+      if (self && (self.uid === u.uid || self.id === u.id)) return false;
+      return !!(u && u.uid && u.username);
+    });
+  }
+  function personRow(u) {
+    var name = u.name || u.fullName || 'Student';
+    var user = String(u.username || '').replace(/^@/, '');
     var photo = u.photoURL || u.avatar || '';
     var av = photo
       ? '<img src="' + esc(photo) + '" alt="">'
       : esc(name.charAt(0).toUpperCase());
-    var follow = opts.follow
-      ? '<button type="button" class="hs-follow" data-hs-follow="' + esc(u.uid || u.id || '') + '">Follow</button>'
-      : '';
-    return '<a class="hs-person" href="' + esc(profileHref(u)) + '">' +
+    var line = '@' + user;
+    if (u.classYear && u.classYear !== 'Campus') line += ' · ' + u.classYear;
+    else if (u.house) line += ' · ' + u.house;
+    var on = g.HshsPeople && g.HshsPeople.followingLocal && g.HshsPeople.followingLocal(u.uid);
+    return '<article class="hs-person">' +
+      '<a class="hs-person-main" href="' + esc(profileHref(u)) + '">' +
       '<span class="hs-ava">' + av + '</span>' +
-      '<span><b>' + esc(name) + '</b><small>@' + esc(user) + (u.classYear ? ' · ' + esc(u.classYear) : '') + '</small></span>' +
-      follow + '</a>';
+      '<span><b>' + esc(name) + '</b><small>' + esc(line) + '</small></span></a>' +
+      '<button type="button" class="hs-follow' + (on ? ' is-on' : '') + '" data-hs-follow="' + esc(u.uid) + '">' +
+      (on ? 'Following' : 'Follow') + '</button></article>';
   }
   function mediaCell(p) {
     var href = isVideo(p) ? 'videos.html' : 'photos.html';
@@ -86,9 +97,7 @@
     if (!box) return;
     var list = recents();
     if (!list.length) {
-      box.innerHTML = '<button type="button" class="hs-chip" data-hs-q="sports day"><i class="fas fa-clock-rotate-left"></i>Sports Day</button>' +
-        '<button type="button" class="hs-chip" data-hs-q="assembly"><i class="fas fa-clock-rotate-left"></i>Assembly</button>' +
-        '<button type="button" class="hs-chip" data-hs-q="science fair"><i class="fas fa-clock-rotate-left"></i>Science Fair</button>';
+      box.innerHTML = '<span class="hs-hint">Searches you make will show up here.</span>';
       return;
     }
     box.innerHTML = list.map(function (q) {
@@ -102,12 +111,21 @@
     try {
       if (g.HshsPeople && g.HshsPeople.listUsers) rows = await g.HshsPeople.listUsers();
     } catch (e) { rows = []; }
-    rows = (rows || []).slice(0, 6);
+    rows = realPeople(rows).slice(0, 8);
     if (!rows.length) {
-      box.innerHTML = '<div class="hs-empty"><p>Sign in to find classmates here.</p></div>';
+      box.innerHTML = '<div class="hs-empty"><p>No classmate accounts yet. Once someone signs up, they show up here.</p></div>';
       return;
     }
-    box.innerHTML = rows.map(function (u) { return personRow(u, { follow: true }); }).join('');
+    box.innerHTML = rows.map(personRow).join('');
+    rows.forEach(function (u) {
+      if (!g.HshsPeople || !g.HshsPeople.isFollowing) return;
+      g.HshsPeople.isFollowing(u.uid).then(function (on) {
+        var btn = box.querySelector('[data-hs-follow="' + u.uid + '"]');
+        if (!btn) return;
+        btn.textContent = on ? 'Following' : 'Follow';
+        btn.classList.toggle('is-on', !!on);
+      });
+    });
   }
   function showHome(on) {
     var home = $('hsSearchHome');
@@ -133,7 +151,7 @@
       photos = (photos || []).filter(function (p) { return matchText(p, q); });
       videos = (videos || []).filter(function (p) { return matchText(p, q); });
     }
-    return { people: people || [], posts: posts || [], photos: photos || [], videos: videos || [] };
+    return { people: realPeople(people), posts: posts || [], photos: photos || [], videos: videos || [] };
   }
   function paintResults(data, q) {
     var people = data.people || [];
@@ -149,9 +167,7 @@
     var mOut = $('hsMediaOut');
     var empty = $('hsEmpty');
     if (pOut) {
-      pOut.innerHTML = people.length ? ('<p class="hs-kicker">People</p>' + people.map(function (u) {
-        return personRow(u, { follow: true });
-      }).join('')) : '';
+      pOut.innerHTML = people.length ? ('<p class="hs-kicker">People</p>' + people.map(personRow).join('')) : '';
     }
     if (mOut) {
       var cells = (TAB === 'videos' ? videos : TAB === 'photos' ? photos : photos.concat(videos)).slice(0, 24);
@@ -160,7 +176,7 @@
     }
     if (empty) {
       empty.hidden = count > 0;
-      empty.innerHTML = count ? '' : '<div class="hs-empty"><i class="fas fa-magnifying-glass"></i><h3>No matches</h3><p>Try a name, class, or event like Sports Day.</p></div>';
+      empty.innerHTML = count ? '' : '<div class="hs-empty"><i class="fas fa-magnifying-glass"></i><h3>No matches</h3><p>Try a classmate name or username.</p></div>';
     }
   }
   async function run(q) {
@@ -231,8 +247,13 @@
         e.preventDefault();
         e.stopPropagation();
         var uid = fol.getAttribute('data-hs-follow');
-        if (!g.HshsPeople || !g.HshsPeople.toggleFollow) return;
+        if (!g.HshsPeople || !g.HshsPeople.me || !g.HshsPeople.me()) {
+          location.href = 'login.html?next=' + encodeURIComponent(location.pathname + location.search);
+          return;
+        }
+        fol.disabled = true;
         g.HshsPeople.toggleFollow(uid).then(function (res) {
+          fol.disabled = false;
           if (!res || !res.ok) return;
           fol.textContent = res.following ? 'Following' : 'Follow';
           fol.classList.toggle('is-on', !!res.following);
