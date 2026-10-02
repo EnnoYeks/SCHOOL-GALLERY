@@ -1,4 +1,24 @@
 (function () {
+    if (window.HshsRoute) return;
+    var ALIAS = { vibe: 'buzz', clips: 'buzz', shorts: 'buzz', studio: 'videos', contat: 'contact', '': 'home', index: 'home', 'index.html': 'home' };
+    function name() {
+        var file = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
+        return ALIAS[file] || file || 'home';
+    }
+    window.HshsRoute = {
+        name: name,
+        is: function (page) {
+            var want = ALIAS[page] || page;
+            return name() === want || document.documentElement.getAttribute('data-hshs-page') === want;
+        },
+        reveal: function () {
+            if (typeof window.__hshsRevealPage === 'function') window.__hshsRevealPage();
+            document.documentElement.classList.add('hshs-ready');
+            document.documentElement.classList.remove('hshs-booting');
+        }
+    };
+})();
+(function () {
     if (window.__hshsBoot) return;
     window.__hshsBoot = true;
 
@@ -92,6 +112,9 @@
         try {
             var f = (new URL(href, location.href).pathname.split('/').pop() || 'index.html').toLowerCase();
             if (!f) f = 'index.html';
+            var alias = { vibe: 'buzz.html', clips: 'buzz.html', shorts: 'buzz.html', studio: 'videos.html', contat: 'contact.html', gallery: 'gallery.html', photos: 'photos.html', videos: 'videos.html', trending: 'trending.html', spotlight: 'spotlight.html', polls: 'polls.html', memories: 'memories.html', about: 'about.html', profile: 'profile.html', settings: 'settings.html', contact: 'contact.html', buzz: 'buzz.html' };
+            if (alias[f]) return alias[f];
+            if (f.indexOf('.') === -1) f += '.html';
             if (f === 'clips.html' || f === 'shorts.html' || f === 'vibe.html') f = 'buzz.html';
             if (f === 'contat.html') f = 'contact.html';
             return f;
