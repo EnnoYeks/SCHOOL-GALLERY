@@ -4,6 +4,8 @@
   g.__hshsPeople = true;
 
   var cache = { users: [], at: 0 };
+  var DEMO_ID = /^(u-demo|u-prefect|u-sports|u-choir|u-lab|u-house|u-maya|u-brian)$/;
+  var DEMO_NAME = /Amina Namukasa|Joel Wambede|Maya Okello|Brian Kato|Daniel Okello|Aisha Nakitende|Faith Namulondo|Gloria Nankinga|Mercy Atim|Joseph Ssemmanda|Sports Club|Choir Desk/;
 
   function db() { return g.db || null; }
   function realUser() {
@@ -38,6 +40,16 @@
       coverURL: p.coverURL || p.cover || ''
     };
   }
+  function isRealAccount(u) {
+    if (!u || !u.uid) return false;
+    if (DEMO_ID.test(u.uid) || DEMO_ID.test(u.id || '')) return false;
+    if (DEMO_NAME.test(u.name || '') || DEMO_NAME.test(u.username || '')) return false;
+    var name = String(u.name || '').trim();
+    var user = String(u.username || '').trim();
+    if (!user || user === 'student' || user === 'guest') return false;
+    if (!name || name === 'HSHS Student' || name === 'Guest User') return false;
+    return true;
+  }
   function me() {
     var user = realUser();
     var p = shape(localProfile());
@@ -67,10 +79,8 @@
     if (!force && cache.users.length && now - cache.at < 20000) return cache.users.slice();
     var rows = [];
     if (db() && db().listUsers) rows = await db().listUsers(80);
-    cache.users = rows || [];
+    cache.users = (rows || []).map(shape).filter(isRealAccount);
     cache.at = now;
-    var self = me();
-    if (self && !cache.users.some(function (u) { return u.uid === self.uid; })) cache.users.unshift(self);
     return cache.users.slice();
   }
 
@@ -92,8 +102,10 @@
   }
 
   async function search(q) {
-    if (db() && db().searchUsers) return db().searchUsers(q, 24);
-    var rows = await listUsers();
+    var rows = [];
+    if (db() && db().searchUsers) rows = await db().searchUsers(q, 24);
+    else rows = await listUsers();
+    rows = (rows || []).map(shape).filter(isRealAccount);
     var needle = String(q || '').toLowerCase().trim().replace(/^@/, '');
     if (!needle) return rows;
     return rows.filter(function (u) {
@@ -107,7 +119,7 @@
   }
   function setLocalFollow(uid, on) {
     var map = localFollows();
-    if (on) map[uid] = 1;
+    if (on) map[uid] = Date.now();
     else delete map[uid];
     try { localStorage.setItem(FOLLOW_KEY, JSON.stringify(map)); } catch (e) {}
     return !!map[uid];
@@ -120,13 +132,16 @@
   async function toggleFollow(uid) {
     if (!uid) return { ok: false, error: 'Missing person.', following: false };
     if (!signedEnough()) return { ok: false, error: 'Sign in first.', following: false };
-    if (db() && db().toggleFollow) {
+    var self = me();
+    if (self && self.uid === uid) return { ok: false, error: 'You cannot follow yourself.', following: false };
+    if (db() && db().toggleFollow && realUser()) {
       try {
         var res = await db().toggleFollow(uid);
         if (res && res.ok) {
           setLocalFollow(uid, !!res.following);
           return res;
         }
+        if (res && res.error) return res;
       } catch (e) {}
     }
     var on = !localFollows()[uid];
@@ -152,6 +167,7 @@
     me: me,
     realUser: realUser,
     authState: authState,
+    isRealAccount: isRealAccount,
     listUsers: listUsers,
     getUser: getUser,
     getByUsername: getByUsername,
@@ -159,18 +175,21 @@
     toggleFollow: toggleFollow,
     followingLocal: function (uid) { return !!localFollows()[uid]; },
     isFollowing: function (uid) {
-      if (db() && db().isFollowing) {
+      if (db() && db().isFollowing && realUser()) {
         return db().isFollowing(uid).then(function (v) { return !!v || !!localFollows()[uid]; }).catch(function () { return !!localFollows()[uid]; });
       }
       return Promise.resolve(!!localFollows()[uid]);
     },
     followCounts: function (uid) { return db() && db().followCounts ? db().followCounts(uid) : Promise.resolve({ followers: 0, following: 0 }); },
-    listFollowers: function (uid) { return db() && db().listFollowers ? db().listFollowers(uid) : Promise.resolve([]);
+    listFollowers: function (uid) {
+      if (!(db() && db().listFollowers)) return Promise.resolve([]);
+      return db().listFollowers(uid).then(function (rows) { return (rows || []).filter(isRealAccount); });
     },
-    listFollowing: function (uid) { return db() && db().listFollowing ? db().listFollowing(uid) : Promise.resolve([]);
+    listFollowing: function (uid) {
+      if (!(db() && db().listFollowing)) return Promise.resolve([]);
+      return db().listFollowing(uid).then(function (rows) { return (rows || []).filter(isRealAccount); });
     },
-    mediaByAuthor: function (uid) { return db() && db().mediaByAuthor ? db().mediaByAuthor(uid) : Promise.resolve([]);
-    },
+    mediaByAuthor: function (uid) { return db() && db().mediaByAuthor ? db().mediaByAuthor(uid) : Promise.resolve([]); },
     startChat: function (peer) { return db() && db().startDirectChat ? db().startDirectChat(peer) : Promise.resolve({ ok: false, error: 'Chat is not ready.' }); },
     profileUrl: profileUrl,
     chatUrl: chatUrl,
