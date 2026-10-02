@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '261002follow1';
+var HSHS_ASSET_VER = '261002bottom1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
