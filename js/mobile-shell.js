@@ -9,7 +9,7 @@
   window.__hshsMobileShell = true;
   window.__hshsMobileShellBoot = true;
 
-  var VER = '261004tpl1';
+  var VER = '261004tpl2';
   var ALIAS = {
     '': 'home',
     index: 'home',
@@ -88,12 +88,44 @@
     var key = file.replace(/\.html$/, '');
     return ALIAS[file] || ALIAS[key] || key || 'home';
   }
+  var PAGE_FILES = {
+    'gallery.html': 1, 'photos.html': 1, 'videos.html': 1, 'trending.html': 1,
+    'spotlight.html': 1, 'polls.html': 1, 'memories.html': 1, 'about.html': 1,
+    'contact.html': 1, 'contat.html': 1, 'profile.html': 1, 'settings.html': 1,
+    'admin.html': 1, 'clips.html': 1, 'shorts.html': 1, 'buzz.html': 1,
+    'chat.html': 1, 'more.html': 1, 'search.html': 1, 'saved.html': 1,
+    'notifications.html': 1, 'login.html': 1, 'edit-profile.html': 1
+  };
+  function appRoot() {
+    var path = location.pathname || '/';
+    var cut = path.indexOf('/index/');
+    if (cut !== -1) return path.slice(0, cut + 1);
+    return path.replace(/[^/]*$/, '');
+  }
   function canonicalize(url) {
     var next = new URL(url, location.href);
-    var file = (next.pathname.split('/').pop() || '').toLowerCase();
-    if (file === 'contat.html') next.pathname = next.pathname.replace(/contat\.html$/i, 'contact.html');
-    if (file === 'clips.html' || file === 'shorts.html') next.pathname = next.pathname.replace(/(clips|shorts)\.html$/i, 'buzz.html');
+    var file = (next.pathname.split('/').pop() || 'index.html').toLowerCase();
+    if (!file) file = 'index.html';
+    if (file === 'contat.html') file = 'contact.html';
+    if (file === 'clips.html' || file === 'shorts.html') file = 'buzz.html';
+    if (file === 'index.html' || PAGE_FILES[file]) {
+      var root = appRoot();
+      if (root.charAt(root.length - 1) !== '/') root += '/';
+      next.pathname = file === 'index.html' ? (root + 'index.html') : (root + 'index/' + file);
+    }
     return next;
+  }
+  function fixLinks(scope) {
+    var root = scope || document;
+    root.querySelectorAll('a[href]').forEach(function (a) {
+      var raw = a.getAttribute('href') || '';
+      if (!raw || raw.charAt(0) === '#' || raw.indexOf('mailto:') === 0 || raw.indexOf('tel:') === 0) return;
+      try {
+        var next = canonicalize(a.href);
+        if (next.origin !== location.origin) return;
+        a.setAttribute('href', next.pathname + next.search + next.hash);
+      } catch (e) {}
+    });
   }
   function isAdmin() {
     try { return !!localStorage.getItem('adminToken'); } catch (e) { return false; }
@@ -346,12 +378,16 @@
     if (window.HshsRender && window.HshsRender.mountHTML) window.HshsRender.mountHTML(root, tpl);
     else root.innerHTML = tpl;
     document.title = TITLES[name] || 'HSHS World';
+    fixLinks(document);
+    rebuildMoreGrid();
     markActive();
     popIn(root);
     window.scrollTo(0, 0);
     await ensurePageScript(name);
     document.dispatchEvent(new CustomEvent('hshs:page', { detail: { page: name, url: next.href } }));
     if (window.HshsRoute && window.HshsRoute.reveal) window.HshsRoute.reveal();
+    document.title = TITLES[name] || 'HSHS World';
+    fixLinks(document);
   }
 
   function isAppLink(anchor) {
