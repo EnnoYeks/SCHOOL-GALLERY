@@ -85,7 +85,7 @@
       var el = document.getElementById(id);
       if (!el) return;
       el.setAttribute('data-count', String(Number(stats[id] || 0)));
-      el.textContent = '0';
+      el.textContent = formatCount(Number(stats[id] || 0));
     });
     animateCounts();
     var featured = (store && typeof store.featured === 'function') ? store.featured(4) : posts.slice(0, 4);
@@ -140,6 +140,7 @@
     }, { threshold: 0.35 });
     var section = document.querySelector('.home-stats');
     if (section) io.observe(section); else run();
+    setTimeout(run, 900);
   }
   async function mount() {
     if (!isPage() || !global.HshsRender || global.__hshsHomeMounted) return;
