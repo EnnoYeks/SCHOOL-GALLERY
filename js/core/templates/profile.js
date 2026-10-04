@@ -39,10 +39,10 @@
       </section>
 
       <nav class="pf-tabs" role="tablist" aria-label="Profile content">
-        <button class="on" data-tab="photos" type="button"><i class="fas fa-grid-2"></i><span>Posts</span></button>
+        <button class="on" data-tab="posts" type="button"><i class="fas fa-grid-2"></i><span>Posts</span></button>
         <button data-tab="photos" type="button"><i class="fas fa-image"></i><span>Photos</span></button>
         <button data-tab="videos" type="button"><i class="fas fa-play"></i><span>Videos</span></button>
-        <button data-tab="saved" type="button"><i class="far fa-heart"></i><span>Likes</span></button>
+        <button data-tab="likes" type="button"><i class="far fa-heart"></i><span>Likes</span></button>
         <button data-tab="saved" type="button"><i class="far fa-bookmark"></i><span>Saved</span></button>
         <button data-pf="followers" type="button"><i class="fas fa-user-group"></i><span>Friends</span></button>
       </nav>
