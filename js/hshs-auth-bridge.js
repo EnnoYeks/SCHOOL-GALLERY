@@ -56,8 +56,7 @@
   function goLogin(next) {
     var url = loginHref();
     if (next) url += (url.indexOf('?') >= 0 ? '&' : '?') + 'next=' + encodeURIComponent(next);
-    if (typeof window.__hshsNavigate === 'function') window.__hshsNavigate(url);
-    else location.href = url;
+    location.assign(url);
   }
 
   function openMore() {

@@ -14,8 +14,8 @@
     html, body { background: #071433; margin: 0; }
     #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
     html:not(.hshs-ready) #hshs-page > :not(.hshs-load-skel) {
-      opacity: 0 !important;
-      visibility: hidden !important;
+      opacity: 1 !important;
+      visibility: visible !important;
     }
     html.hshs-ready #hshs-page > :not(.hshs-load-skel) {
       animation: hshs-pop-in 220ms ease;
@@ -203,7 +203,8 @@
       if (link) link.addEventListener('load', go);
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryGo);
       else tryGo();
-      setTimeout(go, 2500);
+      go();
+      setTimeout(go, 400);
     })();
   </script>
   <script type="module" src="../js/config.js?v=260926allpages2"></script>

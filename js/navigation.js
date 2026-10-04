@@ -193,3 +193,35 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-final-guard-js', 'hshs-final-guard.js');
     add('hshs-nodemo-hard-js', 'hshs-nodemo-hard.js');
 })();
+
+
+(function forceAuthHardNav() {
+  function isAuth(url) {
+    try {
+      var u = new URL(url, location.href);
+      var f = (u.pathname.split('/').pop() || '').toLowerCase();
+      return f === 'login.html' || f === 'edit-profile.html' || f === 'login' || f === 'edit-profile';
+    } catch (e) {
+      return /login|edit-profile/i.test(String(url || ''));
+    }
+  }
+  function wrap() {
+    if (!window.__hshsNavigate || window.__hshsNavigate.__authHard) return;
+    var orig = window.__hshsNavigate;
+    function wrapped(url, fromHistory) {
+      if (isAuth(url)) {
+        location.assign(url);
+        return;
+      }
+      return orig(url, fromHistory);
+    }
+    wrapped.__authHard = true;
+    window.__hshsNavigate = wrapped;
+  }
+  wrap();
+  var n = 0;
+  var iv = setInterval(function () {
+    wrap();
+    if (++n > 40) clearInterval(iv);
+  }, 250);
+})();

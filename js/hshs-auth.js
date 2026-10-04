@@ -44,8 +44,7 @@
   function redirectAfterAuth() {
     var next = new URLSearchParams(location.search).get('next');
     var dest = next || (location.pathname.indexOf('/index/') !== -1 ? '../index.html' : 'index.html');
-    if (typeof window.__hshsNavigate === 'function') window.__hshsNavigate(dest);
-    else location.href = dest;
+    location.assign(dest);
   }
 
   function showPanel(name) {

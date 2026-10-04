@@ -43,9 +43,7 @@
   }
   function goLogin(e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
-    var url = loginUrl();
-    try { if (typeof g.__hshsNavigate === 'function') { g.__hshsNavigate(url); return; } } catch (err) {}
-    location.href = url;
+    location.assign(loginUrl());
   }
   function localProfile() {
     if (g.hshsProfile && g.hshsProfile.uid) return g.hshsProfile;
