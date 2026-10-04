@@ -31,6 +31,7 @@
         s.notifications = (s.notifications || []).filter(function (n) { return !isDemo(n); });
         s.comments = (s.comments || []).filter(function (c) { return !isDemo(c); });
         s.follows = (s.follows || []).filter(function (f) { return !DEMO_ID.test(f.followerId || '') && !DEMO_ID.test(f.followingId || ''); });
+        try { localStorage.setItem('hshsWorldStore_v2', JSON.stringify(s)); } catch (e) {}
         try { localStorage.setItem('hshsWorldStore_v4', JSON.stringify(s)); } catch (e) {}
       }
     } catch (e) {}

@@ -13,7 +13,7 @@
     gallery: { path: 'index/gallery.html', appPath: '/gallery', title: 'Gallery' },
     photos: { path: 'index/photos.html', appPath: '/photos', title: 'Photos' },
     videos: { path: 'index/videos.html', appPath: '/videos', title: 'HSHS Studio' },
-    vibe: { path: 'index/videos.html', appPath: '/vibe', title: 'HSHS Studio', alias: true },
+    vibe: { path: 'index/buzz.html', appPath: '/vibe', title: 'Vibe', alias: true },
     trending: { path: 'index/trending.html', appPath: '/trending', title: 'Trending' },
     spotlight: { path: 'index/spotlight.html', appPath: '/spotlight', title: 'Spotlight' },
     polls: { path: 'index/polls.html', appPath: '/polls', title: 'Polls' },

@@ -62,6 +62,9 @@ html[data-hshs-page="profile"] .mobile-tabbar{background:#071433!important;borde
 .pf-cell .likes{position:absolute;left:6px;bottom:5px;color:#fff;font-size:.68rem;text-shadow:0 1px 4px #000}
 .pf-cell .mark{position:absolute;top:8px;right:8px;color:#fff;font-size:.75rem;text-shadow:0 1px 4px #000}
 .pf-empty{flex:1 0 100%;padding:48px 16px;text-align:center;color:#94a3b8}
+.pf-empty strong{display:block;color:#e2e8f0;font-size:.95rem;margin-bottom:6px}
+.pf-empty p{margin:0 0 14px;font-size:.82rem;line-height:1.4}
+.pf-session{margin:0 0 2px;color:#fbbf24;font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 
 /* Guest empty state card */
 .pf-guest-card{flex:1 0 100%;margin:20px 16px 0;padding:28px 20px;border-radius:18px;background:linear-gradient(160deg,#0b1f4d 0%,#0a1838 100%);border:1px solid rgba(251,191,36,.18);text-align:center;box-shadow:0 12px 32px rgba(0,0,0,.25)}

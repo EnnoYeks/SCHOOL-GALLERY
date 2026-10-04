@@ -169,7 +169,11 @@
     }
     if (!list.length) {
       var empty = tab === 'saved' ? 'Nothing saved yet' : (tab === 'videos' ? 'No videos yet' : 'No photos yet');
-      grid.innerHTML = '<div class="pf-empty">' + empty + '</div>';
+      var share = '';
+      if (isOwn(u) && tab !== 'saved') {
+        share = '<button type="button" class="pf-btn pf-btn-primary" data-pf="share"><i class="fas fa-plus"></i> Share a moment</button>';
+      }
+      grid.innerHTML = '<div class="pf-empty"><strong>' + empty + '</strong><p>Campus photos and clips you share will show up here.</p>' + share + '</div>';
       grid._posts = [];
       return;
     }
@@ -206,6 +210,7 @@
       setTxt('pfName', u.name || '');
       setTxt('pfRole', (u.role || 'Student') + (u.classYear ? (' \u00b7 ' + u.classYear) : ''));
       setTxt('pfBio', u.bio || '');
+      setTxt('pfSession', 'Hawthorne Scribner High School');
       var img = document.getElementById('pfAvaImg');
       if (img) {
         var photo = u.avatar || u.photoURL || '';
@@ -293,6 +298,13 @@
       var act = t.dataset.pf;
       var u = viewCache;
       if (act === 'signin') return goLogin(e);
+      if (act === 'share') {
+        if (!me()) return goLogin(e);
+        if (g.__hshsOpenUploadForPage) g.__hshsOpenUploadForPage(location.pathname);
+        else if (g.__hshsOpenUpload) g.__hshsOpenUpload();
+        else location.href = base() + 'index/photos.html';
+        return;
+      }
       if (act === 'settings') location.href = base() + 'index/settings.html';
       if (act === 'refresh') refresh();
       if (act === 'followers' || act === 'following') showPeople(act);

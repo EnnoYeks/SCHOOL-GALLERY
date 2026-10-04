@@ -2,9 +2,9 @@
   'use strict';
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
 
-  var BOOT_VER = '261004home1';
+  var BOOT_VER = '261004fn1';
   var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','search','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
-  var PAGE_ALIAS = { '': 'home', index: 'home', vibe: 'videos', studio: 'videos', clips: 'buzz', shorts: 'buzz', contat: 'contact' };
+  var PAGE_ALIAS = { '': 'home', index: 'home', vibe: 'buzz', studio: 'videos', clips: 'buzz', shorts: 'buzz', contat: 'contact' };
   var PAGE_CSS = {
     home: ['home.css', 'hshs-home-polish.css', 'hshs-vibe-home.css'],
     gallery: ['gallery.css', 'hshs-wave.css'],
