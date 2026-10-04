@@ -6,7 +6,7 @@
   var cache = global.__hshsPageCache = global.__hshsPageCache || {};
   var pending = Object.create(null);
   var started = false;
-  var targets = ['gallery.html', 'buzz.html', 'photos.html', 'videos.html', 'trending.html', 'more.html'];
+  var targets = ['gallery.html', 'buzz.html', 'photos.html', 'videos.html', 'trending.html', 'more.html', 'chat.html', 'profile.html', 'search.html', 'settings.html', 'memories.html', 'spotlight.html', 'polls.html', 'about.html', 'contact.html'];
 
   function projectBase() {
     var path = location.pathname;
