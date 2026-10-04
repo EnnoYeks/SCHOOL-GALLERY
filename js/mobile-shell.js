@@ -9,12 +9,12 @@
   window.__hshsMobileShell = true;
   window.__hshsMobileShellBoot = true;
 
-  var VER = '261004tpl2';
+  var VER = '261004fn1';
   var ALIAS = {
     '': 'home',
     index: 'home',
     'index.html': 'home',
-    vibe: 'videos',
+    vibe: 'buzz',
     studio: 'videos',
     clips: 'buzz',
     shorts: 'buzz',

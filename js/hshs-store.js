@@ -51,43 +51,17 @@
         return state;
     }
     function seed() {
-        var users = [
-            { id: 'u-demo', name: 'Amina Namukasa', username: 'amina_s4', classYear: 'S4', role: 'Student', bio: 'Sports, track days, and school vibes.', avatar: '', chatTheme: 'ocean', bubbleStyle: 'rounded', lastSeen: now(), createdAt: now() - 86400000 * 20 },
-            { id: 'u-prefect', name: 'Joel Wambede', username: 'joel_pref', classYear: 'S6', role: 'Prefect', bio: 'Prefect desk. Keep it school-safe.', avatar: '', chatTheme: 'grape', bubbleStyle: 'rounded', lastSeen: now() - 20000, createdAt: now() - 86400000 * 40 },
-            { id: 'u-sports', name: 'Sports Club', username: 'hshs_sports', classYear: 'Campus', role: 'Club', bio: 'Match days, drills, and house spirit.', avatar: '', chatTheme: 'mint', bubbleStyle: 'soft', lastSeen: now() - 120000, createdAt: now() - 86400000 * 50 },
-            { id: 'u-choir', name: 'Choir Desk', username: 'hshs_choir', classYear: 'Music', role: 'Club', bio: 'Rehearsals and assembly anthems.', avatar: '', chatTheme: 'sunset', bubbleStyle: 'soft', lastSeen: now() - 300000, createdAt: now() - 86400000 * 55 },
-            { id: 'u-lab', name: 'Science Lab', username: 'stem_lab', classYear: 'STEM', role: 'Department', bio: 'Experiments, fairs, and lab notes.', avatar: '', chatTheme: 'slate', bubbleStyle: 'square', lastSeen: now() - 900000, createdAt: now() - 86400000 * 60 },
-            { id: 'u-house', name: 'House Captains', username: 'house_caps', classYear: 'Houses', role: 'Leadership', bio: 'House points and spirit days.', avatar: '', chatTheme: 'rose', bubbleStyle: 'rounded', lastSeen: now() - 45000, createdAt: now() - 86400000 * 62 },
-            { id: 'u-maya', name: 'Maya Okello', username: 'maya_lens', classYear: 'S5', role: 'Student', bio: 'Photography club. Capturing campus light.', avatar: '', chatTheme: 'ocean', bubbleStyle: 'soft', lastSeen: now() - 8000, createdAt: now() - 86400000 * 12 },
-            { id: 'u-brian', name: 'Brian Kato', username: 'brian_k', classYear: 'S3', role: 'Student', bio: 'Football and Friday vibes.', avatar: '', chatTheme: 'mint', bubbleStyle: 'rounded', lastSeen: now() - 180000, createdAt: now() - 86400000 * 8 }
-        ];
-        var posts = [
-            { id: 'p1', type: 'photo', title: 'Sports Day 2026', description: 'Track finals on the main field.', category: 'sports', classTag: 'S4', image: PICS[0], imageUrl: PICS[0], thumbnailUrl: PICS[0], author: 'Amina Namukasa', authorId: 'u-demo', likes: 42, views: 310, comments: 6, shares: 4, createdAt: now() - 86400000 * 2 },
-            { id: 'p2', type: 'photo', title: 'Morning Assembly', description: 'House announcements and the school anthem.', category: 'events', classTag: 'Campus', image: PICS[1], imageUrl: PICS[1], thumbnailUrl: PICS[1], author: 'Joel Wambede', authorId: 'u-prefect', likes: 28, views: 190, comments: 3, shares: 2, createdAt: now() - 86400000 * 1 },
-            { id: 'p3', type: 'photo', title: 'Science Fair', description: 'Robotics and chemistry stands in the hall.', category: 'academics', classTag: 'S4', image: PICS[3], imageUrl: PICS[3], thumbnailUrl: PICS[3], author: 'Amina Namukasa', authorId: 'u-demo', likes: 61, views: 420, comments: 9, shares: 7, createdAt: now() - 86400000 * 5 },
-            { id: 'p4', type: 'video', title: 'HSHS Sports Day 2026', description: 'Best moments from the field.', category: 'sports', classTag: 'Campus', image: PICS[0], imageUrl: PICS[0], thumbnailUrl: PICS[0], author: 'Sports Club', authorId: 'u-sports', likes: 180, views: 2400, comments: 24, duration: '04:35', featured: true, createdAt: now() - 86400000 * 2 },
-            { id: 'p5', type: 'video', title: 'Graduation Ceremony', description: 'S6 send-off in the main hall.', category: 'events', classTag: 'S6', image: PICS[2], imageUrl: PICS[2], thumbnailUrl: PICS[2], author: 'Prefects', authorId: 'u-prefect', likes: 210, views: 2600, comments: 41, duration: '04:18', featured: true, createdAt: now() - 86400000 * 3 }
-        ];
         return save({
-            users: users,
+            users: [],
             sessionUserId: null,
-            posts: posts,
-            follows: [
-                { followerId: 'u-demo', followingId: 'u-prefect', createdAt: now() - 86400000 },
-                { followerId: 'u-demo', followingId: 'u-sports', createdAt: now() - 86400000 * 2 }
-            ],
-            friendRequests: [
-                { id: 'fr-seed1', fromId: 'u-maya', toId: 'u-demo', status: 'pending', createdAt: now() - 900000 }
-            ],
-            friends: [
-                { a: 'u-demo', b: 'u-prefect', createdAt: now() - 86400000 * 3 }
-            ],
-            notifications: [
-                { id: 'n-seed1', userId: 'u-demo', type: 'friend_request', title: 'Friend request', message: 'Maya Okello (@maya_lens) wants to be friends', data: { requestId: 'fr-seed1', fromId: 'u-maya' }, read: false, createdAt: now() - 900000 }
-            ],
+            posts: [],
+            follows: [],
+            friendRequests: [],
+            friends: [],
+            notifications: [],
             likes: [],
             saves: [],
-            comments: [{ id: 'c1', postId: 'p1', author: 'Joel Wambede', text: 'What a race!', createdAt: now() - 3600000 }]
+            comments: []
         });
     }
     function state() {
