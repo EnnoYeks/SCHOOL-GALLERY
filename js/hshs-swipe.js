@@ -60,6 +60,12 @@
     function fillNext(n) {
         var s = stage();
         if (!s || !n) return;
+        var name = (n.file || '').replace(/\.html$/, '');
+        if (name === 'index' || name === '') name = 'home';
+        if (name === 'clips' || name === 'shorts') name = 'buzz';
+        if (name === 'contat') name = 'contact';
+        var tpl = window.HshsTemplates && window.HshsTemplates[name];
+        if (tpl) { s.next.innerHTML = tpl; return; }
         var cache = window.__hshsPageCache || {};
         var html = cache[n.file] || cache[n.href];
         if (html) s.next.innerHTML = extract(html);
