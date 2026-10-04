@@ -100,7 +100,7 @@
     if (MODE !== 'live' && !signedIn()) {
       box.innerHTML = '<div class="msg-empty"><i class="fas fa-lock"></i>' +
         '<h3>Sign in to message</h3><p>Log in with your HSHS account to see and start conversations.</p>' +
-        '<a class="msg-empty-cta" href="login.html">Sign in</a></div>';
+        '<a class="msg-empty-cta" href="/index/login.html">Sign in</a></div>';
       return;
     }
     if (MODE === 'connecting' && !INBOX.length && !q) {

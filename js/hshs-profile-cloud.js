@@ -263,7 +263,7 @@
       ensurePhotoControls(false);
       var tools2 = document.getElementById('pfTools');
       if (tools2) {
-        tools2.innerHTML = '<a class="pf-btn" href="login.html" style="text-decoration:none;display:inline-flex;align-items:center">Sign in</a>';
+        tools2.innerHTML = '<a class="pf-btn" href="/index/login.html" style="text-decoration:none;display:inline-flex;align-items:center">Sign in</a>';
       }
     }
   }

@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '261002bottom1';
+var HSHS_ASSET_VER = '261004sign2';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -196,21 +196,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 (function forceAuthHardNav() {
-  function isAuth(url) {
+  function fileOf(url) {
     try {
       var u = new URL(url, location.href);
-      var f = (u.pathname.split('/').pop() || '').toLowerCase();
-      return f === 'login.html' || f === 'edit-profile.html' || f === 'login' || f === 'edit-profile';
+      return (u.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
     } catch (e) {
-      return /login|edit-profile/i.test(String(url || ''));
+      return String(url || '').toLowerCase();
     }
   }
+  function isAuth(url) {
+    var f = fileOf(url);
+    return f === 'login' || f === 'edit-profile';
+  }
+  function dest(url) {
+    var f = fileOf(url) === 'edit-profile' ? 'edit-profile' : 'login';
+    var q = '';
+    try { q = new URL(url, location.href).search || ''; } catch (e) {}
+    var inIndex = location.pathname.indexOf('/index/') !== -1;
+    return (inIndex ? (f + '.html') : ('/index/' + f + '.html')) + q;
+  }
+  function go(url) {
+    location.assign(dest(url || 'login.html'));
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var a = t.closest('a[href]');
+    if (!a) return;
+    var href = a.getAttribute('href') || '';
+    if (!isAuth(href)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    go(href);
+  }, true);
   function wrap() {
     if (!window.__hshsNavigate || window.__hshsNavigate.__authHard) return;
     var orig = window.__hshsNavigate;
     function wrapped(url, fromHistory) {
       if (isAuth(url)) {
-        location.assign(url);
+        go(url);
         return;
       }
       return orig(url, fromHistory);
@@ -224,4 +249,11 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap();
     if (++n > 40) clearInterval(iv);
   }, 250);
+  function recover() {
+    if (!isAuth(location.href)) return;
+    if (document.body && document.body.classList.contains('hshs-auth-body') && document.getElementById('hshsAuthRoot')) return;
+    location.replace(dest(location.href));
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', recover);
+  else recover();
 })();

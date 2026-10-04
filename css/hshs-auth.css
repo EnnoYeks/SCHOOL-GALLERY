@@ -271,7 +271,6 @@ body.hshs-auth-body .mobile-tabbar,
 body.hshs-auth-body .navbar,
 body.hshs-auth-body .more-sheet,
 body.hshs-auth-body .more-backdrop,
-body.hshs-auth-body #hshs-page,
 body.hshs-auth-body .app-shell {
   display: none !important;
 }
