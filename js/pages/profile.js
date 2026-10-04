@@ -2,7 +2,7 @@
   'use strict';
   if (g.__hshsProfilePageModule) return;
   g.__hshsProfilePageModule = true;
-  var PAGE = 'profile', tab = 'photos', viewCache = null, mediaCache = [], followingThem = false;
+  var PAGE = 'profile', tab = 'posts', viewCache = null, mediaCache = [], followingThem = false;
 
   function isPage() {
     try {
@@ -106,7 +106,7 @@
       return;
     }
     if (own) {
-      box.innerHTML = '<button class="pf-btn" type="button" data-pf="edit">Edit profile</button>';
+      box.innerHTML = '<button class="pf-btn" type="button" data-pf="edit"><i class="fas fa-pen"></i> Edit profile</button>';
       return;
     }
     box.innerHTML =
@@ -163,21 +163,29 @@
     var list = mediaCache.slice();
     if (tab === 'photos') list = list.filter(function (p) { return !isVideo(p); });
     if (tab === 'videos') list = list.filter(isVideo);
+    if (tab === 'likes') list = [];
     if (tab === 'saved') {
       var ids = savedIds();
       list = list.filter(function (p) { return ids.indexOf(p.id) !== -1; });
     }
     if (!list.length) {
-      var empty = tab === 'saved' ? 'Nothing saved yet' : (tab === 'videos' ? 'No videos yet' : 'No photos yet');
-      grid.innerHTML = '<div class="pf-empty">' + empty + '</div>';
+      var empty = tab === 'saved' ? 'Nothing saved yet' : (tab === 'likes' ? 'No liked moments yet' : (tab === 'videos' ? 'No videos yet' : 'No posts yet'));
+      var share = '';
+      if (isOwn(u) && tab !== 'saved') {
+        share = '<button type="button" class="pf-btn pf-btn-primary" data-pf="share"><i class="fas fa-plus"></i> Share a moment</button>';
+      }
+      grid.innerHTML = '<div class="pf-empty"><strong>' + empty + '</strong><p>Campus photos and clips you share will show up here.</p>' + share + '</div>';
       grid._posts = [];
       return;
     }
     grid.innerHTML = list.map(function (p, i) {
+      var title = p.title || p.caption || '';
       return '<button class="pf-cell" type="button" data-open="' + i + '"><img src="' +
-        esc(mediaOf(p)) + '" alt="' + esc(p.title || 'Moment') + '" loading="lazy">' +
+        esc(mediaOf(p)) + '" alt="' + esc(title || 'Moment') + '" loading="lazy">' +
         (isVideo(p) ? '<i class="fas fa-play mark"></i>' : '') +
-        '<span class="likes">' + abbr(p.likes || 0) + '</span></button>';
+        (title ? '<span class="pf-card-title">' + esc(title) + '</span>' : '') +
+        '<span class="likes">' + abbr(p.likes || 0) + '</span>' +
+        '<span class="comments">' + abbr(p.comments || 0) + '</span></button>';
     }).join('');
     grid._posts = list;
   }
@@ -202,10 +210,13 @@
         var coverUrl = u.cover || u.coverURL || '';
         cover.style.backgroundImage = coverUrl ? 'url("' + String(coverUrl).replace(/"/g, '') + '")' : '';
       }
-      setTxt('pfUser', u.username ? '@' + String(u.username).replace(/^@/, '') : 'profile');
+      var handle = u.username ? '@' + String(u.username).replace(/^@/, '') : 'profile';
+      var meta = [handle, u.classYear || '', 'Hawthorne Scribner High School'].filter(Boolean).join(' · ');
+      setTxt('pfUser', meta);
       setTxt('pfName', u.name || '');
-      setTxt('pfRole', (u.role || 'Student') + (u.classYear ? (' \u00b7 ' + u.classYear) : ''));
+      setTxt('pfRole', [u.role || 'Student', u.house || '', 'HSHS World'].filter(Boolean).join(' | '));
       setTxt('pfBio', u.bio || '');
+      setTxt('pfSession', '');
       var img = document.getElementById('pfAvaImg');
       if (img) {
         var photo = u.avatar || u.photoURL || '';
@@ -239,6 +250,7 @@
     var counts = { followers: 0, following: 0 };
     try { if (api && api.followCounts) counts = await api.followCounts(u.uid); } catch (e) {}
     setTxt('pfPosts', abbr(mediaCache.length));
+    setTxt('pfSaved', String(savedIds().length));
     setTxt('pfFollowers', abbr(counts.followers || 0));
     setTxt('pfFollowing', abbr(counts.following || 0));
     if (!isOwn(u) && api && api.isFollowing) {
@@ -293,11 +305,17 @@
       var act = t.dataset.pf;
       var u = viewCache;
       if (act === 'signin') return goLogin(e);
-      if (act === 'moments') {
-        tab = 'photos';
-        paintHeader(viewCache || me());
-        var grid = document.getElementById('pfGrid');
-        if (grid && grid.scrollIntoView) grid.scrollIntoView({ block: 'nearest' });
+      if (act === 'cover' || act === 'avatar') {
+        if (!me()) return goLogin(e);
+        var file = document.getElementById(act === 'cover' ? 'pfCoverFile' : 'pfAvaFile');
+        if (file) file.click();
+        return;
+      }
+      if (act === 'share') {
+        if (!me()) return goLogin(e);
+        if (g.__hshsOpenUploadForPage) g.__hshsOpenUploadForPage(location.pathname);
+        else if (g.__hshsOpenUpload) g.__hshsOpenUpload();
+        else location.href = base() + 'index/photos.html';
         return;
       }
       if (act === 'settings') location.href = base() + 'index/settings.html';
