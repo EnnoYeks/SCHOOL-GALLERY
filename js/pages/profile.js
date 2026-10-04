@@ -2,7 +2,7 @@
   'use strict';
   if (g.__hshsProfilePageModule) return;
   g.__hshsProfilePageModule = true;
-  var PAGE = 'profile', tab = 'photos', viewCache = null, mediaCache = [], followingThem = false;
+  var PAGE = 'profile', tab = 'posts', viewCache = null, mediaCache = [], followingThem = false;
 
   function isPage() {
     try {
@@ -163,12 +163,13 @@
     var list = mediaCache.slice();
     if (tab === 'photos') list = list.filter(function (p) { return !isVideo(p); });
     if (tab === 'videos') list = list.filter(isVideo);
+    if (tab === 'likes') list = [];
     if (tab === 'saved') {
       var ids = savedIds();
       list = list.filter(function (p) { return ids.indexOf(p.id) !== -1; });
     }
     if (!list.length) {
-      var empty = tab === 'saved' ? 'Nothing saved yet' : (tab === 'videos' ? 'No videos yet' : 'No photos yet');
+      var empty = tab === 'saved' ? 'Nothing saved yet' : (tab === 'likes' ? 'No liked moments yet' : (tab === 'videos' ? 'No videos yet' : 'No posts yet'));
       var share = '';
       if (isOwn(u) && tab !== 'saved') {
         share = '<button type="button" class="pf-btn pf-btn-primary" data-pf="share"><i class="fas fa-plus"></i> Share a moment</button>';
@@ -244,6 +245,7 @@
     var counts = { followers: 0, following: 0 };
     try { if (api && api.followCounts) counts = await api.followCounts(u.uid); } catch (e) {}
     setTxt('pfPosts', abbr(mediaCache.length));
+    setTxt('pfSaved', String(savedIds().length));
     setTxt('pfFollowers', abbr(counts.followers || 0));
     setTxt('pfFollowing', abbr(counts.following || 0));
     if (!isOwn(u) && api && api.isFollowing) {
