@@ -28,17 +28,34 @@
     return fileToPage() + '|' + (location.pathname || '/') + '|' + (location.search || '');
   }
 
+  function looksRaw(html) {
+    return /<!DOCTYPE|<html[\s>]|<\/head>/i.test(html || '');
+  }
+
+  function alreadyTemplated(name) {
+    var root = document.getElementById('hshs-page');
+    if (!root) return false;
+    var html = root.innerHTML || '';
+    if (looksRaw(html)) return false;
+    if (name === 'home') return !!root.querySelector('.home-page, .vibe-home');
+    if (name === 'gallery') return !!root.querySelector('.gallery-page, #galleryFeed');
+    if (name === 'photos') return !!root.querySelector('.photos-page');
+    if (name === 'videos') return !!root.querySelector('.vibe-page, #vibePage');
+    if (name === 'buzz') return !!root.querySelector('.buzz-page, #buzzFeed');
+    if (name === 'chat') return !!root.querySelector('#hshsChatPage, .hshs-chat-page');
+    return !!root.querySelector('main');
+  }
+
   function renderTemplateFallback(name) {
     try {
+      if (alreadyTemplated(name)) return false;
       var root = document.getElementById('hshs-page');
       var templates = global.HshsTemplates;
       var render = global.HshsRender;
       if (!root || !templates || !templates[name]) return false;
 
-      // JS-first pages own their markup. The mobile shell may briefly place
-      // legacy/fetched HTML into #hshs-page while swapping pages. Replace it
-      // synchronously with the JS template before the browser gets a chance
-      // to paint that raw intermediate DOM.
+      // Only replace a raw document dump or an empty shell. Page modules own
+      // the template once it is mounted, so a later hshs:page must not wipe it.
       if (render && typeof render.mountHTML === 'function') {
         render.mountHTML(root, templates[name]);
       } else {
