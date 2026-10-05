@@ -509,6 +509,25 @@ class Database {
         };
     }
 
+    async listHouses() {
+        try {
+            const snap = await getDocs(collection(firestore, "houses"));
+            return snap.docs.map((d) => ({ id: d.id, house: d.data().house || d.id, points: Number(d.data().points) || 0 }));
+        } catch (error) {
+            console.error("listHouses", error);
+            return [];
+        }
+    }
+
+    async saveHouse(house) {
+        const name = String((house && house.house) || "").trim().slice(0, 40);
+        if (!name) return null;
+        const id = String((house && house.id) || name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        const payload = { house: name, points: Number(house.points) || 0, updatedAt: serverTimestamp() };
+        await setDoc(doc(firestore, "houses", id), payload, { merge: true });
+        return { id: id, house: name, points: payload.points };
+    }
+
     async listUsers(max = 80) {
         try {
             const snap = await getDocs(query(collection(firestore, "users"), limit(max)));
