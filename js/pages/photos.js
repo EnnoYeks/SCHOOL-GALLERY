@@ -53,7 +53,7 @@
     loadCss('css/photos.css');
     loadCss('css/photos-campus.css');
     if (!mountTemplate()) return;
-    await loadOnce(base() + 'js/photos.js?v=261002photos1', 'hshs-leg-photos');
+    await loadOnce(base() + 'js/photos.js?v=261005real1', 'hshs-leg-photos');
     try {
       if (typeof global.startPhotos === 'function') global.startPhotos();
     } catch (e) {

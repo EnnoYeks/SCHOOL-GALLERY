@@ -46,7 +46,7 @@
         photos = await (window.db && db.getPhotos ? db.getPhotos(24, 0) : []);
       } catch (e) { photos = []; }
       photos = Array.isArray(photos) ? photos.filter(Boolean) : [];
-      this.photos = photos.length ? photos : seed();
+      this.photos = photos;
       this.render();
     }
     filtered() {
@@ -72,7 +72,7 @@
       var list = this.filtered();
       grid.innerHTML = '';
       if (!list.length) {
-        grid.innerHTML = '<div class="photos-empty">No photos match that search yet.</div>';
+        grid.innerHTML = '<div class="photos-empty">No photos yet.</div>';
         return;
       }
       var frag = document.createDocumentFragment();
