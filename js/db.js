@@ -432,7 +432,11 @@ class Database {
                     chatPatch["unread." + id] = id === uid ? 0 : increment(1);
                 });
             } catch (e) {}
-            await setDoc(doc(firestore, "chats", chatId), chatPatch, { merge: true });
+            try {
+                await updateDoc(doc(firestore, "chats", chatId), chatPatch);
+            } catch (patchErr) {
+                console.warn("[HSHS] chat preview update failed", patchErr);
+            }
             return { id: ref.id, ...payload };
         } catch (error) {
             console.error("sendMessage", error);
@@ -677,6 +681,10 @@ class Database {
         const ids = [me, peer.uid].sort();
         const chatId = ids.join("_");
         const peerName = peer.name || peer.fullName || "HSHS Student";
+        try {
+            const existing = await getDoc(doc(firestore, "chats", chatId));
+            if (existing.exists()) return { ok: true, chatId, peer };
+        } catch (e) {}
         const ok = await this.upsertChat(chatId, {
             memberIds: ids,
             peerId: peer.uid,
