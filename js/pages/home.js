@@ -56,31 +56,57 @@
     var d = new Date(ev.date || ev.startsAt || Date.now());
     return '<article class="home-event-card"><div class="home-event-date"><small>' + esc(d.toLocaleString('en-US', { month: 'short' })) + '</small><strong>' + esc(String(d.getDate())) + '</strong></div><div><strong>' + esc(ev.title || 'School event') + '</strong><small>' + esc(ev.location || ev.place || ev.time || 'Campus') + '</small></div></article>';
   }
-  function campusPosts() {
-    return [
-      { type: 'photo', title: 'Sports Day 2026', likes: 42, views: 310, image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=900&q=70' },
-      { type: 'photo', title: 'Morning assembly', likes: 28, views: 190, image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=900&q=70' },
-      { type: 'video', title: 'House colour day', likes: 116, views: 840, image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=900&q=70' },
-      { type: 'photo', title: 'Library hour', likes: 64, views: 410, image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=70' }
-    ];
-  }
   function postsFromStore(store) {
     var posts = [];
     try {
       if (store && typeof store.listPosts === 'function') posts = store.listPosts() || [];
       else if (store && typeof store.getState === 'function') posts = (store.getState().posts || []);
     } catch (e) {}
-    return posts.filter(Boolean);
+    return posts.filter(function (p) { return p && p.id && (p.image || p.imageUrl || p.thumbnailUrl); });
   }
-  function renderData() {
-    var store = global.HshsStore;
-    var posts = postsFromStore(store);
-    if (!posts.length) posts = campusPosts();
-    var stats = (store && typeof store.analytics === 'function') ? (store.analytics() || {}) : {};
-    if (!stats.totalPhotos) stats.totalPhotos = posts.filter(function (p) { return p.type !== 'video'; }).length || posts.length;
+  async function loadReal() {
+    var db = global.db;
+    var posts = [];
+    var stats = { totalPhotos: 0, totalVideos: 0, totalStudents: 0, totalLikes: 0 };
+    if (db) {
+      try {
+        var lists = await Promise.all([
+          db.getPosts ? db.getPosts(12) : [],
+          db.getPhotos ? db.getPhotos(12) : [],
+          db.getVideos ? db.getVideos(8) : []
+        ]);
+        posts = (lists[0] || []).concat(
+          (lists[1] || []).map(function (p) { p.type = p.type || 'photo'; return p; }),
+          (lists[2] || []).map(function (p) { p.type = 'video'; return p; })
+        );
+        if (db.getAnalytics) {
+          var a = await db.getAnalytics();
+          stats.totalPhotos = Number(a && a.totalPhotos) || 0;
+          stats.totalVideos = Number(a && a.totalVideos) || 0;
+        }
+        if (db.listUsers) {
+          var users = await db.listUsers(80);
+          stats.totalStudents = (users || []).length;
+        }
+      } catch (e) {}
+    }
+    if (!posts.length) posts = postsFromStore(global.HshsStore);
+    var seen = {};
+    posts = posts.filter(function (p) {
+      var key = p.id || p.title;
+      if (!key || seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
+    if (!stats.totalPhotos) stats.totalPhotos = posts.filter(function (p) { return p.type !== 'video'; }).length;
     if (!stats.totalVideos) stats.totalVideos = posts.filter(function (p) { return p.type === 'video'; }).length;
-    if (!stats.totalStudents) stats.totalStudents = 8;
-    if (!stats.totalLikes) stats.totalLikes = posts.reduce(function (sum, p) { return sum + (Number(p.likes) || 0); }, 0);
+    stats.totalLikes = posts.reduce(function (sum, p) { return sum + (Number(p.likes) || 0); }, 0);
+    return { posts: posts, stats: stats };
+  }
+  async function renderData() {
+    var loaded = await loadReal();
+    var posts = loaded.posts;
+    var stats = loaded.stats;
     ['totalPhotos', 'totalVideos', 'totalStudents', 'totalLikes'].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
@@ -88,33 +114,22 @@
       el.textContent = formatCount(Number(stats[id] || 0));
     });
     animateCounts();
-    var featured = (store && typeof store.featured === 'function') ? store.featured(4) : posts.slice(0, 4);
-    if (!featured || !featured.length) featured = posts.slice(0, 4);
+    var featured = posts.slice(0, 4);
     var grid = document.getElementById('featuredGrid');
     if (grid) {
       grid.innerHTML = featured.length
         ? featured.map(postCard).join('')
         : '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong></div>';
     }
-    var trending = (store && typeof store.trending === 'function') ? store.trending(2) : posts.slice().sort(function (a, b) { return (b.likes || 0) - (a.likes || 0); }).slice(0, 2);
-    if (!trending || !trending.length) trending = posts.slice(0, 2);
+    var trending = posts.slice().sort(function (a, b) { return (b.likes || 0) - (a.likes || 0); }).slice(0, 2);
     var trendA = document.getElementById('homeTrendA');
     var trendB = document.getElementById('homeTrendB');
     if (trendA) trendA.innerHTML = trendCard(trending[0], 1);
     if (trendB) trendB.innerHTML = trendCard(trending[1], 2);
-    var events = [];
-    if (store && store.events && typeof store.events === 'function') events = store.events(2) || [];
-    else if (store && Array.isArray(store.events)) events = store.events.slice(0, 2);
-    if (!events.length) {
-      events = [
-        { title: 'House colour day', location: 'Main field', date: Date.now() + 86400000 * 3 },
-        { title: 'Friday assembly', location: 'School hall', date: Date.now() + 86400000 * 6 }
-      ];
-    }
     var eventA = document.getElementById('homeEventA');
     var eventB = document.getElementById('homeEventB');
-    if (eventA) eventA.innerHTML = eventCard(events[0]);
-    if (eventB) eventB.innerHTML = eventCard(events[1]);
+    if (eventA) eventA.innerHTML = eventCard(null);
+    if (eventB) eventB.innerHTML = eventCard(null);
   }
   function animateCounts() {
     var nodes = document.querySelectorAll('.home-stat strong[data-count]');
