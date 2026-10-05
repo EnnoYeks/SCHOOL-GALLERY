@@ -34,7 +34,7 @@
   }
 
   async function ensureApi() {
-    for (var i = 0; i < 50; i++) {
+    for (var i = 0; i < 250; i++) {
       if (window.HshsAuthApi) return window.HshsAuthApi;
       await new Promise(function (r) { setTimeout(r, 60); });
     }
@@ -42,8 +42,14 @@
   }
 
   function redirectAfterAuth() {
-    var next = new URLSearchParams(location.search).get('next');
-    var dest = next || (location.pathname.indexOf('/index/') !== -1 ? '../index.html' : 'index.html');
+    var dest = location.pathname.indexOf('/index/') !== -1 ? '../index.html' : 'index.html';
+    try {
+      var next = new URLSearchParams(location.search).get('next');
+      if (next) {
+        var u = new URL(next, location.href);
+        if (u.origin === location.origin) dest = u.pathname + u.search + u.hash;
+      }
+    } catch (e) {}
     location.assign(dest);
   }
 
@@ -164,7 +170,14 @@
       }
       msg(box, 'Creating your account…', true);
       var cred = await api.signUpWithEmail(email, password);
-      await api.saveProfile(cred.user, { fullName: fullName, username: username, email: email });
+      try {
+        await api.saveProfile(cred.user, { fullName: fullName, username: username, email: email });
+      } catch (profileErr) {
+        // Roll back so a failed profile never leaves a half-made account behind.
+        try { await cred.user.delete(); } catch (delErr) { console.warn('[HSHS] signup rollback failed', delErr); }
+        try { localStorage.removeItem('userProfile'); localStorage.removeItem('hshsUid'); } catch (e) {}
+        throw profileErr;
+      }
       msg(box, 'Account created — welcome to HSHS World!', true);
       setTimeout(redirectAfterAuth, 500);
     } catch (err) {
