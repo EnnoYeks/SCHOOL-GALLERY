@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '261005blue1';
+var HSHS_ASSET_VER = '261005local1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 class Navigation {
@@ -164,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-perf-js', 'hshs-perf.js');
     add('hshs-store-bridge-js', 'hshs-store-bridge.js');
     add('hshs-store-js', 'hshs-store.js');
+    add('hshs-local-social-js', 'hshs-local-social.js');
     add('hshs-people-js', 'hshs-people.js');
     add('hshs-social-js', 'hshs-social.js');
     add('hshs-social-actions-js', 'hshs-social-actions.js');
