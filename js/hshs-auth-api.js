@@ -167,7 +167,10 @@ async function saveProfile(user, data) {
   }
 
   var photo = data.photoURL || data.avatar || existing.photoURL || user.photoURL || "";
-  if (typeof photo === "string" && photo.length > 700000) photo = existing.photoURL || "";
+  if (typeof photo === "string" && photo.length > 190000) {
+    if (data.photoURL || data.avatar) throw new Error("That photo is too large to save yet. Pick a smaller one.");
+    photo = existing.photoURL || "";
+  }
 
   var profile = {
     uid: uid,
