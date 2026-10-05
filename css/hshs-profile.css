@@ -159,7 +159,7 @@ body:has(.pf) {
   border-radius:50%;
   border:3px solid #030916;
   background:var(--pf-gold);
-  color:#071433;
+  color:#fff;
   display:grid;
   place-items:center;
   cursor:pointer;
@@ -226,7 +226,7 @@ body:has(.pf) {
 }
 .pf-btn-primary {
   background:linear-gradient(135deg,#60a5fa,#2563eb);
-  color:#071433;
+  color:#fff;
   border:0;
   box-shadow:0 8px 24px rgba(37,99,235,.22);
 }
@@ -292,7 +292,7 @@ body:has(.pf) {
 }
 .pf-tabs button:hover { color:#fff; background:rgba(255,255,255,.05); }
 .pf-tabs button.on {
-  color:#071433;
+  color:#fff;
   background:linear-gradient(135deg,#60a5fa,#f5b72f);
   box-shadow:0 6px 20px rgba(59,130,246,.16);
 }

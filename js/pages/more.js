@@ -86,7 +86,7 @@
     }
     if (badge) {
       badge.className = 'hshs-session-badge is-in';
-      badge.innerHTML = '<i class="fas fa-circle-check"></i> Signed in';
+      badge.textContent = '';
     }
     if (card) card.classList.add('is-signed-in');
   }
