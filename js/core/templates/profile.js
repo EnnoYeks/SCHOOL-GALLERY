@@ -75,6 +75,7 @@
         <div class="pf-sheet-h"><strong>Edit profile</strong><button type="button" data-pf="close-edit">Done</button></div>
         <label>Name<input id="pfEditName" maxlength="40"></label>
         <label>Username<input id="pfEditUser" maxlength="24"></label>
+        <label>Class<input id="pfEditClass" maxlength="12" placeholder="S.4"></label>
         <label>Bio<textarea id="pfEditBio" maxlength="180" rows="4"></textarea></label>
         <button type="button" class="pf-save" data-pf="save-edit">Save</button>
       </div>

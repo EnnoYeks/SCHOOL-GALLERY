@@ -356,8 +356,15 @@
           g.HshsAuthApi.saveProfile(user, {
             fullName: document.getElementById('pfEditName').value.trim(),
             username: document.getElementById('pfEditUser').value.trim(),
-            bio: document.getElementById('pfEditBio').value.trim()
+            bio: document.getElementById('pfEditBio').value.trim(),
+            classYear: (document.getElementById('pfEditClass') || {}).value || ''
           }).then(function () { document.getElementById('pfEdit').hidden = true; refresh(); });
+          if (g.HshsLocalSocial) g.HshsLocalSocial.saveProfile({
+            name: document.getElementById('pfEditName').value.trim(),
+            username: document.getElementById('pfEditUser').value.trim(),
+            bio: document.getElementById('pfEditBio').value.trim(),
+            classYear: (document.getElementById('pfEditClass') || {}).value || ''
+          });
         } else {
           document.getElementById('pfEdit').hidden = true;
         }

@@ -142,6 +142,7 @@
     try {
       if (g.HshsPeople && g.HshsPeople.search) people = await g.HshsPeople.search(q);
       else if (g.db && g.db.searchUsers) people = await g.db.searchUsers(q, 24);
+      if ((!people || !people.length) && g.HshsLocalSocial) people = g.HshsLocalSocial.search(q);
     } catch (e) { people = []; }
     try { if (g.db && g.db.getPosts) posts = await g.db.getPosts(40, 0); } catch (e) {}
     try { if (g.db && g.db.getPhotos) photos = await g.db.getPhotos(40, 0); } catch (e) {}
