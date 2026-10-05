@@ -1,0 +1,8 @@
+/* HSHS World design system for the core pages. */
+html[data-hshs-page] body{background:#071433;color:#f8fafc;font-family:Nunito,sans-serif}#hshs-page{color:#f8fafc}
+.gallery-page,.photos-page,.videos-page,.buzz-page,.polls-page,.memories-page,.pf,.chat-page,.search-page,.notes-page,.settings-page,.home-page{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:18px 0 72px;box-sizing:border-box}
+.gallery-hero-card,.photos-hero,.video-hero,.poll-card,.memory-card,.chat-thread,.search-card,.note-card,.set-card,.home-stat,.home-split-card,.pf-stats button{border:1px solid rgba(147,197,253,.16);border-radius:16px;background:rgba(12,25,53,.78)}
+.gallery-btn-primary,.vibe-btn-primary,.pf-btn-primary,.pf-save,.hshs-btn,.set-save{border:0;border-radius:12px;background:linear-gradient(135deg,#60a5fa,#2563eb);color:#fff;font-weight:800}
+.gallery-chip,.category-btn,.pf-tabs button,.set-tab{border-radius:999px;font-weight:800}
+.gallery-empty,.photos-empty,.buzz-empty,.home-empty,.pf-empty{border:1px solid rgba(147,197,253,.16);border-radius:16px;background:rgba(9,23,48,.72);color:#93a1b8;text-align:center;padding:28px 16px}
+@media(max-width:720px){.gallery-page,.photos-page,.videos-page,.buzz-page,.polls-page,.memories-page,.pf,.chat-page,.search-page,.notes-page,.settings-page,.home-page{width:min(1180px,calc(100% - 16px));padding-top:10px}}
