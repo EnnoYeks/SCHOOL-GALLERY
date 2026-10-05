@@ -15,7 +15,7 @@ html[data-hshs-page="profile"] .navbar .notification-icon {
   visibility:visible!important;
 }
 html[data-hshs-page="profile"] .navbar .nav-links {
-  display:none!important;
+  display:flex!important;
 }
 html[data-hshs-page="profile"] .mobile-tabbar {
   display:none!important;
