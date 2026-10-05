@@ -173,12 +173,18 @@
       await loadScript(ver(base + 'components/ui.js'), 'hshs-comp-ui');
       await loadScript(ver(base + 'components/shell.js'), 'hshs-comp-shell');
 
+      // Page-specific CSS and the optional store are enhancements, not prerequisites
+      // for mounting the real DOM. Loading them here used to hold the entire first paint.
       var pageCss = PAGE_CSS[page] || [];
-      await Promise.all(pageCss.map(function (file, i) {
+      Promise.all(pageCss.map(function (file, i) {
         return loadCssWait(ver(cssBase + file), 'hshs-page-css-' + i);
-      }));
+      })).catch(function () {});
 
-      try { await loadScript(ver(base + 'hshs-store.js'), 'hshs-store'); } catch (e) { console.warn('[HSHS] Data store unavailable', e); }
+      try {
+        loadScript(ver(base + 'hshs-store.js'), 'hshs-store').catch(function (e) {
+          console.warn('[HSHS] Data store unavailable', e);
+        });
+      } catch (e) {}
     } catch (e) {
       console.error('[HSHS] Core boot failed', e);
       document.documentElement.classList.add('hshs-js-failed');
