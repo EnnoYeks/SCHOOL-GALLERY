@@ -34,7 +34,7 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
 .gallery-media{width:100%;height:100%;object-fit:cover;display:block}
 .gallery-vignette{position:absolute;inset:0;background:linear-gradient(180deg,transparent 42%,rgba(0,0,0,.82));pointer-events:none}
 .gallery-type,.gallery-category{position:absolute;top:10px;padding:5px 8px;border-radius:999px;font-size:.64rem;font-weight:800;background:rgba(7,20,51,.55);color:#fff;border:1px solid rgba(255,255,255,.16);text-transform:uppercase;letter-spacing:.04em}
-.gallery-type{left:10px}.gallery-category{right:10px;color:#fde68a}
+.gallery-type{left:10px}.gallery-category{right:10px;color:#93c5fd}
 .gallery-card-copy{position:absolute;left:12px;right:12px;bottom:12px;color:#fff}
 .gallery-card-copy h2{margin:0 0 4px;font-size:1rem;line-height:1.15}
 .gallery-card-copy p{margin:0;font-size:.75rem;opacity:.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}

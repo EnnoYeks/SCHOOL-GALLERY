@@ -11,7 +11,7 @@ html[data-hshs-page="chat"] #hshsChatMe{display:none!important}
   width:100%;max-width:none;margin:0;
   padding:0 0 calc(88px + env(safe-area-inset-bottom));
   color:#fff;font-family:"Nunito",system-ui,sans-serif;
-  --chat-mine:#1d4ed8;--chat-accent:#f5c518;--chat-wallpaper:#071433;
+  --chat-mine:#1d4ed8;--chat-accent:#3b82f6;--chat-wallpaper:#071433;
   min-height:100svh;position:relative;box-sizing:border-box;
 }
 .hshs-chat-page.msg *,.hshs-chat-page.msg *::before,.hshs-chat-page.msg *::after{box-sizing:border-box}
@@ -29,7 +29,7 @@ html[data-hshs-page="chat"] #hshsChatMe{display:none!important}
   flex:0 0 46px;width:46px;height:46px;border-radius:50%;
   background:radial-gradient(circle at 30% 25%,#1d4ed8,#0b1f4d);
   border:2px solid rgba(245,197,24,.6);display:grid;place-items:center;
-  color:#fbbf24;font-size:1.15rem;
+  color:#3b82f6;font-size:1.15rem;
   box-shadow:0 0 0 3px rgba(29,78,216,.28),0 8px 20px rgba(0,0,0,.25);
 }
 .msg-hero-titles{min-width:0}
@@ -59,7 +59,7 @@ html[data-hshs-page="chat"] #hshsChatMe{display:none!important}
   color:#e2e8f0;
 }
 .msg-search-icon{flex:0 0 auto;width:22px;display:grid;place-items:center;color:#60a5fa;font-size:.95rem}
-.msg-search:focus-within .msg-search-icon{color:#fbbf24}
+.msg-search:focus-within .msg-search-icon{color:#3b82f6}
 .msg-search input{flex:1;border:0;background:none;color:#fff;outline:none;font:inherit;font-size:.95rem;min-width:0;padding:10px 0}
 .msg-search input::placeholder{color:#64748b}
 .msg-search-clear{flex:0 0 28px;width:28px;height:28px;border:0;border-radius:50%;background:rgba(255,255,255,.1);color:#cbd5e1;display:grid;place-items:center;cursor:pointer;font-size:.75rem}
@@ -106,7 +106,7 @@ html[data-hshs-page="chat"] #hshsChatMe{display:none!important}
 .hshs-thread-avatar-wrap{position:relative;flex:0 0 48px}
 .hshs-thread-avatar{
   width:48px;height:48px;border-radius:50%;background:#0b1f4d;
-  border:2px solid #f5c518;box-shadow:0 0 0 3px rgba(245,197,24,.18);
+  border:2px solid #3b82f6;box-shadow:0 0 0 3px rgba(245,197,24,.18);
   display:flex;align-items:center;justify-content:center;font-weight:800;overflow:hidden;
 }
 .hshs-thread-avatar img{width:100%;height:100%;object-fit:cover}
@@ -125,7 +125,7 @@ html[data-hshs-page="chat"] #hshsChatMe{display:none!important}
 .wm-side{position:absolute;left:14px;bottom:24px;letter-spacing:.18em;text-transform:uppercase;font-size:.55rem;color:rgba(148,163,184,.55);line-height:1.5;border-bottom:2px solid rgba(245,197,24,.45);padding-bottom:4px}
 .hshs-thread-welcome{position:relative;z-index:1;height:100%;min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 20px 18px}
 .tw-orb{position:relative;width:118px;height:118px;margin:8px 0 16px}
-.tw-orb b{display:grid;place-items:center;width:118px;height:118px;border-radius:50%;background:radial-gradient(circle at 30% 20%,#1d4ed8,#071433);border:3px solid #f5c518;box-shadow:0 0 0 8px rgba(245,197,24,.12),0 20px 40px rgba(0,0,0,.35);font-size:2rem;font-weight:900}
+.tw-orb b{display:grid;place-items:center;width:118px;height:118px;border-radius:50%;background:radial-gradient(circle at 30% 20%,#1d4ed8,#071433);border:3px solid #3b82f6;box-shadow:0 0 0 8px rgba(245,197,24,.12),0 20px 40px rgba(0,0,0,.35);font-size:2rem;font-weight:900}
 .tw-online{position:absolute;width:16px;height:16px;border-radius:50%;background:#22c55e;border:3px solid #071433;right:10px;bottom:14px}
 .tw-bubble{position:absolute;right:-6px;bottom:6px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#122044;border:2px solid rgba(255,255,255,.16);color:#93c5fd}
 .hshs-thread-welcome h2{margin:0 0 8px;font-size:1.35rem}
@@ -145,7 +145,7 @@ html[data-hshs-page="chat"] #hshsChatMe{display:none!important}
 .hshs-bubble::after{display:none!important}
 .hshs-bubble time{display:block;text-align:right;color:rgba(203,213,225,.85);font-size:.62rem;margin-top:4px}
 .hshs-ticks{margin-left:4px;letter-spacing:-1px}
-.hshs-ticks.read{color:#fbbf24}
+.hshs-ticks.read{color:#3b82f6}
 .hshs-compose-wrap{background:transparent;padding:8px 12px calc(10px + env(safe-area-inset-bottom));position:relative;z-index:6}
 .hshs-thread-compose{display:flex;align-items:center;gap:6px;background:rgba(11,31,77,.88);border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:6px;backdrop-filter:blur(12px)}
 .hshs-plus,.hshs-fab{width:42px;height:42px;border-radius:50%;background:#122044;color:#fff;border:0;font-size:1.2rem;font-weight:800;flex:0 0 42px;cursor:pointer}

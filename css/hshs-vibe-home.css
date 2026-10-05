@@ -20,7 +20,7 @@ body.has-mobile-shell .navbar, .navbar.hshs-flat-top, html.hshs-nav-scrolled .na
 .brand-tick { color: #3b82f6 !important; font-size: .85rem !important; }
 .brand-copy small { display: block !important; margin-top: 2px; font-size: .62rem !important; letter-spacing: .14em !important; text-transform: uppercase !important; color: #94a3b8 !important; font-weight: 700 !important; }
 .hshs-search-btn, body.has-mobile-shell .hshs-search-btn {
-  width: 42px !important; height: 42px !important; border-radius: 50% !important; background: #f5c518 !important; color: #102047 !important; border: 0 !important;
+  width: 42px !important; height: 42px !important; border-radius: 50% !important; background: #3b82f6 !important; color: #102047 !important; border: 0 !important;
 }
 .notification-icon { width: 42px; height: 42px; border-radius: 50%; background: #122044; display: inline-flex; align-items: center; justify-content: center; color: #fff; }
 .profile-img, .hshs-avatar { width: 42px !important; height: 42px !important; border-radius: 50% !important; border: 2px solid #3b82f6 !important; box-shadow: none !important; }

@@ -6,16 +6,16 @@
 .hshs-chat-page.msg.is-open #hshsThread{display:flex!important;flex-direction:column}
 .msg-row.is-group .msg-row-av,
 .hshs-thread-avatar.is-group{border-radius:16px}
-.msg-group-tag{font-style:normal;font-size:.62rem;margin-left:6px;padding:1px 6px;border-radius:999px;background:rgba(245,197,24,.18);color:#f5c518;font-weight:800}
+.msg-group-tag{font-style:normal;font-size:.62rem;margin-left:6px;padding:1px 6px;border-radius:999px;background:rgba(245,197,24,.18);color:#3b82f6;font-weight:800}
 .hshs-thread-calls{display:flex;gap:4px}
 .hshs-thread-call{width:36px;height:36px;border:0;border-radius:50%;background:rgba(255,255,255,.05);color:#64748b;cursor:pointer;opacity:.45}
-.hshs-sender{display:block;font-size:.68rem;color:#f5c518;margin-bottom:2px}
+.hshs-sender{display:block;font-size:.68rem;color:#3b82f6;margin-bottom:2px}
 .hshs-bubble-media img,
 .hshs-bubble-media video{display:block;max-width:196px;border-radius:12px;margin-bottom:4px;background:#071433}
 .hshs-bubble audio{display:block;max-width:210px;margin:6px 0 2px}
 .hshs-bubble-voice{font-weight:700}
 .hshs-file-chip{display:flex;align-items:center;gap:10px;min-width:160px}
-.hshs-file-chip i{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(245,197,24,.16);color:#fbbf24}
+.hshs-file-chip i{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(245,197,24,.16);color:#3b82f6}
 .hshs-file-chip span{display:flex;flex-direction:column;min-width:0}
 .hshs-file-chip b{font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
 .hshs-file-chip small{color:#94a3b8;font-size:.68rem}
@@ -44,7 +44,7 @@
 .msg-attach-ico{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;font-size:1.15rem;box-shadow:0 8px 18px rgba(0,0,0,.25)}
 .ico-gallery{background:linear-gradient(180deg,#818cf8,#4f46e5)}
 .ico-video{background:linear-gradient(180deg,#fb7185,#e11d48)}
-.ico-camera{background:linear-gradient(180deg,#fbbf24,#d97706)}
+.ico-camera{background:linear-gradient(180deg,#3b82f6,#d97706)}
 .ico-record{background:linear-gradient(180deg,#f87171,#b91c1c)}
 .ico-doc{background:linear-gradient(180deg,#60a5fa,#1d4ed8)}
 .ico-pdf{background:linear-gradient(180deg,#fca5a5,#dc2626)}

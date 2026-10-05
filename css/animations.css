@@ -469,7 +469,7 @@
     bottom: 0;
     border-radius: 10px;
     padding: 2px;
-    background: linear-gradient(45deg, #6366f1, #ec4899, #f59e0b, #10b981);
+    background: linear-gradient(45deg, #6366f1, #ec4899, #2563eb, #10b981);
     background-size: 300% 300%;
     animation: gradientShift 5s ease infinite;
     z-index: -1;

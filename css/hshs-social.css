@@ -200,7 +200,7 @@ body.has-mobile-shell .hshs-top-actions .hshs-search-btn {
     background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.12);
 }
 body.has-mobile-shell .hshs-top-actions .hshs-search-btn {
-    background: linear-gradient(135deg, #eab308, #f59e0b); color: #102047; border: 0;
+    background: linear-gradient(135deg, #eab308, #2563eb); color: #102047; border: 0;
 }
 body.has-mobile-shell .brand-copy strong {
     display: block; line-height: 1.05;
