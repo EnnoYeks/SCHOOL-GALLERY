@@ -3,7 +3,7 @@
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
 
   var BOOT_VER = '261004fn1';
-  var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','search','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
+  var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','search','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memor[...]
   var PAGE_ALIAS = { '': 'home', index: 'home', vibe: 'buzz', studio: 'videos', clips: 'buzz', shorts: 'buzz', contat: 'contact' };
   var PAGE_CSS = {
     home: ['home.css', 'hshs-home-polish.css', 'hshs-vibe-home.css'],
@@ -90,7 +90,7 @@
         if (existing.sheet) return resolve();
         existing.addEventListener('load', resolve, { once: true });
         existing.addEventListener('error', resolve, { once: true });
-        setTimeout(resolve, 700);
+        setTimeout(resolve, 3000);
         return;
       }
       var l = document.createElement('link');
@@ -100,7 +100,7 @@
       l.onload = resolve;
       l.onerror = resolve;
       document.head.appendChild(l);
-      setTimeout(resolve, 700);
+      setTimeout(resolve, 3000);
     });
   }
 
