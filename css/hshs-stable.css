@@ -1,0 +1,6 @@
+/* HSHS World · UI stability. Keeps the shared shell visible and stops stuck fades. */
+html.hshs-ready #hshs-page,html.hshs-ready #hshs-page h1,html.hshs-ready #hshs-page h2,html.hshs-ready #hshs-page h3,html.hshs-ready #hshs-page .home-section-head,html.hshs-ready #hshs-page .home-stat,html.hshs-ready #hshs-page .home-split-card,html.hshs-ready #hshs-page .home-cta,html.hshs-ready #hshs-page .home-footer,html.hshs-ready #hshs-page [data-gsap="done"]{opacity:1!important;transform:none!important;visibility:visible!important}
+.navbar~.navbar{display:none!important} body>.footer{display:none!important} .mobile-tabbar~.mobile-tabbar{display:none!important}
+@media(min-width:1025px){.navbar .nav-links{display:flex!important}.mobile-tabbar{display:none!important}}
+@media(max-width:1024px){.navbar .nav-links{display:none!important}.mobile-tabbar{display:flex!important}#hshs-page{padding-bottom:88px}}
+.home-section,.pf-grid,.hshs-school-card{margin-inline:auto}.vibe-btn-primary,.pf-btn-primary,.hshs-btn{border-radius:12px}
