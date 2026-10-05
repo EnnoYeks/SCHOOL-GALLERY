@@ -9,7 +9,7 @@
   window.__hshsMobileShell = true;
   window.__hshsMobileShellBoot = true;
 
-  var VER = '261004fn1';
+  var VER = '261005sk1';
   var ALIAS = {
     '': 'home',
     index: 'home',
@@ -342,7 +342,7 @@
     var boot = document.getElementById('hshs-boot');
     if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
     var sk = root.querySelector('.hshs-load-skel');
-    if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+    if (sk && sk.parentNode) { sk.classList.add('is-leaving'); setTimeout(function(){ if(sk && sk.parentNode) sk.parentNode.removeChild(sk); },150); }
   }
   function clearBindFlags(root) {
     if (!root || !root.dataset) return;
@@ -365,6 +365,7 @@
     if (HARD[name]) { location.assign(next.href); return; }
     closeMore();
     var tpl = await ensureTemplate(name);
+    if (window.HshsSkeleton && window.HshsSkeleton.insert) window.HshsSkeleton.insert(rootEl(), name);
     if (!tpl) { location.assign(next.href); return; }
     if (!fromHistory) history.pushState({ url: next.href, page: name }, '', next.href);
     document.documentElement.setAttribute('data-hshs-page', name);
