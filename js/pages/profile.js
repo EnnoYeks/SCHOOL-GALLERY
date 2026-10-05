@@ -347,6 +347,8 @@
         document.getElementById('pfEditName').value = (u && u.name) || '';
         document.getElementById('pfEditUser').value = (u && u.username) || '';
         document.getElementById('pfEditBio').value = (u && u.bio) || '';
+        var housePick = document.getElementById('pfEditHouse');
+        if (housePick) housePick.value = (u && u.house) || '';
         document.getElementById('pfEdit').hidden = false;
       }
       if (act === 'close-edit') document.getElementById('pfEdit').hidden = true;
@@ -357,6 +359,7 @@
             fullName: document.getElementById('pfEditName').value.trim(),
             username: document.getElementById('pfEditUser').value.trim(),
             bio: document.getElementById('pfEditBio').value.trim(),
+            house: (document.getElementById('pfEditHouse') || {}).value || '',
             classYear: (document.getElementById('pfEditClass') || {}).value || ''
           }).then(function () { document.getElementById('pfEdit').hidden = true; refresh(); });
           if (g.HshsLocalSocial) g.HshsLocalSocial.saveProfile({
