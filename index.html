@@ -77,12 +77,11 @@
     }
   </style>
   <script>(function(){var r=document.documentElement;r.classList.add('hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');va[...]
+  <link rel="stylesheet" href="css/hshs-skeleton.css?v=261005sk1">
 </head>
 <body class="dark-mode">
   <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
-    <div class="hshs-load-skel" role="status" aria-label="Loading">
-      <span class="hshs-load-skel-shine" aria-hidden="true"></span>
-    </div>
+    <div class="hshs-load-skel" data-skel-page="home" role="status" aria-label="Loading"><div class="hshs-skel-topbar"><span class="sk brand"></span><span class="actions"><span class="sk"></span><span class="sk"></span></span></div><div class="hshs-skel-page"><span class="sk skel-home-hero"></span><div class="skel-home-stats"><span class="sk skel-stat"></span><span class="sk skel-stat"></span></div><div class="skel-home-trending"><span class="sk skel-home-trend"></span><span class="sk skel-home-trend"></span></div><span class="sk skel-event"></span><span class="sk skel-event"></span><span class="sk skel-event"></span></div><div class="hshs-skel-bottom"><span class="item"><span class="sk ico"></span><span class="sk txt"></span></span><span class="item"><span class="sk ico"></span><span class="sk txt"></span></span><span class="item"><span class="sk ico"></span></span><span class="item"><span class="sk ico"></span><span class="sk txt"></span></span><span class="item"><span class="sk ico"></span><span class="sk txt"></span></span></div></div>
   </div>
   <script>
     (function () {
@@ -121,7 +120,9 @@
       window.__hshsRevealPage = reveal;
       function dropSkel() {
         var sk = root.querySelector('.hshs-load-skel');
-        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+        if (!sk || !sk.parentNode) return;
+        sk.classList.add('is-leaving');
+        setTimeout(function () { if (sk && sk.parentNode) sk.parentNode.removeChild(sk); }, 150);
       }
       function settled() {
         if (!root.querySelector('.hshs-load-skel')) return root.childElementCount > 0;
@@ -137,11 +138,7 @@
         window.__hshsSkelWatch = obs;
         obs.observe(root, { childList: true });
       }
-      setTimeout(function () {
-        if (document.documentElement.classList.contains('hshs-ready') && !root.querySelector('.hshs-load-skel')) return;
-        dropSkel();
-        reveal();
-      }, 12000);
+      setTimeout(function () { reveal(); }, 12000);
     })();
   </script>
   <script type="module" src="js/config.js?v=261002fast1"></script>
@@ -152,7 +149,7 @@
   <script defer src="js/mobile-navigation.js?v=261004fn2"></script>
   <script defer src="js/search.js?v=261002fast1"></script>
   <script defer src="js/core/navigation-perf.js?v=261002fast1"></script>
-  <script defer src="js/mobile-shell.js?v=261004fn1"></script>
+  <script defer src="js/mobile-shell.js?v=261005sk1"></script>
   <script defer src="js/core/bootstrap.js?v=261004fn1"></script>
   <script defer src="js/pages/home.js?v=261005real1"></script>
   <script defer src="js/hshs-shared-header.js?v=261005blue1"></script>

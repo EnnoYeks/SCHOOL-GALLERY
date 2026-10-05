@@ -92,11 +92,10 @@
     a { color: #eab308; }
     ul { line-height: 1.9; }
   </style>
+  <link rel="stylesheet" href="css/hshs-skeleton.css?v=261005sk1">
 </head>
 <body class="hshs-classic-404 dark-mode">
-    <div class="hshs-load-skel" role="status" aria-label="Loading">
-      <span class="hshs-load-skel-shine" aria-hidden="true"></span>
-    </div>
+    <div class="hshs-load-skel skel-account" data-skel-page="404" role="status" aria-label="Loading"><span class="sk skel-about-block" style="min-height:220px"></span></div>
   <div class="panel hshs-glass">
     <div class="crest" aria-hidden="true">H</div>
     <h1>This path is not on campus</h1>
@@ -158,7 +157,7 @@
       if (link) link.addEventListener('load', go);
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryGo);
       else tryGo();
-      setTimeout(go, 2500);
+      setTimeout(go, 3000);
     })();
   </script>
 </body>

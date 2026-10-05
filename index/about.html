@@ -72,12 +72,12 @@
     }
   </style>
   <script>(function(){var r=document.documentElement;r.classList.add('hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');var s=document.createElement('div');var ok=('backdropFilter' in s.style)||('webkitBackdropFilter' in s.style);if(!ok)r.classList.add('hshs-no-backdrop');})();</script>
+  <link rel="stylesheet" href="../css/hshs-skeleton.css?v=261005sk1">
+  <link rel="stylesheet" href="../css/hshs-about.css?v=261005sk1">
 </head>
 <body class="dark-mode">
   <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
-    <div class="hshs-load-skel" role="status" aria-label="Loading">
-      <span class="hshs-load-skel-shine" aria-hidden="true"></span>
-    </div>
+    <div class="hshs-load-skel" data-skel-page="about" role="status" aria-label="Loading"><div class="hshs-skel-topbar"><span class="sk brand"></span><span class="actions"><span class="sk"></span></span></div><div class="hshs-skel-page"><span class="sk skel-about-block" style="min-height:170px"></span><span class="sk skel-about-block"></span><span class="sk skel-about-block"></span><div class="skel-feature-grid"><span class="sk skel-feature"></span><span class="sk skel-feature"></span><span class="sk skel-feature"></span><span class="sk skel-feature"></span><span class="sk skel-feature"></span><span class="sk skel-feature"></span></div><span class="sk skel-about-block" style="min-height:160px"></span><span class="sk skel-about-block" style="min-height:140px"></span></div><div class="hshs-skel-bottom"></div></div>
   </div>
   <script>
     (function () {
@@ -111,12 +111,14 @@
         }
         function done() { pending--; if (pending <= 0) go(); }
         if (pending <= 0) go();
-        setTimeout(go, 700);
+        setTimeout(go, 3000);
       }
       window.__hshsRevealPage = reveal;
       function dropSkel() {
         var sk = root.querySelector('.hshs-load-skel');
-        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+        if (!sk || !sk.parentNode) return;
+        sk.classList.add('is-leaving');
+        setTimeout(function () { if (sk && sk.parentNode) sk.parentNode.removeChild(sk); }, 150);
       }
       function settled() {
         if (!root.querySelector('.hshs-load-skel')) return root.childElementCount > 0;
@@ -132,11 +134,7 @@
         window.__hshsSkelWatch = obs;
         obs.observe(root, { childList: true });
       }
-      setTimeout(function () {
-        if (document.documentElement.classList.contains('hshs-ready') && !root.querySelector('.hshs-load-skel')) return;
-        dropSkel();
-        reveal();
-      }, 12000);
+      setTimeout(function () { reveal(); }, 12000);
     })();
   </script>
   <script type="module" src="../js/config.js?v=261002fast1"></script>
@@ -147,8 +145,8 @@
   <script defer src="../js/mobile-navigation.js?v=261004fn2"></script>
   <script defer src="../js/search.js?v=261002fast1"></script>
   <script defer src="../js/core/navigation-perf.js?v=261002fast1"></script>
-  <script defer src="../js/mobile-shell.js?v=261004fn1"></script>
-  <script defer src="../js/core/bootstrap.js?v=261004fn1"></script>
+  <script defer src="../js/mobile-shell.js?v=261005sk1"></script>
+  <script defer src="../js/core/bootstrap.js?v=261005sk1"></script>
   <script defer src="../js/pages/about.js?v=261002fast1"></script>
 </body>
 </html>
