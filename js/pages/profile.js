@@ -106,7 +106,7 @@
       return;
     }
     if (own) {
-      box.innerHTML = '<button class="pf-btn" type="button" data-pf="edit">Edit profile</button>';
+      box.innerHTML = '<button class="pf-btn" type="button" data-pf="edit"><i class="fas fa-pen"></i> Edit profile</button>';
       return;
     }
     box.innerHTML =
@@ -179,10 +179,13 @@
       return;
     }
     grid.innerHTML = list.map(function (p, i) {
+      var title = p.title || p.caption || '';
       return '<button class="pf-cell" type="button" data-open="' + i + '"><img src="' +
-        esc(mediaOf(p)) + '" alt="' + esc(p.title || 'Moment') + '" loading="lazy">' +
+        esc(mediaOf(p)) + '" alt="' + esc(title || 'Moment') + '" loading="lazy">' +
         (isVideo(p) ? '<i class="fas fa-play mark"></i>' : '') +
-        '<span class="likes">' + abbr(p.likes || 0) + '</span></button>';
+        (title ? '<span class="pf-card-title">' + esc(title) + '</span>' : '') +
+        '<span class="likes">' + abbr(p.likes || 0) + '</span>' +
+        '<span class="comments">' + abbr(p.comments || 0) + '</span></button>';
     }).join('');
     grid._posts = list;
   }
@@ -207,11 +210,13 @@
         var coverUrl = u.cover || u.coverURL || '';
         cover.style.backgroundImage = coverUrl ? 'url("' + String(coverUrl).replace(/"/g, '') + '")' : '';
       }
-      setTxt('pfUser', u.username ? '@' + String(u.username).replace(/^@/, '') : 'profile');
+      var handle = u.username ? '@' + String(u.username).replace(/^@/, '') : 'profile';
+      var meta = [handle, u.classYear || '', 'Hawthorne Scribner High School'].filter(Boolean).join(' · ');
+      setTxt('pfUser', meta);
       setTxt('pfName', u.name || '');
-      setTxt('pfRole', (u.role || 'Student') + (u.classYear ? (' \u00b7 ' + u.classYear) : ''));
+      setTxt('pfRole', [u.role || 'Student', u.house || '', 'HSHS World'].filter(Boolean).join(' | '));
       setTxt('pfBio', u.bio || '');
-      setTxt('pfSession', 'Hawthorne Scribner High School');
+      setTxt('pfSession', '');
       var img = document.getElementById('pfAvaImg');
       if (img) {
         var photo = u.avatar || u.photoURL || '';
@@ -300,6 +305,12 @@
       var act = t.dataset.pf;
       var u = viewCache;
       if (act === 'signin') return goLogin(e);
+      if (act === 'cover' || act === 'avatar') {
+        if (!me()) return goLogin(e);
+        var file = document.getElementById(act === 'cover' ? 'pfCoverFile' : 'pfAvaFile');
+        if (file) file.click();
+        return;
+      }
       if (act === 'share') {
         if (!me()) return goLogin(e);
         if (g.__hshsOpenUploadForPage) g.__hshsOpenUploadForPage(location.pathname);

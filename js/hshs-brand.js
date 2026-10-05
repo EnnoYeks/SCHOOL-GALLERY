@@ -1,4 +1,6 @@
 (function () {
+    if (window.__hshsBrand) return;
+    window.__hshsBrand = true;
     var APP = 'HSHS World';
     var BADGE = 'https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png';
 

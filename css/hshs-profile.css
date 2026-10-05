@@ -20,6 +20,7 @@ html[data-hshs-page="profile"] .navbar .nav-links {
 html[data-hshs-page="profile"] .mobile-tabbar {
   display:none!important;
 }
+#pfCoverCam,#pfAvaCam,#pfChangePhotoBtn{display:none!important}
 html[data-hshs-page="profile"] body,
 body:has(.pf) {
   background:#030916!important;
@@ -49,10 +50,9 @@ body:has(.pf) {
   border-radius:22px;
   overflow:hidden;
   background:
-    radial-gradient(circle at 72% 30%,rgba(59,130,246,.42),transparent 30%),
-    linear-gradient(135deg,#071633 0%,#0b2c63 48%,#07101f 100%);
-  background-position:center;
-  background-size:cover;
+    linear-gradient(180deg,rgba(3,9,22,.08),rgba(3,9,22,.35)),
+    url("https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1600&q=70") center/cover no-repeat,
+    #071633;
   border:1px solid rgba(255,255,255,.10);
   box-shadow:0 24px 70px rgba(0,0,0,.38);
 }
@@ -198,12 +198,7 @@ body:has(.pf) {
   line-height:1.45;
   max-width:760px;
 }
-.pf-tags {
-  display:flex;
-  flex-wrap:wrap;
-  gap:7px;
-  margin-top:9px;
-}
+.pf-tags { display:none; }
 .pf-tags span {
   padding:5px 10px;
   border:1px solid rgba(247,201,72,.18);
@@ -348,7 +343,29 @@ body:has(.pf) {
   font-size:.75rem;
   font-weight:800;
 }
-.pf-cell .likes::before { content:"\\f004"; font-family:"Font Awesome 6 Free"; margin-right:5px; }
+.pf-cell .likes::before { content:"\f004"; font-family:"Font Awesome 6 Free"; font-weight:900; margin-right:5px; }
+.pf-cell .comments {
+  position:absolute;
+  left:78px;
+  bottom:11px;
+  z-index:2;
+  color:#fff;
+  font-size:.75rem;
+  font-weight:800;
+}
+.pf-cell .comments::before { content:"\f075"; font-family:"Font Awesome 6 Free"; font-weight:900; margin-right:5px; }
+.pf-card-title {
+  position:absolute;
+  left:13px;
+  right:13px;
+  bottom:32px;
+  z-index:2;
+  color:#fff;
+  font-size:.78rem;
+  font-weight:800;
+  text-align:left;
+  text-shadow:0 2px 8px #000;
+}
 .pf-cell .mark {
   position:absolute;
   top:12px;
@@ -436,6 +453,7 @@ body:has(.pf) {
 .pf-person small { color:#94a3b8; }
 
 @media (max-width:1024px) {
+  html[data-hshs-page="profile"] .mobile-tabbar { display:flex!important; }
   .pf { padding:8px 12px 30px; }
   .pf-cover { min-height:190px; border-radius:17px; }
   .pf-cover::before { right:6%; top:28%; font-size:2.25rem; }
@@ -452,7 +470,6 @@ body:has(.pf) {
   .pf-stats b { font-size:1rem; }
   .pf-tabs { top:58px; min-height:54px; overflow-x:auto; }
   .pf-tabs button { flex:0 0 auto; padding:0 12px; }
-  .pf-tabs button span { display:none; }
   .pf-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; margin-top:10px; }
   .pf-cell { border-radius:9px; }
 }

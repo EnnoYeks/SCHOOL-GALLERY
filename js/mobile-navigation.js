@@ -22,7 +22,7 @@
         if (window.__hshsPageSwipe || document.getElementById('hshs-page-swipe-script')) return;
 
         var style = document.createElement('style');
-        style.id = 'hshs-page-swipe-css';
+        style.id = document.getElementById('hshs-page-swipe-css') ? 'hshs-page-swipe-inline' : 'hshs-page-swipe-css';
         style.textContent = `
             #hshs-page,
             body > main,

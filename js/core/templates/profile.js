@@ -5,7 +5,7 @@
     <main class="pf" aria-label="Profile">
       <section class="pf-cover" id="pfCover">
         <div class="pf-cover-shade"></div>
-        <button class="pf-cover-edit" type="button" data-pf="edit"><i class="fas fa-camera"></i><span>Edit Cover</span></button>
+        <button class="pf-cover-edit" type="button" data-pf="cover"><i class="fas fa-camera"></i><span>Edit Cover</span></button>
       </section>
 
       <section class="pf-profile-head">
@@ -15,7 +15,7 @@
               <span id="pfAvaFall">?</span>
               <img id="pfAvaImg" alt="">
             </div>
-            <button class="pf-ava-cam" type="button" data-pf="edit" aria-label="Edit profile photo"><i class="fas fa-camera"></i></button>
+            <button class="pf-ava-cam" type="button" data-pf="avatar" aria-label="Edit profile photo"><i class="fas fa-camera"></i></button>
           </div>
 
           <div class="pf-names">

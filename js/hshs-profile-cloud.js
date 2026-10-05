@@ -158,7 +158,7 @@
       document.body.appendChild(cInput);
       cInput.addEventListener('change', onCoverPicked);
     }
-    if (!document.getElementById('pfAvaCam')) {
+    if (!document.querySelector('.pf-ava-cam')) {
       var btn = document.createElement('button');
       btn.type = 'button'; btn.id = 'pfAvaCam'; btn.className = 'pf-ava-cam';
       btn.setAttribute('aria-label', 'Change profile photo');
@@ -174,7 +174,7 @@
       }
     }
     var cover = document.getElementById('pfCover');
-    if (cover && !document.getElementById('pfCoverCam')) {
+    if (cover && !document.querySelector('.pf-cover-edit') && !document.getElementById('pfCoverCam')) {
       var cbtn = document.createElement('button');
       cbtn.type = 'button'; cbtn.id = 'pfCoverCam'; cbtn.className = 'pf-cover-cam';
       cbtn.innerHTML = '<i class="fas fa-image"></i> Cover';
@@ -249,14 +249,8 @@
     if (shaped) {
       applyProfile(shaped);
       var tools = document.getElementById('pfTools');
-      if (tools && user && !user.isAnonymous) {
-        tools.innerHTML =
-          '<button class="pf-btn" type="button" data-pf="edit">Edit profile</button>' +
-          '<button class="pf-btn pf-btn-ghost" type="button" id="pfChangePhotoBtn">Photo</button>';
-        var pb = document.getElementById('pfChangePhotoBtn');
-        if (pb) pb.addEventListener('click', function () {
-          var f = document.getElementById('pfAvaFile'); if (f) f.click();
-        });
+      if (tools && user && !user.isAnonymous && !tools.querySelector('[data-pf="edit"]')) {
+        tools.innerHTML = '<button class="pf-btn" type="button" data-pf="edit"><i class="fas fa-pen"></i> Edit profile</button>';
       }
       ensurePhotoControls(!!(user && !user.isAnonymous));
     } else if (!user || user.isAnonymous) {
