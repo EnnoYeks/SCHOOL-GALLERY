@@ -84,9 +84,38 @@
   }
   function renderHouses(s) {
     var el = document.getElementById('hshsHouseList'); if (!el) return;
-    var houses = (s.housePoints || []).slice().sort(function(a,b){ return b.points-a.points; });
-    var max = houses[0] ? houses[0].points : 1;
-    el.innerHTML = houses.map(function(h,i){ var width = Math.max(8, Math.min(100, Math.round((h.points || 0) / max * 100))); return '<div class="hshs-house-row"><div class="hshs-house-rank">'+(i+1)+'</div><div class="hshs-house-name">'+esc(h.house)+'</div><div class="hshs-house-bar"><div style="width:'+width+'%"></div></div><div class="hshs-house-points">'+esc(String(h.points))+'</div></div>'; }).join('');
+    var houses = (s.housePoints || []).slice();
+    var max = houses.reduce(function(n,h){ return Math.max(n, Number(h.points)||0); }, 1) || 1;
+    var signed = !!(window.hshsAuthUser && !window.hshsAuthUser.isAnonymous);
+    el.innerHTML = houses.map(function(h,i){
+      var width = Math.max(8, Math.min(100, Math.round((Number(h.points)||0) / max * 100)));
+      var edit = signed
+        ? '<input class="hshs-house-edit" data-house-id="'+esc(h.id||h.house)+'" data-house-field="house" value="'+esc(h.house)+'" maxlength="40"><input class="hshs-house-points-edit" data-house-id="'+esc(h.id||h.house)+'" data-house-field="points" type="number" min="0" value="'+esc(String(h.points||0))+'">'
+        : '<div class="hshs-house-name">'+esc(h.house)+'</div><div class="hshs-house-points">'+esc(String(h.points||0))+'</div>';
+      return '<div class="hshs-house-row"><div class="hshs-house-rank">'+(i+1)+'</div>'+edit+'<div class="hshs-house-bar"><div style="width:'+width+'%"></div></div></div>';
+    }).join('');
+    if (!signed) return;
+    el.querySelectorAll('[data-house-field]').forEach(function(input){ input.addEventListener('change', function(){ saveHouseEdit(input); }); });
+  }
+  function saveHouseEdit(input) {
+    var s = load(), id = input.getAttribute('data-house-id');
+    var row = (s.housePoints || []).find(function(h){ return String(h.id||h.house) === id; });
+    if (!row) return;
+    if (input.getAttribute('data-house-field') === 'points') row.points = Math.max(0, Number(input.value) || 0);
+    else row.house = String(input.value || '').trim().slice(0, 40) || row.house;
+    save(s);
+    var db = window.db;
+    if (db && db.saveHouse) db.saveHouse(row).then(function(saved){ if(saved&&saved.id) row.id=saved.id; save(s); }).catch(function(){});
+    renderHouses(load());
+  }
+  function pullHouses() {
+    var db = window.db; if (!db || !db.listHouses) return;
+    db.listHouses().then(function(rows){
+      if (!rows || !rows.length) return;
+      var s = load();
+      s.housePoints = rows.map(function(h){ return {id:h.id,house:h.house,points:Number(h.points)||0}; });
+      save(s); renderHouses(s);
+    }).catch(function(){});
   }
   function rankScore(u, s) {
     try {
@@ -220,6 +249,7 @@
   function init(){
     if (!window.HshsStore) { setTimeout(init,120); return; }
     injectHub();
+    pullHouses();
     renderNominationPanel();
     window.HshsSchool = { getState: load, nominate: openNomination, refresh: function(){var s=load();renderWeek(s);renderHouses(s);renderRanks(s);renderCalendar(s);renderNominationPanel();} };
   }
