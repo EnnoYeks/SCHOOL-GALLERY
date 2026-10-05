@@ -67,20 +67,14 @@
       .hshs-load-skel-shine { animation: none; opacity: 0.35; }
     }
   </style>
+  <link rel="stylesheet" href="../css/hshs-skeleton.css?v=261005sk1">
 </head>
 <body class="dark-mode" style="background:#071433;color:#fff;font-family:Nunito,sans-serif;padding:2rem">
-  <div class="hshs-load-skel" role="status" aria-label="Loading">
-    <span class="hshs-load-skel-shine" aria-hidden="true"></span>
-  </div>
+  <div class="hshs-load-skel skel-account" data-skel-page="contact" role="status" aria-label="Loading"><div class="skel-head"><span class="sk back"></span><span class="sk title"></span></div><span class="sk skel-about-block"></span></div>
   <p>This page moved. <a href="contact.html" style="color:#eab308">Continue</a>.</p>
   <script>
     (function () {
-      setTimeout(function () {
-        var sk = document.querySelector('.hshs-load-skel');
-        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
-        document.documentElement.classList.remove('hshs-booting');
-        document.documentElement.classList.add('hshs-ready');
-      }, 2500);
+      setTimeout(function () { go(); }, 3000);
     })();
   </script>
 </body>

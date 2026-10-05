@@ -1,6 +1,7 @@
 (function (global) {
   'use strict';
   if (global.HshsRender) return;
+  function fadeSkeleton(root) { var sk = root && root.querySelector('.hshs-load-skel'); if (!sk || !sk.parentNode) return; sk.classList.add('is-leaving'); setTimeout(function(){ if(sk && sk.parentNode) sk.parentNode.removeChild(sk); }, 150); }
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
     if (attrs) {
@@ -52,8 +53,7 @@
         window.__hshsBootDone = true;
         var boot = document.getElementById('hshs-boot');
         if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
-        var sk = document.querySelector('#hshs-page .hshs-load-skel');
-        if (sk && sk.parentNode) sk.parentNode.removeChild(sk);
+        fadeSkeleton(document.getElementById('hshs-page'));
       });
     });
   }
@@ -63,6 +63,8 @@
     return root.childElementCount > (sk ? 1 : 0);
   }
   function mountHTML(target, html) {
+    var page = document.documentElement.getAttribute('data-hshs-page');
+    if (global.HshsSkeleton && page) global.HshsSkeleton.insert(typeof target === 'string' ? document.querySelector(target) : target, page);
     var root = typeof target === 'string' ? document.querySelector(target) : target;
     if (!root) return null;
     var skel = root.querySelector('.hshs-load-skel');

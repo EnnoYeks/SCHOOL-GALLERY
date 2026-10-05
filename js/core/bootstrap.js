@@ -2,7 +2,7 @@
   'use strict';
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
 
-  var BOOT_VER = '261004fn1';
+  var BOOT_VER = '261005sk1';
   var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','search','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memor[...]
   var PAGE_ALIAS = { '': 'home', index: 'home', vibe: 'buzz', studio: 'videos', clips: 'buzz', shorts: 'buzz', contat: 'contact' };
   var PAGE_CSS = {
@@ -160,6 +160,7 @@
       await loadScript(ver(base + 'core/registry.js'), 'hshs-core-registry');
       try { await loadScript(ver(base + 'utils/dom.js'), 'hshs-utils-dom'); } catch (e) {}
       await loadScript(ver(base + 'core/render.js'), 'hshs-core-render');
+      try { await loadScript(ver(base + 'core/skeleton.js'), 'hshs-core-skeleton'); } catch (e) {}
       try { await loadScript(ver(base + 'hshs-route.js'), 'hshs-route'); } catch (e) {}
 
       var currentTpl = TEMPLATE_NAMES.indexOf(page) !== -1 ? page : 'home';
