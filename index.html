@@ -14,6 +14,10 @@
   <link rel="stylesheet" href="css/hshs-glass.css?v=261002fast1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/hshs-shared-header.css?v=261002fast1">
+  <link rel="stylesheet" href="css/hshs-official.css?v=261002fast1">
+  <link rel="stylesheet" href="css/home.css?v=261002fast1">
+  <link rel="stylesheet" href="css/hshs-home-polish.css?v=261002fast1">
+  <link rel="stylesheet" href="css/hshs-vibe-home.css?v=261002fast1">
   <style>
     html, body { background: #071433; margin: 0; }
     #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
@@ -72,7 +76,7 @@
       .hshs-load-skel-shine { animation: none; opacity: 0.35; }
     }
   </style>
-  <script>(function(){var r=document.documentElement;r.classList.add('hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');var s=document.createElement('div');var ok=('backdropFilter' in s.style)||('webkitBackdropFilter' in s.style);if(!ok)r.classList.add('hshs-no-backdrop');})();</script>
+  <script>(function(){var r=document.documentElement;r.classList.add('hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');va[...]
 </head>
 <body class="dark-mode">
   <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
@@ -85,7 +89,7 @@
       var root = document.getElementById('hshs-page');
       if (!root) return;
       function reveal() {
-        if (window.__hshsRevealQueued) return;
+         if (window.__hshsRevealQueued) return;
         window.__hshsRevealQueued = true;
         function go() {
           requestAnimationFrame(function () {
@@ -112,7 +116,7 @@
         }
         function done() { pending--; if (pending <= 0) go(); }
         if (pending <= 0) go();
-        setTimeout(go, 700);
+        setTimeout(go, 3000);
       }
       window.__hshsRevealPage = reveal;
       function dropSkel() {
