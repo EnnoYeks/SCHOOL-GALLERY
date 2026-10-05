@@ -108,10 +108,15 @@
         var pending = 0;
         var links = document.querySelectorAll('link[rel="stylesheet"]');
         for (var i = 0; i < links.length; i++) {
+          var href = links[i].getAttribute('href') || '';
+          if (!href) continue;
+          try {
+            if (new URL(href, location.href).origin !== location.origin) continue;
+          } catch (e) { continue; }
           if (links[i].sheet) continue;
           pending++;
-          links[i].addEventListener('load', done);
-          links[i].addEventListener('error', done);
+          links[i].addEventListener('load', done, { once: true });
+          links[i].addEventListener('error', done, { once: true });
         }
         function done() { pending--; if (pending <= 0) go(); }
         if (pending <= 0) go();
