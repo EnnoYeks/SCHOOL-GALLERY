@@ -5,7 +5,7 @@ body.has-mobile-shell .navbar,
 html[data-hshs-page] .navbar {
   background: #071433 !important;
   border: 0 !important;
-  border-bottom: 1px solid rgba(251, 191, 36, .32) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, .32) !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -29,8 +29,8 @@ body.has-mobile-shell .navbar-container.hshs-topbar {
 }
 
 .navbar .logo .brand-school { color: #e2e8f0 !important; }
-.navbar .logo .brand-mark { color: #fbbf24 !important; }
-.navbar .logo i { color: #fbbf24 !important; }
+.navbar .logo .brand-mark { color: #3b82f6 !important; }
+.navbar .logo i { color: #3b82f6 !important; }
 
 .navbar .nav-actions,
 .navbar .hshs-top-actions {
@@ -55,15 +55,15 @@ body.has-mobile-shell .navbar-container.hshs-topbar {
 
 .navbar .profile-icon,
 .navbar .hshs-profile {
-  border: 2px solid #fbbf24 !important;
+  border: 2px solid #3b82f6 !important;
   background: #102a62 !important;
   overflow: hidden;
 }
 
 .navbar .notification-icon {
   background: #102a62 !important;
-  color: #fde68a !important;
-  border: 1px solid rgba(251, 191, 36, .28) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(59, 130, 246, .28) !important;
 }
 
 .navbar .hshs-settings-btn,
@@ -88,9 +88,9 @@ body.has-mobile-shell .navbar-container.hshs-topbar {
   white-space: nowrap;
 }
 .hshs-session-chip.is-in {
-  background: rgba(251, 191, 36, .16);
-  color: #fde68a;
-  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, .35);
+  background: rgba(59, 130, 246, .16);
+  color: #93c5fd;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, .35);
 }
 .hshs-session-chip.is-guest {
   background: rgba(148, 163, 184, .14);
@@ -126,8 +126,8 @@ body.has-mobile-shell .navbar-container.hshs-topbar {
   display: grid;
   place-items: center;
   background: #102a62;
-  color: #fde68a;
-  border: 1px solid rgba(251, 191, 36, .28);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, .28);
   text-decoration: none;
 }
 
@@ -142,9 +142,9 @@ body.has-mobile-shell .navbar-container.hshs-topbar {
   font-weight: 800;
   font-style: normal;
 }
-.hshs-session-badge.is-in { background: rgba(251, 191, 36, .16); color: #fde68a; }
+.hshs-session-badge.is-in { background: rgba(59, 130, 246, .16); color: #93c5fd; }
 .hshs-session-badge.is-guest { background: rgba(148, 163, 184, .16); color: #cbd5e1; }
-.hshs-me-card.is-signed-in { border-color: rgba(251, 191, 36, .4); }
+.hshs-me-card.is-signed-in { border-color: rgba(59, 130, 246, .4); }
 
 .hshs-upload-cancel {
   position: absolute;
@@ -158,7 +158,7 @@ body.has-mobile-shell .navbar-container.hshs-topbar {
   background: rgba(7, 20, 51, .82);
   color: #fff;
   font-weight: 800;
-  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, .45);
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, .45);
   cursor: pointer;
 }
 

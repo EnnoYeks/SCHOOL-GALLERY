@@ -1,12 +1,12 @@
 html[data-hshs-page="chat"] #hshsChatBanner{display:none!important;height:0!important;overflow:hidden!important}
-.msg-group-tag{font-style:normal;font-size:.62rem;font-weight:800;color:#fbbf24;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.28);border-radius:999px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.msg-group-tag{font-style:normal;font-size:.62rem;font-weight:800;color:#3b82f6;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.28);border-radius:999px;padding:1px 6px;margin-left:6px;vertical-align:middle}
 .msg-row-av.is-group img,.hshs-thread-avatar.is-group{border-radius:16px}
-.hshs-sender{display:block;color:#fbbf24;font-size:.68rem;margin-bottom:2px}
+.hshs-sender{display:block;color:#3b82f6;font-size:.68rem;margin-bottom:2px}
 .hshs-bubble-photo{display:block;max-width:220px;width:100%;border-radius:12px;margin:2px 0}
 .hshs-voice-chip{display:flex;align-items:center;gap:8px;font-weight:700}
 .hshs-call-btn{width:36px;height:36px;border:0;border-radius:50%;background:rgba(255,255,255,.05);color:#64748b;cursor:pointer;opacity:.55}
 .hshs-call-btn.is-disabled{cursor:not-allowed}
-.hshs-call-btn.is-soon{color:#fbbf24;opacity:1}
+.hshs-call-btn.is-soon{color:#3b82f6;opacity:1}
 .hshs-typing{display:flex;gap:4px;align-items:center;min-width:46px;padding:10px 12px}
 .hshs-typing span{width:6px;height:6px;border-radius:50%;background:#93c5fd;animation:hshsDots 1s infinite ease-in-out}
 .hshs-typing span:nth-child(2){animation-delay:.15s}

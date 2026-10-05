@@ -19,9 +19,9 @@ body:has(.hs-search) {
 }
 .hs-bar {
   display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 8px 0 14px;
-  border-radius: 16px; background: #0b1f4d; border: 1px solid rgba(251, 191, 36, .28);
+  border-radius: 16px; background: #0b1f4d; border: 1px solid rgba(59, 130, 246, .28);
 }
-.hs-bar i.lead { color: #fbbf24; width: 18px; text-align: center; }
+.hs-bar i.lead { color: #3b82f6; width: 18px; text-align: center; }
 .hs-bar input {
   flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: #fff;
   font: inherit; font-size: 1rem; font-weight: 650; min-height: 48px;
@@ -36,7 +36,7 @@ body:has(.hs-search) {
   flex: 0 0 auto; border: 0; min-height: 36px; padding: 0 14px; border-radius: 999px;
   background: #102a62; color: #93a4c7; font-weight: 800; font-size: .78rem; cursor: pointer;
 }
-.hs-tab.on { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #071433; }
+.hs-tab.on { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #071433; }
 .hs-kicker {
   margin: 16px 4px 8px; font-size: .68rem; font-weight: 800; letter-spacing: .16em;
   text-transform: uppercase; color: #8b97b3;
@@ -48,7 +48,7 @@ body:has(.hs-search) {
   border: 0; border-radius: 999px; min-height: 36px; padding: 0 12px;
   background: #102a62; color: #e2e8f0; font-weight: 700; font-size: .8rem; cursor: pointer;
 }
-.hs-chip i { color: #fbbf24; margin-right: 6px; }
+.hs-chip i { color: #3b82f6; margin-right: 6px; }
 .hs-person {
   display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px;
   background: #0b1f4d; color: #fff; border: 1px solid rgba(255,255,255,.06);
@@ -82,7 +82,7 @@ body:has(.hs-search) {
   display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 10px 12px;
   border-radius: 16px; background: #0b1f4d; color: #fff; text-decoration: none;
 }
-.hs-short i { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: rgba(251,191,36,.12); color: #fbbf24; }
+.hs-short i { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: rgba(59,130,246,.12); color: #3b82f6; }
 .hs-short b { display: block; font-size: .86rem; }
 .hs-short small { display: block; color: #94a3b8; font-size: .7rem; }
 @media (min-width: 1025px) { .hs-search { margin-top: 84px; } }

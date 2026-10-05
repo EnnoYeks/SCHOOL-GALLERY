@@ -148,7 +148,7 @@ body.studio-open .navbar{opacity:0;pointer-events:none}
 .hshs-live-swatch{
   width:56px;height:56px;border-radius:50%;
   border:2px solid rgba(255,255,255,.35);
-  background:linear-gradient(135deg,#f472b6,#fbbf24 40%,#34d399 70%,#60a5fa);
+  background:linear-gradient(135deg,#f472b6,#3b82f6 40%,#34d399 70%,#60a5fa);
   box-shadow:0 4px 12px rgba(0,0,0,.35);
 }
 .hshs-live-filter.is-on .hshs-live-swatch{

@@ -3,7 +3,7 @@
   --hshs-navy: #071433;
   --hshs-navy-deep: #0b1f4d;
   --hshs-gold: #eab308;
-  --hshs-amber: #f5c518;
+  --hshs-amber: #3b82f6;
   --hshs-glass-bg: rgba(255, 255, 255, 0.08);
   --hshs-glass-bg-strong: rgba(255, 255, 255, 0.12);
   --hshs-glass-border: rgba(255, 255, 255, 0.15);
@@ -84,7 +84,7 @@
     background: rgba(12, 28, 68, 0.86) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
   }
   .navbar .hshs-search-btn, .navbar .notification-icon, .navbar .profile-icon, .navbar .hshs-profile { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-  .navbar .hshs-search-btn { background: #f5c518 !important; }
+  .navbar .hshs-search-btn { background: #3b82f6 !important; }
   .navbar .notification-icon { background: rgba(18, 32, 68, 0.95) !important; }
   .hshs-glass::before, .navbar::before, .vibe-hero-glass::before, .vibe-hero-copy::before, .home-stat::before, .home-split-card::before, .home-trend-item::before, .home-event-card::before, .home-panel::before, .home-cta::before { display: none; }
   .vibe-hero-card { background: linear-gradient(135deg, #0b1f4d 0%, #12306b 42%, #1d4ed8 68%, #eab308 100%) !important; }

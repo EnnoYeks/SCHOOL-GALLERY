@@ -23,25 +23,8 @@
   }
 
   function paintChip() {
-    var actions = document.querySelector('.navbar .nav-actions, .navbar .hshs-top-actions');
-    if (!actions) return;
     var chip = document.getElementById('hshsSessionChip');
-    if (!chip) {
-      chip = document.createElement('span');
-      chip.id = 'hshsSessionChip';
-      chip.className = 'hshs-session-chip';
-      var profile = actions.querySelector('.profile-icon, .hshs-profile');
-      if (profile) actions.insertBefore(chip, profile);
-      else actions.appendChild(chip);
-    }
-    var who = signedIn();
-    var name = who && (who.name || who.fullName || who.displayName || who.username || '');
-    var email = who && (who.email || '');
-    chip.className = 'hshs-session-chip ' + (who ? 'is-in' : 'is-guest');
-    chip.innerHTML = who
-      ? '<i class="fas fa-circle-check"></i><em>Signed in</em>'
-      : '<i class="fas fa-user"></i><em>Guest</em>';
-    chip.title = who ? ('Signed in' + (name ? ' as ' + name : '') + (email ? ' · ' + email : '')) : 'Browsing as guest';
+    if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
   }
 
   function paintMoreCard() {
@@ -71,7 +54,7 @@
     else if (pic) pic.innerHTML = '<b>' + String(label).charAt(0).toUpperCase() + '</b>';
     if (badge) {
       badge.className = 'hshs-session-badge is-in';
-      badge.innerHTML = '<i class="fas fa-circle-check"></i> Signed in';
+      badge.textContent = '';
     }
     if (card) card.classList.add('is-signed-in');
   }

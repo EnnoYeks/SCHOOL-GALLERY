@@ -6,10 +6,10 @@
     /* Light Mode Colors */
     --primary-color: #6366f1;
     --secondary-color: #ec4899;
-    --accent-color: #f59e0b;
+    --accent-color: #2563eb;
     --success-color: #10b981;
     --danger-color: #ef4444;
-    --warning-color: #f59e0b;
+    --warning-color: #2563eb;
 
     --bg-primary: #ffffff;
     --bg-secondary: #f3f4f6;
@@ -34,10 +34,10 @@
 body.dark-mode {
     --primary-color: #818cf8;
     --secondary-color: #f472b6;
-    --accent-color: #fbbf24;
+    --accent-color: #3b82f6;
     --success-color: #34d399;
     --danger-color: #f87171;
-    --warning-color: #fbbf24;
+    --warning-color: #3b82f6;
 
     --bg-primary: #050816;
     --bg-secondary: #111827;
@@ -215,7 +215,7 @@ body {
 .shape-2 {
     width: 200px;
     height: 200px;
-    background: linear-gradient(135deg, #ec4899, #f59e0b);
+    background: linear-gradient(135deg, #ec4899, #2563eb);
     bottom: -50px;
     right: -50px;
     animation: float 25s ease-in-out infinite reverse;
@@ -224,7 +224,7 @@ body {
 .shape-3 {
     width: 250px;
     height: 250px;
-    background: linear-gradient(135deg, #f59e0b, #10b981);
+    background: linear-gradient(135deg, #2563eb, #10b981);
     top: 50%;
     left: 50%;
     animation: float 30s ease-in-out infinite;

@@ -28,7 +28,7 @@ body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
   position: fixed; inset: 0; z-index: 4000;
   display: flex; align-items: center; justify-content: center;
   background:
-    radial-gradient(520px 360px at 50% 42%, rgba(212,175,55,.12), transparent 58%),
+    radial-gradient(520px 360px at 50% 42%, rgba(37,99,235,.12), transparent 58%),
     radial-gradient(720px 480px at 50% 40%, rgba(15,40,90,.55), transparent 70%),
     #050d1c;
   transition: opacity .38s ease;
@@ -58,7 +58,7 @@ html:not(.hshs-ready) #hshs-page > :not(.hshs-load-skel) {
   height: 190px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(212,175,55,.42) 0%, rgba(37,99,235,.16) 42%, transparent 70%);
+  background: radial-gradient(circle, rgba(37,99,235,.42) 0%, rgba(37,99,235,.16) 42%, transparent 70%);
   animation: hshsHaloPulse 2.2s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
@@ -108,8 +108,8 @@ html:not(.hshs-ready) #hshs-page > :not(.hshs-load-skel) {
   50% { opacity: 1; transform: translate(-50%, -50%) scale(1.14); }
 }
 @keyframes hshsBadgeGlow {
-  0%, 100% { filter: drop-shadow(0 0 8px rgba(212,175,55,.16)) drop-shadow(0 16px 28px rgba(0,0,0,.55)); }
-  50% { filter: drop-shadow(0 0 26px rgba(212,175,55,.7)) drop-shadow(0 0 48px rgba(37,99,235,.28)) drop-shadow(0 16px 28px rgba(0,0,0,.55)); }
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(37,99,235,.16)) drop-shadow(0 16px 28px rgba(0,0,0,.55)); }
+  50% { filter: drop-shadow(0 0 26px rgba(37,99,235,.7)) drop-shadow(0 0 48px rgba(37,99,235,.28)) drop-shadow(0 16px 28px rgba(0,0,0,.55)); }
 }
 @keyframes hshsDotGrow {
   0%, 70%, 100% { transform: scale(1); opacity: .28; box-shadow: none; }

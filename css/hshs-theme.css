@@ -6,7 +6,7 @@
 body.dark-mode {
     --primary-color: #60a5fa;
     --secondary-color: #38bdf8;
-    --accent-color: #facc15;
+    --accent-color: #3b82f6;
 }
 
 .animated-bg {
@@ -38,7 +38,7 @@ body.dark-mode {
     100% { transform: translate(-8%, 4%) scale(1.04) rotate(-6deg); }
 }
 .shape-1 { background: linear-gradient(135deg, #1d4ed8, #0ea5e9) !important; }
-.shape-2 { background: linear-gradient(135deg, #eab308, #f59e0b) !important; }
+.shape-2 { background: linear-gradient(135deg, #eab308, #2563eb) !important; }
 .shape-3 { background: linear-gradient(135deg, #0ea5e9, #14b8a6) !important; }
 .shape-4 { background: linear-gradient(135deg, #b42318, #1d4ed8) !important; }
 
