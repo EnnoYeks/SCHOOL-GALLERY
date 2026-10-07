@@ -1,0 +1,25 @@
+.campus-wrap{display:grid;gap:14px;margin:12px 0 18px}
+.campus-row{display:flex;gap:10px;overflow:auto;padding:2px 2px 8px;scrollbar-width:none}
+.campus-row::-webkit-scrollbar{display:none}
+.campus-story{flex:0 0 76px;display:grid;justify-items:center;gap:6px;border:0;background:transparent;color:#d7e4ff;font-size:.68rem}
+.campus-story i{width:58px;height:58px;border-radius:20px;display:grid;place-items:center;background:#16357a;border:2px solid #6ea2ff;font-style:normal;font-weight:800}
+.campus-story.is-add i{background:#102047;border-style:dashed}
+.campus-chips{display:flex;gap:8px;overflow:auto}
+.campus-chips button,.campus-actions button,.campus-sheet button{border:0;cursor:pointer}
+.campus-chips button{border-radius:999px;padding:8px 12px;background:#12264f;color:#c9d8f8;font-weight:700}
+.campus-chips button.is-on{background:#3d7dff;color:#fff}
+.campus-card{display:grid;gap:8px;padding:12px;border-radius:18px;background:#101e3f;color:#e8eefc}
+.campus-card header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.campus-actions{display:flex;gap:8px;flex-wrap:wrap}
+.campus-actions button,.campus-card .campus-follow{border-radius:999px;padding:7px 10px;background:#1b315f;color:#d7e4ff}
+.campus-actions button.is-on{background:#3d7dff;color:#fff}
+.campus-fab{position:fixed;right:18px;bottom:88px;z-index:40;width:54px;height:54px;border:0;border-radius:18px;background:#3d7dff;color:#fff;font-size:1.4rem;box-shadow:0 10px 24px rgba(20,60,160,.35);cursor:pointer}
+.campus-sheet{position:fixed;inset:0;z-index:70;background:rgba(4,10,24,.62);display:grid;align-items:end}
+.campus-sheet[hidden]{display:none}
+.campus-panel{background:#0d1b38;color:#e8eefc;border-radius:22px 22px 0 0;padding:16px;max-height:82vh;overflow:auto}
+.campus-panel h3{margin:0 0 10px}
+.campus-panel input,.campus-panel textarea,.campus-panel select{width:100%;box-sizing:border-box;border:0;border-radius:12px;padding:10px;background:#16284f;color:#fff;margin:0 0 8px}
+.campus-panel .row{display:flex;gap:8px}
+.campus-note{color:#9eb0d2;font-size:.82rem}
+.campus-alert{display:grid;grid-template-columns:36px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid rgba(148,178,255,.12)}
+.campus-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#102047;color:#fff;border-radius:12px;padding:10px 14px;z-index:90}
