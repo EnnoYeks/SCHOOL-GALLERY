@@ -35,21 +35,29 @@
       visibility: visible !important;
     }
     body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
+    /* First paint uses the real skeleton, already sized for the locked viewport. */
     .hshs-load-skel::before,
-    .hshs-load-skel::after {
-      content: "";
-      position: absolute;
-      left: 16px;
-      right: 16px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.04);
+    .hshs-load-skel::after { content: none; }
+    .hshs-skel-page { display: grid; gap: 12px; }
+    .skel-home-hero,
+    .skel-stat,
+    .skel-home-trend,
+    .skel-event { display: block; border-radius: 18px; background: rgba(255,255,255,.05); }
+    .skel-home-hero { min-height: 340px; border-radius: 28px; }
+    .skel-home-stats,
+    .skel-home-trending { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .skel-stat { min-height: 76px; }
+    .skel-home-trend { min-height: 148px; }
+    .skel-event { min-height: 84px; }
+    html.hshs-device-mobile .hshs-load-skel { padding: 0 14px calc(78px + 24px); }
+    html.hshs-device-desktop .hshs-load-skel {
+      width: min(1180px, calc(var(--hshs-vw, 100vw) - 40px));
+      margin-inline: auto;
+      padding: 0 0 24px;
     }
-    .hshs-load-skel::before { top: 88px; height: 148px; }
-    .hshs-load-skel::after {
-      top: 252px;
-      height: 72px;
-      box-shadow: 0 88px 0 rgba(255, 255, 255, 0.04), 0 176px 0 rgba(255, 255, 255, 0.04);
-    }
+    html.hshs-device-desktop .skel-home-hero { min-height: 420px; }
+    html.hshs-device-desktop .skel-home-stats,
+    html.hshs-device-desktop .skel-home-trending { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .hshs-load-skel-shine {
       position: absolute;
       inset: 0;
@@ -66,8 +74,25 @@
       .hshs-load-skel-shine { animation: none; opacity: 0.35; }
     }
   </style>
-  <script>(function(){var r=document.documentElement;r.classList.add('hshs-js-first');r.classList.add(window.matchMedia('(max-width:1024px)').matches?'hshs-device-mobile':'hshs-device-desktop');va[...]
-  <link rel="stylesheet" href="css/hshs-skeleton.css?v=261007map1">
+  <script>
+    (function () {
+      var r = document.documentElement;
+      function lock() {
+        var mobile = window.matchMedia('(max-width:1024px)').matches;
+        r.classList.add('hshs-js-first');
+        r.classList.toggle('hshs-device-mobile', mobile);
+        r.classList.toggle('hshs-device-desktop', !mobile);
+        var w = window.innerWidth || r.clientWidth || (mobile ? 390 : 1280);
+        r.style.setProperty('--hshs-vw', w + 'px');
+        r.setAttribute('data-hshs-vp', mobile ? 'mobile' : 'desktop');
+      }
+      lock();
+      var mq = window.matchMedia('(max-width:1024px)');
+      if (mq.addEventListener) mq.addEventListener('change', lock);
+      else if (mq.addListener) mq.addListener(lock);
+    })();
+  </script>
+  <link rel="stylesheet" href="css/hshs-skeleton.css?v=261007vp1">
 </head>
 <body class="dark-mode">
   <script src="js/core/paint.js?v=261007paint1"></script>

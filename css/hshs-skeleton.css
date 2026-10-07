@@ -15,8 +15,32 @@
 .skel-polls-hero,.skel-memories-hero{min-height:340px;border-radius:28px}.skel-section{padding:20px;border-radius:22px}.skel-poll-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}.skel-poll{min-height:190px}.skel-memory-reel{display:flex;gap:10px;overflow:hidden}.skel-memory-card{flex:0 0 190px;aspect-ratio:4/5}.skel-year-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.skel-year{min-height:82px}
 .skel-spot-hero{min-height:250px;border-radius:28px}.skel-spot-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.skel-spot-feature{min-height:230px;border-radius:24px}.skel-spot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.skel-spot-card{min-height:180px}.skel-lower{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.skel-panel{min-height:180px}
 .skel-search{height:52px}.skel-search-result{min-height:62px;padding:8px}.skel-more-card{min-height:82px;padding:14px}.skel-menu{min-height:58px;padding:13px 14px}.skel-admin{min-height:180px}.skel-admin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.skel-admin-stat{min-height:110px}
-@media(min-width:900px){.hshs-load-skel{padding-left:max(var(--hshs-pad),calc((100vw - 980px)/2));padding-right:max(var(--hshs-pad),calc((100vw - 980px)/2));padding-bottom:24px}.hshs-skel-bottom{display:none}.skel-gallery-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.skel-video-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.skel-buzz{width:min(430px,100vw);left:50%;right:auto;transform:translateX(-50%)}.skel-chat-layout{display:grid;grid-template-columns:380px minmax(0,1fr);gap:12px}.skel-chat-thread{display:grid;min-height:calc(100dvh - 108px);border-radius:18px}}
-@media(max-width:899px){html.hshs-device-mobile .skel-profile{padding:14px 14px 56px}.skel-profile-cover{min-height:190px}.skel-profile-head{margin:-54px 0 0;grid-template-columns:96px 1fr;gap:13px}.skel-profile-avatar{width:96px;height:96px}.skel-profile-stats{gap:6px}.skel-profile-grid{grid-template-columns:repeat(3,1fr);gap:5px}.skel-feature-grid{grid-template-columns:repeat(2,1fr)}.skel-contact-grid{grid-template-columns:1fr}.skel-poll-grid{grid-template-columns:1fr}.skel-spot-grid{grid-template-columns:repeat(2,1fr)}.skel-lower{grid-template-columns:1fr}.skel-year-grid{grid-template-columns:repeat(2,1fr)}}
+html.hshs-device-desktop .hshs-load-skel{width:min(1180px,calc(var(--hshs-vw,100vw) - 40px));margin-inline:auto;padding-left:0;padding-right:0;padding-bottom:24px}
+html.hshs-device-desktop .hshs-skel-bottom{display:none}
+html.hshs-device-desktop .skel-gallery-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+html.hshs-device-desktop .skel-video-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+html.hshs-device-desktop .skel-buzz{width:min(430px,var(--hshs-vw,100vw));left:50%;right:auto;transform:translateX(-50%)}
+html.hshs-device-desktop .skel-chat-layout{display:grid;grid-template-columns:380px minmax(0,1fr);gap:12px}
+html.hshs-device-desktop .skel-chat-thread{display:grid;min-height:calc(100dvh - 108px);border-radius:18px}
+html.hshs-device-desktop .skel-home-stats,html.hshs-device-desktop .skel-home-trending{grid-template-columns:repeat(4,minmax(0,1fr))}
+html.hshs-device-desktop .skel-home-hero{min-height:420px}
+html.hshs-device-desktop .skel-poll-grid,html.hshs-device-desktop .skel-spot-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+html.hshs-device-desktop .skel-feature-grid,html.hshs-device-desktop .skel-year-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+html.hshs-device-desktop .skel-admin-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+html.hshs-device-desktop .sk-grid-2{grid-template-columns:repeat(3,minmax(0,1fr))}
+html.hshs-device-mobile .hshs-load-skel{width:auto;margin-inline:0;padding-left:14px;padding-right:14px;padding-bottom:calc(78px + 24px)}
+html.hshs-device-mobile .hshs-skel-bottom{display:grid}
+html.hshs-device-mobile .skel-gallery-grid,html.hshs-device-mobile .skel-video-grid,html.hshs-device-mobile .skel-poll-grid,html.hshs-device-mobile .skel-contact-grid,html.hshs-device-mobile .skel-lower,html.hshs-device-mobile .skel-feature-grid{grid-template-columns:1fr}
+html.hshs-device-mobile .skel-spot-grid,html.hshs-device-mobile .skel-year-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.hshs-device-mobile .skel-home-stats,html.hshs-device-mobile .skel-home-trending{grid-template-columns:1fr 1fr}
+html.hshs-device-mobile .skel-chat-layout{display:block}
+html.hshs-device-mobile .skel-chat-thread{display:none}
+html.hshs-device-mobile .skel-profile{padding:14px 14px 56px}
+html.hshs-device-mobile .skel-profile-cover{min-height:190px}
+html.hshs-device-mobile .skel-profile-head{margin:-54px 0 0;grid-template-columns:96px 1fr;gap:13px}
+html.hshs-device-mobile .skel-profile-avatar{width:96px;height:96px}
+html.hshs-device-mobile .skel-profile-grid{grid-template-columns:repeat(3,1fr);gap:5px}
+html.hshs-device-mobile .skel-profile-stats{gap:6px}
 @media(max-width:520px){.skel-video-grid{grid-template-columns:1fr;gap:10px}.skel-feature-grid{grid-template-columns:1fr}.skel-spot-card{min-height:130px}.skel-spot-hero{min-height:310px}.skel-polls-hero,.skel-memories-hero{min-height:370px}.skel-profile-cover{min-height:150px;border-radius:17px}.skel-profile-head{margin:-45px 0 0;grid-template-columns:78px 1fr;gap:10px}.skel-profile-avatar{width:78px;height:78px}.skel-profile-grid{grid-template-columns:repeat(3,1fr)}}
 @media(prefers-reduced-motion:reduce){.sk::after{animation:none;opacity:.35}.hshs-load-skel{transition:none}}@keyframes hshs-skeleton-shimmer{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
 .mobile-tabbar,.navbar{position:relative;z-index:40}
