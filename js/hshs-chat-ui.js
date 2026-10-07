@@ -601,12 +601,28 @@
     window.visualViewport.addEventListener('scroll', apply);
   }
 
+  function paintPanel() {
+    var chats = $('hshsChatStatChats');
+    var unread = $('hshsChatStatUnread');
+    var groups = $('hshsChatStatGroups');
+    if (chats) chats.textContent = String(INBOX.length);
+    if (unread) unread.textContent = String(INBOX.reduce(function (n, c) { return n + (c.unread ? 1 : 0); }, 0));
+    if (groups) groups.textContent = String(INBOX.filter(function (c) { return c.group; }).length);
+  }
   function wire() {
     var page = root();
-    if (!page || page.dataset.wired) return;
+    if (!page) return;
+    if (MODE === 'connecting' && !signedIn()) MODE = 'local';
+    fillList();
+    paintPanel();
+    if (page.dataset.wired) return;
     page.dataset.wired = '1';
     bindKeyboard();
-    fillList();
+    var panelCompose = $('hshsPanelCompose');
+    if (panelCompose && !panelCompose.dataset.bound) {
+      panelCompose.dataset.bound = '1';
+      panelCompose.onclick = openCompose;
+    }
 
     var searchForm = $('hshsChatSearchForm');
     if (searchForm) searchForm.addEventListener('submit', function (e) { e.preventDefault(); });

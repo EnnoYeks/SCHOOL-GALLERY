@@ -32,7 +32,7 @@
           <span>RECENT</span>
           <button type="button" id="hshsMarkRead" hidden>Mark all read</button>
         </div>
-        <div class="chat-list" id="hshsChatList"></div>
+        <div class="chat-list" id="hshsChatList" data-hshs-state="loading"><div class="msg-skel" aria-hidden="true"><i></i><span><b></b><em></em></span></div><div class="msg-skel" aria-hidden="true"><i></i><span><b></b><em></em></span></div><div class="msg-skel" aria-hidden="true"><i></i><span><b></b><em></em></span></div><div class="msg-skel" aria-hidden="true"><i></i><span><b></b><em></em></span></div></div>
       </section>
     </aside>
 
@@ -94,7 +94,7 @@
             <button type="submit" class="chat-send-btn" id="hshsSendBtn" aria-label="Send"><i class="fas fa-arrow-up"></i></button>
             <div class="chat-emoji-sheet" id="hshsEmojiSheet" hidden></div>
           </form>
-          <p class="chat-no-media">Text + emoji for now • more chat features coming later</p>
+          <p class="chat-no-media">Text and emoji. Sign in to send.</p>
         </div>
       </section>
 
@@ -115,32 +115,20 @@
       </section>
     </section>
 
-    <aside class="chat-panel">
+    <aside class="chat-panel" id="hshsChatPanel">
       <div class="profile-card">
-        <div class="avatar avatar-blue avatar-xl">A</div>
-        <h3>Amani</h3>
-        <p>Head of the media club</p>
+        <div class="avatar avatar-blue avatar-xl">H</div>
+        <h3>No chat open</h3>
+        <p>Pick a classmate or start a new message.</p>
       </div>
-
       <div class="info-card">
-        <div class="stat">
-          <strong>24</strong>
-          <span>Messages</span>
-        </div>
-        <div class="stat">
-          <strong>7</strong>
-          <span>Shared</span>
-        </div>
-        <div class="stat">
-          <strong>3</strong>
-          <span>Groups</span>
-        </div>
+        <div class="stat"><strong id="hshsChatStatChats">–</strong><span>Chats</span></div>
+        <div class="stat"><strong id="hshsChatStatUnread">–</strong><span>Unread</span></div>
+        <div class="stat"><strong id="hshsChatStatGroups">–</strong><span>Groups</span></div>
       </div>
-
       <div class="quick-actions">
-        <button type="button">See profile</button>
-        <button type="button">Mute</button>
-        <button type="button">Report</button>
+        <button type="button" id="hshsPanelCompose">New chat</button>
+        <a href="../index/login.html">Sign in</a>
       </div>
     </aside>
   </div>

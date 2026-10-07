@@ -48,7 +48,19 @@
     var fresh = !existing || existing.dataset.wired !== '1';
     if (fresh) g.HshsRender.mountHTML(root, g.HshsTemplates.chat);
     document.body.classList.add('has-mobile-shell');
-    if (g.HshsMessagesUi && g.HshsMessagesUi.boot) g.HshsMessagesUi.boot();
+    var tries = 0;
+    function arm() {
+      if (g.HshsMessagesUi && g.HshsMessagesUi.boot) {
+        g.HshsMessagesUi.boot();
+        return;
+      }
+      var list = document.getElementById('hshsChatList');
+      if (list && !list.children.length) {
+        list.innerHTML = '<div class="msg-empty"><i class="fas fa-comment-dots"></i><h3>No conversations yet</h3><p>Sign in to message a classmate.</p><a class="msg-empty-cta" href="' + base() + 'index/login.html">Sign in</a></div>';
+      }
+      if (++tries < 20) setTimeout(arm, 80);
+    }
+    arm();
     if (fresh && g.HshsChatLive && g.HshsChatLive.boot) g.HshsChatLive.boot();
   }
 
