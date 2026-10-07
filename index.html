@@ -18,61 +18,11 @@
   <link rel="stylesheet" href="css/home.css?v=261002fast1">
   <link rel="stylesheet" href="css/hshs-home-polish.css?v=261002fast1">
   <link rel="stylesheet" href="css/hshs-vibe-home.css?v=261002fast1">
+  <link rel="stylesheet" href="css/hshs-campus.css?v=261007campus1">
   <style>
     html, body { background: #071433; margin: 0; }
     #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
     html, #hshs-page, .mobile-tabbar, .navbar { opacity: 1; visibility: visible; }
-    html.hshs-ready #hshs-page > :not(.hshs-load-skel) { animation: none; }
-    .hshs-load-skel {
-      position: relative;
-      z-index: 1;
-      min-height: 100vh;
-      background:
-        radial-gradient(520px 280px at 50% 18%, rgba(37, 99, 235, 0.16), transparent 62%),
-        #071433;
-      overflow: hidden;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-    body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
-    /* First paint uses the real skeleton, already sized for the locked viewport. */
-    .hshs-load-skel::before,
-    .hshs-load-skel::after { content: none; }
-    .hshs-skel-page { display: grid; gap: 12px; }
-    .skel-home-hero,
-    .skel-stat,
-    .skel-home-trend,
-    .skel-event { display: block; border-radius: 18px; background: rgba(255,255,255,.05); }
-    .skel-home-hero { min-height: 340px; border-radius: 28px; }
-    .skel-home-stats,
-    .skel-home-trending { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .skel-stat { min-height: 76px; }
-    .skel-home-trend { min-height: 148px; }
-    .skel-event { min-height: 84px; }
-    html.hshs-device-mobile .hshs-load-skel { padding: 0 14px calc(78px + 24px); }
-    html.hshs-device-desktop .hshs-load-skel {
-      width: min(1180px, calc(var(--hshs-vw, 100vw) - 40px));
-      margin-inline: auto;
-      padding: 0 0 24px;
-    }
-    html.hshs-device-desktop .skel-home-hero { min-height: 420px; }
-    html.hshs-device-desktop .skel-home-stats,
-    html.hshs-device-desktop .skel-home-trending { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .hshs-load-skel-shine {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(100deg, transparent 18%, rgba(59, 130, 246, 0.16) 48%, transparent 78%);
-      transform: translateX(-120%);
-      animation: hshs-skel-shimmer 1.35s ease-in-out infinite;
-      pointer-events: none;
-    }
-    @keyframes hshs-skel-shimmer {
-      0% { transform: translateX(-120%); }
-      100% { transform: translateX(120%); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .hshs-load-skel-shine { animation: none; opacity: 0.35; }
-    }
   </style>
   <script>
     (function () {
@@ -96,74 +46,7 @@
 </head>
 <body class="dark-mode">
   <script src="js/core/paint.js?v=261007paint1"></script>
-
-  <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
-    <div class="hshs-load-skel" data-skel-page="home" role="status" aria-label="Loading"><div class="hshs-skel-page"><span class="sk skel-home-hero"></span><div class="skel-home-stats"><span class="sk skel-stat"></span><span class="sk skel-stat"></span></div><div class="skel-home-trending"><span class="sk skel-home-trend"></span><span class="sk skel-home-trend"></span></div><span class="sk skel-event"></span><span class="sk skel-event"></span><span class="sk skel-event"></span></div></div>
-  </div>
-  <script>
-    (function () {
-      var root = document.getElementById('hshs-page');
-      if (!root) return;
-      function reveal() {
-         if (window.__hshsRevealQueued) return;
-        window.__hshsRevealQueued = true;
-        function go() {
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              var r = document.documentElement;
-              r.classList.remove('hshs-booting');
-              r.classList.add('hshs-ready');
-              window.__hshsBootDone = true;
-              dropSkel();
-              var boot = document.getElementById('hshs-boot');
-              if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
-              var cover = document.getElementById('hshs-tt-overlay');
-              if (cover && cover.parentNode) cover.parentNode.removeChild(cover);
-            });
-          });
-        }
-        var pending = 0;
-        var links = document.querySelectorAll('link[rel="stylesheet"]');
-        for (var i = 0; i < links.length; i++) {
-          var href = links[i].getAttribute('href') || '';
-          if (!href) continue;
-          try {
-            if (new URL(href, location.href).origin !== location.origin) continue;
-          } catch (e) { continue; }
-          if (links[i].sheet) continue;
-          pending++;
-          links[i].addEventListener('load', done, { once: true });
-          links[i].addEventListener('error', done, { once: true });
-        }
-        function done() { pending--; if (pending <= 0) go(); }
-        if (pending <= 0) go();
-        setTimeout(go, 3000);
-      }
-      window.__hshsRevealPage = reveal;
-      function dropSkel() {
-        var sk = root.querySelector('.hshs-load-skel');
-        if (!sk || !sk.parentNode) return;
-        sk.classList.add('is-leaving');
-        setTimeout(function () { if (sk && sk.parentNode) sk.parentNode.removeChild(sk); }, 150);
-      }
-      function settled() {
-        if (!root.querySelector('.hshs-load-skel')) return root.childElementCount > 0;
-        return root.childElementCount > 1;
-      }
-      function check() {
-        if (!settled()) return;
-        if (window.__hshsSkelWatch) window.__hshsSkelWatch.disconnect();
-        reveal();
-      }
-      if (window.MutationObserver) {
-        var obs = new MutationObserver(check);
-        window.__hshsSkelWatch = obs;
-        obs.observe(root, { childList: true });
-      }
-      reveal();
-      setTimeout(function () { reveal(); }, 0);
-    })();
-  </script>
+  <div id="hshs-page" style="opacity:1!important;visibility:visible!important"></div>
   <script type="module" src="js/config.js?v=261002fast1"></script>
   <script type="module" src="js/db.js?v=261002fast1"></script>
   <script defer src="js/utils.js?v=261002fast1"></script>
@@ -175,6 +58,7 @@
   <script defer src="js/mobile-shell.js?v=261005sk1"></script>
   <script defer src="js/core/bootstrap.js?v=261004fn1"></script>
   <script defer src="js/pages/home.js?v=261005real1"></script>
+  <script defer src="js/hshs-campus.js?v=261007campus1"></script>
   <script defer src="js/hshs-shared-header.js?v=261005blue1"></script>
   <script defer src="js/hshs-upload-cancel.js?v=261002fast1"></script>
 </body>
