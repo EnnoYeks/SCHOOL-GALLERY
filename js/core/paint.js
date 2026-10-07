@@ -36,6 +36,10 @@
   function releaseStuckSkeletons() {
     document.querySelectorAll('.hshs-load-skel').forEach(function (sk) {
       if (!sk.parentNode) return;
+      if (document.querySelector('.chat-shell, .hshs-chat-page')) {
+        sk.parentNode.removeChild(sk);
+        return;
+      }
       var page = sk.getAttribute('data-skel-page') || 'this page';
       var box = document.createElement('div');
       box.className = 'hshs-section-state hshs-error';

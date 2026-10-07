@@ -64,3 +64,78 @@
   .msg-compose-panel{max-width:380px;height:100%}
   .msg-compose-backdrop{display:none}
 }
+
+
+/* Keep the inbox and thread in two real columns. Do not split the page around a leftover skeleton. */
+@media (min-width: 1025px) {
+  html.hshs-device-desktop #hshs-page:has(.chat-shell) {
+    display: block;
+  }
+  html.hshs-device-desktop #hshs-page:has(.chat-shell) > .hshs-section-state {
+    display: none !important;
+  }
+  html.hshs-device-desktop .hshs-chat-page {
+    display: block !important;
+    width: min(1120px, calc(100% - 48px));
+    max-width: 1120px !important;
+    margin: 20px auto 28px !important;
+    padding: 0 !important;
+    min-height: 0;
+  }
+  html.hshs-device-desktop .chat-shell {
+    display: grid !important;
+    grid-template-columns: 340px minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0 !important;
+    width: 100%;
+    min-height: calc(100dvh - 112px);
+    border: 1px solid rgba(122, 169, 235, .16);
+    border-radius: 18px;
+    overflow: hidden;
+    background: #061330;
+  }
+  html.hshs-device-desktop .chat-sidebar {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    border-radius: 0;
+    border: 0;
+    border-right: 1px solid rgba(122, 169, 235, .14);
+    box-shadow: none;
+  }
+  html.hshs-device-desktop .chat-main-panel {
+    display: none !important;
+  }
+  html.hshs-device-desktop .chat-panel {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  html.hshs-device-desktop body.hshs-chat-thread-open .chat-panel,
+  html.hshs-device-desktop body.hshs-chat-compose-open .chat-panel {
+    display: none !important;
+  }
+  html.hshs-device-desktop body.hshs-chat-thread-open .chat-main-panel,
+  html.hshs-device-desktop body.hshs-chat-compose-open .chat-main-panel {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex !important;
+    min-width: 0;
+  }
+  html.hshs-device-desktop body.hshs-chat-thread-open .chat-home-head,
+  html.hshs-device-desktop body.hshs-chat-compose-open .chat-home-head {
+    display: none !important;
+  }
+  html.hshs-device-desktop body.hshs-chat-thread-open .chat-thread {
+    display: flex !important;
+    flex: 1;
+    min-width: 0;
+  }
+}
