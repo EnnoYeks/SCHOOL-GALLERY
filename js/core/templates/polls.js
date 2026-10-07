@@ -25,7 +25,7 @@
       <div><span class="polls-kicker">YOUR SCHOOL. YOUR VOICE.</span><h2>Live right now</h2><p>Pick an option and see how the HSHS community is voting.</p></div>
       <button type="button" class="poll-create" id="createPollBtn"><i class="fas fa-plus"></i><span>Start a poll</span></button>
     </div>
-    <div id="activePollsList" class="poll-grid" aria-live="polite"><div class="poll-loading">Loading live polls…</div></div>
+    <div id="activePollsList" class="poll-grid" aria-live="polite"><article class="hshs-sk-poll" aria-hidden="true"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar short"></span></article><article class="hshs-sk-poll" aria-hidden="true"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar short"></span></article></div>
   </section>
 
   <section class="polls-content polls-results-strip" id="results">
@@ -40,7 +40,7 @@
     <div class="polls-heading">
       <div><span class="polls-kicker">THE ARCHIVE</span><h2>Past polls</h2><p>See what HSHS has asked and answered before.</p></div>
     </div>
-    <div id="closedPollsList" class="poll-grid" aria-live="polite"><div class="poll-loading">Loading poll history…</div></div>
+    <div id="closedPollsList" class="poll-grid" aria-live="polite"><article class="hshs-sk-poll" aria-hidden="true"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar short"></span></article><article class="hshs-sk-poll" aria-hidden="true"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar short"></span></article></div>
   </section>
 
   <section class="polls-cta">

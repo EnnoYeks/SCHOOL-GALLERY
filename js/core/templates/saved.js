@@ -8,6 +8,6 @@
     <button type="button" class="hshs-tab on" data-saved-tab="saved" role="tab" aria-selected="true">Saved posts</button>
     <button type="button" class="hshs-tab" data-saved-tab="interacted" role="tab" aria-selected="false">Interacted</button>
   </div>
-  <section id="hshsSavedList" aria-live="polite"></section>
-  <section id="hshsInteractedList" hidden aria-live="polite"></section>
+  <section id="hshsSavedList" aria-live="polite"><article class="hshs-sk-card" aria-hidden="true"><div class="hshs-sk-media"></div><div class="hshs-sk-copy"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span></div></article><article class="hshs-sk-card" aria-hidden="true"><div class="hshs-sk-media"></div><div class="hshs-sk-copy"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span></div></article><article class="hshs-sk-card" aria-hidden="true"><div class="hshs-sk-media"></div><div class="hshs-sk-copy"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span></div></article></section>
+  <section id="hshsInteractedList" hidden aria-live="polite"><article class="hshs-sk-card" aria-hidden="true"><div class="hshs-sk-media"></div><div class="hshs-sk-copy"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span></div></article><article class="hshs-sk-card" aria-hidden="true"><div class="hshs-sk-media"></div><div class="hshs-sk-copy"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span></div></article><article class="hshs-sk-card" aria-hidden="true"><div class="hshs-sk-media"></div><div class="hshs-sk-copy"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span></div></article></section>
 </main>`;})(typeof window!=='undefined'?window:this);

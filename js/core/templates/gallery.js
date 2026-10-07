@@ -38,7 +38,7 @@
         </div>
       </section>
       <section class="gallery-feed" id="galleryFeed" aria-live="polite">
-        <article class="gallery-skel"></article><article class="gallery-skel"></article><article class="gallery-skel"></article><article class="gallery-skel"></article>
+        <article class="gallery-skel" aria-hidden="true"><span class="gallery-skel-media"></span><span class="gallery-skel-copy"><b></b><em></em></span><span class="gallery-skel-acts"><i></i><i></i><i></i><i></i></span></article><article class="gallery-skel" aria-hidden="true"><span class="gallery-skel-media"></span><span class="gallery-skel-copy"><b></b><em></em></span><span class="gallery-skel-acts"><i></i><i></i><i></i><i></i></span></article><article class="gallery-skel" aria-hidden="true"><span class="gallery-skel-media"></span><span class="gallery-skel-copy"><b></b><em></em></span><span class="gallery-skel-acts"><i></i><i></i><i></i><i></i></span></article><article class="gallery-skel" aria-hidden="true"><span class="gallery-skel-media"></span><span class="gallery-skel-copy"><b></b><em></em></span><span class="gallery-skel-acts"><i></i><i></i><i></i><i></i></span></article>
       </section>
       <div class="gallery-loader" id="galleryLoader" hidden><div class="hshs-wave"><i></i><i></i><i></i></div></div>
       <div class="gallery-sentinel" id="gallerySentinel" aria-hidden="true"></div>

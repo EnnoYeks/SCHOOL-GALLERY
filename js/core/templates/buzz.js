@@ -17,11 +17,11 @@
       </header>
 
       <section class="buzz-feed" id="buzzFeed" aria-live="polite">
-        <div class="buzz-state" id="buzzLoading">
-          <div class="hshs-wave" aria-hidden="true"><i></i><i></i><i></i></div>
-          <strong>Loading Vibe</strong>
-          <small>Finding the latest HSHS moments…</small>
-        </div>
+        <article class="hshs-sk-buzz" id="buzzLoading" aria-hidden="true">
+          <div class="hshs-sk-buzz-media"></div>
+          <div class="hshs-sk-buzz-cap"><b></b><em></em></div>
+          <div class="hshs-sk-buzz-rail"><i></i><i></i><i></i></div>
+        </article>
       </section>
 
       <div class="buzz-toast" id="buzzToast" role="status"></div>

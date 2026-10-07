@@ -22,7 +22,7 @@
     <p class="hs-kicker">Recent</p>
     <div class="hs-chip-row" id="hsRecent"></div>
     <p class="hs-kicker">Suggested people</p>
-    <div class="hs-people" id="hsSuggest"></div>
+    <div class="hs-people" id="hsSuggest"><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div></div>
     <p class="hs-kicker">Jump in</p>
     <div class="hs-shortcuts">
       <a class="hs-short" href="gallery.html"><i class="fas fa-image"></i><span><b>Gallery</b><small>All campus posts</small></span></a>

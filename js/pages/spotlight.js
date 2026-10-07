@@ -146,7 +146,7 @@
     var posts = [];
     try { if (global.db && global.db.getPosts) posts = await global.db.getPosts(60, 0); } catch (e) { posts = []; }
     posts = (posts || []).filter(function (p) { return p && p.id; });
-    if (!posts.length) posts = seed();
+    if (!posts.length) posts = [];
     state.posts = posts.sort(function (a, b) { return score(b) - score(a) || dateValue(b.createdAt || b.timestamp) - dateValue(a.createdAt || a.timestamp); });
     renderBoard();
   }

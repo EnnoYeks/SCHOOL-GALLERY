@@ -191,9 +191,11 @@
     }
     showHome(false);
     var empty = $('hsEmpty');
-    if (empty) {
-      empty.hidden = false;
-      empty.innerHTML = '<div class="hs-empty"><i class="fas fa-spinner fa-spin"></i><h3>Searching…</h3></div>';
+    if (empty) { empty.hidden = true; empty.innerHTML = ''; }
+    var media = $('hsMediaOut');
+    if (media) {
+      media.hidden = false;
+      media.innerHTML = (g.HshsPaint && g.HshsPaint.markup) ? g.HshsPaint.markup.feed(4) : '<article class="hshs-sk-card"></article><article class="hshs-sk-card"></article>';
     }
     var data = await gather(q);
     if (lastQ !== q) return;

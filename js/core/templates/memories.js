@@ -27,7 +27,7 @@
       <div><span class="memories-kicker"><i class="fas fa-calendar-day"></i> TODAY IN HSHS HISTORY</span><h2>On This Day</h2><p>Look back at what happened on this date in HSHS.</p></div>
       <button class="memories-date-pill" type="button"><i class="far fa-calendar"></i><span id="memoryToday">Today</span><i class="fas fa-chevron-down"></i></button>
     </div>
-    <div id="onThisDayGrid" class="memories-feature-grid"><div class="memories-loading">Loading memories…</div></div>
+    <div id="onThisDayGrid" class="memories-feature-grid"><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article></div>
   </section>
 
   <section class="memories-section" id="reel">
@@ -37,7 +37,7 @@
         <button class="is-active" type="button" data-memory-filter="all">All</button><button type="button" data-memory-filter="photo">Photos</button><button type="button" data-memory-filter="video">Videos</button><button type="button" data-memory-filter="event">Events</button><button type="button" data-memory-filter="mine">My Posts</button>
       </div>
     </div>
-    <div id="memoryReel" class="memories-reel"><div class="memories-loading">Loading the reel…</div><a class="memories-share-card" href="../index/upload.html"><span>+</span><strong>Share a memory</strong></a></div>
+    <div id="memoryReel" class="memories-reel"><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><a class="memories-share-card" href="../index/upload.html"><span>+</span><strong>Share a memory</strong></a></div>
   </section>
 
   <section class="memories-section" id="timeline">
@@ -45,7 +45,7 @@
       <div><span class="memories-kicker"><i class="fas fa-route"></i> THE STORY OF HSHS</span><h2>HSHS Timeline</h2><p>The biggest moments from this year and beyond.</p></div>
       <button class="memories-outline-btn" type="button" data-timeline-more>View full timeline <i class="fas fa-arrow-right"></i></button>
     </div>
-    <div id="schoolTimeline" class="memories-timeline"><div class="memories-loading">Loading timeline…</div></div>
+    <div id="schoolTimeline" class="memories-timeline"><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div></div>
   </section>
 
   <section class="memories-section" id="years">
