@@ -16,21 +16,11 @@
   <style>
     html, body { background: #071433; margin: 0; }
     #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
-    html:not(.hshs-ready) #hshs-page > :not(.hshs-load-skel) {
-      opacity: 0 !important;
-      visibility: hidden !important;
-    }
-    html.hshs-ready #hshs-page > :not(.hshs-load-skel) {
-      animation: hshs-pop-in 220ms ease;
-    }
-    @keyframes hshs-pop-in {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+    html, #hshs-page, .mobile-tabbar, .navbar { opacity: 1; visibility: visible; }
+    html.hshs-ready #hshs-page > :not(.hshs-load-skel) { animation: none; }
     .hshs-load-skel {
-      position: fixed;
-      inset: 0;
-      z-index: 5000;
+      position: relative;
+      z-index: 1;
       min-height: 100vh;
       background:
         radial-gradient(520px 280px at 50% 18%, rgba(37, 99, 235, 0.16), transparent 62%),
@@ -77,6 +67,8 @@
   <link rel="stylesheet" href="../css/hshs-account.css?v=261005sk1">
 </head>
 <body class="dark-mode">
+  <script src="../js/core/paint.js?v=261007paint1"></script>
+
   <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
     <div class="hshs-load-skel" data-skel-page="search" role="status" aria-label="Loading"><div class="hshs-skel-topbar"><span class="sk brand"></span><span class="actions"><span class="sk"></span></span></div><main class="skel-account"><span class="sk skel-search"></span><div class="skel-tabs"><span class="sk sk-chip"></span><span class="sk sk-chip"></span><span class="sk sk-chip"></span></div><div class="skel-list"><span class="sk skel-search-result"></span><span class="sk skel-search-result"></span><span class="sk skel-search-result"></span><span class="sk skel-search-result"></span><span class="sk skel-search-result"></span><span class="sk skel-search-result"></span></div></main><div class="hshs-skel-bottom"><span class="item"><span class="sk ico"></span></span><span class="item"><span class="sk ico"></span></span><span class="item"><span class="sk ico"></span></span><span class="item"><span class="sk ico"></span></span><span class="item"><span class="sk ico"></span></span></div></div>
   </div>
@@ -135,7 +127,8 @@
         window.__hshsSkelWatch = obs;
         obs.observe(root, { childList: true });
       }
-      setTimeout(function () { reveal(); }, 12000);
+      reveal();
+      setTimeout(function () { reveal(); }, 0);
     })();
   </script>
   <script type="module" src="../js/config.js?v=261002fast1"></script>

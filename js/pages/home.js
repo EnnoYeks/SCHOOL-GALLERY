@@ -104,7 +104,13 @@
     return { posts: posts, stats: stats };
   }
   async function renderData() {
-    var loaded = await loadReal();
+    var loaded;
+    try { loaded = await loadReal(); }
+    catch (err) {
+      var grid = document.getElementById('featuredGrid');
+      if (grid && global.HshsPaint) global.HshsPaint.section(grid, 'error', { onRetry: renderData, error: '<div class="hshs-section-state hshs-error"><strong>Could not load the feed</strong><button type="button" data-hshs-retry>Retry</button></div>' });
+      return;
+    }
     var posts = loaded.posts;
     var stats = loaded.stats;
     ['totalPhotos', 'totalVideos', 'totalStudents', 'totalLikes'].forEach(function (id) {
@@ -167,10 +173,11 @@
       document.body.appendChild(root);
     }
     document.documentElement.setAttribute('data-hshs-page', 'home');
-    await loadOnce(assetBase() + 'css/home.css?v=260906p3', 'hshs-home-css');
-    await loadOnce(assetBase() + 'css/hshs-home-polish.css?v=260906hero', 'hshs-home-polish-css');
-    await loadOnce(assetBase() + 'css/hshs-vibe-home.css?v=260906split2', 'hshs-vibe-home-css');
-    await loadOnce(assetBase() + 'css/hshs-glass.css?v=260926glass', 'hshs-glass-css');
+    if (global.HshsPaint) global.HshsPaint.now();
+    loadOnce(assetBase() + 'css/home.css?v=260906p3', 'hshs-home-css');
+    loadOnce(assetBase() + 'css/hshs-home-polish.css?v=260906hero', 'hshs-home-polish-css');
+    loadOnce(assetBase() + 'css/hshs-vibe-home.css?v=260906split2', 'hshs-vibe-home-css');
+    loadOnce(assetBase() + 'css/hshs-glass.css?v=260926glass', 'hshs-glass-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
     else if (tpl) root.innerHTML = tpl;

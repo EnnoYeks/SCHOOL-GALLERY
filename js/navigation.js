@@ -105,8 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('hshs-boot-critical')) {
         var st = document.createElement('style');
         st.id = 'hshs-boot-critical';
-        st.textContent = 'html.hshs-booting,html.hshs-booting body{background:#050d1c!important}';
-        if (!document.querySelector('.hshs-load-skel')) document.documentElement.classList.add('hshs-booting');
+        st.textContent = 'html,body{background:#071433}#hshs-page,.mobile-tabbar,.navbar{opacity:1;visibility:visible}';
+        document.documentElement.classList.add('hshs-ready');
+        document.documentElement.classList.remove('hshs-booting');
         var mobile = window.matchMedia('(max-width: 1024px)').matches;
         document.documentElement.classList.toggle('hshs-device-mobile', mobile);
         document.documentElement.classList.toggle('hshs-device-desktop', !mobile);
@@ -160,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addCss('hshs-chrome-css', 'hshs-chrome.css');
     addCss('hshs-system-css', 'hshs-system.css');
     addCss('hshs-stable-css', 'hshs-stable.css');
+    add('hshs-paint-js', 'core/paint.js');
     add('hshs-lock-js', 'hshs-lock.js');
     add('hshs-tt-js', 'hshs-tt.js');
     add('hshs-boot-js', 'hshs-boot.js');

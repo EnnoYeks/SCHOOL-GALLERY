@@ -18,7 +18,7 @@
       visibility: visible !important;
     }
     html.hshs-ready #hshs-page > :not(.hshs-load-skel) {
-      animation: hshs-pop-in 220ms ease;
+      animation: none;
     }
     @keyframes hshs-pop-in {
       from { opacity: 0; }
@@ -26,9 +26,8 @@
     }
 
     .hshs-load-skel {
-      position: fixed;
-      inset: 0;
-      z-index: 5000;
+      position: relative;
+      z-index: 1;
       min-height: 100vh;
       background:
         radial-gradient(520px 280px at 50% 18%, rgba(37, 99, 235, 0.16), transparent 62%),

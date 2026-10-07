@@ -1,9 +1,9 @@
 (function () {
   var root = document.documentElement;
-  var mobile = window.matchMedia('(max-width: 1024px)').matches;
+  var mobile = window.matchMedia('(max-width:1024px)').matches;
   root.classList.toggle('hshs-device-mobile', mobile);
   root.classList.toggle('hshs-device-desktop', !mobile);
-  if (document.querySelector('.hshs-load-skel')) return;
-  if (root.classList.contains('hshs-ready') || window.__hshsBootDone) return;
-  root.classList.add('hshs-booting');
+  root.classList.add('hshs-ready');
+  root.classList.remove('hshs-booting');
+  if (window.HshsPaint) window.HshsPaint.now();
 })();

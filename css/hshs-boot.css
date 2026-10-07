@@ -3,26 +3,16 @@ html.hshs-booting,
 html.hshs-booting body {
   background: #050d1c !important;
 }
-html.hshs-booting .animated-bg,
-html.hshs-booting .gradient-bg,
-html.hshs-booting .particles-container,
-html.hshs-booting .floating-shapes,
+/* First paint: never hide the shell because a resource is late. */
 html.hshs-booting .navbar,
-html.hshs-booting .hero,
-html.hshs-booting .nav-links,
-html.hshs-booting #hshs-tt-overlay {
-  display: none !important;
-}
-html.hshs-booting body > *:not(#hshs-boot):not(#hshs-page) {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-html.hshs-booting #hshs-page,
-.hshs-load-skel {
+html.hshs-booting .mobile-tabbar,
+html.hshs-booting #hshs-page {
+  display: revert;
   opacity: 1 !important;
   visibility: visible !important;
+  pointer-events: auto !important;
 }
+#hshs-boot { display: none !important; }
 body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
 #hshs-boot {
   position: fixed; inset: 0; z-index: 4000;
@@ -39,11 +29,7 @@ html.hshs-ready body > *:not(#hshs-boot) {
   visibility: visible !important;
   pointer-events: auto !important;
 }
-html:not(.hshs-ready) #hshs-page > :not(.hshs-load-skel) {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
+/* content stays visible; skeletons live inside sections */
 .hshs-boot-card {
   width: min(240px, 72vw);
   text-align: center;

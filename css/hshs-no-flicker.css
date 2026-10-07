@@ -10,18 +10,7 @@ html.hshs-booting,
 html.hshs-booting body {
   background: #050d1c !important;
 }
-html.hshs-booting .animated-bg,
-html.hshs-booting .gradient-bg,
-html.hshs-booting .particles-container,
-html.hshs-booting .floating-shapes,
-html.hshs-booting .hero {
-  display: none !important;
-}
-html.hshs-booting body > *:not(#hshs-boot):not(#hshs-page):not(.navbar) {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
+/* shell stays visible during boot */
 html.hshs-booting #hshs-page,
 .hshs-load-skel {
   opacity: 1 !important;
@@ -33,15 +22,7 @@ html.hshs-ready body > *:not(#hshs-boot) {
   visibility: visible !important;
   pointer-events: auto !important;
 }
-/* Hold injected markup until the page is styled, then pop it in once. */
-html:not(.hshs-ready) #hshs-page > :not(.hshs-load-skel) {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-html.hshs-ready #hshs-page > :not(.hshs-load-skel) {
-  animation: hshsPopIn 220ms ease;
-}
+html.hshs-ready #hshs-page > :not(.hshs-load-skel) { animation: none; }
 @keyframes hshsPopIn {
   from { opacity: 0; }
   to { opacity: 1; }
