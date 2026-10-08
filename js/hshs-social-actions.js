@@ -3,6 +3,7 @@
     window.__hshsSocialActions = true;
 
     function store() { return window.HshsStore; }
+    function people() { return window.HshsPeople || null; }
     function escapeHtml(s) {
         return String(s == null ? '' : s).replace(/[&<>"']/g, function (ch) {
             return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
@@ -13,6 +14,9 @@
         if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'M';
         if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'K';
         return String(n);
+    }
+    function toast(msg) {
+        if (window.Utils && Utils.showToast) Utils.showToast(msg, 'info');
     }
     function stableLegacyId(card) {
         try {
@@ -131,7 +135,7 @@
             closeBtn.type = 'button';
             closeBtn.className = 'hshs-comments-close';
             closeBtn.setAttribute('aria-label', 'Close comments');
-            closeBtn.textContent = '×';
+            closeBtn.textContent = '\u00d7';
             head.appendChild(closeBtn);
 
             var list = document.createElement('div');
@@ -178,7 +182,7 @@
                 if (!s || !s.addComment) return;
                 var result;
                 try { result = s.addComment(post.id, input.value); } catch (e) { result = { ok: false, error: 'Failed' }; }
-                if (!result || !result.ok) { if (window.Utils && Utils.showToast) Utils.showToast(result && result.error || 'Could not post comment', 'info'); return; }
+                if (!result || !result.ok) { toast(result && result.error || 'Could not post comment'); return; }
                 input.value = '';
                 var count = card.querySelector('.comment-action .action-count');
                 if (count) count.textContent = formatCount(post.comments);
@@ -242,30 +246,70 @@
             ensureComments(card, post);
         } catch (e) { /* ignore wiring errors */ }
     }
+
+    /** Follow buttons: Firebase via HshsPeople, not local-only HshsStore */
     function wirePeople(root) {
         try {
-            var s = store();
-            if (!s) return;
             (root || document).querySelectorAll('.hshs-people-card').forEach(function (card) {
                 try {
                     var uid = card.getAttribute('data-uid');
                     var actions = card.querySelector('.hshs-people-actions');
                     if (!uid || !actions || actions.querySelector('[data-follow]')) return;
-                    var user = (s.getUser && s.getUser(uid)) || null;
-                    if (!user) return;
+
                     var btn = document.createElement('button');
-                    btn.type = 'button'; btn.className = 'hshs-follow-btn hshs-follow-person'; btn.setAttribute('data-follow', uid);
-                    var following = (s.isFollowing && s.isFollowing(uid)) || false;
-                    btn.textContent = following ? 'Following' : 'Follow'; btn.classList.toggle('is-on', following);
+                    btn.type = 'button';
+                    btn.className = 'hshs-follow-btn hshs-follow-person';
+                    btn.setAttribute('data-follow', uid);
+                    btn.textContent = 'Follow';
+                    btn.disabled = true;
                     actions.insertBefore(btn, actions.firstChild);
+
+                    function paint(following) {
+                        btn.disabled = false;
+                        btn.textContent = following ? 'Following' : 'Follow';
+                        btn.classList.toggle('is-on', !!following);
+                    }
+
+                    var api = people();
+                    if (api && api.isFollowing) {
+                        api.isFollowing(uid).then(function (v) { paint(!!v); }).catch(function () { paint(false); });
+                    } else {
+                        var s = store();
+                        paint(!!(s && s.isFollowing && s.isFollowing(uid)));
+                    }
+
                     btn.onclick = function (e) {
-                        e.preventDefault(); e.stopPropagation();
-                        try {
-                            if (!s.toggleFollow) return;
-                            var result = s.toggleFollow(uid);
-                            if (!result || !result.ok) { if (window.Utils && Utils.showToast) Utils.showToast(result && result.error, 'info'); return; }
-                            btn.textContent = result.following ? 'Following' : 'Follow'; btn.classList.toggle('is-on', result.following);
-                        } catch (err) { /* ignore */ }
+                        e.preventDefault();
+                        e.stopPropagation();
+                        btn.disabled = true;
+                        var p = people();
+                        if (p && p.toggleFollow) {
+                            p.toggleFollow(uid).then(function (result) {
+                                if (!result || !result.ok) {
+                                    toast((result && result.error) || 'Could not follow');
+                                    btn.disabled = false;
+                                    return;
+                                }
+                                paint(!!result.following);
+                            }).catch(function (err) {
+                                toast((err && err.message) || 'Could not follow');
+                                btn.disabled = false;
+                            });
+                            return;
+                        }
+                        var s = store();
+                        if (!s || !s.toggleFollow) {
+                            toast('Sign in first');
+                            btn.disabled = false;
+                            return;
+                        }
+                        var result = s.toggleFollow(uid);
+                        if (!result || !result.ok) {
+                            toast((result && result.error) || 'Could not follow');
+                            btn.disabled = false;
+                            return;
+                        }
+                        paint(!!result.following);
                     };
                 } catch (e) { /* per-card ignore */ }
             });
@@ -295,6 +339,7 @@
         } catch (e) { /* ignore observer errors */ }
         document.addEventListener('hshs:storechange', function () { try { scan(document); } catch (e) {} });
         document.addEventListener('hshs:notify', function () { try { scan(document); } catch (e) {} });
+        document.addEventListener('hshs:auth', function () { try { scan(document); } catch (e) {} });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();

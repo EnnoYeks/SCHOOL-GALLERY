@@ -1,12 +1,10 @@
 /**
- * HSHS Social — pinned known-good build (58704bde)
+ * HSHS Social — local build (no stale CDN pin)
+ * Follow / people actions live in hshs-social-actions.js + HshsPeople + db.js
  */
 (function () {
   if (window.__hshsSocialBoot) return;
   window.__hshsSocialBoot = true;
-  var s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/gh/EnnoYeks/SCHOOL-GALLERY@58704bde2c3646cd4060ca1c2cdf35b2f61c37c3/js/hshs-social.js';
-  s.async = false;
-  s.crossOrigin = 'anonymous';
-  document.head.appendChild(s);
+  // Intentionally empty: do not load an old CDN snapshot.
+  // Real follow/chat wiring is in hshs-social-actions.js, hshs-people.js, db.js.
 })();
