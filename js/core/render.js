@@ -42,6 +42,9 @@
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         if (typeof window.__hshsRevealPage === 'function') {
+          // paint.js holds the early reveal while the skeleton is the only content.
+          // A real mount reaches this point, so release the guard before revealing.
+          window.__hshsRevealQueued = false;
           window.__hshsRevealPage();
           return;
         }
