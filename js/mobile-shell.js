@@ -72,8 +72,41 @@
   function inSub() {
     return location.pathname.indexOf('/index/') !== -1;
   }
-  function homeHref() { return inSub() ? '../index.html' : 'index.html'; }
-  function sub(name) { return inSub() ? name : 'index/' + name; }
+  // Root-absolute hrefs so they work from any route (/vibe, /gallery, etc.)
+  function abs(path) {
+    if (!path) return '/';
+    if (path.charAt(0) === '/') return path;
+    if (path.charAt(0) === '#') return path;
+    return '/' + path.replace(/^\/+/, '');
+  }
+  function homeHref() { return '/'; }
+  function sub(name) {
+    // map file names to clean app paths where possible
+    var map = {
+      'buzz.html': '/vibe',
+      'clips.html': '/vibe',
+      'shorts.html': '/vibe',
+      'gallery.html': '/gallery',
+      'photos.html': '/photos',
+      'videos.html': '/videos',
+      'trending.html': '/trending',
+      'spotlight.html': '/spotlight',
+      'polls.html': '/polls',
+      'memories.html': '/memories',
+      'more.html': '/more',
+      'about.html': '/about',
+      'contact.html': '/contact',
+      'profile.html': '/profile',
+      'settings.html': '/settings',
+      'chat.html': '/chat',
+      'admin.html': '/admin',
+      'login.html': '/login',
+      'notifications.html': '/notifications',
+      'saved.html': '/saved',
+      'search.html': '/search'
+    };
+    return map[name] || abs(name);
+  }
   function jsBase() {
     return inSub() ? '../js/' : 'js/';
   }
@@ -120,6 +153,8 @@
     root.querySelectorAll('a[href]').forEach(function (a) {
       var raw = a.getAttribute('href') || '';
       if (!raw || raw.charAt(0) === '#' || raw.indexOf('mailto:') === 0 || raw.indexOf('tel:') === 0) return;
+      // skip already absolute app routes
+      if (raw.charAt(0) === '/' && raw.indexOf('/index/') === -1) return;
       try {
         var next = canonicalize(a.href);
         if (next.origin !== location.origin) return;
@@ -215,9 +250,10 @@
       var tab = a.getAttribute('data-tab');
       if (!tab || tab === 'upload') return;
       var on = false;
-      if (tab === 'home') on = file === 'index.html' || file === '';
+      if (tab === 'home') on = file === 'index.html' || file === '' || location.pathname === '/' || location.pathname === '';
       else if (tab === 'more') on = moreFiles.indexOf(file) !== -1;
-      else on = file === tab + '.html' || (tab === 'buzz' && (file === 'clips.html' || file === 'shorts.html'));
+      else if (tab === 'buzz') on = file === 'buzz.html' || file === 'clips.html' || file === 'shorts.html' || /\/(vibe|buzz|clips|shorts)/i.test(location.pathname);
+      else on = file === tab + '.html' || location.pathname === '/' + tab;
       a.classList.toggle('active', on);
     });
     document.querySelectorAll('.navbar .nav-link, .more-grid a').forEach(function (a) {
@@ -243,7 +279,7 @@
     bar.setAttribute('aria-label', 'Primary');
     bar.innerHTML =
       '<a href="' + r.PRIMARY[0].href + '" class="' + (isActive(r.PRIMARY[0]) ? 'active' : '') + '" data-tab="home"><i class="fas fa-house"></i><span>Home</span></a>' +
-      '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="buzz"><i class="fas fa-bolt"></i><span>Buzz</span></a>' +
+      '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="buzz"><i class="fas fa-bolt"></i><span>Vibe</span></a>' +
       '<button type="button" class="tab-upload" data-tab="upload" id="openUploadStudio" aria-label="Upload"><span class="tab-upload-btn"><i class="fas fa-plus"></i></span></button>' +
       '<a href="' + r.PRIMARY[2].href + '" class="' + (isActive(r.PRIMARY[2]) ? 'active' : '') + '" data-tab="gallery"><i class="fas fa-images"></i><span>Gallery</span></a>' +
       '<a href="#more" class="' + (moreActive ? 'active' : '') + '" data-tab="more" id="openMoreSheet"><i class="fas fa-ellipsis"></i><span>More</span></a>';
@@ -424,21 +460,19 @@
     navigate(a.href);
   }, true);
 
-  window.addEventListener('popstate', function () {
-    closeMore();
-    navigate(location.href, true);
-  });
-
+  // Boot
   function boot() {
     ensurePopCss();
     buildBar();
+    fixLinks(document);
     markActive();
-    history.replaceState({ url: location.href, page: pageName() }, '', location.href);
-    if (window.__hshsBootMark) window.__hshsBootMark('shell', 1);
   }
-
-  window.__hshsNavigate = navigate;
-  window.__hshsCloseMore = closeMore;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
+  window.addEventListener('popstate', function () {
+    navigate(location.href, true);
+  });
 })();
