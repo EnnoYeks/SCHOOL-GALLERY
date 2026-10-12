@@ -33,10 +33,21 @@ html.hshs-ready #hshs-page > :not(.hshs-load-skel) { animation: none; }
 html.hshs-device-mobile .nav-links {
   display: none !important;
 }
+/* Mobile bottom bar only on phones/tablets — always hide on desktop */
 @media (min-width: 1025px) {
+  .mobile-tabbar,
+  .more-sheet,
+  .more-backdrop,
   html.hshs-device-desktop .mobile-tabbar,
   html.hshs-device-desktop .more-sheet,
-  html.hshs-device-desktop .more-backdrop {
+  html.hshs-device-desktop .more-backdrop,
+  body.has-mobile-shell .mobile-tabbar,
+  body.has-mobile-shell .more-sheet,
+  body.has-mobile-shell .more-backdrop {
     display: none !important;
+  }
+  body.has-mobile-shell,
+  html.hshs-device-desktop body {
+    padding-bottom: 0 !important;
   }
 }
