@@ -43,7 +43,8 @@ html.hshs-device-mobile .skel-profile-grid{grid-template-columns:repeat(3,1fr);g
 html.hshs-device-mobile .skel-profile-stats{gap:6px}
 @media(max-width:520px){.skel-video-grid{grid-template-columns:1fr;gap:10px}.skel-feature-grid{grid-template-columns:1fr}.skel-spot-card{min-height:130px}.skel-spot-hero{min-height:310px}.skel-polls-hero,.skel-memories-hero{min-height:370px}.skel-profile-cover{min-height:150px;border-radius:17px}.skel-profile-head{margin:-45px 0 0;grid-template-columns:78px 1fr;gap:10px}.skel-profile-avatar{width:78px;height:78px}.skel-profile-grid{grid-template-columns:repeat(3,1fr)}}
 @media(prefers-reduced-motion:reduce){.sk::after{animation:none;opacity:.35}.hshs-load-skel{transition:none}}@keyframes hshs-skeleton-shimmer{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
-.mobile-tabbar,.navbar{position:relative;z-index:40}
+/* Keep navbar relative; do NOT force relative on mobile-tabbar (it must stay fixed) */
+.navbar{position:relative;z-index:40}
 .hshs-section-state{margin:18px 16px;padding:18px;border-radius:16px;background:rgba(255,255,255,.04);color:#e8eefc}
 .hshs-section-state button{margin-top:10px;border:0;border-radius:12px;padding:10px 14px;background:#1d4ed8;color:#fff;font-weight:700}
 .hshs-section-skel{min-height:120px;display:grid;gap:10px}
