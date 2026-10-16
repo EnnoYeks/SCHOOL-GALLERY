@@ -24,11 +24,9 @@
           navLink(b + 'index.html', 'fa-home', 'Home', 'home'),
           navLink(b + 'index/gallery.html', 'fa-images', 'Gallery', 'gallery'),
           navLink(b + 'index/photos.html', 'fa-photo-video', 'Photos', 'photos'),
-          navLink(b + 'index/videos.html', 'fa-video', 'Vibe', 'videos'),
-          navLink(b + 'index/trending.html', 'fa-fire', 'Trending', 'trending'),
-          navLink(b + 'index/spotlight.html', 'fa-star', 'Spotlight', 'spotlight'),
-          navLink(b + 'index/polls.html', 'fa-poll', 'Polls', 'polls'),
-          navLink(b + 'index/memories.html', 'fa-history', 'Memories', 'memories')
+          navLink(b + 'index/videos.html', 'fa-video', 'Buzz', 'videos'),
+          navLink(b + 'index/trending.html', 'fa-fire', 'Trending', 'trending')
+          // Spotlight, Polls, Memories moved to desktop More menu to prevent header overflow
         ]),
         R().el('div', { className: 'nav-actions' }, [
           R().el('div', { className: 'notification-icon' }, [R().icon('fa-bell'), R().el('span', { className: 'notification-badge', id: 'notificationBadge', text: '0' })]),
