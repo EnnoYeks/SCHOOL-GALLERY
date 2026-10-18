@@ -86,6 +86,11 @@ service cloud.firestore {
 
       allow create, update: if isSelf(uid)
         && request.resource.data.uid == uid
+        && !('email' in request.resource.data)
+        && !('phone' in request.resource.data)
+        && !('whatsapp' in request.resource.data)
+        && !('studentId' in request.resource.data)
+        && !('location' in request.resource.data)
         && optionalString('fullName', 80)
         && optionalString('name', 80)
         && optionalString('username', 24)
@@ -129,6 +134,7 @@ service cloud.firestore {
 
       allow create: if signedIn()
         && request.resource.data.uid == request.auth.uid
+        && !('email' in request.resource.data)
         && request.resource.data.field == 'username'
         && request.resource.data.value is string
         && request.resource.data.value.size() >= 3
@@ -137,6 +143,7 @@ service cloud.firestore {
       allow update: if signedIn()
         && resource.data.uid == request.auth.uid
         && request.resource.data.uid == request.auth.uid
+        && !('email' in request.resource.data)
         && request.resource.data.field == 'username';
 
       allow delete: if signedIn()
