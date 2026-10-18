@@ -23,7 +23,8 @@ import {
   where,
   limit,
   getDocs,
-  serverTimestamp
+  serverTimestamp,
+  deleteField
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 function appAuth() {
@@ -129,7 +130,7 @@ async function isUsernameTaken(username, exceptUid) {
   return found.uid !== exceptUid;
 }
 
-async function claimUsername(uid, username, email) {
+async function claimUsername(uid, username) {
   username = cleanUsername(username);
   if (!username) return;
   var ref = doc(db(), "userIndex", "username_" + username);
@@ -140,7 +141,7 @@ async function claimUsername(uid, username, email) {
   try {
     await setDoc(ref, {
       uid: uid,
-      email: (email || "").toLowerCase(),
+      email: deleteField(),
       field: "username",
       value: username
     }, { merge: true });
@@ -187,7 +188,23 @@ async function saveProfile(user, data) {
   if (!existingSnap.exists()) profile.createdAt = serverTimestamp();
 
   try {
-    await setDoc(doc(db(), "users", uid), profile, { merge: true });
+    // Keep contact identifiers in the owner-only private/contact document.
+    await setDoc(doc(db(), "users", uid), {
+      ...profile,
+      email: deleteField(),
+      phone: deleteField(),
+      whatsapp: deleteField(),
+      studentId: deleteField(),
+      location: deleteField()
+    }, { merge: true });
+    await setDoc(doc(db(), "users", uid, "private", "contact"), {
+      email: (user.email || data.email || existing.email || "").toLowerCase(),
+      phone: String(data.phone || "").slice(0, 40),
+      whatsapp: String(data.whatsapp || "").slice(0, 40),
+      studentId: String(data.studentId || "").slice(0, 40),
+      location: String(data.location || "").slice(0, 80),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
   } catch (e) {
     persistProfileLocal(normalizeProfile(Object.assign({}, existing, profile, { createdAt: Date.now(), updatedAt: Date.now() }), user));
     if (e && e.code === "permission-denied") {
@@ -196,7 +213,7 @@ async function saveProfile(user, data) {
     throw e;
   }
 
-  if (username) await claimUsername(uid, username, profile.email);
+  if (username) await claimUsername(uid, username);
 
   try {
     await updateProfile(user, {
@@ -206,6 +223,12 @@ async function saveProfile(user, data) {
   } catch (e) {}
 
   var out = normalizeProfile(Object.assign({}, existing, profile, { createdAt: Date.now(), updatedAt: Date.now() }), user);
+  // These values stay in the local self-profile only; never return them from the public user document.
+  out.email = (user.email || data.email || "").toLowerCase();
+  out.phone = String(data.phone || "").slice(0, 40);
+  out.whatsapp = String(data.whatsapp || "").slice(0, 40);
+  out.studentId = String(data.studentId || "").slice(0, 40);
+  out.location = String(data.location || "").slice(0, 80);
   persistProfileLocal(out);
   return out;
 }
@@ -219,9 +242,16 @@ async function loadOrCreateProfile(user, extra) {
     if (snap.exists()) {
       var keep = snap.data();
       var data = normalizeProfile(Object.assign({ uid: user.uid }, keep, {
-        email: keep.email || user.email || "",
+        email: user.email || "",
         photoURL: keep.photoURL || user.photoURL || ""
       }), user);
+      try {
+        var contactSnap = await getDoc(doc(db(), "users", user.uid, "private", "contact"));
+        if (contactSnap.exists()) Object.assign(data, contactSnap.data());
+      } catch (contactError) {
+        console.warn("[auth] private contact data unavailable", contactError);
+      }
+      data.email = (user.email || "").toLowerCase();
       persistProfileLocal(data);
       return data;
     }
