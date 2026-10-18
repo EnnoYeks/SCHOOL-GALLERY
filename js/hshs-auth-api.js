@@ -223,6 +223,12 @@ async function saveProfile(user, data) {
   } catch (e) {}
 
   var out = normalizeProfile(Object.assign({}, existing, profile, { createdAt: Date.now(), updatedAt: Date.now() }), user);
+  // These values stay in the local self-profile only; never return them from the public user document.
+  out.email = (user.email || data.email || "").toLowerCase();
+  out.phone = String(data.phone || "").slice(0, 40);
+  out.whatsapp = String(data.whatsapp || "").slice(0, 40);
+  out.studentId = String(data.studentId || "").slice(0, 40);
+  out.location = String(data.location || "").slice(0, 80);
   persistProfileLocal(out);
   return out;
 }
@@ -236,9 +242,16 @@ async function loadOrCreateProfile(user, extra) {
     if (snap.exists()) {
       var keep = snap.data();
       var data = normalizeProfile(Object.assign({ uid: user.uid }, keep, {
-        email: keep.email || user.email || "",
+        email: user.email || "",
         photoURL: keep.photoURL || user.photoURL || ""
       }), user);
+      try {
+        var contactSnap = await getDoc(doc(db(), "users", user.uid, "private", "contact"));
+        if (contactSnap.exists()) Object.assign(data, contactSnap.data());
+      } catch (contactError) {
+        console.warn("[auth] private contact data unavailable", contactError);
+      }
+      data.email = (user.email || "").toLowerCase();
       persistProfileLocal(data);
       return data;
     }
