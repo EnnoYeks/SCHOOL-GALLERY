@@ -1,13 +1,15 @@
 // ============================================
-// HSHS WORLD – STORAGE LAYER (R2-ready)
+// HSHS WORLD – STORAGE LAYER (Cloudflare R2 only)
 // ============================================
-// Media files never go into Firestore as blobs.
-// This module returns a public URL (or data URL fallback).
-// When Cloudflare R2 is configured, swap the upload body.
+// Media files never go into Firestore.
+// Firestore holds metadata only. Public media URLs come from the r2.dev base.
+// Uploads go through the hshs-r2-sign Worker (presigned PUT). No secrets in the client.
 
 (function (g) {
   "use strict";
   if (g.HshsStorage) return;
+
+  var DEFAULT_PUBLIC_BASE = "https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev";
 
   var cfg = (g.CONFIG && g.CONFIG.storage) || {
     provider: "cloudflare-r2",
@@ -16,17 +18,21 @@
     maxVideoSize: 104857600
   };
 
-  /**
-   * Expected future config (set in config.js or via window.__R2):
-   * {
-   *   accountId, bucket, publicBaseUrl,
-   *   // Prefer a Worker that returns a presigned PUT URL
-   *   signUrl: "https://your-worker.workers.dev/sign",
-   *   // Or direct S3-compatible credentials (less ideal in browser)
-   * }
-   */
   function r2Config() {
-    return g.__R2 || (g.CONFIG && g.CONFIG.r2) || null;
+    var c = g.__R2 || (g.CONFIG && g.CONFIG.r2) || {};
+    if (!c.publicBaseUrl) c.publicBaseUrl = DEFAULT_PUBLIC_BASE;
+    return c;
+  }
+
+  function publicBase() {
+    var r = r2Config();
+    return String(r.publicBaseUrl || DEFAULT_PUBLIC_BASE).replace(/\/$/, "");
+  }
+
+  /** Build the public r2.dev URL for an object key. */
+  function publicUrl(key) {
+    if (!key) return "";
+    return publicBase() + "/" + String(key).replace(/^\/+/, "");
   }
 
   function uid() {
@@ -72,8 +78,8 @@
 
   /**
    * Upload a File/Blob. Returns { url, key, provider, kind, size }.
-   * Today: data URL / object URL fallback so the app keeps working offline.
-   * When R2 is wired: PUT to presigned URL and return the public CDN URL.
+   * Primary path: Worker signs a PUT → file goes to R2 → public URL is r2.dev base + key.
+   * Fallback only if the Worker is unreachable (local preview).
    */
   async function upload(file, options) {
     options = options || {};
@@ -83,8 +89,7 @@
     var key = objectKey(kind, file);
     var r2 = r2Config();
 
-    // --- R2 path (presigned PUT via Worker) ---
-    if (r2 && r2.signUrl && r2.publicBaseUrl) {
+    if (r2 && r2.signUrl) {
       try {
         var signRes = await fetch(r2.signUrl, {
           method: "POST",
@@ -109,20 +114,19 @@
         });
         if (!put.ok) throw new Error("R2 PUT failed " + put.status);
 
-        var publicUrl = (r2.publicBaseUrl.replace(/\/$/, "") + "/" + key);
         return {
-          url: publicUrl,
+          url: publicUrl(key),
           key: key,
           provider: "cloudflare-r2",
           kind: kind,
-          size: file && file.size || 0
+          size: (file && file.size) || 0
         };
       } catch (err) {
-        console.warn("[HshsStorage] R2 upload failed, falling back:", err && err.message);
+        console.warn("[HshsStorage] R2 upload failed, local fallback:", err && err.message);
       }
     }
 
-    // --- Local / offline fallback (data URL for photos, blob URL for video) ---
+    // Local fallback only (never writes media into Firestore)
     if (kind === "photo" && typeof createImageBitmap === "function") {
       try {
         var bitmap = await createImageBitmap(file);
@@ -155,7 +159,6 @@
       };
       reader.onerror = reject;
       if (kind === "video") {
-        // Prefer object URL for large video to avoid memory blow-up
         try {
           var obj = URL.createObjectURL(file);
           resolve({
@@ -172,20 +175,15 @@
     });
   }
 
-  /**
-   * Upload from an already-prepared data URL / blob URL (camera capture path).
-   */
   async function uploadFromUrl(src, options) {
     options = options || {};
     var kind = options.kind || "photo";
     if (!src) throw new Error("No media source");
 
-    // If it is already a remote http(s) URL, just pass through
     if (/^https?:\/\//i.test(src)) {
       return { url: src, key: objectKey(kind, null), provider: "remote", kind: kind, size: 0 };
     }
 
-    // data: or blob: → try to turn into File and re-use upload()
     try {
       var res = await fetch(src);
       var blob = await res.blob();
@@ -208,6 +206,8 @@
     upload: upload,
     uploadFromUrl: uploadFromUrl,
     objectKey: objectKey,
+    publicUrl: publicUrl,
+    publicBase: publicBase,
     r2Config: r2Config,
     provider: function () {
       var r = r2Config();
