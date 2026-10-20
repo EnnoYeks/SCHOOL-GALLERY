@@ -1,14 +1,14 @@
-# HSHS World – Backend (Firebase + R2)
+# HSHS World – Backend (Firebase Auth + Firestore metadata + Cloudflare R2 media)
 
-The app talks to Firebase project **`school-gallery-62032`**.
+The app talks to Firebase project **`school-gallery-62032`** for auth and metadata only.
 
 | Layer | Status | Notes |
 |-------|--------|--------|
 | **Auth** | Live | Email/password + Google. Firebase UID is the account identity. |
-| **Firestore** | Live | posts, photos, videos, comments, likes, chats, messages, presence, users, follows |
+| **Firestore** | Metadata only | posts, photos, videos, comments, likes, chats, messages, presence, users, follows. **No media blobs.** |
+| **Media files** | Live on R2 | `js/storage.js` → Worker `hshs-r2-sign` → bucket `hshs-world-media`. Public base: `https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev` |
 | **Chat** | Live | `js/hshs-chat-live.js` + `db.js`. Inbox is live classmates only. |
 | **People** | Live | Search, follow, profile, start chat |
-| **Media files** | Prepared | `js/storage.js` → Cloudflare R2 when configured |
 | **Local store** | Fallback only | Empty seed. No demo accounts. |
 
 Before the final school move, deploy rules and indexes:
@@ -17,6 +17,19 @@ Before the final school move, deploy rules and indexes:
 firebase use school-gallery-62032
 firebase deploy --only firestore:rules,firestore:indexes
 ```
+
+---
+
+## Media (Cloudflare R2)
+
+- Bucket: `hshs-world-media`
+- Public base URL: `https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev`
+- Signing Worker: `https://hshs-r2-sign.ennoyeks.workers.dev`
+- Client config: `window.__R2` (set from `js/config.js`)
+- Upload flow: browser → Worker (presigned PUT) → R2 → public URL returned as `publicBase + "/" + key`
+- Secrets stay in the Worker. Nothing sensitive is in the frontend.
+
+Firestore documents only store the resulting public URL, `mediaKey`, and `mediaProvider: "cloudflare-r2"`.
 
 ---
 
@@ -65,7 +78,8 @@ Guests can open public pages. Creating posts, comments, likes, and chat messages
 
 ### Key files
 
-- `js/config.js` — Firebase app + persistence + auth boot
+- `js/config.js` — Firebase app + persistence + auth boot + R2 public config
+- `js/storage.js` — R2 upload + public URL builder
 - `js/hshs-auth-api.js` — sign in / sign up / Google / reset / profile
 - `js/hshs-auth.js` — login page UI
 - `js/hshs-auth-bridge.js` — stamps `authorId` from the Firebase UID
@@ -86,15 +100,15 @@ firebase use school-gallery-62032
 firebase deploy --only firestore
 ```
 
-### Collections in use
+### Collections in use (metadata only)
 
 | Path | Purpose |
 |------|---------|
 | `users/{uid}` | Account profile |
 | `userIndex/username_{name}` | Unique username → UID |
-| `posts/{id}` | Gallery / For You feed |
-| `photos/{id}` | Photo library |
-| `videos/{id}` | Studio / long videos |
+| `posts/{id}` | Gallery / For You feed (stores R2 public URL) |
+| `photos/{id}` | Photo library (stores R2 public URL) |
+| `videos/{id}` | Studio / long videos (stores R2 public URL) |
 | `comments/{id}` | Comments |
 | `likes/{id}` | Like events |
 | `follows/{id}` | Follow graph (`{me}_{them}`) |
@@ -113,16 +127,11 @@ firebase deploy --only firestore
 - Chat list and messages are limited to signed-in members of that thread.
 - Unauthenticated users can read public content but cannot write authenticated collections.
 - Anonymous provider is **not** treated as a signed-in author.
+- Media access is controlled by the R2 Worker and bucket CORS, not by Firestore.
 
 ---
 
-## 3. Cloudflare R2 (media storage)
-
-`js/storage.js` is the upload entry point. Until `window.__R2` is set, uploads fall back to compressed data URLs / blob URLs.
-
----
-
-## 4. Quick verification
+## 3. Quick verification
 
 - [ ] Email and Google sign-in enabled in Firebase
 - [ ] Rules + indexes deployed
@@ -134,5 +143,6 @@ firebase deploy --only firestore
 - [ ] Logout returns the UI to Guest
 - [ ] Refresh keeps a signed-in session
 - [ ] New posts store `authorId` equal to the Firebase UID
+- [ ] New uploads return a URL under `https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev/`
 - [ ] Search finds signed-in classmates
 - [ ] Follow + Message opens a live thread with no demo names
