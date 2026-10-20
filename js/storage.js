@@ -3,7 +3,9 @@
 // ============================================
 // Media files never go into Firestore.
 // Firestore holds metadata only. Public media URLs come from the r2.dev base.
-// Uploads go through the hshs-r2-sign Worker (presigned PUT). No secrets in the client.
+// Uploads go through the hshs-r2-sign Worker (presigned PUT).
+// Display can list objects from the same Worker and build public URLs.
+// No secrets in the client.
 
 (function (g) {
   "use strict";
@@ -29,10 +31,26 @@
     return String(r.publicBaseUrl || DEFAULT_PUBLIC_BASE).replace(/\/$/, "");
   }
 
+  function workerBase() {
+    var r = r2Config();
+    return String(r.signUrl || "").replace(/\/sign\/?$/i, "").replace(/\/$/, "");
+  }
+
   /** Build the public r2.dev URL for an object key. */
   function publicUrl(key) {
     if (!key) return "";
+    if (/^https?:\/\//i.test(key)) return key;
     return publicBase() + "/" + String(key).replace(/^\/+/, "");
+  }
+
+  /** Prefer an existing URL; otherwise build one from mediaKey. */
+  function mediaUrl(item) {
+    if (!item) return "";
+    var direct = item.image || item.imageUrl || item.thumbnailUrl || item.videoUrl || "";
+    if (direct && /^https?:\/\//i.test(direct)) return direct;
+    if (item.mediaKey) return publicUrl(item.mediaKey);
+    if (direct) return publicUrl(direct);
+    return "";
   }
 
   function uid() {
@@ -76,10 +94,55 @@
     }
   }
 
+  function isVideoKey(key) {
+    return /\.(mp4|webm|mov|m4v)$/i.test(String(key || ""));
+  }
+
+  /**
+   * List objects from the Worker (/list). Returns array of { key, url, type, size }.
+   * Worker must expose GET /list and return { objects: [{ key, size }] } or an array.
+   */
+  async function list(options) {
+    options = options || {};
+    var base = workerBase();
+    if (!base) return [];
+    var limit = options.limit || 40;
+    var prefix = options.prefix || "";
+    try {
+      var url = base + "/list?limit=" + encodeURIComponent(limit);
+      if (prefix) url += "&prefix=" + encodeURIComponent(prefix);
+      var res = await fetch(url, { method: "GET" });
+      if (!res.ok) throw new Error("List failed " + res.status);
+      var data = await res.json();
+      var raw = Array.isArray(data) ? data : (data.objects || data.items || []);
+      return raw.map(function (item) {
+        var key = typeof item === "string" ? item : (item.key || item.name || "");
+        var type = isVideoKey(key) ? "video" : "photo";
+        return {
+          id: key,
+          key: key,
+          mediaKey: key,
+          url: publicUrl(key),
+          image: publicUrl(key),
+          imageUrl: publicUrl(key),
+          thumbnailUrl: publicUrl(key),
+          type: type,
+          title: key.split("/").pop() || "HSHS moment",
+          likes: 0,
+          views: 0,
+          size: (item && item.size) || 0,
+          provider: "cloudflare-r2"
+        };
+      }).filter(function (o) { return o.key; });
+    } catch (err) {
+      console.warn("[HshsStorage] R2 list failed:", err && err.message);
+      return [];
+    }
+  }
+
   /**
    * Upload a File/Blob. Returns { url, key, provider, kind, size }.
    * Primary path: Worker signs a PUT → file goes to R2 → public URL is r2.dev base + key.
-   * Fallback only if the Worker is unreachable (local preview).
    */
   async function upload(file, options) {
     options = options || {};
@@ -88,10 +151,15 @@
 
     var key = objectKey(kind, file);
     var r2 = r2Config();
+    var signTarget = r2.signUrl || "";
+    // Prefer /sign if the configured URL is the Worker root
+    if (signTarget && !/\/sign\/?$/i.test(signTarget)) {
+      signTarget = signTarget.replace(/\/$/, "") + "/sign";
+    }
 
-    if (r2 && r2.signUrl) {
+    if (signTarget) {
       try {
-        var signRes = await fetch(r2.signUrl, {
+        var signRes = await fetch(signTarget, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -205,8 +273,10 @@
   g.HshsStorage = {
     upload: upload,
     uploadFromUrl: uploadFromUrl,
+    list: list,
     objectKey: objectKey,
     publicUrl: publicUrl,
+    mediaUrl: mediaUrl,
     publicBase: publicBase,
     r2Config: r2Config,
     provider: function () {
