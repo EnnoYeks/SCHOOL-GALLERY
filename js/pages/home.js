@@ -34,8 +34,14 @@
     var n = Number(value || 0);
     return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace('.0', '') + 'k' : String(n);
   }
+  function mediaOf(post) {
+    if (global.HshsStorage && typeof global.HshsStorage.mediaUrl === 'function') {
+      return global.HshsStorage.mediaUrl(post);
+    }
+    return post.image || post.imageUrl || post.thumbnailUrl || post.videoUrl || '';
+  }
   function postCard(post) {
-    var image = post.image || post.imageUrl || post.thumbnailUrl || '';
+    var image = mediaOf(post);
     var media = image
       ? '<div class="home-feature-media" style="background-image:url(\'' + esc(image) + '\')"></div>'
       : '<div class="home-feature-media home-feature-media-empty"><i class="fas fa-photo-film"></i></div>';
@@ -48,7 +54,7 @@
   }
   function trendCard(post, rank) {
     if (!post) return '<div class="home-empty"><i class="fas fa-fire"></i><strong>No trending yet</strong></div>';
-    var thumb = post.image || post.imageUrl || post.thumbnailUrl || '';
+    var thumb = mediaOf(post);
     return '<a class="home-trend-item" href="index/trending.html"><span class="home-trend-thumb"' + (thumb ? ' style="background-image:url(\'' + esc(thumb) + '\')"' : '') + '></span><span class="home-trend-rank">#' + rank + '</span><span><strong>' + esc(post.title || 'HSHS moment') + '</strong><small>' + formatCount(post.likes) + ' likes · ' + formatCount(post.views) + ' views</small></span></a>';
   }
   function eventCard(ev) {
@@ -62,7 +68,7 @@
       if (store && typeof store.listPosts === 'function') posts = store.listPosts() || [];
       else if (store && typeof store.getState === 'function') posts = (store.getState().posts || []);
     } catch (e) {}
-    return posts.filter(function (p) { return p && p.id && (p.image || p.imageUrl || p.thumbnailUrl); });
+    return posts.filter(function (p) { return p && p.id && mediaOf(p); });
   }
   async function loadReal() {
     var db = global.db;
@@ -91,12 +97,29 @@
       } catch (e) {}
     }
     if (!posts.length) posts = postsFromStore(global.HshsStore);
+
+    // Fallback: list objects directly from the R2 bucket via the Worker
+    if (!posts.length && global.HshsStorage && typeof global.HshsStorage.list === 'function') {
+      try {
+        posts = await global.HshsStorage.list({ limit: 24 }) || [];
+      } catch (e) {}
+    }
+
     var seen = {};
     posts = posts.filter(function (p) {
-      var key = p.id || p.title;
+      var key = p.id || p.mediaKey || p.title;
       if (!key || seen[key]) return false;
       seen[key] = true;
-      return true;
+      // Ensure display URL is the r2.dev public URL when we have a key
+      if (global.HshsStorage && typeof global.HshsStorage.mediaUrl === 'function') {
+        var url = global.HshsStorage.mediaUrl(p);
+        if (url) {
+          p.image = p.image || url;
+          p.imageUrl = p.imageUrl || url;
+          p.thumbnailUrl = p.thumbnailUrl || url;
+        }
+      }
+      return !!(p.image || p.imageUrl || p.thumbnailUrl || p.mediaKey);
     });
     if (!stats.totalPhotos) stats.totalPhotos = posts.filter(function (p) { return p.type !== 'video'; }).length;
     if (!stats.totalVideos) stats.totalVideos = posts.filter(function (p) { return p.type === 'video'; }).length;
