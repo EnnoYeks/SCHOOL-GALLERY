@@ -58,6 +58,13 @@ export const CONFIG = {
     maxPhotoSize: 52428800,
     maxVideoSize: 104857600
   },
+  // R2 — secrets stay in the Worker only
+  r2: {
+    accountId: "cb48d11c7f8f22a34c27a2874f1cd6e3",
+    bucket: "hshs-world-media",
+    publicBaseUrl: "https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev",
+    signUrl: "https://hshs-r2-sign.ennoyeks.workers.dev"
+  },
   pagination: {
     postsPerPage: 10,
     photosPerPage: 20,
@@ -104,3 +111,8 @@ window.auth = auth;
 window.analytics = analytics;
 window.CONFIG = CONFIG;
 window.firebaseConfig = firebaseConfig;
+
+// Expose R2 config for js/storage.js (no secrets)
+if (typeof window !== "undefined") {
+  window.__R2 = CONFIG.r2;
+}
