@@ -1,18 +1,12 @@
 (function () {
   'use strict';
-  var CAMPUS = [
-    { id: 'ph1', title: 'Morning assembly', description: 'The school gathers before lessons on the Bududa campus.', image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=900&q=70', author: 'HSHS Media', house: 'Campus', category: 'campus', likes: 86, views: 420, comments: 12, createdAt: '2026-09-20' },
-    { id: 'ph2', title: 'Sports Day track', description: 'House teams line up for the 100 metres.', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=900&q=70', author: 'Sports Desk', house: 'Eagle', category: 'sports', likes: 124, views: 690, comments: 18, createdAt: '2026-09-18' },
-    { id: 'ph3', title: 'Library hour', description: 'Quiet reading time in the school library.', image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=70', author: 'Library Club', house: 'Falcon', category: 'campus', likes: 64, views: 310, comments: 6, createdAt: '2026-09-12' },
-    { id: 'ph4', title: 'Football after class', description: 'A friendly match on the school field.', image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=900&q=70', author: 'Sports Desk', house: 'Lion', category: 'sports', likes: 141, views: 802, comments: 22, createdAt: '2026-09-22' },
-    { id: 'ph5', title: 'Art studio', description: 'Colour studies from the creative arts club.', image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=900&q=70', author: 'Arts Club', house: 'Falcon', category: 'houses', likes: 73, views: 280, comments: 9, createdAt: '2026-09-08' },
-    { id: 'ph6', title: 'Hills around Bududa', description: 'The view from the school slopes after rain.', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=70', author: 'HSHS Media', house: 'Campus', category: 'campus', likes: 98, views: 540, comments: 11, createdAt: '2026-09-15' },
-    { id: 'ph7', title: 'Class in session', description: 'A lesson underway in the main block.', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=70', author: 'Academics', house: 'Eagle', category: 'campus', likes: 57, views: 260, comments: 4, createdAt: '2026-09-05' },
-    { id: 'ph8', title: 'House colour day', description: 'Eagle, Lion and Falcon show their colours.', image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=900&q=70', author: 'House Captains', house: 'Lion', category: 'houses', likes: 116, views: 610, comments: 15, createdAt: '2026-09-25' },
-    { id: 'ph9', title: 'Science bench', description: 'A practical session in the science room.', image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=900&q=70', author: 'Science Club', house: 'Eagle', category: 'campus', likes: 69, views: 333, comments: 7, createdAt: '2026-09-11' }
-  ];
 
-  function seed() { return CAMPUS.map(function (p) { return Object.assign({}, p); }); }
+  function mediaOf(p) {
+    if (window.HshsStorage && typeof window.HshsStorage.mediaUrl === 'function') {
+      return window.HshsStorage.mediaUrl(p) || '';
+    }
+    return p.image || p.imageUrl || p.thumbnailUrl || '';
+  }
 
   class PhotosPage {
     constructor() {
@@ -43,9 +37,25 @@
     async loadPhotos() {
       var photos = [];
       try {
-        photos = await (window.db && db.getPhotos ? db.getPhotos(24, 0) : []);
+        photos = await (window.db && db.getPhotos ? db.getPhotos(48, 0) : []);
       } catch (e) { photos = []; }
       photos = Array.isArray(photos) ? photos.filter(Boolean) : [];
+
+      // Fallback: list only the photos/ prefix from R2
+      if (!photos.length && window.HshsStorage && typeof window.HshsStorage.list === 'function') {
+        try {
+          photos = await window.HshsStorage.list({ limit: 48, prefix: 'photos/' }) || [];
+        } catch (e) { photos = []; }
+      }
+
+      photos = photos.map(function (p) {
+        var url = mediaOf(p);
+        p.image = p.image || url;
+        p.imageUrl = p.imageUrl || url;
+        p.thumbnailUrl = p.thumbnailUrl || url;
+        return p;
+      }).filter(function (p) { return p.image; });
+
       this.photos = photos;
       this.render();
     }
