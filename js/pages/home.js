@@ -71,53 +71,6 @@
     return posts.filter(function (p) { return p && p.id && mediaOf(p); });
   }
 
-  async function queryFeaturedAndEvents() {
-    var featured = [];
-    var events = [];
-    try {
-      if (!window.firestore) return { featured: featured, events: events };
-      var fs = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
-      var qFeat = fs.query(
-        fs.collection(window.firestore, 'posts'),
-        fs.where('featured', '==', true),
-        fs.orderBy('featuredAt', 'desc'),
-        fs.limit(4)
-      );
-      var snaps = await Promise.all([
-        fs.getDocs(qFeat).catch(function () { return { docs: [] }; }),
-        fs.getDocs(fs.query(fs.collection(window.firestore, 'photos'), fs.where('featured', '==', true), fs.orderBy('featuredAt', 'desc'), fs.limit(4))).catch(function () { return { docs: [] }; }),
-        fs.getDocs(fs.query(fs.collection(window.firestore, 'videos'), fs.where('featured', '==', true), fs.orderBy('featuredAt', 'desc'), fs.limit(4))).catch(function () { return { docs: [] }; })
-      ]);
-      var allFeat = [];
-      snaps.forEach(function (snap) {
-        (snap.docs || []).forEach(function (d) {
-          var data = d.data() || {};
-          data.id = d.id;
-          data.type = data.type || (snap === snaps[2] ? 'video' : 'photo');
-          allFeat.push(data);
-        });
-      });
-      allFeat.sort(function (a, b) {
-        var at = a.featuredAt && a.featuredAt.toMillis ? a.featuredAt.toMillis() : 0;
-        var bt = b.featuredAt && b.featuredAt.toMillis ? b.featuredAt.toMillis() : 0;
-        return bt - at;
-      });
-      featured = allFeat.slice(0, 4);
-
-      var qEv = fs.query(
-        fs.collection(window.firestore, 'events'),
-        fs.where('date', '>=', new Date().toISOString().slice(0, 10)),
-        fs.orderBy('date', 'asc'),
-        fs.limit(2)
-      );
-      var evSnap = await fs.getDocs(qEv).catch(function () { return { docs: [] }; });
-      events = (evSnap.docs || []).map(function (d) { return { id: d.id, ...d.data() }; });
-    } catch (e) {
-      console.warn('Featured/events query failed', e);
-    }
-    return { featured: featured, events: events };
-  }
-
   async function loadReal() {
     var db = global.db;
     var posts = [];
@@ -137,10 +90,6 @@
           var a = await db.getAnalytics();
           stats.totalPhotos = Number(a && a.totalPhotos) || 0;
           stats.totalVideos = Number(a && a.totalVideos) || 0;
-        }
-        if (db.listUsers) {
-          var users = await db.listUsers(80);
-          stats.totalStudents = (users || []).length;
         }
       } catch (e) {}
     }
@@ -190,8 +139,15 @@
     });
     animateCounts();
 
-    var special = await queryFeaturedAndEvents();
-    var featured = special.featured.length ? special.featured : [];
+    var featured = [];
+    var events = [];
+    if (global.db && global.db.getFeatured) {
+      try { featured = await global.db.getFeatured(4) || []; } catch (e) {}
+    }
+    if (global.db && global.db.getUpcomingEvents) {
+      try { events = await global.db.getUpcomingEvents(2) || []; } catch (e) {}
+    }
+
     var grid = document.getElementById('featuredGrid');
     if (grid) {
       grid.innerHTML = featured.length
@@ -205,8 +161,8 @@
     if (trendB) trendB.innerHTML = trendCard(trending[1], 2);
     var eventA = document.getElementById('homeEventA');
     var eventB = document.getElementById('homeEventB');
-    if (eventA) eventA.innerHTML = eventCard(special.events[0] || null);
-    if (eventB) eventB.innerHTML = eventCard(special.events[1] || null);
+    if (eventA) eventA.innerHTML = eventCard(events[0] || null);
+    if (eventB) eventB.innerHTML = eventCard(events[1] || null);
   }
   function animateCounts() {
     var nodes = document.querySelectorAll('.home-stat strong[data-count]');
