@@ -270,9 +270,43 @@
     }
   }
 
+  /** Admin upload: validates type/size then PUTs to /admin/upload with token. */
+  async function uploadAdmin(file) {
+    if (!file) throw new Error("No file");
+    var kind = (file.type && file.type.indexOf("video") === 0) ? "video" : "photo";
+    checkSize(file, kind);
+    var allowed = kind === "video" ? ["video/mp4", "video/webm"] : ["image/jpeg", "image/png", "image/webp"];
+    if (allowed.indexOf(file.type) === -1) throw new Error("Unsupported file type");
+    var token = await (g.auth && g.auth.currentUser ? g.auth.currentUser.getIdToken() : Promise.reject(new Error("Not signed in")));
+    var base = workerBase();
+    var res = await fetch(base + "/admin/upload", {
+      method: "PUT",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": file.type,
+        "Content-Length": String(file.size)
+      },
+      body: file
+    });
+    if (!res.ok) {
+      var msg = "Upload failed";
+      try { var j = await res.json(); msg = j.error || msg; } catch (e) {}
+      throw new Error(msg);
+    }
+    var data = await res.json();
+    return {
+      url: publicUrl(data.key),
+      key: data.key,
+      provider: "cloudflare-r2",
+      kind: kind,
+      size: file.size
+    };
+  }
+
   g.HshsStorage = {
     upload: upload,
     uploadFromUrl: uploadFromUrl,
+    uploadAdmin: uploadAdmin,
     list: list,
     objectKey: objectKey,
     publicUrl: publicUrl,
