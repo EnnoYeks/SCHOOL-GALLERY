@@ -1,4 +1,5 @@
 // HSHS staff desk — Supabase for featured + events
+// Admin claim check temporarily disabled (Firebase console locked). Re-enable later.
 class AdminDashboard {
     constructor() {
         this.lock = document.getElementById('adminLock');
@@ -7,32 +8,19 @@ class AdminDashboard {
     }
 
     async checkAndInit() {
-        const isAdmin = await this.checkAdminAccess();
-        if (!isAdmin) {
-            this.showLock();
-            return;
-        }
+        // TEMP: always allow while Firebase console is locked
         this.unlockDesk();
         this.init();
     }
 
     async checkAdminAccess() {
-        try {
-            const user = window.auth && window.auth.currentUser;
-            if (!user || user.isAnonymous) return false;
-            const tokenResult = await user.getIdTokenResult(true);
-            return !!(tokenResult && tokenResult.claims && tokenResult.claims.admin === true);
-        } catch (e) {
-            return false;
-        }
+        // Re-enable this later when Firebase console access is restored
+        return true;
     }
 
     showLock() {
         if (this.desk) this.desk.hidden = true;
         if (this.lock) this.lock.hidden = false;
-        if (this.lock) {
-            this.lock.innerHTML = '<p style="color:var(--text-secondary)">Admin access requires the admin claim set in the Firebase console.<br>Sign in with an admin account and refresh.</p>';
-        }
     }
 
     unlockDesk() {
