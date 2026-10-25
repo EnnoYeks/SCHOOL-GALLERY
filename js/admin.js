@@ -192,13 +192,14 @@ class AdminDashboard {
     }
 }
 
-// Ensure it runs after the template is in the DOMunction bootAdmin() {
+function bootAdmin() {
     if (!document.getElementById('adminPanels')) {
         setTimeout(bootAdmin, 100);
         return;
     }
     window.adminDashboard = new AdminDashboard();
 }
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bootAdmin);
 } else {
