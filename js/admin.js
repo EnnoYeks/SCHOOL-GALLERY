@@ -27,37 +27,11 @@
     }
 
     async init() {
-      this.showLocked('Checking your administrator access…');
-      try {
-        const auth = window.auth;
-        if (!auth) throw new Error('Sign-in service is not ready. Refresh and try again.');
-        const user = auth.currentUser || await new Promise((resolve, reject) => {
-          const timeout = window.setTimeout(() => {
-            unsubscribe();
-            reject(new Error('Sign-in check timed out. Please refresh.'));
-          }, 10000);
-          const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-            window.clearTimeout(timeout);
-            unsubscribe();
-            resolve(currentUser);
-          }, reject);
-        });
-        if (!user || user.isAnonymous) {
-          this.showLocked('Sign in with your staff account to continue.', true);
-          return;
-        }
-        const token = await user.getIdTokenResult(true);
-        const claims = token.claims || {};
-        if (claims.admin !== true && claims.role !== 'admin') {
-          this.showLocked('This account does not have administrator access. Ask the site owner to grant the admin claim.', true);
-          return;
-        }
-        this.unlockDesk();
-        this.renderAdminPanels();
-        await Promise.all([this.loadRecentItems(), this.loadEventsList()]);
-      } catch (error) {
-        this.showLocked(error.message || 'Could not verify administrator access. Please refresh.');
-      }
+      // Temporary open admin mode: do not depend on Firebase admin claims
+      // while the project owner is locked out of Firebase.
+      this.unlockDesk();
+      this.renderAdminPanels();
+      await Promise.all([this.loadRecentItems(), this.loadEventsList()]);
     }
 
     showLocked(message, showLogin = false) {
