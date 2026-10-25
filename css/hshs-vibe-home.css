@@ -90,3 +90,42 @@ body.has-mobile-shell .navbar, .navbar.hshs-flat-top, html.hshs-nav-scrolled .na
 .home-trend-item, .home-event-card, .home-panel { background: #122044 !important; border: 0 !important; border-radius: 16px !important; color: #e2e8f0; }
 @media (min-width: 1025px) { .vibe-hero, .home-section, .home-cta.home-wrap, .home-footer .home-wrap { width: min(980px, calc(100% - 48px)); margin-inline: auto; } }
 @media (prefers-reduced-motion: reduce) { .vibe-hero-photos span, .vibe-spark { animation: none !important; } .vibe-hero-photos span:first-child { opacity: .35; } }
+
+/* Live campus media on home */
+.vibe-hero-photos span.is-campus {
+  mix-blend-mode: normal;
+  opacity: 0;
+  transform: scale(1.04);
+  animation: vibeCrossLive 18s ease-in-out infinite;
+}
+.vibe-hero-photos span.is-campus:nth-child(1) { animation-delay: 0s; }
+.vibe-hero-photos span.is-campus:nth-child(2) { animation-delay: 4.5s; }
+.vibe-hero-photos span.is-campus:nth-child(3) { animation-delay: 9s; }
+.vibe-hero-photos span.is-campus:nth-child(4) { animation-delay: 13.5s; }
+@keyframes vibeCrossLive {
+  0% { opacity: 0; transform: scale(1.02); }
+  8% { opacity: .55; }
+  22% { opacity: .55; transform: scale(1.12); }
+  30% { opacity: 0; transform: scale(1.14); }
+  100% { opacity: 0; transform: scale(1.14); }
+}
+.home-feature-card.is-alive {
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+.home-feature-card.is-alive:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 14px 28px rgba(7,20,51,.35) !important;
+}
+.home-feature-media.is-live {
+  animation: featureKen 14s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes featureKen {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vibe-hero-photos span.is-campus,
+  .home-feature-media.is-live { animation: none !important; }
+  .vibe-hero-photos span.is-campus:first-child { opacity: .45; }
+}
