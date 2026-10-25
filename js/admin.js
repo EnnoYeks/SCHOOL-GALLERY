@@ -1,42 +1,28 @@
 // HSHS staff desk — Supabase for featured + events
-// Admin claim check temporarily disabled (Firebase console locked). Re-enable later.
+// Admin claim check temporarily disabled.
 class AdminDashboard {
     constructor() {
         this.lock = document.getElementById('adminLock');
         this.desk = document.getElementById('adminDesk') || document.querySelector('.admin-container');
-        this.checkAndInit();
-    }
-
-    async checkAndInit() {
-        // TEMP: always allow while Firebase console is locked
         this.unlockDesk();
         this.init();
     }
 
-    async checkAdminAccess() {
-        // Re-enable this later when Firebase console access is restored
-        return true;
-    }
-
-    showLock() {
-        if (this.desk) this.desk.hidden = true;
-        if (this.lock) this.lock.hidden = false;
-    }
-
     unlockDesk() {
-        if (this.lock) this.lock.hidden = true;
-        if (this.desk) this.desk.hidden = false;
-    }
-
-    goHome() {
-        const inIndex = /\/index\//i.test(location.pathname);
-        location.href = inIndex ? '../index.html' : 'index.html';
+        if (this.lock) {
+            this.lock.hidden = true;
+            this.lock.style.display = 'none';
+        }
+        if (this.desk) {
+            this.desk.hidden = false;
+            this.desk.style.display = '';
+        }
     }
 
     async init() {
         this.renderAdminPanels();
-        try { await this.loadRecentItems(); } catch (e) {}
-        try { await this.loadEventsList(); } catch (e) {}
+        try { await this.loadRecentItems(); } catch (e) { console.warn(e); }
+        try { await this.loadEventsList(); } catch (e) { console.warn(e); }
     }
 
     renderAdminPanels() {
@@ -206,4 +192,15 @@ class AdminDashboard {
     }
 }
 
-window.adminDashboard = new AdminDashboard();
+// Ensure it runs after the template is in the DOMunction bootAdmin() {
+    if (!document.getElementById('adminPanels')) {
+        setTimeout(bootAdmin, 100);
+        return;
+    }
+    window.adminDashboard = new AdminDashboard();
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootAdmin);
+} else {
+    bootAdmin();
+}
