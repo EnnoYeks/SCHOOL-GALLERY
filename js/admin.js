@@ -41,13 +41,14 @@ class AdminDashboard {
     }
 
     goHome() {
-        const inIndex = /\\/index\\//i.test(location.pathname);
+        const inIndex = /\/index\//i.test(location.pathname);
         location.href = inIndex ? '../index.html' : 'index.html';
     }
 
     async init() {
         this.renderAdminPanels();
-        try { await this.loadDashboard(); } catch (e) {}
+        try { await this.loadRecentItems(); } catch (e) {}
+        try { await this.loadEventsList(); } catch (e) {}
     }
 
     renderAdminPanels() {
@@ -57,8 +58,9 @@ class AdminDashboard {
             <section style="margin:1.5rem 0;padding:1rem;background:rgba(255,255,255,0.04);border-radius:12px">
                 <h2 style="margin:0 0 0.5rem">Pin Featured Today</h2>
                 <p style="color:var(--text-secondary);font-size:0.9rem">Only pinned items appear in Featured Today. Normal uploads stay in Gallery / Photos / Studio.</p>
+                <div id="recentItems" style="margin-top:1rem;max-height:280px;overflow:auto"></div>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.75rem">
-                    <input id="pinId" placeholder="Post / Photo / Video ID" style="flex:1;min-width:180px;padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:inherit">
+                    <input id="pinId" placeholder="Or paste an ID" style="flex:1;min-width:160px;padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:inherit">
                     <select id="pinCol" style="padding:0.5rem;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.15)">
                         <option value="posts">posts</option>
                         <option value="photos">photos</option>
@@ -69,7 +71,7 @@ class AdminDashboard {
                 </div>
             </section>
             <section style="margin:1.5rem 0;padding:1rem;background:rgba(255,255,255,0.04);border-radius:12px">
-                <h2 style="margin:0 0 0.5rem">Add Upcoming Event</h2>
+                <h2 style="margin:0 0 0.5rem">Upcoming Events</h2>
                 <div style="display:grid;gap:0.5rem;margin-top:0.75rem">
                     <input id="evTitle" placeholder="Event title" style="padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:inherit">
                     <input id="evDate" type="date" style="padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:inherit">
@@ -80,7 +82,6 @@ class AdminDashboard {
             </section>
         `;
         this.bindAdminActions();
-        this.loadEventsList();
     }
 
     bindAdminActions() {
@@ -89,11 +90,54 @@ class AdminDashboard {
         document.getElementById('addEventBtn')?.addEventListener('click', () => this.addEvent());
     }
 
+    async loadRecentItems() {
+        const box = document.getElementById('recentItems');
+        if (!box || !window.db) return;
+        box.innerHTML = '<p style="color:var(--text-secondary)">Loading recent items…</p>';
+        try {
+            const [posts, photos, videos] = await Promise.all([
+                window.db.getPosts ? window.db.getPosts(8, 0) : [],
+                window.db.getPhotos ? window.db.getPhotos(8, 0) : [],
+                window.db.getVideos ? window.db.getVideos(6, 0) : []
+            ]);
+            const items = []
+                .concat((posts || []).map(p => ({ ...p, _col: 'posts' })))
+                .concat((photos || []).map(p => ({ ...p, _col: 'photos' })))
+                .concat((videos || []).map(p => ({ ...p, _col: 'videos' })))
+                .slice(0, 12);
+            if (!items.length) {
+                box.innerHTML = '<p style="color:var(--text-secondary)">No items yet</p>';
+                return;
+            }
+            box.innerHTML = items.map(it => {
+                const title = (it.title || 'Untitled').slice(0, 48);
+                const pinned = it.featured ? ' · pinned' : '';
+                return '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.35rem 0;border-bottom:1px solid rgba(255,255,255,0.06)">'
+                    + '<span style="font-size:0.9rem">' + title + ' <small style="opacity:.6">' + it._col + pinned + '</small></span>'
+                    + '<button type="button" class="pin-one" data-id="' + it.id + '" data-col="' + it._col + '" data-featured="' + (it.featured ? '1' : '0') + '" style="padding:0.25rem 0.6rem;border-radius:6px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:inherit;cursor:pointer;font-size:0.8rem">'
+                    + (it.featured ? 'Unpin' : 'Pin') + '</button>'
+                    + '</div>';
+            }).join('');
+            box.querySelectorAll('.pin-one').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    const col = btn.getAttribute('data-col');
+                    const isPinned = btn.getAttribute('data-featured') === '1';
+                    document.getElementById('pinId').value = id;
+                    document.getElementById('pinCol').value = col;
+                    this.pinItem(!isPinned);
+                });
+            });
+        } catch (e) {
+            box.innerHTML = '<p style="color:var(--text-secondary)">Could not load items</p>';
+        }
+    }
+
     async pinItem(featured) {
         const id = (document.getElementById('pinId') || {}).value || '';
         const col = (document.getElementById('pinCol') || {}).value || 'posts';
         if (!id.trim()) {
-            alert('Enter an item ID');
+            alert('Enter an item ID or use a button above');
             return;
         }
         try {
@@ -104,6 +148,7 @@ class AdminDashboard {
                 : { featured: false, featuredAt: null };
             await fs.updateDoc(ref, patch);
             alert(featured ? 'Pinned to Featured Today' : 'Unpinned');
+            this.loadRecentItems();
         } catch (e) {
             alert('Could not update (check ID and admin claim): ' + (e && e.message));
         }
@@ -169,8 +214,6 @@ class AdminDashboard {
             box.innerHTML = '<p style="color:var(--text-secondary)">Could not load events</p>';
         }
     }
-
-    async loadDashboard() {}
 }
 
 window.adminDashboard = new AdminDashboard();
