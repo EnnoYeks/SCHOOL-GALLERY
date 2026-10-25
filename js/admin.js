@@ -15,7 +15,27 @@
     async init() {
       this.render();
       this.bind();
+      const ready = await this.waitForBackend();
+      if (!ready) {
+        const items = $('recentItems');
+        const events = $('eventsList');
+        if (items) items.innerHTML = '<div class="admin-empty">Database did not start. Check the browser console, then refresh.</div>';
+        if (events) events.innerHTML = '<div class="admin-empty">Events unavailable because the database did not start.</div>';
+        return;
+      }
       await Promise.all([this.loadRecentItems(), this.loadEventsList()]);
+    }
+
+    waitForBackend() {
+      return new Promise((resolve) => {
+        const started = Date.now();
+        const check = () => {
+          if (window.db && window.supabase) return resolve(true);
+          if (Date.now() - started >= 6000) return resolve(false);
+          setTimeout(check, 100);
+        };
+        check();
+      });
     }
 
     render() {
@@ -87,7 +107,11 @@
 
     async loadRecentItems() {
       const box = $('recentItems');
-      if (!box || !window.db) return;
+      if (!box) return;
+      if (!window.db) {
+        box.innerHTML = '<div class="admin-empty">Database is not available yet.</div>';
+        return;
+      }
       try {
         const [posts, photos, videos] = await Promise.all([
           window.db.getPosts(8, 0), window.db.getPhotos(8, 0), window.db.getVideos(6, 0)
@@ -167,6 +191,7 @@
       try {
         const sb = window.supabase;
         if (!sb) return;
+        if (!sb) throw new Error('Supabase did not initialize');
         const { data, error } = await sb.from('events').select('*').order('date', { ascending: true }).limit(20);
         if (error) throw error;
         $('adminEventCount') && ($('adminEventCount').textContent = (data||[]).length);
@@ -182,8 +207,9 @@
           btn.addEventListener('click', async () => {
             if (!confirm('Delete this event?')) return;
             try {
-              await sb.from('events').delete().eq('id', btn.dataset.id);
-              this.loadEventsList();
+              const { error } = await sb.from('events').delete().eq('id', btn.dataset.id);
+              if (error) throw error;
+              await this.loadEventsList();
             } catch (e) {}
           });
         });
