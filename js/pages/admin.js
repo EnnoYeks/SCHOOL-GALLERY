@@ -14,7 +14,7 @@
   }
   function loadCss(href) {
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=261025admin1';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=261025admin2';
     l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
   }
   async function mount() {
