@@ -1,20 +1,18 @@
 /**
  * HSHS World — R2 Worker
- * Binding name expected: MEDIA (or change to match your R2 binding)
+ * Binding name: MEDIA_BUCKET (hshs-world-media)
  *
  * Routes:
- *   POST /sign   { key, contentType }  → { url }   (presigned PUT, 15 min)
+ *   POST /sign   { key, contentType }  → { url }
+ *   PUT  /put?key=...                  → writes the file
  *   GET  /list?limit=40&prefix=        → { objects: [{ key, size }] }
- *   GET  /         → health
- *
- * Deploy with Wrangler. Bind the hshs-world-media bucket as MEDIA.
- * Secrets stay here; the frontend only calls this Worker.
+ *   GET  /                             → health
  */
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const bucket = env.MEDIA || env.BUCKET || env.hshs_world_media;
+    const bucket = env.MEDIA_BUCKET || env.MEDIA || env.BUCKET || env.hshs_world_media;
 
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: cors() });
@@ -42,9 +40,6 @@ export default {
       const key = String(body.key || "").replace(/^\/+/, "");
       if (!key) return json({ error: "Missing key" }, 400);
 
-      // Direct PUT via the binding is not a presigned URL.
-      // For browser uploads we return a short-lived token the Worker will accept on /put.
-      // Simpler path: client POSTs the file to /put?key=... and the Worker writes it.
       const putUrl = url.origin + "/put?key=" + encodeURIComponent(key);
       return json({ url: putUrl, putUrl: putUrl, key: key });
     }
