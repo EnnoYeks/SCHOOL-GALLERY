@@ -1,7 +1,3 @@
-/**
- * HSHS WORLD · Home page controller
- * Hero photos + Featured row use real campus media when available.
- */
 (function (global) {
   'use strict';
   if (global.__hshsHomePageModule) return;
@@ -28,7 +24,7 @@
   }
   function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' })[c];
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
     });
   }
   function formatCount(value) {
@@ -51,40 +47,28 @@
   }
   function postCard(post, index) {
     var image = mediaOf(post);
-    var isVideo = String(post.type || '').toLowerCase().indexOf('video') !== -1 || !!post.videoUrl;
+    var isVideo = String(post.type || '').toLowerCase().indexOf('video') !== -1 || !!post.videoUrl || !!post.video_url;
     var media = image
       ? '<div class="home-feature-media is-live" style="background-image:url(\'' + esc(image) + '\');animation-delay:' + ((index || 0) * 1.2) + 's"></div>'
       : '<div class="home-feature-media home-feature-media-empty"><i class="fas fa-align-left"></i></div>';
     return '<article class="home-feature-card is-alive" data-id="' + esc(post.id || '') + '">' + media
       + '<div class="home-feature-overlay"></div><div class="home-feature-body">'
-      + '<span class="home-feature-type"><i class="fas ' + (isVideo ? 'fa-video' : 'fa-image') + '"></i> ' + esc(isVideo ? 'Vibe' : 'Photo') + '</span>'
+      + '<span class="home-feature-type"><i class="fas ' + (isVideo ? 'fa-video' : 'fa-image') + '"></i> ' + (isVideo ? 'Vibe' : 'Photo') + '</span>'
       + '<h3>' + esc(post.title || post.caption || 'HSHS moment') + '</h3>'
       + '<div class="home-feature-meta"><span>' + formatCount(post.likes) + ' likes</span><span>' + formatCount(post.views) + ' views</span></div>'
       + '</div></article>';
-  }
-  function trendCard(post, rank) {
-    if (!post) return '<div class="home-empty"><i class="fas fa-fire"></i><strong>No trending yet</strong></div>';
-    var thumb = mediaOf(post);
-    return '<a class="home-trend-item" href="index/trending.html"><span class="home-trend-thumb"' + (thumb ? ' style="background-image:url(\'' + esc(thumb) + '\')"' : '') + '></span><span class="home-trend-rank">#' + rank + '</span><span><strong>' + esc(post.title || 'HSHS moment') + '</strong><small>' + formatCount(post.likes) + ' likes · ' + formatCount(post.views) + ' views</small></span></a>';
-  }
-  function eventCard(ev) {
-    if (!ev) return '<div class="home-empty"><i class="fas fa-calendar-days"></i><strong>No events yet</strong></div>';
-    var d = new Date(ev.date || ev.startsAt || Date.now());
-    return '<article class="home-event-card"><div class="home-event-date"><small>' + esc(d.toLocaleString('en-US', { month: 'short' })) + '</small><strong>' + esc(String(d.getDate())) + '</strong></div><div><strong>' + esc(ev.title || 'School event') + '</strong><small>' + esc(ev.location || ev.place || ev.time || 'Campus') + '</small></div></article>';
   }
   function postsFromStore(store) {
     var posts = [];
     try {
       if (store && typeof store.listPosts === 'function') posts = store.listPosts() || [];
-      else if (store && typeof store.getState === 'function') posts = (store.getState().posts || []);
+      else if (store && typeof store.getState === 'function') posts = store.getState().posts || [];
     } catch (e) {}
     return posts.filter(function (p) { return p && p.id && (mediaOf(p) || p.description); });
   }
-
-  async function loadReal() {
+  async function loadPosts() {
     var db = global.db;
     var posts = [];
-    var stats = { totalPhotos: 0, totalVideos: 0, totalStudents: 0, totalLikes: 0 };
     if (db) {
       try {
         var lists = await Promise.all([
@@ -96,24 +80,15 @@
           (lists[1] || []).map(function (p) { p.type = p.type || 'photo'; return p; }),
           (lists[2] || []).map(function (p) { p.type = 'video'; return p; })
         );
-        if (db.getAnalytics) {
-          var a = await db.getAnalytics();
-          stats.totalPhotos = Number(a && a.totalPhotos) || 0;
-          stats.totalVideos = Number(a && a.totalVideos) || 0;
-        }
       } catch (e) {}
     }
     if (!posts.length) posts = postsFromStore(global.HshsStore);
-
     if (!posts.length && global.HshsStorage && typeof global.HshsStorage.list === 'function') {
-      try {
-        posts = await global.HshsStorage.list({ limit: 24 }) || [];
-      } catch (e) {}
+      try { posts = await global.HshsStorage.list({ limit: 24 }) || []; } catch (e) {}
     }
-
     var seen = {};
-    posts = posts.filter(function (p) {
-      var key = p.id || p.mediaKey || p.media_key || p.title;
+    return posts.filter(function (p) {
+      var key = p && (p.id || p.mediaKey || p.media_key || p.title);
       if (!key || seen[key]) return false;
       seen[key] = true;
       var url = mediaOf(p);
@@ -124,104 +99,30 @@
       }
       return !!(url || p.description);
     });
-    if (!stats.totalPhotos) stats.totalPhotos = posts.filter(function (p) { return p.type !== 'video'; }).length;
-    if (!stats.totalVideos) stats.totalVideos = posts.filter(function (p) { return p.type === 'video'; }).length;
-    stats.totalLikes = posts.reduce(function (sum, p) { return sum + (Number(p.likes) || 0); }, 0);
-    return { posts: posts, stats: stats };
   }
   function withMedia(list) {
     return (list || []).filter(function (p) { return !!mediaOf(p); });
   }
-  function animateHeroPhotos(posts) {
-    var spans = document.querySelectorAll('.vibe-hero-photos span');
-    if (!spans.length) return;
-    var urls = withMedia(posts).map(mediaOf).filter(Boolean);
-    var seen = {};
-    urls = urls.filter(function (u) {
-      if (seen[u]) return false;
-      seen[u] = 1;
-      return /^https?:\/\//i.test(u) && u.indexOf('data:') !== 0;
-    }).slice(0, 4);
-    if (!urls.length) return;
-    for (var i = 0; i < spans.length; i++) {
-      var url = urls[i % urls.length];
-      spans[i].style.backgroundImage = 'url(\'' + url.replace(/'/g, '%27') + '\')';
-      spans[i].classList.add('is-campus');
-    }
-  }
   async function renderData() {
-    var loaded;
-    try { loaded = await loadReal(); }
-    catch (err) {
-      var grid = document.getElementById('featuredGrid');
-      if (grid && global.HshsPaint) global.HshsPaint.section(grid, 'error', { onRetry: renderData, error: '<div class="hshs-section-state hshs-error"><strong>Could not load the feed</strong><button type="button" data-hshs-retry>Retry</button></div>' });
-      return;
-    }
-    var posts = loaded.posts;
-    var stats = loaded.stats;
-    ['totalPhotos', 'totalVideos', 'totalStudents', 'totalLikes'].forEach(function (id) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      el.setAttribute('data-count', String(Number(stats[id] || 0)));
-      el.textContent = formatCount(Number(stats[id] || 0));
-    });
-    animateCounts();
-
-    var featured = [];
-    var events = [];
-    if (global.db && global.db.getFeatured) {
-      try { featured = await global.db.getFeatured(6) || []; } catch (e) {}
-    }
-    if (global.db && global.db.getUpcomingEvents) {
-      try { events = await global.db.getUpcomingEvents(2) || []; } catch (e) {}
-    }
-    featured = withMedia(featured);
-    if (!featured.length) {
-      featured = withMedia(posts).slice(0, 6);
-    }
-    animateHeroPhotos(featured.concat(posts));
-
     var grid = document.getElementById('featuredGrid');
-    if (grid) {
+    if (!grid) return;
+    grid.setAttribute('aria-busy', 'true');
+    try {
+      var results = await Promise.all([
+        loadPosts(),
+        global.db && typeof global.db.getFeatured === 'function' ? global.db.getFeatured(6).catch(function () { return []; }) : Promise.resolve([])
+      ]);
+      var posts = results[0] || [];
+      var featured = withMedia(results[1] || []);
+      if (!featured.length) featured = withMedia(posts).slice(0, 6);
       grid.innerHTML = featured.length
         ? featured.map(function (p, i) { return postCard(p, i); }).join('')
-        : '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong><p style="opacity:.75;margin:6px 0 0;font-size:.85rem">Share a photo to light up this row</p></div>';
+        : '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong><p style="opacity:.75;margin:6px 0 0;font-size:.85rem">Share a photo or video to light up this feed.</p></div>';
+    } catch (error) {
+      grid.innerHTML = '<div class="home-empty home-feature-empty"><strong>Could not load Featured</strong><button type="button" data-hshs-retry>Retry</button></div>';
+    } finally {
+      grid.removeAttribute('aria-busy');
     }
-    var trending = posts.slice().sort(function (a, b) { return (b.likes || 0) - (a.likes || 0); }).slice(0, 2);
-    var trendA = document.getElementById('homeTrendA');
-    var trendB = document.getElementById('homeTrendB');
-    if (trendA) trendA.innerHTML = trendCard(trending[0], 1);
-    if (trendB) trendB.innerHTML = trendCard(trending[1], 2);
-    var eventA = document.getElementById('homeEventA');
-    var eventB = document.getElementById('homeEventB');
-    if (eventA) eventA.innerHTML = eventCard(events[0] || null);
-    if (eventB) eventB.innerHTML = eventCard(events[1] || null);
-  }
-  function animateCounts() {
-    var nodes = document.querySelectorAll('.home-stat strong[data-count]');
-    if (!nodes.length) return;
-    var started = false;
-    function run() {
-      if (started) return;
-      started = true;
-      nodes.forEach(function (el) {
-        var target = Number(el.getAttribute('data-count') || 0);
-        var start = performance.now();
-        function tick(now) {
-          var t = Math.min(1, (now - start) / 700);
-          el.textContent = formatCount(Math.round(target * t));
-          if (t < 1) requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      });
-    }
-    if (!('IntersectionObserver' in window)) { run(); return; }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) { if (entry.isIntersecting) run(); });
-    }, { threshold: 0.35 });
-    var section = document.querySelector('.home-stats');
-    if (section) io.observe(section); else run();
-    setTimeout(run, 900);
   }
   async function mount() {
     if (!isPage() || !global.HshsRender || global.__hshsHomeMounted) return;
@@ -234,18 +135,17 @@
     }
     document.documentElement.setAttribute('data-hshs-page', 'home');
     if (global.HshsPaint) global.HshsPaint.now();
-    loadOnce(assetBase() + 'css/home.css?v=261025live', 'hshs-home-css');
-    loadOnce(assetBase() + 'css/hshs-home-polish.css?v=261025live', 'hshs-home-polish-css');
-    loadOnce(assetBase() + 'css/hshs-vibe-home.css?v=261025live2', 'hshs-vibe-home-css');
+    loadOnce(assetBase() + 'css/home.css?v=261025featured1', 'hshs-home-css');
+    loadOnce(assetBase() + 'css/hshs-home-polish.css?v=261025featured1', 'hshs-home-polish-css');
+    loadOnce(assetBase() + 'css/hshs-vibe-home.css?v=261025featured1', 'hshs-vibe-home-css');
     loadOnce(assetBase() + 'css/hshs-glass.css?v=260926glass', 'hshs-glass-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
     else if (tpl) root.innerHTML = tpl;
-    renderData();
     global.__hshsHomeMounted = true;
     if (typeof window.__hshsRevealPage === 'function') window.__hshsRevealPage();
     document.dispatchEvent(new CustomEvent('hshs:page'));
-    setTimeout(renderData, 400);
+    renderData();
   }
   function boot() {
     function go() {
@@ -258,6 +158,9 @@
     else document.addEventListener('hshs:foundation-ready', go, { once: true });
     document.addEventListener('hshs:page', function () { if (isPage()) setTimeout(renderData, 0); });
     document.addEventListener('hshs:content-created', function () { if (isPage()) setTimeout(renderData, 200); });
+    document.addEventListener('click', function (event) {
+      if (event.target.closest('[data-hshs-retry]') && isPage()) renderData();
+    });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
