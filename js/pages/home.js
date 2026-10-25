@@ -44,7 +44,7 @@
     var image = mediaOf(post);
     var media = image
       ? '<div class="home-feature-media" style="background-image:url(\'' + esc(image) + '\')"></div>'
-      : '<div class="home-feature-media home-feature-media-empty"><i class="fas fa-photo-film"></i></div>';
+      : '<div class="home-feature-media home-feature-media-empty"><i class="fas fa-align-left"></i></div>';
     return '<article class="home-feature-card">' + media
       + '<div class="home-feature-overlay"></div><div class="home-feature-body">'
       + '<span class="home-feature-type"><i class="fas ' + (post.type === 'video' ? 'fa-video' : 'fa-image') + '"></i> ' + esc(post.type === 'video' ? 'Vibe' : 'Photo') + '</span>'
@@ -68,7 +68,7 @@
       if (store && typeof store.listPosts === 'function') posts = store.listPosts() || [];
       else if (store && typeof store.getState === 'function') posts = (store.getState().posts || []);
     } catch (e) {}
-    return posts.filter(function (p) { return p && p.id && mediaOf(p); });
+    return posts.filter(function (p) { return p && p.id && (mediaOf(p) || p.description); });
   }
 
   async function loadReal() {
@@ -114,7 +114,7 @@
           p.thumbnailUrl = p.thumbnailUrl || url;
         }
       }
-      return !!(p.image || p.imageUrl || p.thumbnailUrl || p.mediaKey);
+      return !!(p.image || p.imageUrl || p.thumbnailUrl || p.mediaKey || p.description);
     });
     if (!stats.totalPhotos) stats.totalPhotos = posts.filter(function (p) { return p.type !== 'video'; }).length;
     if (!stats.totalVideos) stats.totalVideos = posts.filter(function (p) { return p.type === 'video'; }).length;
