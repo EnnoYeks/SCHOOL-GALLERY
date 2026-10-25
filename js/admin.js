@@ -1,4 +1,4 @@
-// HSHS staff desk
+// HSHS staff desk — Supabase for featured + events
 class AdminDashboard {
     constructor() {
         this.lock = document.getElementById('adminLock');
@@ -141,16 +141,17 @@ class AdminDashboard {
             return;
         }
         try {
-            const fs = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
-            const ref = fs.doc(window.firestore, col, id.trim());
+            const sb = window.supabase;
+            if (!sb) throw new Error('Supabase not loaded');
             const patch = featured
-                ? { featured: true, featuredAt: fs.serverTimestamp() }
-                : { featured: false, featuredAt: null };
-            await fs.updateDoc(ref, patch);
+                ? { featured: true, featured_at: new Date().toISOString() }
+                : { featured: false, featured_at: null };
+            const { error } = await sb.from(col).update(patch).eq('id', id.trim());
+            if (error) throw error;
             alert(featured ? 'Pinned to Featured Today' : 'Unpinned');
             this.loadRecentItems();
         } catch (e) {
-            alert('Could not update (check ID and admin claim): ' + (e && e.message));
+            alert('Could not update: ' + (e && e.message));
         }
     }
 
@@ -163,13 +164,14 @@ class AdminDashboard {
             return;
         }
         try {
-            const fs = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
-            await fs.addDoc(fs.collection(window.firestore, 'events'), {
+            const sb = window.supabase;
+            if (!sb) throw new Error('Supabase not loaded');
+            const { error } = await sb.from('events').insert({
                 title: title.trim(),
                 date: date,
-                location: place.trim(),
-                createdAt: fs.serverTimestamp()
+                location: place.trim()
             });
+            if (error) throw error;
             document.getElementById('evTitle').value = '';
             document.getElementById('evPlace').value = '';
             this.loadEventsList();
@@ -183,18 +185,18 @@ class AdminDashboard {
         const box = document.getElementById('eventsList');
         if (!box) return;
         try {
-            const fs = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
-            const q = fs.query(fs.collection(window.firestore, 'events'), fs.orderBy('date', 'asc'), fs.limit(20));
-            const snap = await fs.getDocs(q);
-            if (snap.empty) {
+            const sb = window.supabase;
+            if (!sb) return;
+            const { data, error } = await sb.from('events').select('*').order('date', { ascending: true }).limit(20);
+            if (error) throw error;
+            if (!data || !data.length) {
                 box.innerHTML = '<p style="color:var(--text-secondary)">No events yet</p>';
                 return;
             }
-            box.innerHTML = snap.docs.map(function (d) {
-                const ev = d.data();
+            box.innerHTML = data.map(function (ev) {
                 return '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.06)">'
                     + '<span>' + (ev.title || '') + ' · ' + (ev.date || '') + '</span>'
-                    + '<button type="button" data-id="' + d.id + '" class="del-ev" style="background:transparent;border:none;color:#f87171;cursor:pointer">Delete</button>'
+                    + '<button type="button" data-id="' + ev.id + '" class="del-ev" style="background:transparent;border:none;color:#f87171;cursor:pointer">Delete</button>'
                     + '</div>';
             }).join('');
             box.querySelectorAll('.del-ev').forEach(btn => {
@@ -202,8 +204,8 @@ class AdminDashboard {
                     const id = btn.getAttribute('data-id');
                     if (!confirm('Delete this event?')) return;
                     try {
-                        const fs = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
-                        await fs.deleteDoc(fs.doc(window.firestore, 'events', id));
+                        const { error } = await sb.from('events').delete().eq('id', id);
+                        if (error) throw error;
                         this.loadEventsList();
                     } catch (e) {
                         alert('Delete failed');
