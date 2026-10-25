@@ -3,7 +3,12 @@ class AdminDashboard {
     constructor() {
         this.lock = document.getElementById('adminLock');
         this.desk = document.getElementById('adminDesk') || document.querySelector('.admin-container');
-        if (!this.checkAdminAccess()) {
+        this.checkAndInit();
+    }
+
+    async checkAndInit() {
+        const isAdmin = await this.checkAdminAccess();
+        if (!isAdmin) {
             this.showLock();
             return;
         }
@@ -11,37 +16,23 @@ class AdminDashboard {
         this.init();
     }
 
-    staffCode() {
-        return '';
-    }
-
-    checkAdminAccess() {
-        // Admin is not a client-side role. Use Firebase console.
-        return false;
-    }
-
-    saveToken() {}
-
-    clearToken() {
+    async checkAdminAccess() {
         try {
-            if (window.Utils && Utils.removeData) Utils.removeData('adminToken');
-            localStorage.removeItem('adminToken');
-        } catch (e) {}
+            const user = window.auth && window.auth.currentUser;
+            if (!user || user.isAnonymous) return false;
+            const tokenResult = await user.getIdTokenResult(true);
+            return !!(tokenResult && tokenResult.claims && tokenResult.claims.admin === true);
+        } catch (e) {
+            return false;
+        }
     }
 
     showLock() {
         if (this.desk) this.desk.hidden = true;
         if (this.lock) this.lock.hidden = false;
-        const form = document.getElementById('adminLockForm');
-        const err = document.getElementById('adminLockError');
-        if (!form) return;
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (err) {
-                err.hidden = false;
-                err.textContent = 'Admin is not available in the browser. Use the Firebase console.';
-            }
-        });
+        if (this.lock) {
+            this.lock.innerHTML = '<p style="color:var(--text-secondary)">Admin access requires the admin claim set in the Firebase console.<br>Sign in with an admin account and refresh.</p>';
+        }
     }
 
     unlockDesk() {
@@ -50,110 +41,136 @@ class AdminDashboard {
     }
 
     goHome() {
-        const inIndex = /\/index\//i.test(location.pathname);
+        const inIndex = /\\/index\\//i.test(location.pathname);
         location.href = inIndex ? '../index.html' : 'index.html';
     }
 
     async init() {
-        this.setupTabs();
-        this.setupEventListeners();
+        this.renderAdminPanels();
         try { await this.loadDashboard(); } catch (e) {}
-        try { await this.loadStats(); } catch (e) {}
     }
 
-    async loadDashboard() {
-        if (typeof db === 'undefined' || !db.getAnalytics) return;
-        const analytics = await db.getAnalytics();
-        const statElements = {
-            totalPosts: document.getElementById('totalPosts'),
-            totalPhotosStat: document.getElementById('totalPhotosStat'),
-            totalVideosStat: document.getElementById('totalVideosStat'),
-            totalLikesStat: document.getElementById('totalLikesStat'),
-            totalCommentsStat: document.getElementById('totalCommentsStat'),
-            totalViewsStat: document.getElementById('totalViewsStat')
-        };
-        Object.entries(statElements).forEach(([key, element]) => {
-            if (!element) return;
-            const value = analytics[key.replace('Stat', '')] || 0;
-            if (window.Utils && Utils.animateCounter) Utils.animateCounter(element, 0, value, 800);
-            else element.textContent = value;
-        });
+    renderAdminPanels() {
+        const panels = document.getElementById('adminPanels');
+        if (!panels) return;
+        panels.innerHTML = `
+            <section style="margin:1.5rem 0;padding:1rem;background:rgba(255,255,255,0.04);border-radius:12px">
+                <h2 style="margin:0 0 0.5rem">Pin Featured Today</h2>
+                <p style="color:var(--text-secondary);font-size:0.9rem">Only pinned items appear in Featured Today. Normal uploads stay in Gallery / Photos / Studio.</p>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.75rem">
+                    <input id="pinId" placeholder="Post / Photo / Video ID" style="flex:1;min-width:180px;padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:inherit">
+                    <select id="pinCol" style="padding:0.5rem;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.15)">
+                        <option value="posts">posts</option>
+                        <option value="photos">photos</option>
+                        <option value="videos">videos</option>
+                    </select>
+                    <button id="pinBtn" type="button" style="padding:0.5rem 1rem;border-radius:8px;background:#2563eb;color:#fff;border:none;cursor:pointer">Pin</button>
+                    <button id="unpinBtn" type="button" style="padding:0.5rem 1rem;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.2);cursor:pointer">Unpin</button>
+                </div>
+            </section>
+            <section style="margin:1.5rem 0;padding:1rem;background:rgba(255,255,255,0.04);border-radius:12px">
+                <h2 style="margin:0 0 0.5rem">Add Upcoming Event</h2>
+                <div style="display:grid;gap:0.5rem;margin-top:0.75rem">
+                    <input id="evTitle" placeholder="Event title" style="padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:inherit">
+                    <input id="evDate" type="date" style="padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:inherit">
+                    <input id="evPlace" placeholder="Location / place" style="padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:inherit">
+                    <button id="addEventBtn" type="button" style="padding:0.6rem 1rem;border-radius:8px;background:#2563eb;color:#fff;border:none;cursor:pointer">Add event</button>
+                </div>
+                <div id="eventsList" style="margin-top:1rem"></div>
+            </section>
+        `;
+        this.bindAdminActions();
+        this.loadEventsList();
     }
 
-    async loadStats() {}
+    bindAdminActions() {
+        document.getElementById('pinBtn')?.addEventListener('click', () => this.pinItem(true));
+        document.getElementById('unpinBtn')?.addEventListener('click', () => this.pinItem(false));
+        document.getElementById('addEventBtn')?.addEventListener('click', () => this.addEvent());
+    }
 
-    setupTabs() {
-        const tabButtons = document.querySelectorAll('.menu-item');
-        const tabs = document.querySelectorAll('.tab-content');
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const tabName = btn.getAttribute('data-tab');
-                if (btn.id === 'adminLogoutBtn' || btn.getAttribute('data-tab') === 'logout') {
-                    this.clearToken();
-                    this.goHome();
-                    return;
-                }
-                if (!tabName) return;
-                tabButtons.forEach(b => b.classList.remove('active'));
-                tabs.forEach(t => t.classList.remove('active'));
-                btn.classList.add('active');
-                const tab = document.getElementById(tabName + 'Tab');
-                if (tab) tab.classList.add('active');
-                if (tabName === 'posts') await this.loadPostsTable();
-                if (tabName === 'photos') await this.loadPhotosTable();
-                if (tabName === 'videos') await this.loadVideosTable();
+    async pinItem(featured) {
+        const id = (document.getElementById('pinId') || {}).value || '';
+        const col = (document.getElementById('pinCol') || {}).value || 'posts';
+        if (!id.trim()) {
+            alert('Enter an item ID');
+            return;
+        }
+        try {
+            const fs = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
+            const ref = fs.doc(window.firestore, col, id.trim());
+            const patch = featured
+                ? { featured: true, featuredAt: fs.serverTimestamp() }
+                : { featured: false, featuredAt: null };
+            await fs.updateDoc(ref, patch);
+            alert(featured ? 'Pinned to Featured Today' : 'Unpinned');
+        } catch (e) {
+            alert('Could not update (check ID and admin claim): ' + (e && e.message));
+        }
+    }
+
+    async addEvent() {
+        const title = (document.getElementById('evTitle') || {}).value || '';
+        const date = (document.getElementById('evDate') || {}).value || '';
+        const place = (document.getElementById('evPlace') || {}).value || '';
+        if (!title.trim() || !date) {
+            alert('Title and date are required');
+            return;
+        }
+        try {
+            const fs = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
+            await fs.addDoc(fs.collection(window.firestore, 'events'), {
+                title: title.trim(),
+                date: date,
+                location: place.trim(),
+                createdAt: fs.serverTimestamp()
             });
-        });
-    }
-
-    async loadPostsTable() {
-        const tbody = document.getElementById('postsTableBody');
-        if (!tbody || typeof db === 'undefined') return;
-        const posts = await db.getPosts(100, 0);
-        if (!posts.length) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem">No posts found</td></tr>';
-            return;
+            document.getElementById('evTitle').value = '';
+            document.getElementById('evPlace').value = '';
+            this.loadEventsList();
+            alert('Event added');
+        } catch (e) {
+            alert('Could not add event: ' + (e && e.message));
         }
-        tbody.innerHTML = posts.map(post => '<tr><td><strong>' + (post.title || '') + '</strong></td><td>' + (post.category || 'general') + '</td><td></td><td>' + (post.likes || 0) + '</td><td>' + (post.views || 0) + '</td><td></td></tr>').join('');
     }
 
-    async loadPhotosTable() {
-        const tbody = document.getElementById('photosTableBody');
-        if (!tbody || typeof db === 'undefined') return;
-        const photos = await db.getPhotos(100, 0);
-        if (!photos.length) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem">No photos found</td></tr>';
-            return;
+    async loadEventsList() {
+        const box = document.getElementById('eventsList');
+        if (!box) return;
+        try {
+            const fs = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
+            const q = fs.query(fs.collection(window.firestore, 'events'), fs.orderBy('date', 'asc'), fs.limit(20));
+            const snap = await fs.getDocs(q);
+            if (snap.empty) {
+                box.innerHTML = '<p style="color:var(--text-secondary)">No events yet</p>';
+                return;
+            }
+            box.innerHTML = snap.docs.map(function (d) {
+                const ev = d.data();
+                return '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.06)">'
+                    + '<span>' + (ev.title || '') + ' · ' + (ev.date || '') + '</span>'
+                    + '<button type="button" data-id="' + d.id + '" class="del-ev" style="background:transparent;border:none;color:#f87171;cursor:pointer">Delete</button>'
+                    + '</div>';
+            }).join('');
+            box.querySelectorAll('.del-ev').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-id');
+                    if (!confirm('Delete this event?')) return;
+                    try {
+                        const fs = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
+                        await fs.deleteDoc(fs.doc(window.firestore, 'events', id));
+                        this.loadEventsList();
+                    } catch (e) {
+                        alert('Delete failed');
+                    }
+                });
+            });
+        } catch (e) {
+            box.innerHTML = '<p style="color:var(--text-secondary)">Could not load events</p>';
         }
-        tbody.innerHTML = photos.map(photo => '<tr><td></td><td><strong>' + (photo.title || '') + '</strong></td><td></td><td>' + (photo.likes || 0) + '</td><td>' + (photo.views || 0) + '</td><td></td></tr>').join('');
     }
 
-    async loadVideosTable() {
-        const tbody = document.getElementById('videosTableBody');
-        if (!tbody || typeof db === 'undefined') return;
-        const videos = await db.getVideos(100, 0);
-        if (!videos.length) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem">No videos found</td></tr>';
-            return;
-        }
-        tbody.innerHTML = videos.map(video => '<tr><td></td><td><strong>' + (video.title || '') + '</strong></td><td>' + (video.duration || '') + '</td><td></td><td>' + (video.views || 0) + '</td><td></td></tr>').join('');
-    }
-
-    setupEventListeners() {
-        document.getElementById('uploadBtn')?.addEventListener('click', () => this.openUploadModal());
-        document.getElementById('refreshBtn')?.addEventListener('click', () => {
-            this.loadDashboard();
-            if (window.Utils && Utils.showToast) Utils.showToast('Dashboard refreshed', 'success');
-        });
-        document.getElementById('adminHomeBtn')?.addEventListener('click', () => this.goHome());
-    }
-
-    openUploadModal() {
-        const modal = document.getElementById('adminModal');
-        if (modal) modal.classList.add('active');
-        document.getElementById('modalCloseBtn')?.addEventListener('click', () => modal.classList.remove('active'));
-        document.getElementById('modalCancelBtn')?.addEventListener('click', () => modal.classList.remove('active'));
-    }
+    async loadDashboard() {}
 }
 
 window.adminDashboard = new AdminDashboard();
