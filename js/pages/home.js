@@ -1,5 +1,6 @@
 /**
  * HSHS WORLD · Home page controller
+ * Hero photos + Featured row use real campus media when available.
  */
 (function (global) {
   'use strict';
@@ -35,20 +36,29 @@
     return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace('.0', '') + 'k' : String(n);
   }
   function mediaOf(post) {
+    if (!post) return '';
     if (global.HshsStorage && typeof global.HshsStorage.mediaUrl === 'function') {
-      return global.HshsStorage.mediaUrl(post);
+      var fromStore = global.HshsStorage.mediaUrl(post);
+      if (fromStore) return fromStore;
     }
-    return post.image || post.imageUrl || post.thumbnailUrl || post.videoUrl || '';
+    var direct = post.image || post.imageUrl || post.image_url || post.thumbnailUrl || post.thumbnail_url || post.videoUrl || post.video_url || '';
+    if (direct && /^https?:\/\//i.test(direct)) return direct;
+    var key = post.mediaKey || post.media_key || '';
+    if (key && global.HshsStorage && typeof global.HshsStorage.publicUrl === 'function') {
+      return global.HshsStorage.publicUrl(key);
+    }
+    return direct || '';
   }
-  function postCard(post) {
+  function postCard(post, index) {
     var image = mediaOf(post);
+    var isVideo = String(post.type || '').toLowerCase().indexOf('video') !== -1 || !!post.videoUrl;
     var media = image
-      ? '<div class="home-feature-media" style="background-image:url(\'' + esc(image) + '\')"></div>'
+      ? '<div class="home-feature-media is-live" style="background-image:url(\'' + esc(image) + '\');animation-delay:' + ((index || 0) * 1.2) + 's"></div>'
       : '<div class="home-feature-media home-feature-media-empty"><i class="fas fa-align-left"></i></div>';
-    return '<article class="home-feature-card">' + media
+    return '<article class="home-feature-card is-alive" data-id="' + esc(post.id || '') + '">' + media
       + '<div class="home-feature-overlay"></div><div class="home-feature-body">'
-      + '<span class="home-feature-type"><i class="fas ' + (post.type === 'video' ? 'fa-video' : 'fa-image') + '"></i> ' + esc(post.type === 'video' ? 'Vibe' : 'Photo') + '</span>'
-      + '<h3>' + esc(post.title || 'HSHS moment') + '</h3>'
+      + '<span class="home-feature-type"><i class="fas ' + (isVideo ? 'fa-video' : 'fa-image') + '"></i> ' + esc(isVideo ? 'Vibe' : 'Photo') + '</span>'
+      + '<h3>' + esc(post.title || post.caption || 'HSHS moment') + '</h3>'
       + '<div class="home-feature-meta"><span>' + formatCount(post.likes) + ' likes</span><span>' + formatCount(post.views) + ' views</span></div>'
       + '</div></article>';
   }
@@ -103,23 +113,41 @@
 
     var seen = {};
     posts = posts.filter(function (p) {
-      var key = p.id || p.mediaKey || p.title;
+      var key = p.id || p.mediaKey || p.media_key || p.title;
       if (!key || seen[key]) return false;
       seen[key] = true;
-      if (global.HshsStorage && typeof global.HshsStorage.mediaUrl === 'function') {
-        var url = global.HshsStorage.mediaUrl(p);
-        if (url) {
-          p.image = p.image || url;
-          p.imageUrl = p.imageUrl || url;
-          p.thumbnailUrl = p.thumbnailUrl || url;
-        }
+      var url = mediaOf(p);
+      if (url) {
+        p.image = p.image || url;
+        p.imageUrl = p.imageUrl || url;
+        p.thumbnailUrl = p.thumbnailUrl || url;
       }
-      return !!(p.image || p.imageUrl || p.thumbnailUrl || p.mediaKey || p.description);
+      return !!(url || p.description);
     });
     if (!stats.totalPhotos) stats.totalPhotos = posts.filter(function (p) { return p.type !== 'video'; }).length;
     if (!stats.totalVideos) stats.totalVideos = posts.filter(function (p) { return p.type === 'video'; }).length;
     stats.totalLikes = posts.reduce(function (sum, p) { return sum + (Number(p.likes) || 0); }, 0);
     return { posts: posts, stats: stats };
+  }
+  function withMedia(list) {
+    return (list || []).filter(function (p) { return !!mediaOf(p); });
+  }
+  function animateHeroPhotos(posts) {
+    var spans = document.querySelectorAll('.vibe-hero-photos span');
+    if (!spans.length) return;
+    var urls = withMedia(posts).map(mediaOf).filter(Boolean);
+    var seen = {};
+    urls = urls.filter(function (u) {
+      if (seen[u]) return false;
+      seen[u] = 1;
+      return /^https?:\/\//i.test(u) && u.indexOf('data:') !== 0;
+    }).slice(0, 4);
+    if (!urls.length) return;
+    for (var i = 0; i < spans.length; i++) {
+      var url = urls[i % urls.length];
+      spans[i].style.backgroundImage = 'url(\'' + url.replace(/'/g, '%27') + '\')';
+      spans[i].classList.add('is-campus');
+    }
   }
   async function renderData() {
     var loaded;
@@ -142,17 +170,22 @@
     var featured = [];
     var events = [];
     if (global.db && global.db.getFeatured) {
-      try { featured = await global.db.getFeatured(4) || []; } catch (e) {}
+      try { featured = await global.db.getFeatured(6) || []; } catch (e) {}
     }
     if (global.db && global.db.getUpcomingEvents) {
       try { events = await global.db.getUpcomingEvents(2) || []; } catch (e) {}
     }
+    featured = withMedia(featured);
+    if (!featured.length) {
+      featured = withMedia(posts).slice(0, 6);
+    }
+    animateHeroPhotos(featured.concat(posts));
 
     var grid = document.getElementById('featuredGrid');
     if (grid) {
       grid.innerHTML = featured.length
-        ? featured.map(postCard).join('')
-        : '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong></div>';
+        ? featured.map(function (p, i) { return postCard(p, i); }).join('')
+        : '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong><p style="opacity:.75;margin:6px 0 0;font-size:.85rem">Share a photo to light up this row</p></div>';
     }
     var trending = posts.slice().sort(function (a, b) { return (b.likes || 0) - (a.likes || 0); }).slice(0, 2);
     var trendA = document.getElementById('homeTrendA');
@@ -201,9 +234,9 @@
     }
     document.documentElement.setAttribute('data-hshs-page', 'home');
     if (global.HshsPaint) global.HshsPaint.now();
-    loadOnce(assetBase() + 'css/home.css?v=260906p3', 'hshs-home-css');
-    loadOnce(assetBase() + 'css/hshs-home-polish.css?v=260906hero', 'hshs-home-polish-css');
-    loadOnce(assetBase() + 'css/hshs-vibe-home.css?v=260906split2', 'hshs-vibe-home-css');
+    loadOnce(assetBase() + 'css/home.css?v=261025live', 'hshs-home-css');
+    loadOnce(assetBase() + 'css/hshs-home-polish.css?v=261025live', 'hshs-home-polish-css');
+    loadOnce(assetBase() + 'css/hshs-vibe-home.css?v=261025live2', 'hshs-vibe-home-css');
     loadOnce(assetBase() + 'css/hshs-glass.css?v=260926glass', 'hshs-glass-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
@@ -224,6 +257,7 @@
     else if (global.HshsApp && global.HshsApp.isReady && global.HshsApp.isReady()) go();
     else document.addEventListener('hshs:foundation-ready', go, { once: true });
     document.addEventListener('hshs:page', function () { if (isPage()) setTimeout(renderData, 0); });
+    document.addEventListener('hshs:content-created', function () { if (isPage()) setTimeout(renderData, 200); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
