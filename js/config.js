@@ -11,6 +11,7 @@ import {
   browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCoFBtKrk7ZRvV1mZe5hN9tRCPKsuQBlgo",
@@ -25,6 +26,11 @@ const app = initializeApp(firebaseConfig);
 
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
+
+// Supabase — database only (auth stays on Firebase, media stays on R2)
+export const SUPABASE_URL = "https://hhlogdqpgjiajeufwnop.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_RVPCBfzNQ5OvdPp96MUqVA_AG5wazGk";
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let analytics = null;
 try {
@@ -58,7 +64,6 @@ export const CONFIG = {
     maxPhotoSize: 52428800,
     maxVideoSize: 104857600
   },
-  // R2 — secrets stay in the Worker only
   r2: {
     accountId: "cb48d11c7f8f22a34c27a2874f1cd6e3",
     bucket: "hshs-world-media",
@@ -109,10 +114,10 @@ window.firebaseApp = app;
 window.firestore = firestore;
 window.auth = auth;
 window.analytics = analytics;
+window.supabase = supabase;
 window.CONFIG = CONFIG;
 window.firebaseConfig = firebaseConfig;
 
-// Expose R2 config for js/storage.js (no secrets)
 if (typeof window !== "undefined") {
   window.__R2 = CONFIG.r2;
 }
