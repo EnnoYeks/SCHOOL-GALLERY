@@ -1,6 +1,5 @@
 // HSHS World — Admin control room
-// Security checks are implemented but temporarily relaxed because Firebase is locked.
-// Full token + allowlist enforcement will be re-enabled once Firebase access is restored.
+// All privileged writes go through Worker /admin/* (Firebase token + ADMIN_UIDS).
 
 (function () {
   'use strict';
@@ -23,9 +22,12 @@
         this.showLock('Sign in required', 'Please sign in to access the control room.', 'index/login.html');
         return;
       }
-      // TEMP: skip full /admin/me check while locked out of Firebase
-      // When restored, call window.adminApi.me() and set isAdmin from response
-      this.isAdmin = true; // temporary bypass
+      try {
+        const me = await window.adminApi.me();
+        this.isAdmin = !!(me && me.admin);
+      } catch (e) {
+        this.isAdmin = false;
+      }
       if (!this.isAdmin) {
         this.showLock('You do not have permission', 'This area is for admins only.', null);
         return;
@@ -205,12 +207,7 @@
       if (this.busy) return;
       this.busy = true;
       try {
-        // TEMP: still uses anon client while security is deferred
-        const sb = window.supabase;
-        if (!sb) throw new Error('Supabase not ready');
-        const patch = featured ? { featured: true, featured_at: new Date().toISOString() } : { featured: false, featured_at: null };
-        const { error } = await sb.from(col).update(patch).eq('id', id);
-        if (error) throw error;
+        await window.adminApi.feature(id, featured, col);
         await this.loadRecentItems();
         this.setFeedback('adminFeedback', featured ? 'Pinned' : 'Unpinned', true);
       } catch (e) {
@@ -226,11 +223,7 @@
       if (this.busy) return;
       this.busy = true;
       try {
-        // TEMP: anon insert while security deferred
-        const sb = window.supabase;
-        if (!sb) throw new Error('Supabase not ready');
-        const { error } = await sb.from('events').insert({ title, date, location: place });
-        if (error) throw error;
+        await window.adminApi.createEvent({ title, date, location: place });
         $('evTitle').value = ''; $('evDate').value = ''; $('evPlace').value = '';
         await this.loadEventsList();
         this.setFeedback('adminFeedback', 'Event added', true);
@@ -260,8 +253,7 @@
           btn.addEventListener('click', async () => {
             if (!confirm('Delete this event?')) return;
             try {
-              const { error } = await sb.from('events').delete().eq('id', btn.dataset.id);
-              if (error) throw error;
+              await window.adminApi.deleteEvent(btn.dataset.id);
               await this.loadEventsList();
             } catch (e) {}
           });
@@ -283,30 +275,21 @@
       this.busy = true;
       this.setFeedback('postFeedback', 'Saving…');
       try {
-        let mediaKey = '', imageUrl = '';
+        let media_key = '', image_url = '';
         if (file && window.HshsStorage && window.HshsStorage.uploadAdmin) {
           const up = await window.HshsStorage.uploadAdmin(file);
-          mediaKey = up.key;
-          imageUrl = up.url;
+          media_key = up.key;
+          image_url = up.url;
         }
-        // TEMP: direct insert while security deferred; Worker will set official fields later
-        const sb = window.supabase;
-        const payload = {
+        await window.adminApi.createPost({
           title: title || 'Untitled',
           description,
           type: file && file.type.startsWith('video') ? 'video' : 'photo',
-          image_url: imageUrl,
-          thumbnail_url: imageUrl,
-          media_key: mediaKey,
-          media_provider: mediaKey ? 'cloudflare-r2' : null,
-          status,
-          is_official: true,
-          author_role: 'admin',
-          author: 'HSHS Admin',
-          author_id: window.hshsUid || 'admin-temp'
-        };
-        const { error } = await sb.from('posts').insert(payload);
-        if (error) throw error;
+          image_url,
+          thumbnail_url: image_url,
+          media_key,
+          status
+        });
         $('postTitle').value = '';
         $('postDesc').value = '';
         if ($('postMedia')) $('postMedia').value = '';
@@ -321,10 +304,8 @@
       const box = $('officialList');
       if (!box) return;
       try {
-        const sb = window.supabase;
-        const { data, error } = await sb.from('posts').select('*').eq('is_official', true).order('created_at', { ascending: false }).limit(20);
-        if (error) throw error;
-        this.official = data || [];
+        const res = await window.adminApi.listPosts();
+        this.official = res.posts || res || [];
         if (!this.official.length) {
           box.innerHTML = '<div class="admin-empty">No official posts yet.</div>';
           return;
@@ -348,15 +329,12 @@
     async handleOfficialAction(id, action) {
       if (action === 'delete' && !confirm('Delete this official post?')) return;
       try {
-        const sb = window.supabase;
         if (action === 'delete') {
-          const { error } = await sb.from('posts').delete().eq('id', id);
-          if (error) throw error;
+          await window.adminApi.deletePost(id);
         } else {
           const post = this.official.find(p => p.id === id);
           const next = post && post.status === 'draft' ? 'published' : 'draft';
-          const { error } = await sb.from('posts').update({ status: next }).eq('id', id);
-          if (error) throw error;
+          await window.adminApi.updatePost(id, { status: next });
         }
         await this.loadOfficialPosts();
       } catch (e) {
