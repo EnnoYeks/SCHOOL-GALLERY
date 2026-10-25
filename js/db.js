@@ -51,13 +51,16 @@ class Database {
         };
     }
 
-    async queryTable(table, limitValue = 10, offset = 0) {
+    async queryTable(table, limitValue = 10, offset = 0, extra = {}) {
         try {
-            const { data, error } = await supabase
+            let q = supabase
                 .from(table)
                 .select("*")
                 .order("created_at", { ascending: false })
                 .range(offset, offset + limitValue - 1);
+            if (table === "posts") q = q.eq("status", "published");
+            if (extra.eq) Object.entries(extra.eq).forEach(([k, v]) => q = q.eq(k, v));
+            const { data, error } = await q;
             if (error) throw error;
             return (data || []).map(row => this.normalizeItem(row));
         } catch (error) {
@@ -80,12 +83,14 @@ class Database {
         try {
             const tables = ["posts", "photos", "videos"];
             const results = await Promise.all(tables.map(async (table) => {
-                const { data } = await supabase
+                let q = supabase
                     .from(table)
                     .select("*")
                     .eq("featured", true)
                     .order("featured_at", { ascending: false })
                     .limit(limitCount);
+                if (table === "posts") q = q.eq("status", "published");
+                const { data } = await q;
                 return (data || []).map(row => this.normalizeItem({ ...row, type: table === "videos" ? "video" : (row.type || "photo") }));
             }));
             const all = results.flat();
@@ -140,7 +145,10 @@ class Database {
                 likes: 0,
                 views: 0,
                 comments: 0,
-                shares: 0
+                shares: 0,
+                status: "published",
+                is_official: false,
+                author_role: "user"
             };
             const { data: row, error } = await supabase.from("posts").insert(payload).select().single();
             if (error) throw error;
@@ -214,7 +222,7 @@ class Database {
     async getAnalytics() {
         try {
             const [posts, photos, videos] = await Promise.all([
-                supabase.from("posts").select("id", { count: "exact", head: true }),
+                supabase.from("posts").select("id", { count: "exact", head: true }).eq("status", "published"),
                 supabase.from("photos").select("id", { count: "exact", head: true }),
                 supabase.from("videos").select("id", { count: "exact", head: true })
             ]);
