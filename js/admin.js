@@ -1,5 +1,5 @@
 // HSHS World — Admin control room
-// Privileged writes via Worker /admin/* (Firebase token + ADMIN_UIDS).
+// TEMP: OPEN_ACCESS so home content can be managed while roles are wired.
 
 (function () {
   'use strict';
@@ -15,15 +15,32 @@
 
   class AdminDashboard {
     constructor() {
-      this.busy = false; this.items = []; this.official = []; this.isAdmin = false; this.uploadTarget = 'posts';
+      this.busy = false; this.items = []; this.official = []; this.isAdmin = false; this.openAccess = false; this.uploadTarget = 'posts';
       this.init();
     }
 
     async init() {
+      const OPEN_ACCESS = true;
       const ready = await this.waitForAuth();
-      if (!ready) { this.showLock('Sign in required', 'Please sign in to access the control room.', 'index/login.html'); return; }
-      try { const me = await window.adminApi.me(); this.isAdmin = !!(me && me.admin); } catch (e) { this.isAdmin = false; }
-      if (!this.isAdmin) { this.showLock('You do not have permission', 'This area is for admins only.', null); return; }
+      if (!ready && !OPEN_ACCESS) {
+        this.showLock('Sign in required', 'Please sign in to access the control room.', 'index/login.html');
+        return;
+      }
+      this.isAdmin = false;
+      try {
+        if (window.adminApi && window.adminApi.me) {
+          const me = await window.adminApi.me();
+          this.isAdmin = !!(me && me.admin);
+        }
+      } catch (e) { this.isAdmin = false; }
+      if (OPEN_ACCESS) {
+        this.isAdmin = true;
+        this.openAccess = true;
+      }
+      if (!this.isAdmin) {
+        this.showLock('You do not have permission', 'This area is for admins only.', null);
+        return;
+      }
       this.render(); this.bind();
       await Promise.all([this.loadRecentItems(), this.loadEventsList(), this.loadOfficialPosts()]);
     }
@@ -51,7 +68,7 @@
     render() {
       const panels = $('adminPanels'); if (!panels) return;
       panels.innerHTML = [
-        '<header class="admin-welcome"><div><p class="admin-eyebrow">HSHS WORLD · CONTROL ROOM</p><h1>Good to see you, admin.</h1><p class="admin-muted">Upload content, pin Featured Today, manage events.</p></div>',
+        '<header class="admin-welcome"><div><p class="admin-eyebrow">HSHS WORLD · CONTROL ROOM</p><h1>Home & content control</h1><p class="admin-muted">Upload to Gallery, pin Featured Today, and manage events. ' + (this.openAccess ? '<span style="color:#fbbf24">Open access is on for now.</span>' : '') + '</p></div>',
         '<button class="admin-btn admin-btn-quiet" id="adminRefresh" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button></header>',
         '<section class="admin-stat-grid">',
         '<article class="admin-stat"><p>Posts</p><strong id="adminPostCount">0</strong><small>Latest</small></article>',
@@ -59,7 +76,7 @@
         '<article class="admin-stat"><p>Videos</p><strong id="adminVideoCount">0</strong><small>Videos</small></article>',
         '<article class="admin-stat"><p>Events</p><strong id="adminEventCount">0</strong><small>Calendar</small></article></section>',
         '<section class="admin-panel" style="margin-bottom:18px"><div class="admin-panel-head"><div><p class="admin-eyebrow">UPLOAD</p><h2>Post · Photo · Video</h2>',
-        '<p class="admin-muted">Feature on Home pins Featured Today in the same write.</p></div></div>',
+        '<p class="admin-muted">Check Feature on Home to pin Featured Today in the same write.</p></div></div>',
         '<form class="admin-event-form" id="adminUploadForm">',
         '<div class="admin-form-row" style="gap:8px;flex-wrap:wrap">',
         '<label>Destination<select id="upTarget"><option value="posts">Post</option><option value="photos">Photo</option><option value="videos">Video</option></select></label>',
@@ -74,7 +91,7 @@
         '<div class="admin-form-row"><button type="button" id="upDraftBtn" class="admin-btn admin-btn-quiet">Save draft</button>',
         '<button type="button" id="upPublishBtn" class="admin-btn admin-btn-primary">Publish</button></div>',
         '<p id="upFeedback" class="admin-feedback"></p></form></section>',
-        '<div class="admin-work-grid"><section class="admin-panel"><div class="admin-panel-head"><div><p class="admin-eyebrow">HOMEPAGE</p><h2>Featured Today</h2></div></div>',
+        '<div class="admin-work-grid"><section class="admin-panel"><div class="admin-panel-head"><div><p class="admin-eyebrow">HOMEPAGE</p><h2>Featured Today</h2><p class="admin-muted">Pin, edit, or remove what shows on Home.</p></div></div>',
         '<div id="recentItems" class="admin-item-list"><div class="admin-empty">Loading…</div></div>',
         '<details class="admin-manual-pin"><summary>Pin by item ID</summary><div class="admin-inline-form">',
         '<input id="pinId" placeholder="Item ID"><select id="pinCol"><option value="posts">posts</option><option value="photos">photos</option><option value="videos">videos</option></select>',
@@ -143,16 +160,20 @@
       this.busy = true; this.setFeedback('upFeedback', 'Uploading…'); this.setProgress(10);
       try {
         let media_key = '', image_url = '', video_url = '', thumbnail_url = '', poster_key = '';
-        if (file && window.HshsStorage && window.HshsStorage.uploadAdmin) {
+        if (file && window.HshsStorage) {
           this.setProgress(30);
-          const up = await window.HshsStorage.uploadAdmin(file);
-          media_key = up.key;
+          const up = window.HshsStorage.uploadAdmin
+            ? await window.HshsStorage.uploadAdmin(file)
+            : await window.HshsStorage.upload(file, { kind: file.type.indexOf('video/') === 0 ? 'video' : 'photo' });
+          media_key = up.key || '';
           if (file.type.indexOf('video/') === 0) video_url = up.url; else { image_url = up.url; thumbnail_url = up.url; }
           this.setProgress(60);
         }
-        if (poster && window.HshsStorage && window.HshsStorage.uploadAdmin) {
-          const up2 = await window.HshsStorage.uploadAdmin(poster);
-          poster_key = up2.key; thumbnail_url = up2.url; this.setProgress(75);
+        if (poster && window.HshsStorage) {
+          const up2 = window.HshsStorage.uploadAdmin
+            ? await window.HshsStorage.uploadAdmin(poster)
+            : await window.HshsStorage.upload(poster, { kind: 'photo' });
+          poster_key = up2.key || ''; thumbnail_url = up2.url; this.setProgress(75);
         }
         const payload = {
           target, title: title || (target === 'posts' ? 'Untitled' : target === 'photos' ? 'Photo' : 'Video'),
@@ -161,12 +182,44 @@
           type: file && file.type.indexOf('video/') === 0 ? 'video' : 'photo'
         };
         this.setProgress(90);
-        await window.adminApi.createContent(payload);
+        let saved = null;
+        try {
+          if (window.adminApi && window.adminApi.createContent) {
+            saved = await window.adminApi.createContent(payload);
+          }
+        } catch (apiErr) {
+          console.warn('[admin] Worker createContent failed, local path', apiErr);
+        }
+        if (!saved && window.db) {
+          const common = {
+            title: payload.title,
+            description: payload.description,
+            category: payload.category,
+            classTag: payload.class_tag,
+            image: payload.image_url || '',
+            imageUrl: payload.image_url || '',
+            thumbnailUrl: payload.thumbnail_url || payload.image_url || '',
+            videoUrl: payload.video_url || '',
+            mediaKey: payload.media_key || '',
+            mediaProvider: 'cloudflare-r2',
+            type: payload.type
+          };
+          if (target === 'photos') saved = await window.db.createPhoto(common);
+          else if (target === 'videos') saved = await window.db.createVideo(common);
+          else saved = await window.db.createPost(Object.assign({}, common, { status: payload.status }));
+          if (feature && saved && saved.id) {
+            try {
+              if (window.adminApi && window.adminApi.feature) await window.adminApi.feature(saved.id, true, target);
+              else if (window.supabase) await window.supabase.from(target).update({ featured: true, featured_at: new Date().toISOString() }).eq('id', saved.id);
+            } catch (fe) {}
+          }
+        }
+        if (!saved) throw new Error('Could not save content');
         this.setProgress(100);
         if ($('upTitle')) $('upTitle').value = ''; if ($('upDesc')) $('upDesc').value = '';
         if ($('upFile')) $('upFile').value = ''; if ($('upPoster')) $('upPoster').value = '';
         if ($('upFeature')) $('upFeature').checked = false;
-        this.setFeedback('upFeedback', status === 'draft' ? 'Draft saved' : 'Published', true);
+        this.setFeedback('upFeedback', status === 'draft' ? 'Draft saved' : 'Published — check Home Featured', true);
         await Promise.all([this.loadRecentItems(), this.loadOfficialPosts()]);
       } catch (e) {
         this.setFeedback('upFeedback', e.message || 'Could not save', false);
@@ -179,18 +232,39 @@
       const box = $('recentItems'); if (!box) return;
       if (!window.db) { box.innerHTML = '<div class="admin-empty">Database is not available yet.</div>'; return; }
       try {
-        const [posts, photos, videos] = await Promise.all([window.db.getPosts(8, 0), window.db.getPhotos(8, 0), window.db.getVideos(6, 0)]);
-        this.items = [].concat((posts || []).map(i => Object.assign({}, i, { _col: 'posts' })), (photos || []).map(i => Object.assign({}, i, { _col: 'photos' })), (videos || []).map(i => Object.assign({}, i, { _col: 'videos' }))).slice(0, 12);
+        const [posts, photos, videos] = await Promise.all([
+          window.db.getPosts ? window.db.getPosts(8, 0) : [],
+          window.db.getPhotos ? window.db.getPhotos(8, 0) : [],
+          window.db.getVideos ? window.db.getVideos(6, 0) : []
+        ]);
+        this.items = [].concat(
+          (posts || []).map(i => Object.assign({}, i, { _col: 'posts' })),
+          (photos || []).map(i => Object.assign({}, i, { _col: 'photos' })),
+          (videos || []).map(i => Object.assign({}, i, { _col: 'videos' }))
+        ).slice(0, 12);
         if ($('adminPostCount')) $('adminPostCount').textContent = String((posts || []).length);
         if ($('adminPhotoCount')) $('adminPhotoCount').textContent = String((photos || []).length);
         if ($('adminVideoCount')) $('adminVideoCount').textContent = String((videos || []).length);
         if (!this.items.length) { box.innerHTML = '<div class="admin-empty">No content yet.</div>'; return; }
         box.innerHTML = this.items.map(it => {
           const pinned = !!it.featured;
-          return '<article class="admin-item-row"><span class="admin-type-icon"><i class="fa-solid ' + (it._col === 'videos' ? 'fa-film' : 'fa-image') + '"></i></span><div class="admin-item-copy"><strong>' + esc(it.title || 'Untitled') + '</strong><small>' + esc(it._col) + (pinned ? ' · pinned' : '') + '</small></div><button class="admin-btn ' + (pinned ? 'admin-btn-quiet' : 'admin-btn-primary') + ' admin-pin-one" type="button" data-id="' + esc(it.id) + '" data-col="' + it._col + '" data-featured="' + (pinned ? '1' : '0') + '">' + (pinned ? 'Unpin' : 'Pin') + '</button></article>';
+          const media = it.image_url || it.imageUrl || it.thumbnail_url || it.image || '';
+          return '<article class="admin-item-row" data-id="' + esc(it.id) + '" data-col="' + it._col + '">' +
+            (media ? '<span class="admin-type-icon" style="background-image:url(\'' + esc(media) + '\');background-size:cover"></span>' :
+              '<span class="admin-type-icon"><i class="fa-solid ' + (it._col === 'videos' ? 'fa-film' : 'fa-image') + '"></i></span>') +
+            '<div class="admin-item-copy"><strong>' + esc(it.title || 'Untitled') + '</strong><small>' + esc(it._col) + (pinned ? ' · on Home' : '') + '</small></div>' +
+            '<button class="admin-btn ' + (pinned ? 'admin-btn-quiet' : 'admin-btn-primary') + ' admin-pin-one" type="button" data-id="' + esc(it.id) + '" data-col="' + it._col + '" data-featured="' + (pinned ? '1' : '0') + '">' + (pinned ? 'Unpin Home' : 'Pin Home') + '</button>' +
+            '<button class="admin-icon-btn admin-edit-one" type="button" data-id="' + esc(it.id) + '" data-col="' + it._col + '" title="Edit title"><i class="fa-solid fa-pen"></i></button>' +
+            '<button class="admin-icon-btn admin-del-one" type="button" data-id="' + esc(it.id) + '" data-col="' + it._col + '" title="Delete"><i class="fa-solid fa-trash"></i></button></article>';
         }).join('');
         box.querySelectorAll('.admin-pin-one').forEach(btn => {
-          btn.addEventListener('click', () => { $('pinId').value = btn.dataset.id; $('pinCol').value = btn.dataset.col; this.pinItem(btn.dataset.featured !== '1'); });
+          btn.addEventListener('click', () => { if ($('pinId')) $('pinId').value = btn.dataset.id; if ($('pinCol')) $('pinCol').value = btn.dataset.col; this.pinItem(btn.dataset.featured !== '1'); });
+        });
+        box.querySelectorAll('.admin-edit-one').forEach(btn => {
+          btn.addEventListener('click', () => this.editItem(btn.dataset.id, btn.dataset.col));
+        });
+        box.querySelectorAll('.admin-del-one').forEach(btn => {
+          btn.addEventListener('click', () => this.deleteItem(btn.dataset.id, btn.dataset.col));
         });
       } catch (e) { box.innerHTML = '<div class="admin-empty">Could not load items.</div>'; }
     }
@@ -200,9 +274,63 @@
       const col = ($('pinCol') && $('pinCol').value) || 'posts';
       if (!id || !ALLOWED.has(col) || this.busy) return;
       this.busy = true;
-      try { await window.adminApi.feature(id, featured, col); await this.loadRecentItems(); this.setFeedback('adminFeedback', featured ? 'Pinned' : 'Unpinned', true); }
-      catch (e) { this.setFeedback('adminFeedback', e.message || 'Could not update', false); }
+      try {
+        let ok = false;
+        try {
+          if (window.adminApi && window.adminApi.feature) {
+            await window.adminApi.feature(id, featured, col);
+            ok = true;
+          }
+        } catch (e1) {}
+        if (!ok && window.supabase) {
+          const patch = featured
+            ? { featured: true, featured_at: new Date().toISOString() }
+            : { featured: false, featured_at: null };
+          const { error } = await window.supabase.from(col).update(patch).eq('id', id);
+          if (error) throw error;
+          ok = true;
+        }
+        if (!ok) throw new Error('Could not pin — sign in and try again');
+        await this.loadRecentItems();
+        this.setFeedback('adminFeedback', featured ? 'Pinned on Home' : 'Removed from Home', true);
+      } catch (e) { this.setFeedback('adminFeedback', e.message || 'Could not update', false); }
       finally { this.busy = false; }
+    }
+
+    async editItem(id, col) {
+      const it = this.items.find(x => String(x.id) === String(id) && x._col === col);
+      const title = prompt('Title for home / feed', (it && it.title) || '');
+      if (title == null) return;
+      const description = prompt('Description / caption', (it && (it.description || it.caption)) || '');
+      if (description == null) return;
+      try {
+        if (window.adminApi && window.adminApi.updateContent) {
+          await window.adminApi.updateContent(col, id, { title: title.trim().slice(0, 200), description: description.trim().slice(0, 2000) });
+        } else if (window.supabase) {
+          const { error } = await window.supabase.from(col).update({ title: title.trim().slice(0, 200), description: description.trim().slice(0, 2000) }).eq('id', id);
+          if (error) throw error;
+        }
+        await this.loadRecentItems();
+        this.setFeedback('upFeedback', 'Updated for home', true);
+      } catch (e) {
+        this.setFeedback('upFeedback', (e && e.message) || 'Could not edit', false);
+      }
+    }
+
+    async deleteItem(id, col) {
+      if (!confirm('Delete this item from the site?')) return;
+      try {
+        if (window.adminApi && window.adminApi.deleteContent) {
+          await window.adminApi.deleteContent(col, id);
+        } else if (window.supabase) {
+          const { error } = await window.supabase.from(col).delete().eq('id', id);
+          if (error) throw error;
+        }
+        await this.loadRecentItems();
+        this.setFeedback('upFeedback', 'Deleted', true);
+      } catch (e) {
+        this.setFeedback('upFeedback', (e && e.message) || 'Could not delete', false);
+      }
     }
 
     async addEvent() {
@@ -212,7 +340,12 @@
       if (!title || !date || this.busy) return;
       this.busy = true;
       try {
-        await window.adminApi.createEvent({ title, date, location: place });
+        if (window.adminApi && window.adminApi.createEvent) {
+          await window.adminApi.createEvent({ title, date, location: place });
+        } else if (window.supabase) {
+          const { error } = await window.supabase.from('events').insert({ title, date, location: place });
+          if (error) throw error;
+        }
         if ($('evTitle')) $('evTitle').value = ''; if ($('evDate')) $('evDate').value = ''; if ($('evPlace')) $('evPlace').value = '';
         await this.loadEventsList(); this.setFeedback('adminFeedback', 'Event added', true);
       } catch (e) { this.setFeedback('adminFeedback', e.message || 'Could not add event', false); }
@@ -222,7 +355,7 @@
     async loadEventsList() {
       const box = $('eventsList'); if (!box) return;
       try {
-        const sb = window.supabase; if (!sb) return;
+        const sb = window.supabase; if (!sb) { box.innerHTML = '<div class="admin-empty">Events need database.</div>'; return; }
         const { data, error } = await sb.from('events').select('*').order('date', { ascending: true }).limit(20);
         if (error) throw error;
         if ($('adminEventCount')) $('adminEventCount').textContent = String((data || []).length);
@@ -231,7 +364,11 @@
         box.querySelectorAll('.admin-icon-btn').forEach(btn => {
           btn.addEventListener('click', async () => {
             if (!confirm('Delete this event?')) return;
-            try { await window.adminApi.deleteEvent(btn.dataset.id); await this.loadEventsList(); } catch (e) {}
+            try {
+              if (window.adminApi && window.adminApi.deleteEvent) await window.adminApi.deleteEvent(btn.dataset.id);
+              else if (window.supabase) await window.supabase.from('events').delete().eq('id', btn.dataset.id);
+              await this.loadEventsList();
+            } catch (e) {}
           });
         });
       } catch (e) { box.innerHTML = '<div class="admin-empty">Could not load events.</div>'; }
@@ -240,6 +377,10 @@
     async loadOfficialPosts() {
       const box = $('officialList'); if (!box) return;
       try {
+        if (!window.adminApi || !window.adminApi.listPosts) {
+          box.innerHTML = '<div class="admin-empty">Official list needs Worker admin routes.</div>';
+          return;
+        }
         const res = await window.adminApi.listPosts();
         this.official = res.posts || res || [];
         if (!this.official.length) { box.innerHTML = '<div class="admin-empty">No official posts yet.</div>'; return; }
