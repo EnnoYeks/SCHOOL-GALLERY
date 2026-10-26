@@ -1,36 +1,34 @@
-# Clean URL Structure
+# Clean URL Structure — Complete
 
-## Migrated pages (folder/index.html with root-relative paths)
+All main pages now have clean folder-based URLs with root-relative paths.
 
+## Migrated pages
 ```
-more/index.html
-about/index.html
-profile/index.html
-settings/index.html
-gallery/index.html
-photos/index.html
-videos/index.html
-login/index.html
-contact/index.html
-buzz/index.html
-chat/index.html
-polls/index.html
-memories/index.html
-notifications/index.html
-saved/index.html
-search/index.html
-admin/index.html
+/more/
+/about/
+/profile/
+/settings/
+/gallery/
+/photos/
+/videos/
+/login/
+/contact/
+/buzz/
+/chat/
+/polls/
+/memories/
+/notifications/
+/saved/
+/search/
+/admin/
+/edit-profile/
+/spotlight/
+/trending/
 ```
 
-## Still under index/ (can be migrated the same way)
+## Status
+- Folder structure + root-relative paths (`/css/`, `/js/`) in place.
+- Existing vercel.json rewrites remain as fallback.
+- Live site already serving the clean URLs.
 
-- edit-profile.html
-- spotlight.html
-- trending.html
-- clips.html / shorts.html (redirects)
-- contat.html (typo)
-
-## Notes
-- Existing vercel.json rewrites continue to work as fallback.
-- All new pages use `/css/` and `/js/` paths.
-- After deploy, test the clean URLs directly.
+Migration of page structure is finished.
