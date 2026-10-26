@@ -41,7 +41,6 @@
       } catch (e) { photos = []; }
       photos = Array.isArray(photos) ? photos.filter(Boolean) : [];
 
-      // Fallback: list only the photos/ prefix from R2
       if (!photos.length && window.HshsStorage && typeof window.HshsStorage.list === 'function') {
         try {
           photos = await window.HshsStorage.list({ limit: 48, prefix: 'photos/' }) || [];
@@ -80,14 +79,18 @@
       var grid = document.getElementById('masonryGrid');
       if (!grid) return;
       var list = this.filtered();
-      grid.innerHTML = '';
       if (!list.length) {
         grid.innerHTML = '<div class="photos-empty">No photos yet.</div>';
         return;
       }
-      var frag = document.createDocumentFragment();
-      list.forEach(function (photo) { frag.appendChild(this.createPhotoCard(photo)); }, this);
-      grid.appendChild(frag);
+      if (window.HshsMediaCards && window.HshsMediaCards.keyedPhotoUpdate) {
+        window.HshsMediaCards.keyedPhotoUpdate(grid, list, this.createPhotoCard.bind(this));
+      } else {
+        grid.innerHTML = '';
+        var frag = document.createDocumentFragment();
+        list.forEach(function (photo) { frag.appendChild(this.createPhotoCard(photo)); }, this);
+        grid.appendChild(frag);
+      }
     }
     createPhotoCard(photo) {
       var card = document.createElement('article');

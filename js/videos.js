@@ -1,6 +1,4 @@
 import { db } from "./db.js";
-import { updateDoc, doc, increment } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import { firestore } from "./config.js";
 
 class VideosPage {
     constructor() {
@@ -85,12 +83,13 @@ class VideosPage {
         document.querySelectorAll("[data-video-index]").forEach(el => {
             el.onclick = () => this.play(Number(el.dataset.videoIndex));
         });
+        this.enhanceCards();
     }
     featCard(v, index, first) {
         const title = this.escape(v.title || "Untitled");
         const thumb = this.attr(v.thumbnailUrl || v.thumbnail || "");
         const dur = this.escape(v.duration || "");
-        return `<article class="vibe-feat" data-video-index="${index}">
+        return `<article class="vibe-feat" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
             ${thumb ? `<img src="${thumb}" alt="${title}" loading="lazy">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}
             ${first ? `<span class="badge">FEATURED</span>` : ""}
             <span class="play"><i class="fas fa-play"></i></span>
@@ -102,7 +101,7 @@ class VideosPage {
         const title = this.escape(v.title || "Untitled");
         const thumb = this.attr(v.thumbnailUrl || v.thumbnail || "");
         const dur = this.escape(v.duration || "");
-        return `<article class="vibe-row" data-video-index="${index}">
+        return `<article class="vibe-row" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
             <div class="shot">
                 ${thumb ? `<img src="${thumb}" alt="${title}" loading="lazy">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}
                 <span class="play"><i class="fas fa-play"></i></span>
@@ -111,6 +110,22 @@ class VideosPage {
             <div class="copy"><b>${title}</b><small>${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div>
             <button class="more" type="button" aria-label="More">⋮</button>
         </article>`;
+    }
+    enhanceCards() {
+        if (!window.HshsMediaCards) return;
+        document.querySelectorAll('[data-video-url]').forEach(el => {
+            const url = el.getAttribute('data-video-url');
+            if (!url || el.querySelector('img')) return;
+            window.HshsMediaCards.capturePoster(url, function (poster) {
+                if (!poster) return;
+                const img = document.createElement('img');
+                img.src = poster;
+                img.alt = '';
+                img.loading = 'lazy';
+                const fallback = el.querySelector('.thumb-fallback');
+                if (fallback) fallback.replaceWith(img);
+            });
+        });
     }
     skeletons(){return "<article class=\"vibe-skel-row\"><div class=\"frame vibe-shine\"></div><div class=\"lines\"><div class=\"line vibe-shine\"></div><div class=\"line short vibe-shine\"></div></div></article>".repeat(5);}
     bindFilters(){
@@ -156,8 +171,9 @@ class VideosPage {
         this.updateViews(video);
     }
     async updateViews(video){
-        if (!video?.id) return;
-        try { await updateDoc(doc(firestore, "videos", video.id), { views: increment(1) }); video.views = (+video.views || 0) + 1; } catch (e) {}
+        if (!video?.id || !window.HshsMediaCards) return;
+        await window.HshsMediaCards.incrementViews(video.id);
+        video.views = (+video.views || 0) + 1;
     }
     score(v){ return ((+v.likes||0)+(+v.comments||0))*4 + (+v.views||0); }
     date(v){ if (!v) return 0; if (typeof v.toMillis === "function") return v.toMillis(); if (v.seconds) return v.seconds * 1000; const n = new Date(v).getTime(); return Number.isFinite(n) ? n : 0; }

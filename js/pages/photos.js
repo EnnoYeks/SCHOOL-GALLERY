@@ -53,8 +53,10 @@
     if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     loadCss('css/photos.css');
     loadCss('css/photos-campus.css');
+    loadCss('css/hshs-media-cards.css');
     if (!mountTemplate()) return;
-    await loadOnce(base() + 'js/photos.js?v=261005real1', 'hshs-leg-photos');
+    await loadOnce(base() + 'js/hshs-media-cards.js?v=261026media1', 'hshs-media-cards');
+    await loadOnce(base() + 'js/photos.js?v=261026media1', 'hshs-leg-photos');
     try {
       if (typeof global.startPhotos === 'function') global.startPhotos();
     } catch (e) {
