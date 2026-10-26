@@ -1,23 +1,36 @@
 # Clean URL Structure
 
-Main pages now have folder-based clean URLs:
+## Migrated pages (folder/index.html with root-relative paths)
 
 ```
-more/index.html       →  /more/
-about/index.html      →  /about/
-profile/index.html    →  /profile/
-settings/index.html   →  /settings/
-gallery/index.html    →  /gallery/
-photos/index.html     →  /photos/
-videos/index.html     →  /videos/
-login/index.html      →  /login/
-contact/index.html    →  /contact/
+more/index.html
+about/index.html
+profile/index.html
+settings/index.html
+gallery/index.html
+photos/index.html
+videos/index.html
+login/index.html
+contact/index.html
+buzz/index.html
+chat/index.html
+polls/index.html
+memories/index.html
+notifications/index.html
+saved/index.html
+search/index.html
+admin/index.html
 ```
 
-## Status
-- All of the above use root-relative paths (`/css/...`, `/js/...`)
-- Existing `vercel.json` rewrites still work as fallback for the old `/index/*.html` files
-- Remaining pages under `index/` (buzz, chat, polls, memories, notifications, saved, search, admin, edit-profile, spotlight, trending, etc.) can be migrated the same way when ready
+## Still under index/ (can be migrated the same way)
 
-## How to finish the rest
-Copy any `index/pagename.html` to `pagename/index.html` and replace every `../css/` and `../js/` with `/css/` and `/js/`.
+- edit-profile.html
+- spotlight.html
+- trending.html
+- clips.html / shorts.html (redirects)
+- contat.html (typo)
+
+## Notes
+- Existing vercel.json rewrites continue to work as fallback.
+- All new pages use `/css/` and `/js/` paths.
+- After deploy, test the clean URLs directly.
