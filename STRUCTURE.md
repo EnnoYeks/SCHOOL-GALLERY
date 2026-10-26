@@ -1,25 +1,23 @@
 # Clean URL Structure
 
-Pages are being moved to the professional folder layout:
+Main pages now have folder-based clean URLs:
 
 ```
-more/index.html     →  /more/
-about/index.html    →  /about/
-...
+more/index.html       →  /more/
+about/index.html      →  /about/
+profile/index.html    →  /profile/
+settings/index.html   →  /settings/
+gallery/index.html    →  /gallery/
+photos/index.html     →  /photos/
+videos/index.html     →  /videos/
+login/index.html      →  /login/
+contact/index.html    →  /contact/
 ```
 
-## Benefits
-- Clean permanent URLs with no .html
-- Root-relative asset paths (`/css/...`, `/js/...`) that never break
-- Works naturally on Vercel without relying only on rewrites
+## Status
+- All of the above use root-relative paths (`/css/...`, `/js/...`)
+- Existing `vercel.json` rewrites still work as fallback for the old `/index/*.html` files
+- Remaining pages under `index/` (buzz, chat, polls, memories, notifications, saved, search, admin, edit-profile, spotlight, trending, etc.) can be migrated the same way when ready
 
-## Current status
-- `more/index.html` is live (paths updated to root-relative)
-- Existing `vercel.json` rewrites still work as fallback
-- Other pages under `index/*.html` can be migrated the same way
-
-## How to migrate a page
-1. Create `pagename/index.html`
-2. Change all `../css/` and `../js/` to `/css/` and `/js/`
-3. Update internal links to use `/pagename/`
-4. Optional: remove the old `index/pagename.html` once confirmed working
+## How to finish the rest
+Copy any `index/pagename.html` to `pagename/index.html` and replace every `../css/` and `../js/` with `/css/` and `/js/`.
