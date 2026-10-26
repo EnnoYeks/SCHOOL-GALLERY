@@ -8,9 +8,9 @@
     try {
       if (g.HshsRegistry && HshsRegistry.activeRoute) return HshsRegistry.activeRoute().name === PAGE;
     } catch (e) {}
-    return (location.pathname.split('/').pop() || '').toLowerCase() === 'profile.html';
+    return (window.HshsPaths ? HshsPaths.key() : '') === 'profile';
   }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function base() { return '/'; }
   function people() { return g.HshsPeople || null; }
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
@@ -34,7 +34,7 @@
     document.head.appendChild(l);
   }
   function loginUrl() {
-    var path = base() + 'index/login.html';
+    var path = base() + '/login/';
     try {
       var u = new URL(path, location.href);
       u.searchParams.set('next', location.pathname + location.search);
@@ -129,10 +129,10 @@
     if (!box) return;
     if (!u) { box.innerHTML = ''; return; }
     var items = [
-      { href: base() + 'index/photos.html', label: 'Photos' },
-      { href: base() + 'index/videos.html', label: 'Videos' },
-      { href: base() + 'index/memories.html', label: 'Memories' },
-      { href: base() + 'index/spotlight.html', label: 'Spotlight' }
+      { href: base() + '/photos/', label: 'Photos' },
+      { href: base() + '/videos/', label: 'Videos' },
+      { href: base() + '/memories/', label: 'Memories' },
+      { href: base() + '/spotlight/', label: 'Spotlight' }
     ];
     box.innerHTML = items.map(function (h) {
       return '<a class="pf-hl" href="' + h.href + '"><b>' + h.label.charAt(0) + '</b><span>' + h.label + '</span></a>';
@@ -277,7 +277,7 @@
       return;
     }
     list.innerHTML = rows.map(function (p) {
-      var href = people() ? people().profileUrl(p) : ('profile.html?uid=' + encodeURIComponent(p.uid));
+      var href = people() ? people().profileUrl(p) : ((window.HshsPaths ? HshsPaths.href('profile') : '/profile/') + '?uid=' + encodeURIComponent(p.uid));
       return '<a class="pf-person" href="' + href + '"><b>' + esc((p.name || '?').charAt(0).toUpperCase()) +
         '</b><span><strong>' + esc(p.name) + '</strong><small>@' + esc(p.username || 'student') + '</small></span></a>';
     }).join('');
@@ -315,10 +315,10 @@
         if (!me()) return goLogin(e);
         if (g.__hshsOpenUploadForPage) g.__hshsOpenUploadForPage(location.pathname);
         else if (g.__hshsOpenUpload) g.__hshsOpenUpload();
-        else location.href = base() + 'index/photos.html';
+        else location.href = base() + '/photos/';
         return;
       }
-      if (act === 'settings') location.href = base() + 'index/settings.html';
+      if (act === 'settings') location.href = base() + '/settings/';
       if (act === 'refresh') refresh();
       if (act === 'followers' || act === 'following') showPeople(act);
       if (act === 'close-people') { var s = document.getElementById('pfPeople'); if (s) s.hidden = true; }
@@ -326,7 +326,7 @@
       if (act === 'message') {
         if (!me()) return goLogin(e);
         if (u && people()) location.href = people().chatUrl(u);
-        else location.href = base() + 'index/chat.html';
+        else location.href = base() + '/chat/';
       }
       if (act === 'follow') {
         if (!me()) return goLogin(e);

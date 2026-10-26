@@ -4,7 +4,7 @@
 
   function relabel() {
     // Long videos page (videos.html) → Buzz
-    document.querySelectorAll('a[href*="videos.html"]').forEach(function (a) {
+    document.querySelectorAll('a[href*="videos.html"], a[href*="/videos"]').forEach(function (a) {
       a.querySelectorAll('span, b, small').forEach(function (n) {
         var t = n.textContent.trim();
         if (t === 'Vibe' || t === 'HSHS Studio') n.textContent = 'Buzz';
@@ -13,7 +13,7 @@
     });
 
     // Short clips page (buzz.html) → Vibe
-    document.querySelectorAll('a[href*="buzz.html"], a[data-tab="buzz"]').forEach(function (a) {
+    document.querySelectorAll('a[href*="buzz.html"], a[href*="/buzz"], a[data-tab="buzz"]').forEach(function (a) {
       a.querySelectorAll('span, b, small').forEach(function (n) {
         if (n.textContent.trim() === 'Buzz') n.textContent = 'Vibe';
       });

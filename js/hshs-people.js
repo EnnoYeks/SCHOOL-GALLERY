@@ -150,17 +150,15 @@
   }
 
   function profileUrl(user) {
-    var base = location.pathname.indexOf('/index/') !== -1 ? '' : 'index/';
-    if (!user) return base + 'profile.html';
-    if (user.username) return base + 'profile.html?u=' + encodeURIComponent(user.username);
-    return base + 'profile.html?uid=' + encodeURIComponent(user.uid || user.id || '');
+    if (!user) return '/profile/';
+    if (user.username) return '/profile/?u=' + encodeURIComponent(user.username);
+    return '/profile/?uid=' + encodeURIComponent(user.uid || user.id || '');
   }
 
   function chatUrl(user) {
-    var base = location.pathname.indexOf('/index/') !== -1 ? '' : 'index/';
-    if (!user) return base + 'chat.html';
+    if (!user) return '/chat/';
     var q = user.uid ? ('uid=' + encodeURIComponent(user.uid)) : ('u=' + encodeURIComponent(user.username || ''));
-    return base + 'chat.html?' + q;
+    return '/chat/?' + q;
   }
 
   g.HshsPeople = {

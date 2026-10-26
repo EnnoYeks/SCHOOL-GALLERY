@@ -15,10 +15,10 @@
   ];
   var state = { posts: [], filter: 'all' };
   function isPage() {
-    var f = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
+    var f = (window.HshsPaths ? HshsPaths.key() : '');
     return f === PAGE || (global.HshsRoute && global.HshsRoute.is(PAGE));
   }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function base() { return '/'; }
   function loadCss() {
     if (document.querySelector('link[data-hshs-css="css/spotlight.css"]')) return;
     var l = document.createElement('link');

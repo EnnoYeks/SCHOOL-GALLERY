@@ -37,7 +37,7 @@
         <button class="is-active" type="button" data-memory-filter="all">All</button><button type="button" data-memory-filter="photo">Photos</button><button type="button" data-memory-filter="video">Videos</button><button type="button" data-memory-filter="event">Events</button><button type="button" data-memory-filter="mine">My Posts</button>
       </div>
     </div>
-    <div id="memoryReel" class="memories-reel"><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><a class="memories-share-card" href="../index/upload.html"><span>+</span><strong>Share a memory</strong></a></div>
+    <div id="memoryReel" class="memories-reel"><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><article class="hshs-sk-mem" aria-hidden="true"></article><a class="memories-share-card" href="/upload/"><span>+</span><strong>Share a memory</strong></a></div>
   </section>
 
   <section class="memories-section" id="timeline">
@@ -77,7 +77,7 @@
 
   <section class="memories-section memories-my" id="myMemories">
     <div class="memories-my-copy"><span class="memories-kicker"><i class="far fa-bookmark"></i> YOUR ARCHIVE</span><h2>My Memories</h2><p>Keep the moments you want to come back to. Your saved memories will live here.</p></div>
-    <a class="memories-outline-btn memories-my-btn" href="../index/saved.html">Open saved memories <i class="fas fa-arrow-right"></i></a>
+    <a class="memories-outline-btn memories-my-btn" href="/saved/">Open saved memories <i class="fas fa-arrow-right"></i></a>
   </section>
 </main>
 `;})(typeof window!=='undefined'?window:this);

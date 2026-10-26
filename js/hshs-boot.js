@@ -2,7 +2,7 @@
     if (window.HshsRoute) return;
     var ALIAS = { vibe: 'buzz', clips: 'buzz', shorts: 'buzz', studio: 'videos', contat: 'contact', '': 'home', index: 'home', 'index.html': 'home' };
     function name() {
-        var file = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
+        var file = (window.HshsPaths ? HshsPaths.key() : '');
         return ALIAS[file] || file || 'home';
     }
     window.HshsRoute = {

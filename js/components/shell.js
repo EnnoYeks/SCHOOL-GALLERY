@@ -3,7 +3,7 @@
   if (global.HshsShell) return;
   function R() { return global.HshsRender; }
   function basePath() {
-    return location.pathname.indexOf('/index/') !== -1 ? '../' : '';
+    return '/';
   }
   function navLink(href, icon, label, page) {
     return R().el('a', { href: href, className: 'nav-link', dataset: { page: page } }, [
@@ -21,16 +21,16 @@
           R().el('div', { className: 'search-results', id: 'searchResults' })
         ]),
         R().el('div', { className: 'nav-links' }, [
-          navLink(b + 'index.html', 'fa-home', 'Home', 'home'),
-          navLink(b + 'index/gallery.html', 'fa-images', 'Gallery', 'gallery'),
-          navLink(b + 'index/photos.html', 'fa-photo-video', 'Photos', 'photos'),
-          navLink(b + 'index/videos.html', 'fa-video', 'Buzz', 'videos'),
-          navLink(b + 'index/trending.html', 'fa-fire', 'Trending', 'trending')
+          navLink('/', 'fa-home', 'Home', 'home'),
+          navLink('/gallery/', 'fa-images', 'Gallery', 'gallery'),
+          navLink('/photos/', 'fa-photo-video', 'Photos', 'photos'),
+          navLink('/videos/', 'fa-video', 'Buzz', 'videos'),
+          navLink('/trending/', 'fa-fire', 'Trending', 'trending')
           // Spotlight, Polls, Memories moved to desktop More menu to prevent header overflow
         ]),
         R().el('div', { className: 'nav-actions' }, [
           R().el('div', { className: 'notification-icon' }, [R().icon('fa-bell'), R().el('span', { className: 'notification-badge', id: 'notificationBadge', text: '0' })]),
-          R().el('a', { href: b + 'index/settings.html', className: 'hshs-settings-btn theme-toggle', id: 'hshsSettingsBtn', title: 'Settings' }, [R().icon('fa-gear')]),
+          R().el('a', { href: '/settings/', className: 'hshs-settings-btn theme-toggle', id: 'hshsSettingsBtn', title: 'Settings' }, [R().icon('fa-gear')]),
           R().el('div', { className: 'profile-icon' }, [
             R().el('img', { src: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#1d4ed8"/><circle cx="32" cy="24" r="10" fill="white"/><path d="M14 54c4-12 14-18 18-18s14 6 18 18" fill="white"/></svg>'), alt: 'Profile', className: 'profile-img', id: 'profileImg' })
           ]),
@@ -50,11 +50,11 @@
           ]),
           R().el('div', { className: 'footer-section' }, [
             R().el('h4', { text: 'Quick Links' }),
-            R().el('a', { href: b + 'index.html', text: 'Home' }),
-            R().el('a', { href: b + 'index/gallery.html', text: 'Gallery' }),
-            R().el('a', { href: b + 'index/buzz.html', text: 'Vibe' }),
-            R().el('a', { href: b + 'index/videos.html', text: 'Buzz' }),
-            R().el('a', { href: b + 'index/about.html', text: 'About' })
+            R().el('a', { href: '/', text: 'Home' }),
+            R().el('a', { href: '/gallery/', text: 'Gallery' }),
+            R().el('a', { href: '/buzz/', text: 'Vibe' }),
+            R().el('a', { href: '/videos/', text: 'Buzz' }),
+            R().el('a', { href: '/about/', text: 'About' })
           ]),
           R().el('div', { className: 'footer-section' }, [
             R().el('h4', { text: 'Contact' }),

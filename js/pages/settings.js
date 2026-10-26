@@ -5,10 +5,10 @@
   global.__hshsSettingsPageModule = true;
   var VER = '261002route1';
   function isPage() {
-    var f = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
+    var f = (window.HshsPaths ? HshsPaths.key() : '');
     return f === PAGE || (global.HshsRoute && global.HshsRoute.is(PAGE));
   }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function base() { return '/'; }
   function loadCss(h) {
     if (document.querySelector('link[data-hshs-css="' + h + '"]')) return;
     var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + h + '?v=' + VER; l.dataset.hshsCss = h; document.head.appendChild(l);

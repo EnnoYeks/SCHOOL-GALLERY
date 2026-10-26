@@ -4,10 +4,10 @@
   if (global.__hshsvideosPageModule) return;
   global.__hshsvideosPageModule = true;
   function isPage() {
-    var f = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
+    var f = (window.HshsPaths ? HshsPaths.key() : '');
     return f === 'videos' || f === 'studio' || (global.HshsRoute && global.HshsRoute.is(PAGE));
   }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function base() { return '/'; }
   function loadOnce(src, id) {
     return new Promise(function (res) {
       if (id && document.getElementById(id)) return res();
@@ -18,7 +18,7 @@
   }
   function loadCss(href) {
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=261026media1';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=261002route1';
     l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
   }
   function mount() {

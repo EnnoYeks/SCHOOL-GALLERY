@@ -12,9 +12,9 @@
     try {
       if (g.HshsRegistry && g.HshsRegistry.activeRoute) return g.HshsRegistry.activeRoute().name === PAGE;
     } catch (e) {}
-    return (location.pathname.split('/').pop() || '').toLowerCase() === 'search.html';
+    return (window.HshsPaths ? HshsPaths.key() : '') === 'search';
   }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function base() { return '/'; }
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
       return { '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' }[c];
@@ -49,7 +49,7 @@
   }
   function profileHref(u) {
     if (g.HshsPeople && g.HshsPeople.profileUrl) return g.HshsPeople.profileUrl(u);
-    return 'profile.html?uid=' + encodeURIComponent(u.uid || u.id || '');
+    return '/profile/?uid=' + encodeURIComponent(u.uid || u.id || '');
   }
   function realPeople(rows) {
     var api = g.HshsPeople;
@@ -79,7 +79,7 @@
       (on ? 'Following' : 'Follow') + '</button></article>';
   }
   function mediaCell(p) {
-    var href = isVideo(p) ? 'videos.html' : 'photos.html';
+    var href = window.HshsPaths ? HshsPaths.href(isVideo(p) ? 'videos' : 'photos') : (isVideo(p) ? '/videos/' : '/photos/');
     return '<a class="hs-cell" href="' + href + '" title="' + esc(p.title || 'Moment') + '">' +
       (mediaOf(p) ? '<img src="' + esc(mediaOf(p)) + '" alt="" loading="lazy">' : '') +
       (isVideo(p) ? '<i class="fas fa-play mark"></i>' : '') +
@@ -251,7 +251,7 @@
         e.stopPropagation();
         var uid = fol.getAttribute('data-hs-follow');
         if (!g.HshsPeople || !g.HshsPeople.me || !g.HshsPeople.me()) {
-          location.href = 'login.html?next=' + encodeURIComponent(location.pathname + location.search);
+          location.href = (window.HshsPaths ? HshsPaths.href('login') : '/login/') + '?next=' + encodeURIComponent(location.pathname + location.search);
           return;
         }
         fol.disabled = true;

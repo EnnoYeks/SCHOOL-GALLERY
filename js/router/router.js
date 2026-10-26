@@ -64,6 +64,10 @@
 
   function currentFile() {
     try {
+      if (global.HshsPaths) {
+        var key = HshsPaths.key();
+        return key === 'home' ? 'index.html' : key + '.html';
+      }
       var p = currentPath().replace(/\/+$/, '') || '/';
       return p === '/' ? 'index.html' : p.split('/').pop();
     } catch (e) {

@@ -17,10 +17,10 @@
       'u-brian': 'House D'
     },
     events: [
-      { date: '2026-09-04', title: 'Friday Assembly', type: 'Assembly', icon: 'fa-bullhorn', link: 'index/contact.html' },
-      { date: '2026-09-05', title: 'Inter-house Training', type: 'Sports', icon: 'fa-running', link: 'index/videos.html' },
-      { date: '2026-09-08', title: 'STEM Club Meetup', type: 'STEM', icon: 'fa-flask', link: 'index/gallery.html' },
-      { date: '2026-09-10', title: 'Class Photo Day', type: 'Campus', icon: 'fa-camera', link: 'index/photos.html' }
+      { date: '2026-09-04', title: 'Friday Assembly', type: 'Assembly', icon: 'fa-bullhorn', link: '/contact/' },
+      { date: '2026-09-05', title: 'Inter-house Training', type: 'Sports', icon: 'fa-running', link: '/videos/' },
+      { date: '2026-09-08', title: 'STEM Club Meetup', type: 'STEM', icon: 'fa-flask', link: '/gallery/' },
+      { date: '2026-09-10', title: 'Class Photo Day', type: 'Campus', icon: 'fa-camera', link: '/photos/' }
     ],
     nominations: []
   };
@@ -60,7 +60,7 @@
   function fmtDate(v) { try { var d = new Date(v + 'T12:00:00'); return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); } catch (e) { return esc(v); } }
   function currentUser() { try { return window.HshsStore && HshsStore.currentUser ? HshsStore.currentUser() : null; } catch (e) { return null; } }
   function users() { try { return window.HshsStore && HshsStore.listUsers ? HshsStore.listUsers() : []; } catch (e) { return []; } }
-  function profileLink(id) { return 'index/profile.html?user=' + encodeURIComponent(id); }
+  function profileLink(id) { return '/profile/?user=' + encodeURIComponent(id); }
   function schoolLink(path) { return path || '#'; }
 
   function schoolHubMarkup() {

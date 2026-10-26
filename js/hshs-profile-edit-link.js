@@ -6,10 +6,10 @@
     var btn = e.target.closest('[data-pf="edit"], .pf-btn[data-pf="edit"]');
     if (!btn) return;
     var file = (location.pathname.split('/').pop() || '').toLowerCase();
-    if (file !== 'profile.html' && !document.getElementById('pfTools')) return;
+    if ((window.HshsPaths ? HshsPaths.key() !== 'profile' : file !== 'profile.html') && !document.getElementById('pfTools')) return;
     e.preventDefault();
     e.stopPropagation();
-    var dest = location.pathname.indexOf('/index/') !== -1 ? 'edit-profile.html' : 'index/edit-profile.html';
+    var dest = '/edit-profile/';
     if (typeof window.__hshsNavigate === 'function') window.__hshsNavigate(dest);
     else location.href = dest;
   }, true);

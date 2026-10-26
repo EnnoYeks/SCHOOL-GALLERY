@@ -8,9 +8,9 @@
     try {
       if (g.HshsRegistry && g.HshsRegistry.activeRoute) return g.HshsRegistry.activeRoute().name === PAGE;
     } catch (e) {}
-    return (location.pathname.split('/').pop() || '').toLowerCase() === 'chat.html';
+    return (window.HshsPaths ? HshsPaths.key() : '') === 'chat';
   }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function base() { return '/'; }
 
   function loadCss() {
     if (!document.querySelector('link[data-hshs-chat-css]')) {
@@ -56,7 +56,7 @@
       }
       var list = document.getElementById('hshsChatList');
       if (list && !list.children.length) {
-        list.innerHTML = '<div class="msg-empty"><i class="fas fa-comment-dots"></i><h3>No conversations yet</h3><p>Sign in to message a classmate.</p><a class="msg-empty-cta" href="' + base() + 'index/login.html">Sign in</a></div>';
+        list.innerHTML = '<div class="msg-empty"><i class="fas fa-comment-dots"></i><h3>No conversations yet</h3><p>Sign in to message a classmate.</p><a class="msg-empty-cta" href="' + base() + '/login/">Sign in</a></div>';
       }
       if (++tries < 20) setTimeout(arm, 80);
     }

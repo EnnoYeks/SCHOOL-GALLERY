@@ -8,12 +8,11 @@
   }
 
   function inSub() {
-    return /\/index\//i.test(location.pathname);
+    return false;
   }
 
   function href(file) {
-    if (file === 'index.html') return inSub() ? '../index.html' : 'index.html';
-    return inSub() ? file : 'index/' + file;
+    return window.HshsPaths ? HshsPaths.href(file) : (file === 'index.html' ? '/' : '/' + String(file).replace(/\.html$/, '') + '/');
   }
 
   function applyDevice() {
@@ -57,7 +56,7 @@
   }
 
   function openMobileMore() {
-    var tab = document.querySelector('#openMoreSheet, [data-tab="more"], .tab-more, a[href$="more.html"]');
+    var tab = document.querySelector('#openMoreSheet, [data-tab="more"], .tab-more, a[href$="more.html"], a[href$="/more/"], a[href$="/more"]');
     if (tab) {
       tab.click();
       return;

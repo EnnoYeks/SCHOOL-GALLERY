@@ -4,8 +4,8 @@
   global.__hshsGalleryModernModule = true;
   var PAGE = 'gallery', PAGE_SIZE = 9;
   var state = { type:'all', category:'all', query:'', all:[], items:[], offset:0, loading:false, done:false, observer:null, view:-1 };
-  function isPage(){ var p=(location.pathname.split('/').pop()||'').toLowerCase().replace(/\.html$/,''); return p==='gallery' || (global.HshsRoute && global.HshsRoute.is(PAGE)); }
-  function base(){ return location.pathname.indexOf('/index/')!==-1?'../':''; }
+  function isPage(){ var p=(window.HshsPaths?HshsPaths.key():''); return p==='gallery' || (global.HshsRoute && global.HshsRoute.is(PAGE)); }
+  function base(){ return '/'; }
   function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c];}); }
   function count(v){ v=Number(v)||0; return v>999?(v/1000).toFixed(v>9999?0:1).replace('.0','')+'k':String(v); }
   function date(v){ if(global.Utils&&Utils.formatDate) return Utils.formatDate(v); var d=v&&v.toDate?v.toDate():new Date(v); return isNaN(d)?'Recently':d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }

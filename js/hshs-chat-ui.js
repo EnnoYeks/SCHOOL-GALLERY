@@ -100,7 +100,7 @@
     if (MODE !== 'live' && !signedIn()) {
       box.innerHTML = '<div class="msg-empty"><i class="fas fa-lock"></i>' +
         '<h3>Sign in to message</h3><p>Log in with your HSHS account to see and start conversations.</p>' +
-        '<a class="msg-empty-cta" href="/index/login.html">Sign in</a></div>';
+        '<a class="msg-empty-cta" href="/login/">Sign in</a></div>';
       return;
     }
     if (MODE === 'connecting' && !INBOX.length && !q) {
@@ -285,7 +285,7 @@
     var av = $('hshsThreadAvatar');
     if (av) av.innerHTML = avatarHtml(item);
     var profileLink = $('hshsThreadProfileLink');
-    if (profileLink) profileLink.href = item.group ? '#' : ('profile.html?uid=' + encodeURIComponent(item.peerId || ''));
+    if (profileLink) profileLink.href = item.group ? '#' : ((window.HshsPaths ? HshsPaths.href('profile') : '/profile/') + '?uid=' + encodeURIComponent(item.peerId || ''));
     var input = $('hshsThreadInput');
     if (input) { input.placeholder = 'Type a message...'; input.value = ''; }
     var btn = $('hshsSendBtn');
@@ -434,7 +434,7 @@
 
   var composeTimer = 0;
   function openCompose() {
-    if (!signedIn()) { location.href = 'login.html'; return; }
+    if (!signedIn()) { location.href = window.HshsPaths ? HshsPaths.href('login') : '/login/'; return; }
     var sheet = $('hshsComposeSheet');
     if (!sheet) return;
     sheet.hidden = false;

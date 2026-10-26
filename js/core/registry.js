@@ -29,12 +29,12 @@
   };
   function currentFile() {
     try {
+      if (global.HshsPaths) {
+        var key = HshsPaths.key();
+        return key === 'home' ? '/' : '/' + key + '/';
+      }
       var p = (location.pathname || '/').replace(/\/+$/, '') || '/';
       if (p === '' || p === '/') return '/';
-      if (p.indexOf('/index/') !== -1) {
-        var last = p.split('/').pop();
-        return '/' + last.replace('.html', '') + '/';
-      }
       return p.endsWith('/') ? p : p + '/';
     } catch (e) { return '/'; }
   }

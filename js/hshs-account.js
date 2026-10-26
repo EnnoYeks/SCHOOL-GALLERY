@@ -13,13 +13,22 @@
     ];
 
     function fileName() {
+        if (window.HshsPaths) {
+            var key = HshsPaths.key();
+            return key === 'home' ? 'index.html' : key + '.html';
+        }
         return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     }
     function inSub() {
-        return /\/index\//i.test(location.pathname);
+        return false;
     }
     function sub(name) {
-        return inSub() ? name : 'index/' + name;
+        var hash = '';
+        var raw = String(name || '');
+        var hi = raw.indexOf('#');
+        if (hi !== -1) { hash = raw.slice(hi); raw = raw.slice(0, hi); }
+        var path = window.HshsPaths ? HshsPaths.href(raw) : ('/' + raw.replace(/\.html$/, '') + '/');
+        return path + hash;
     }
     function store() { return window.HshsStore; }
     function escapeHtml(s) {
@@ -251,12 +260,10 @@
         function wrapped(url, fromHistory) {
             try {
                 var next = new URL(url, location.href);
-                var file = (next.pathname.split('/').pop() || '').toLowerCase();
+                var file = window.HshsPaths ? HshsPaths.key(next.pathname) : (next.pathname.split('/').pop() || '').toLowerCase();
                 var extra = ['more.html', 'saved.html', 'notifications.html'];
-                if (extra.indexOf(file) !== -1 && next.pathname.indexOf('/index/') === -1) {
-                    next.pathname = (location.pathname.indexOf('/index/') !== -1)
-                        ? location.pathname.replace(/[^/]+$/, file)
-                        : '/index/' + file;
+                if (extra.indexOf(file) !== -1) {
+                    next.pathname = window.HshsPaths ? new URL(HshsPaths.href(file), location.origin).pathname : ('/' + file.replace(/\.html$/, '') + '/');
                     url = next.href;
                 }
             } catch (e) {}

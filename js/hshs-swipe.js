@@ -15,7 +15,7 @@
             .find(function (s) { return s.indexOf('navigation.js') !== -1 && s.indexOf('mobile-navigation') === -1; });
         var href = guess
             ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-swipe.css')
-            : (location.pathname.indexOf('/index/') !== -1 ? '../css/hshs-swipe.css' : 'css/hshs-swipe.css');
+            : ('/css/hshs-swipe.css');
         var link = document.createElement('link');
         link.id = 'hshs-swipe-css';
         link.rel = 'stylesheet';
@@ -24,19 +24,17 @@
     }
     function width() { return (window.innerWidth || 360); }
     function fileOf() {
-        var f = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-        if (!f || f === 'index.html') return 'index.html';
-        if (f === 'clips.html' || f === 'shorts.html') return 'buzz.html';
-        return f;
+        var key = window.HshsPaths ? HshsPaths.key() : (location.pathname.split('/').filter(Boolean).pop() || 'home');
+        if (!key || key === 'home' || key === 'index') return 'index.html';
+        if (key === 'buzz') return 'buzz.html';
+        return key + '.html';
     }
     function indexOf() {
         var i = ORDER.indexOf(fileOf());
         return i < 0 ? 0 : i;
     }
     function hrefFor(file) {
-        var inSub = location.pathname.indexOf('/index/') !== -1 || fileOf() !== 'index.html';
-        if (file === 'index.html') return inSub ? '../index.html' : 'index.html';
-        return inSub ? file : 'index/' + file;
+        return window.HshsPaths ? HshsPaths.href(file) : (file === 'index.html' ? '/' : '/' + String(file).replace(/\.html$/, '') + '/');
     }
     function neighbor(d) {
         var i = indexOf() + d;

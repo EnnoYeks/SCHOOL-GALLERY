@@ -29,7 +29,7 @@
       .find(function (s) { return s.indexOf('navigation.js') !== -1 && s.indexOf('mobile-navigation') === -1; });
     var href = guess
       ? guess.replace(/js\/navigation\.js.*$/, 'css/gallery-transitions.css')
-      : (location.pathname.indexOf('/index/') !== -1 ? '../css/gallery-transitions.css' : 'css/gallery-transitions.css');
+      : ('/css/gallery-transitions.css');
     var link = document.createElement('link');
     link.id = 'hshs-motion-css';
     link.rel = 'stylesheet';

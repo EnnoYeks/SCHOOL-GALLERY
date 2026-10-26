@@ -1,5 +1,49 @@
 (function (global) {
   'use strict';
+
+  // Clean app paths. Always /page/ — never index/*.html or page/index.html.
+  var HSHS_PAGES = {
+    home: 1, gallery: 1, photos: 1, videos: 1, trending: 1, spotlight: 1,
+    polls: 1, memories: 1, more: 1, search: 1, about: 1, contact: 1,
+    profile: 1, settings: 1, notifications: 1, saved: 1, buzz: 1, chat: 1,
+    admin: 1, login: 1, "edit-profile": 1
+  };
+  function hshsKey(path) {
+    var p = String(path == null ? (location.pathname || "/") : path);
+    p = p.split("?")[0].split("#")[0];
+    p = p.replace(/\\/g, "/");
+    p = p.replace(/\/index\.html$/i, "/");
+    p = p.replace(/\.html$/i, "");
+    p = p.replace(/\/index\//gi, "/");
+    p = p.replace(/^\.\//, "").replace(/^\.\.\//, "");
+    var parts = p.split("/").filter(Boolean);
+    var seg = (parts.pop() || "home").toLowerCase();
+    if (seg === "index") seg = "home";
+    if (seg === "contat") seg = "contact";
+    if (seg === "clips" || seg === "shorts" || seg === "vibe") seg = "buzz";
+    if (seg === "studio") seg = "videos";
+    return seg;
+  }
+  function hshsHref(name) {
+    var raw = String(name || "");
+    var hash = "";
+    var hi = raw.indexOf("#");
+    if (hi !== -1) { hash = raw.slice(hi); raw = raw.slice(0, hi); }
+    var q = "";
+    var qi = raw.indexOf("?");
+    if (qi !== -1) { q = raw.slice(qi); raw = raw.slice(0, qi); }
+    raw = raw.replace(/^\.\//, "").replace(/^(\.\.\/)+/, "").replace(/^\/+/, "");
+    if (!raw || raw === "index" || raw === "index.html") return "/" + q + hash;
+    var key = hshsKey(raw);
+    if (!key || key === "home") return "/" + q + hash;
+    return "/" + key + "/" + q + hash;
+  }
+  global.HshsPaths = { key: hshsKey, href: hshsHref, pages: HSHS_PAGES };
+  try {
+    var now = hshsKey(location.pathname);
+    if (now && now !== "home") document.documentElement.setAttribute("data-hshs-page", now);
+  } catch (e) {}
+
   if (global.HshsPaint) return;
 
   function paintNow() {

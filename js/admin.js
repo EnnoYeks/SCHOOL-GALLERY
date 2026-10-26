@@ -23,7 +23,7 @@
       const OPEN_ACCESS = true;
       const ready = await this.waitForAuth();
       if (!ready && !OPEN_ACCESS) {
-        this.showLock('Sign in required', 'Please sign in to access the control room.', 'index/login.html');
+        this.showLock('Sign in required', 'Please sign in to access the control room.', '/login/');
         return;
       }
       this.isAdmin = false;

@@ -12,14 +12,20 @@
   var activatedKey = '';
 
   function currentFile() {
-    try { return (location.pathname.split('/').pop() || 'index.html').toLowerCase(); }
-    catch (e) { return 'index.html'; }
+    try {
+      if (global.HshsPaths) {
+        var key = HshsPaths.key();
+        return key === 'home' ? 'index.html' : key + '.html';
+      }
+      return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    } catch (e) { return 'index.html'; }
   }
 
   function fileToPage(file) {
+    if (!file && global.HshsPaths) return HshsPaths.key();
     file = (file || currentFile()).toLowerCase();
-    if (!file || file === 'index.html') return 'home';
-    if (file === 'clips.html' || file === 'shorts.html') return 'buzz';
+    if (!file || file === 'index.html' || file === 'index') return 'home';
+    if (file === 'clips.html' || file === 'shorts.html' || file === 'vibe.html') return 'buzz';
     if (file === 'contact.html' || file === 'contat.html') return 'contact';
     return file.replace(/\.html$/, '');
   }

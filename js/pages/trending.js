@@ -3,8 +3,8 @@
   var PAGE = 'trending';
   if (global['__hshs' + PAGE + 'PageModule']) return;
   global['__hshs' + PAGE + 'PageModule'] = true;
-  function isPage() { return global.HshsRoute ? global.HshsRoute.is(PAGE) : ((location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '') === PAGE); }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function isPage() { return global.HshsRoute ? global.HshsRoute.is(PAGE) : ((window.HshsPaths ? HshsPaths.key() : '') === PAGE); }
+  function base() { return '/'; }
   function loadOnce(src, id) {
     return new Promise(function (resolve) {
       if (id && document.getElementById(id)) return resolve();

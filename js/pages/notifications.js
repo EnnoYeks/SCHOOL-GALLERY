@@ -5,21 +5,21 @@
   var PAGE='notifications';
   function isPage(){
     try{ if(g.HshsRegistry&&g.HshsRegistry.activeRoute) return g.HshsRegistry.activeRoute().name===PAGE; }catch(e){}
-    return (location.pathname.split('/').pop()||'').toLowerCase()==='notifications.html';
+    return (window.HshsPaths?HshsPaths.key():'')==='notifications';
   }
-  function base(){ return location.pathname.indexOf('/index/')!==-1?'../':''; }
+  function base(){ return '/'; }
   function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);}); }
   function rel(ts){ var d=Date.now()-Number(ts||0); if(d<60000)return'Just now'; if(d<3600000)return Math.floor(d/60000)+'m'; if(d<86400000)return Math.floor(d/3600000)+'h'; return Math.floor(d/86400000)+'d'; }
   function icon(type){ return ({friend_request:'fa-user-plus',friend_accept:'fa-user-check',message:'fa-comment-dots',like:'fa-heart',mention:'fa-at',follow:'fa-user-plus',system:'fa-bell',featured:'fa-star',poll:'fa-square-poll-vertical'}[type]||'fa-bell'); }
   function seed(){
     var now=Date.now();
     return [
-      {id:'hm1',type:'message',title:'Mercy',message:'See you at assembly tomorrow.',createdAt:now-480000,read:false,href:'chat.html'},
-      {id:'hm2',type:'message',title:'Class 4A',message:'Ivan: Maths homework is in the group.',createdAt:now-1800000,read:false,href:'chat.html'},
-      {id:'hn1',type:'system',title:'Sports Day photos',message:'New album from the main field is in Gallery.',createdAt:now-3600000,read:false,href:'gallery.html'},
-      {id:'hn2',type:'featured',title:'Spotlight pick',message:'A campus moment was featured this week.',createdAt:now-7200000,read:false,href:'spotlight.html'},
-      {id:'hn3',type:'mention',title:'Class 4A',message:'Ivan mentioned the maths homework in the group.',createdAt:now-900000,read:false,href:'chat.html'},
-      {id:'hn4',type:'poll',title:'House spirit poll',message:'Vote for this term\'s leading house.',createdAt:now-86400000,read:true,href:'polls.html'}
+      {id:'hm1',type:'message',title:'Mercy',message:'See you at assembly tomorrow.',createdAt:now-480000,read:false,href:'/chat/'},
+      {id:'hm2',type:'message',title:'Class 4A',message:'Ivan: Maths homework is in the group.',createdAt:now-1800000,read:false,href:'/chat/'},
+      {id:'hn1',type:'system',title:'Sports Day photos',message:'New album from the main field is in Gallery.',createdAt:now-3600000,read:false,href:'/gallery/'},
+      {id:'hn2',type:'featured',title:'Spotlight pick',message:'A campus moment was featured this week.',createdAt:now-7200000,read:false,href:'/spotlight/'},
+      {id:'hn3',type:'mention',title:'Class 4A',message:'Ivan mentioned the maths homework in the group.',createdAt:now-900000,read:false,href:'/chat/'},
+      {id:'hn4',type:'poll',title:'House spirit poll',message:'Vote for this term\'s leading house.',createdAt:now-86400000,read:true,href:'/polls/'}
     ];
   }
   function rows(){
@@ -40,10 +40,10 @@
   }
   function dest(n){
     if(n.href) return n.href;
-    if(isMsg(n)||String(n.type||'')==='mention') return 'chat.html';
-    if(n.type==='poll') return 'polls.html';
-    if(n.type==='featured') return 'spotlight.html';
-    return 'notifications.html';
+    if(isMsg(n)||String(n.type||'')==='mention') return window.HshsPaths?HshsPaths.href('chat'):'/chat/';
+    if(n.type==='poll') return window.HshsPaths?HshsPaths.href('polls'):'/polls/';
+    if(n.type==='featured') return window.HshsPaths?HshsPaths.href('spotlight'):'/spotlight/';
+    return window.HshsPaths?HshsPaths.href('notifications'):'/notifications/';
   }
   function render(tab){
     var list=document.getElementById('hshsNotifList');
@@ -53,14 +53,14 @@
     var badge=document.getElementById('hshsMsgTabCount');
     if(badge){ badge.textContent=String(unreadMsgs); badge.hidden=!unreadMsgs; }
     if(!all.length){
-      var extra=tab==='messages'?'<a class="hshs-open-chats" href="'+base()+'index/chat.html">Open chats</a>':'';
+      var extra=tab==='messages'?'<a class="hshs-open-chats" href="'+base()+'/chat/">Open chats</a>':'';
       list.innerHTML='<div class="hshs-empty"><i class="fas fa-bell-slash"></i><h4>Nothing here yet</h4>'+extra+'</div>';
       return;
     }
     list.innerHTML=all.map(function(n){
       return '<button type="button" class="hshs-notif-card'+(n.read?'':' unread')+'" data-go="'+esc(dest(n))+'">'+ '<span class="hshs-notif-ico"><i class="fas '+esc(icon(n.type))+'"></i></span>'+ '<span class="hshs-notif-copy"><strong>'+esc(n.title||'Notification')+'</strong><p>'+esc(n.message||'')+'</p><time>'+esc(rel(n.createdAt||Date.now()))+(isMsg(n)?' · Chat':'')+'</time></span>'+ (isMsg(n)?'<span class="hshs-notif-go">Open</span>':'')+ '</button>';
     }).join('');
-    if(tab==='messages') list.insertAdjacentHTML('beforeend','<a class="hshs-open-chats" href="'+base()+'index/chat.html">See all chats</a>');
+    if(tab==='messages') list.insertAdjacentHTML('beforeend','<a class="hshs-open-chats" href="'+base()+'/chat/">See all chats</a>');
   }
   function mount(){
     if(!isPage()||!g.HshsRender||!g.HshsTemplates||!g.HshsTemplates.notifications) return;
@@ -83,7 +83,7 @@
       if(!isPage()) return;
       var card=e.target.closest('[data-go]');
       if(!card) return;
-      location.href=base()+'index/'+card.getAttribute('data-go').replace(/^.*\//,'');
+      location.href=window.HshsPaths?HshsPaths.href(card.getAttribute('data-go')):('/'+String(card.getAttribute('data-go')||'').replace(/^.*\//,'').replace(/\.html$/,'')+'/');
     });
     render(tab);
   }

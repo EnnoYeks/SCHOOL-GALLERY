@@ -64,7 +64,7 @@
 
         var script = document.createElement('script');
         script.id = 'hshs-page-swipe-script';
-        script.src = getAssetPath('../js/page-swipe.js');
+        script.src = '/js/page-swipe.js';
         script.onload = function () {
             document.documentElement.classList.add('hshs-page-swipe-ready');
         };

@@ -64,6 +64,6 @@
     { "source": "/contat", "destination": "/contact/" },
     { "source": "/contat.html", "destination": "/contact/" }
   ],
-  "cleanUrls": false,
+  "cleanUrls": true,
   "trailingSlash": true
 }

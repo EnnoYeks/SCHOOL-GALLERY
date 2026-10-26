@@ -9,10 +9,10 @@
   function readFollows(){ try { return new Set(JSON.parse(localStorage.getItem('hshsVibeFollows')||'[]')); } catch(e){ return new Set(); } }
   function writeFollows(){ try { localStorage.setItem('hshsVibeFollows', JSON.stringify(Array.from(state.follows))); } catch(e){} }
   function isPage(){
-    var f=(location.pathname.split('/').pop()||'').toLowerCase().replace(/\.html$/,'');
+    var f=(window.HshsPaths?HshsPaths.key():'');
     return f==='buzz'||f==='vibe'||f==='clips'||f==='shorts'||(global.HshsRoute&&global.HshsRoute.is(PAGE));
   }
-  function base(){ return location.pathname.indexOf('/index/')!==-1 ? '../' : ''; }
+  function base(){ return '/'; }
   function esc(value){ return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c];}); }
   function mediaUrl(item){ return item.video_url||item.videoUrl||item.url||item.media_url||item.mediaUrl||item.src||''; }
   function posterUrl(item){ return item.thumbnail||item.thumbnail_url||item.thumbnailUrl||item.cover||item.image_url||item.imageUrl||''; }

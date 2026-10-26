@@ -1,6 +1,6 @@
 (function(g){'use strict';g.HshsTemplates=g.HshsTemplates||{};g.HshsTemplates.saved=`<main class="hshs-account-page" aria-label="Saved HSHS World content">
   <div class="hshs-page-head">
-    <a class="hshs-back" href="more.html" aria-label="Back"><i class="fas fa-chevron-left"></i></a>
+    <a class="hshs-back" href="/more/" aria-label="Back"><i class="fas fa-chevron-left"></i></a>
     <h1>Saved</h1>
     <span class="hshs-page-head-icon"><i class="fas fa-bookmark"></i></span>
   </div>

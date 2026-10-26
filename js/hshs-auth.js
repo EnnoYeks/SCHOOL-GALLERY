@@ -43,7 +43,7 @@
 
   function redirectAfterAuth() {
     var next = new URLSearchParams(location.search).get('next');
-    var dest = next || (location.pathname.indexOf('/index/') !== -1 ? '../index.html' : 'index.html');
+    var dest = next || '/';
     location.assign(dest);
   }
 

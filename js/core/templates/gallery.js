@@ -10,8 +10,8 @@
           <p>Photos, clips and school moments in one place.</p>
           <div class="gallery-hero-actions">
             <button class="gallery-btn-primary" type="button" id="galleryShareBtn"><i class="fas fa-plus"></i> Share a moment</button>
-            <a class="gallery-btn-ghost" href="videos.html"><i class="fas fa-clapperboard"></i> HSHS Studio</a>
-            <a class="gallery-btn-ghost" href="chat.html"><i class="fas fa-envelope"></i> Messages</a>
+            <a class="gallery-btn-ghost" href="/videos/"><i class="fas fa-clapperboard"></i> HSHS Studio</a>
+            <a class="gallery-btn-ghost" href="/chat/"><i class="fas fa-envelope"></i> Messages</a>
           </div>
         </div>
       </section>

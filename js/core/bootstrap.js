@@ -37,12 +37,13 @@
         }
       }
     } catch (e) {}
-    return location.pathname.indexOf('/index/') !== -1 ? '../js/' : 'js/';
+    return '/js/';
   }
 
   function currentPageName() {
-    var file = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
-    return PAGE_ALIAS[file] || file || 'home';
+    var file = (window.HshsPaths ? HshsPaths.key() : (location.pathname.split('/').filter(Boolean).pop() || '')).toLowerCase().replace(/\.html$/, '');
+    if (!file || file === 'index') file = 'home';
+    return PAGE_ALIAS[file] || PAGE_ALIAS[file + '.html'] || file || 'home';
   }
 
   function loadScript(src, id) {

@@ -3,8 +3,7 @@
     window.__hshsSearchBtn = true;
 
     function searchUrl() {
-        var inIndex = location.pathname.indexOf('/index/') !== -1;
-        return (inIndex ? '' : 'index/') + 'search.html';
+        return '/search/';
     }
 
     function placeButton() {
