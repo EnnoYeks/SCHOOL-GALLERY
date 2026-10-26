@@ -1,36 +1,36 @@
 /**
  * HSHS Router
- *
- * Phase 1 keeps the existing page files as the compatibility layer while
- * exposing clean application routes for the future single-shell SPA.
+ * Updated to prefer clean folder URLs.
  */
 (function (global) {
   'use strict';
   if (global.HshsRouter) return;
 
   var ROUTES = {
-    home: { path: 'index.html', appPath: '/', title: 'HSHS World' },
-    gallery: { path: 'index/gallery.html', appPath: '/gallery', title: 'Gallery' },
-    photos: { path: 'index/photos.html', appPath: '/photos', title: 'Photos' },
-    videos: { path: 'index/videos.html', appPath: '/videos', title: 'HSHS Studio' },
-    vibe: { path: 'index/buzz.html', appPath: '/vibe', title: 'Vibe', alias: true },
-    trending: { path: 'index/trending.html', appPath: '/trending', title: 'Trending' },
-    spotlight: { path: 'index/spotlight.html', appPath: '/spotlight', title: 'Spotlight' },
-    polls: { path: 'index/polls.html', appPath: '/polls', title: 'Polls' },
-    memories: { path: 'index/memories.html', appPath: '/memories', title: 'Memories' },
-    more: { path: 'index/more.html', appPath: '/more', title: 'More' },
-    about: { path: 'index/about.html', appPath: '/about', title: 'About' },
-    contact: { path: 'index/contact.html', appPath: '/contact', title: 'Contact' },
-    contat: { path: 'index/contact.html', appPath: '/contact', title: 'Contact', alias: true },
-    profile: { path: 'index/profile.html', appPath: '/profile', title: 'Profile' },
-    settings: { path: 'index/settings.html', appPath: '/settings', title: 'Settings' },
-    notifications: { path: 'index/notifications.html', appPath: '/notifications', title: 'Notifications' },
-    saved: { path: 'index/saved.html', appPath: '/saved', title: 'Saved' },
-    buzz: { path: 'index/buzz.html', appPath: '/buzz', title: 'Vibe' },
-    clips: { path: 'index/buzz.html', appPath: '/buzz', title: 'Vibe', alias: true },
-    shorts: { path: 'index/buzz.html', appPath: '/buzz', title: 'Vibe', alias: true },
-    chat: { path: 'index/chat.html', appPath: '/chat', title: 'Chat' },
-    admin: { path: 'index/admin.html', appPath: '/admin', title: 'Admin' }
+    home: { path: '/', appPath: '/', title: 'HSHS World' },
+    gallery: { path: '/gallery/', appPath: '/gallery', title: 'Gallery' },
+    photos: { path: '/photos/', appPath: '/photos', title: 'Photos' },
+    videos: { path: '/videos/', appPath: '/videos', title: 'HSHS Studio' },
+    vibe: { path: '/buzz/', appPath: '/vibe', title: 'Vibe', alias: true },
+    trending: { path: '/trending/', appPath: '/trending', title: 'Trending' },
+    spotlight: { path: '/spotlight/', appPath: '/spotlight', title: 'Spotlight' },
+    polls: { path: '/polls/', appPath: '/polls', title: 'Polls' },
+    memories: { path: '/memories/', appPath: '/memories', title: 'Memories' },
+    more: { path: '/more/', appPath: '/more', title: 'More' },
+    about: { path: '/about/', appPath: '/about', title: 'About' },
+    contact: { path: '/contact/', appPath: '/contact', title: 'Contact' },
+    contat: { path: '/contact/', appPath: '/contact', title: 'Contact', alias: true },
+    profile: { path: '/profile/', appPath: '/profile', title: 'Profile' },
+    settings: { path: '/settings/', appPath: '/settings', title: 'Settings' },
+    notifications: { path: '/notifications/', appPath: '/notifications', title: 'Notifications' },
+    saved: { path: '/saved/', appPath: '/saved', title: 'Saved' },
+    buzz: { path: '/buzz/', appPath: '/buzz', title: 'Vibe' },
+    clips: { path: '/buzz/', appPath: '/buzz', title: 'Vibe', alias: true },
+    shorts: { path: '/buzz/', appPath: '/buzz', title: 'Vibe', alias: true },
+    chat: { path: '/chat/', appPath: '/chat', title: 'Chat' },
+    admin: { path: '/admin/', appPath: '/admin', title: 'Admin' },
+    login: { path: '/login/', appPath: '/login', title: 'Sign in' },
+    'edit-profile': { path: '/edit-profile/', appPath: '/edit-profile', title: 'Edit profile' }
   };
 
   function clean(value) {
@@ -54,7 +54,6 @@
     for (var i = 0; i < keys.length; i++) {
       var route = ROUTES[keys[i]];
       if (clean(route.path) === normalized || clean(route.appPath) === normalized) return route;
-      if (clean(route.path).split('/').pop() === normalized.split('/').pop()) return route;
     }
     return null;
   }
@@ -65,7 +64,8 @@
 
   function currentFile() {
     try {
-      return (currentPath().split('/').pop() || 'index.html').toLowerCase();
+      var p = currentPath().replace(/\/+$/, '') || '/';
+      return p === '/' ? 'index.html' : p.split('/').pop();
     } catch (e) {
       return 'index.html';
     }
@@ -73,8 +73,8 @@
 
   function active() {
     var file = currentFile();
-    if (file === 'index.html' || file === '') return ROUTES.home;
-    var hit = resolve(file);
+    if (file === 'index.html' || file === '' || currentPath() === '/') return ROUTES.home;
+    var hit = resolve(currentPath());
     return hit || ROUTES.home;
   }
 
