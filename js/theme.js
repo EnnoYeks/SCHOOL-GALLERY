@@ -42,7 +42,7 @@
         var ver = window.__hshsAssetVer || '260924look1';
         var href = guess
             ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-official.css')
-            : (location.pathname.indexOf('/index/') !== -1 ? '../css/hshs-official.css' : 'css/hshs-official.css');
+            : ('/css/hshs-official.css');
         if (href.indexOf('?') === -1) href += '?v=' + ver;
         return href;
     }

@@ -25,7 +25,7 @@
     if (typeof global.__hshsMarkActive === 'function') {
       try { global.__hshsMarkActive(); return; } catch (e) {}
     }
-    var file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    var file = (window.HshsPaths ? (HshsPaths.key() === 'home' ? 'index.html' : HshsPaths.key() + '.html') : (location.pathname.split('/').pop() || 'index.html')).toLowerCase();
     document.querySelectorAll('.navbar .nav-link, .mobile-tabbar a').forEach(function (a) {
       var href = (a.getAttribute('href') || '').split('/').pop().toLowerCase();
       var on = href === file || ((file === 'index.html' || file === '') && (href === 'index.html' || href === ''));

@@ -171,7 +171,7 @@
     var user = window.hshsAuthUser;
     if (!user || user.isAnonymous) {
       msg('Sign in to save your profile to the school cloud.');
-      setTimeout(function () { location.href = 'login.html?next=' + encodeURIComponent(location.pathname + location.search); }, 900);
+      setTimeout(function () { location.href = (window.HshsPaths ? HshsPaths.href('login') : '/login/') + '?next=' + encodeURIComponent(location.pathname + location.search); }, 900);
       return false;
     }
     setBusy(true); msg('Saving…');
@@ -191,7 +191,7 @@
       }
       persistLocal(data); updateMedia(data); updatePreview(data);
       msg('Profile saved.', true);
-      if (qs('welcome') === '1') setTimeout(function () { location.href = 'profile.html?welcome=1'; }, 700);
+      if (qs('welcome') === '1') setTimeout(function () { location.href = (window.HshsPaths ? HshsPaths.href('profile') : '/profile/') + '?welcome=1'; }, 700);
       return true;
     } catch (err) {
       console.error(err);
@@ -255,9 +255,9 @@
       btn.addEventListener('click', function (e) { e.preventDefault(); saveProfile(); });
     });
     var back = $('epBack');
-    if (back) back.addEventListener('click', function (e) { e.preventDefault(); location.href = 'profile.html'; });
+    if (back) back.addEventListener('click', function (e) { e.preventDefault(); location.href = window.HshsPaths ? HshsPaths.href('profile') : '/profile/'; });
     var cancel = $('epCancel') || document.querySelector('.ep-btn-ghost');
-    if (cancel) cancel.addEventListener('click', function (e) { e.preventDefault(); location.href = 'profile.html'; });
+    if (cancel) cancel.addEventListener('click', function (e) { e.preventDefault(); location.href = window.HshsPaths ? HshsPaths.href('profile') : '/profile/'; });
 
     var avInput = $('epAvatarFile'), avBtn = $('epChangeAvatar');
     if (avBtn && avInput) {
@@ -320,7 +320,7 @@
           else if (window.auth && window.auth.signOut) await window.auth.signOut();
         } catch (e) {}
         try { localStorage.removeItem('userProfile'); localStorage.removeItem('hshsUid'); } catch (e) {}
-        location.href = 'login.html';
+        location.href = window.HshsPaths ? HshsPaths.href('login') : '/login/';
       });
     }
   }

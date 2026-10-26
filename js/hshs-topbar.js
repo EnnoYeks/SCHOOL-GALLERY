@@ -3,10 +3,10 @@
   window.__hshsTopbarFix = true;
 
   function inSub() {
-    return /\/index\//i.test(location.pathname);
+    return false;
   }
   function href(file) {
-    return inSub() ? file : 'index/' + file;
+    return window.HshsPaths ? HshsPaths.href(file) : ('/' + String(file || '').replace(/\.html$/, '') + '/');
   }
   function go(file) {
     var url = href(file);

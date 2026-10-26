@@ -7,7 +7,7 @@
             .find(function (s) { return s.indexOf('navigation.js') !== -1 && s.indexOf('mobile-navigation') === -1; });
         var href = guess
             ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-perf.css')
-            : (location.pathname.indexOf('/index/') !== -1 ? '../css/hshs-perf.css' : 'css/hshs-perf.css');
+            : ('/css/hshs-perf.css');
         var link = document.createElement('link');
         link.id = 'hshs-perf-css';
         link.rel = 'stylesheet';

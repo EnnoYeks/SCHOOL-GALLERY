@@ -49,7 +49,7 @@
   function like(postId) {
     var s = state(), who = me(); var row = s.likes[postId] || { by: [] }; var i = row.by.indexOf(who.id);
     if (i === -1) row.by.push(who.id); else row.by.splice(i, 1); s.likes[postId] = row; save(s);
-    if (i === -1) alertPush(who.id, { id: 'a' + Date.now(), type: 'like', text: 'You liked a campus post', time: Date.now(), href: 'index/gallery.html' });
+    if (i === -1) alertPush(who.id, { id: 'a' + Date.now(), type: 'like', text: 'You liked a campus post', time: Date.now(), href: '/gallery/' });
     return row.by.length;
   }
   function savePost(postId) {
@@ -61,7 +61,7 @@
     text = String(text || '').trim().slice(0, 280); if (!text) return;
     var s = state(), who = me(); s.comments[postId] = s.comments[postId] || [];
     s.comments[postId].push({ id: 'c' + Date.now(), name: who.name, text: text, time: Date.now() }); save(s);
-    alertPush(who.id, { id: 'a' + Date.now(), type: 'comment', text: 'New comment on a campus post', time: Date.now(), href: 'index/notifications.html' });
+    alertPush(who.id, { id: 'a' + Date.now(), type: 'comment', text: 'New comment on a campus post', time: Date.now(), href: '/notifications/' });
   }
   function hide(postId) { var s = state(), who = me(); s.hidden[who.id] = s.hidden[who.id] || []; if (s.hidden[who.id].indexOf(postId) === -1) s.hidden[who.id].push(postId); save(s); toast('Hidden from your feed'); }
   function report(postId, reason) { var s = state(); s.reports.push({ postId: postId, reason: reason || 'Not for school', time: Date.now() }); save(s); toast('Report sent to school admins'); }
@@ -135,7 +135,7 @@
   function paintAlerts() {
     var list = document.getElementById('hshsNotifList'); if (!list) return;
     var rows = (state().alerts[me().id] || []);
-    list.innerHTML = rows.length ? rows.map(function (n) { return '<a class="campus-alert" href="' + esc(n.href || 'notifications.html') + '"><i class="fas fa-bell"></i><span><strong>' + esc(n.type) + '</strong><br>' + esc(n.text) + '</span></a>'; }).join('') : '<p class="campus-note">No alerts yet. Likes, comments, and school posts show up here.</p>';
+    list.innerHTML = rows.length ? rows.map(function (n) { return '<a class="campus-alert" href="' + esc(window.HshsPaths ? HshsPaths.href(n.href || 'notifications') : (n.href || '/notifications/')) + '"><i class="fas fa-bell"></i><span><strong>' + esc(n.type) + '</strong><br>' + esc(n.text) + '</span></a>'; }).join('') : '<p class="campus-note">No alerts yet. Likes, comments, and school posts show up here.</p>';
   }
   function paintSearch() {
     var input = document.getElementById('hsSearchInput') || document.getElementById('searchInput'); if (!input || input.dataset.campus) return;
@@ -162,7 +162,7 @@
   }
   function paint() { paintHome(); paintAlerts(); paintSearch(); }
   function boot() {
-    if (!document.getElementById('campusCss')) { var link = document.createElement('link'); link.id = 'campusCss'; link.rel = 'stylesheet'; link.href = (location.pathname.indexOf('/index/') !== -1 ? '../' : '') + 'css/hshs-campus.css?v=261007campus1'; document.head.appendChild(link); }
+    if (!document.getElementById('campusCss')) { var link = document.createElement('link'); link.id = 'campusCss'; link.rel = 'stylesheet'; link.href = ('/') + 'css/hshs-campus.css?v=261007campus1'; document.head.appendChild(link); }
     bind(); paint(); setTimeout(paint, 700); setTimeout(paint, 1600);
   }
   g.HshsCampus = { follow: follow, like: like, comment: comment, save: savePost, report: report, hide: hide, joinGroup: joinGroup, addPost: addPost };

@@ -4,10 +4,10 @@
   if (global.__hshsvideosPageModule) return;
   global.__hshsvideosPageModule = true;
   function isPage() {
-    var f = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
+    var f = (window.HshsPaths ? HshsPaths.key() : '');
     return f === 'videos' || f === 'studio' || (global.HshsRoute && global.HshsRoute.is(PAGE));
   }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function base() { return '/'; }
   function loadOnce(src, id) {
     return new Promise(function (res) {
       if (id && document.getElementById(id)) return res();

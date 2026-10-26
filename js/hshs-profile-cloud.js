@@ -9,7 +9,7 @@
 
   function isProfilePage() {
     var file = (location.pathname.split('/').pop() || '').toLowerCase();
-    return file === 'profile.html' || document.documentElement.getAttribute('data-hshs-page') === 'profile';
+    return (window.HshsPaths && HshsPaths.key() === 'profile') || file === 'profile.html' || document.documentElement.getAttribute('data-hshs-page') === 'profile';
   }
 
   function cloudProfile() {
@@ -191,7 +191,7 @@
     if (!user || user.isAnonymous) {
       toast('Sign in to save your photo');
       setTimeout(function () {
-        location.href = (location.pathname.indexOf('/index/') !== -1 ? '' : 'index/') + 'login.html';
+        location.href = window.HshsPaths ? HshsPaths.href('login.html') : '/login/';
       }, 800);
       return null;
     }
@@ -257,7 +257,7 @@
       ensurePhotoControls(false);
       var tools2 = document.getElementById('pfTools');
       if (tools2) {
-        tools2.innerHTML = '<a class="pf-btn" href="/index/login.html" style="text-decoration:none;display:inline-flex;align-items:center">Sign in</a>';
+        tools2.innerHTML = '<a class="pf-btn" href="/login/" style="text-decoration:none;display:inline-flex;align-items:center">Sign in</a>';
       }
     }
   }

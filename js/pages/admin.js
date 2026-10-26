@@ -3,8 +3,8 @@
   var PAGE = 'admin';
   if (global['__hshs' + PAGE + 'PageModule']) return;
   global['__hshs' + PAGE + 'PageModule'] = true;
-  function isPage() { var f=(location.pathname.split('/').pop()||'').toLowerCase().replace(/\.html$/,''); return f===PAGE || (global.HshsRoute && global.HshsRoute.is(PAGE)); }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function isPage() { var f=(window.HshsPaths?HshsPaths.key():''); return f===PAGE || (global.HshsRoute && global.HshsRoute.is(PAGE)); }
+  function base() { return '/'; }
   function loadOnce(src, id) {
     return new Promise(function (res) {
       if (id && document.getElementById(id)) return res();

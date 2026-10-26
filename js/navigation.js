@@ -218,8 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
     var f = fileOf(url) === 'edit-profile' ? 'edit-profile' : 'login';
     var q = '';
     try { q = new URL(url, location.href).search || ''; } catch (e) {}
-    var inIndex = location.pathname.indexOf('/index/') !== -1;
-    return (inIndex ? (f + '.html') : ('/index/' + f + '.html')) + q;
+    return (window.HshsPaths ? HshsPaths.href(f) : ('/' + f + '/')) + q;
   }
   function go(url) {
     location.assign(dest(url || 'login.html'));

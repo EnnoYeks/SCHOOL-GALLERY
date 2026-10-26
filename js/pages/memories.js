@@ -1,6 +1,6 @@
 (function(global){'use strict';var PAGE='memories';if(global.__hshsMemoriesPageModule)return;global.__hshsMemoriesPageModule=true;
-function isPage(){var f=(location.pathname.split('/').pop()||'').toLowerCase().replace(/\.html$/,'');return f===PAGE||(global.HshsRoute&&global.HshsRoute.is(PAGE));}
-function base(){return location.pathname.indexOf('/index/')!==-1?'../':''}
+function isPage(){var f=(window.HshsPaths?HshsPaths.key():'');return f===PAGE||(global.HshsRoute&&global.HshsRoute.is(PAGE));}
+function base(){return '/'}
 function loadCss(){if(document.querySelector('link[data-hshs-css="css/memories.css"]'))return;var l=document.createElement('link');l.rel='stylesheet';l.href=base()+'css/memories.css?v=261002fast1';l.dataset.hshsCss='css/memories.css';document.head.appendChild(l)}
 function esc(v){return String(v==null?'':v).replace(/[&<>\"']/g,function(c){return({'&':'&','<':'<','>':'>','\"':'"',"'":'&#39;'})[c]})}
 function dateOf(p){var v=p&&(p.createdAt||p.timestamp||p.date);if(v&&typeof v.toDate==='function')v=v.toDate();var d=new Date(v);return isNaN(d)?null:d}

@@ -22,7 +22,7 @@ class VideosPage {
         document.getElementById("uploadVideoBtn")?.addEventListener("click", () => {
             const target = document.querySelector('[data-route="admin"]') || document.querySelector('a[href*="admin"]');
             if (target) target.click();
-            else window.location.href = "admin.html";
+            else window.location.href = window.HshsPaths ? HshsPaths.href("admin") : "/admin/";
         });
         await this.load(false);
     }

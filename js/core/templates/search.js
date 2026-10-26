@@ -4,7 +4,7 @@
   g.HshsTemplates.search = `
 <main class="hs-search hshs-account-page" id="hshsSearchPage" aria-label="Search HSHS World">
   <div class="hshs-page-head">
-    <a class="hshs-back" href="more.html" aria-label="Back to More"><i class="fas fa-chevron-left"></i></a>
+    <a class="hshs-back" href="/more/" aria-label="Back to More"><i class="fas fa-chevron-left"></i></a>
     <h1>Search</h1>
   </div>
   <form class="hs-bar" id="hsSearchForm" autocomplete="off">
@@ -25,10 +25,10 @@
     <div class="hs-people" id="hsSuggest"><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div></div>
     <p class="hs-kicker">Jump in</p>
     <div class="hs-shortcuts">
-      <a class="hs-short" href="gallery.html"><i class="fas fa-image"></i><span><b>Gallery</b><small>All campus posts</small></span></a>
-      <a class="hs-short" href="photos.html"><i class="fas fa-camera"></i><span><b>Photos</b><small>Albums and stills</small></span></a>
-      <a class="hs-short" href="videos.html"><i class="fas fa-play"></i><span><b>Studio</b><small>School videos</small></span></a>
-      <a class="hs-short" href="trending.html"><i class="fas fa-fire"></i><span><b>Trending</b><small>What is buzzing</small></span></a>
+      <a class="hs-short" href="/gallery/"><i class="fas fa-image"></i><span><b>Gallery</b><small>All campus posts</small></span></a>
+      <a class="hs-short" href="/photos/"><i class="fas fa-camera"></i><span><b>Photos</b><small>Albums and stills</small></span></a>
+      <a class="hs-short" href="/videos/"><i class="fas fa-play"></i><span><b>Studio</b><small>School videos</small></span></a>
+      <a class="hs-short" href="/trending/"><i class="fas fa-fire"></i><span><b>Trending</b><small>What is buzzing</small></span></a>
     </div>
   </div>
   <div id="hsSearchResults" hidden>

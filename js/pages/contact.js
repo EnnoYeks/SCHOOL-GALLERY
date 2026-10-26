@@ -3,13 +3,13 @@
   if (global.__hshsContactPageModule) return;
   global.__hshsContactPageModule = true;
   function isPage() {
-    var f = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
+    var f = (window.HshsPaths ? HshsPaths.key() : '');
     return f === 'contact' || f === 'contat' || (global.HshsRoute && global.HshsRoute.is('contact'));
   }
   function loadCss() {
     if (document.getElementById('hshs-contact-css')) return;
     var link = document.createElement('link'); link.id = 'hshs-contact-css'; link.rel = 'stylesheet';
-    link.href = (location.pathname.indexOf('/index/') !== -1 ? '../' : '') + 'css/hshs-contact.css?v=261002route1';
+    link.href = ('/') + 'css/hshs-contact.css?v=261002route1';
     document.head.appendChild(link);
   }
   function setStatus(text, ok) {

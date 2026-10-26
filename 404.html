@@ -5,17 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page not found · HSHS World</title>
   <script>
-    (function () {
-      var path = location.pathname;
-      var base = "/";
-      var marker = "/SCHOOL-GALLERY/";
-      var at = path.indexOf(marker);
-      if (at !== -1) base = path.slice(0, at) + marker;
-      else if (/\/index\.html$/i.test(path)) base = path.replace(/index\.html$/i, "");
-      else if (path.indexOf("/index/") !== -1) base = path.slice(0, path.indexOf("/index/")) + "/";
-      if (base.charAt(base.length - 1) !== "/") base += "/";
-      window.__hshsBase = base;
-    })();
+    (function () { window.__hshsBase = "/"; })();
   </script>
   <link id="hshs-page-css" rel="stylesheet">
   <link id="hshs-glass-css" rel="stylesheet">
@@ -92,7 +82,7 @@
     a { color: #eab308; }
     ul { line-height: 1.9; }
   </style>
-  <link rel="stylesheet" href="css/hshs-skeleton.css?v=261005sk1">
+  <link rel="stylesheet" href="/css/hshs-skeleton.css?v=261005sk1">
 </head>
 <body class="hshs-classic-404 dark-mode">
     <div class="hshs-load-skel skel-account" data-skel-page="404" role="status" aria-label="Loading"><span class="sk skel-about-block" style="min-height:220px"></span></div>
@@ -100,31 +90,32 @@
     <div class="crest" aria-hidden="true">H</div>
     <h1>This path is not on campus</h1>
     <p>The page you asked for is not part of HSHS World. Return home, or choose a campus hall below.</p>
-    <p><a data-hshs-path="index.html" href="index.html">Back to HSHS World home</a></p>
+    <p><a data-hshs-path="/" href="/">Back to HSHS World home</a></p>
     <ul>
-      <li><a data-hshs-path="index/gallery.html" href="index/gallery.html">Gallery</a></li>
-      <li><a data-hshs-path="index/photos.html" href="index/photos.html">Photos</a></li>
-      <li><a data-hshs-path="index/videos.html" href="index/videos.html">Buzz</a></li>
-      <li><a data-hshs-path="index/buzz.html" href="index/buzz.html">Vibe</a></li>
-      <li><a data-hshs-path="index/trending.html" href="index/trending.html">Trending</a></li>
-      <li><a data-hshs-path="index/spotlight.html" href="index/spotlight.html">Spotlight</a></li>
-      <li><a data-hshs-path="index/polls.html" href="index/polls.html">Polls</a></li>
-      <li><a data-hshs-path="index/memories.html" href="index/memories.html">Memories</a></li>
-      <li><a data-hshs-path="index/chat.html" href="index/chat.html">Chat</a></li>
-      <li><a data-hshs-path="index/more.html" href="index/more.html">More</a></li>
-      <li><a data-hshs-path="index/profile.html" href="index/profile.html">Profile</a></li>
-      <li><a data-hshs-path="index/settings.html" href="index/settings.html">Settings</a></li>
-      <li><a data-hshs-path="index/notifications.html" href="index/notifications.html">Notifications</a></li>
-      <li><a data-hshs-path="index/saved.html" href="index/saved.html">Saved</a></li>
-      <li><a data-hshs-path="index/about.html" href="index/about.html">About</a></li>
-      <li><a data-hshs-path="index/contact.html" href="index/contact.html">Contact</a></li>
-      <li><a data-hshs-path="index/login.html" href="index/login.html">Sign in</a></li>
+      <li><a data-hshs-path="/gallery/" href="/gallery/">Gallery</a></li>
+      <li><a data-hshs-path="/photos/" href="/photos/">Photos</a></li>
+      <li><a data-hshs-path="/videos/" href="/videos/">Buzz</a></li>
+      <li><a data-hshs-path="/buzz/" href="/buzz/">Vibe</a></li>
+      <li><a data-hshs-path="/trending/" href="/trending/">Trending</a></li>
+      <li><a data-hshs-path="/spotlight/" href="/spotlight/">Spotlight</a></li>
+      <li><a data-hshs-path="/polls/" href="/polls/">Polls</a></li>
+      <li><a data-hshs-path="/memories/" href="/memories/">Memories</a></li>
+      <li><a data-hshs-path="/chat/" href="/chat/">Chat</a></li>
+      <li><a data-hshs-path="/more/" href="/more/">More</a></li>
+      <li><a data-hshs-path="/profile/" href="/profile/">Profile</a></li>
+      <li><a data-hshs-path="/settings/" href="/settings/">Settings</a></li>
+      <li><a data-hshs-path="/notifications/" href="/notifications/">Notifications</a></li>
+      <li><a data-hshs-path="/saved/" href="/saved/">Saved</a></li>
+      <li><a data-hshs-path="/about/" href="/about/">About</a></li>
+      <li><a data-hshs-path="/contact/" href="/contact/">Contact</a></li>
+      <li><a data-hshs-path="/login/" href="/login/">Sign in</a></li>
     </ul>
     <script>
       (function () {
-        var base = window.__hshsBase || "/";
         document.querySelectorAll("[data-hshs-path]").forEach(function (a) {
-          a.setAttribute("href", base + a.getAttribute("data-hshs-path"));
+          var path = a.getAttribute("data-hshs-path") || "/";
+          if (path.charAt(0) !== "/") path = "/" + path;
+          a.setAttribute("href", path);
         });
       })();
     </script>

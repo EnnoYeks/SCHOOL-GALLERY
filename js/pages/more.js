@@ -4,11 +4,12 @@
   if (global['__hshs' + PAGE + 'PageModule']) return;
   global['__hshs' + PAGE + 'PageModule'] = true;
   function isPage() {
+    if (window.HshsPaths) return HshsPaths.key() === PAGE;
     try { if (global.HshsRegistry && global.HshsRegistry.activeRoute) return global.HshsRegistry.activeRoute().name === PAGE; } catch (e) {}
     var file = (location.pathname.split('/').pop() || '').toLowerCase();
     return file === 'more.html' || file === 'more';
   }
-  function base() { return location.pathname.indexOf('/index/') !== -1 ? '../' : ''; }
+  function base() { return '/'; }
   function loadCss(href) {
     if (document.querySelector('link[data-hshs-more-css="' + href + '"]')) return;
     var l = document.createElement('link');

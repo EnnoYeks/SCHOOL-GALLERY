@@ -67,10 +67,12 @@
   var loadedScripts = Object.create(null);
 
   function currentFile() {
-    return (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    var key = window.HshsPaths ? HshsPaths.key() : (location.pathname.split('/').filter(Boolean).pop() || 'home');
+    if (!key || key === 'home' || key === 'index') return 'index.html';
+    return key + '.html';
   }
   function inSub() {
-    return location.pathname.indexOf('/index/') !== -1;
+    return false;
   }
   // Root-absolute hrefs so they work from any route (/vibe, /gallery, etc.)
   function abs(path) {
@@ -83,40 +85,40 @@
   function sub(name) {
     // map file names to clean app paths where possible
     var map = {
-      'buzz.html': '/vibe',
-      'clips.html': '/vibe',
-      'shorts.html': '/vibe',
-      'gallery.html': '/gallery',
-      'photos.html': '/photos',
-      'videos.html': '/videos',
-      'trending.html': '/trending',
-      'spotlight.html': '/spotlight',
-      'polls.html': '/polls',
-      'memories.html': '/memories',
-      'more.html': '/more',
-      'about.html': '/about',
-      'contact.html': '/contact',
-      'profile.html': '/profile',
-      'settings.html': '/settings',
-      'chat.html': '/chat',
-      'admin.html': '/admin',
-      'login.html': '/login',
-      'notifications.html': '/notifications',
-      'saved.html': '/saved',
-      'search.html': '/search'
+      'buzz.html': '/buzz/',
+      'clips.html': '/buzz/',
+      'shorts.html': '/buzz/',
+      'gallery.html': '/gallery/',
+      'photos.html': '/photos/',
+      'videos.html': '/videos/',
+      'trending.html': '/trending/',
+      'spotlight.html': '/spotlight/',
+      'polls.html': '/polls/',
+      'memories.html': '/memories/',
+      'more.html': '/more/',
+      'about.html': '/about/',
+      'contact.html': '/contact/',
+      'profile.html': '/profile/',
+      'settings.html': '/settings/',
+      'chat.html': '/chat/',
+      'admin.html': '/admin/',
+      'login.html': '/login/',
+      'notifications.html': '/notifications/',
+      'saved.html': '/saved/',
+      'search.html': '/search/'
     };
     return map[name] || abs(name);
   }
-  function jsBase() {
-    return inSub() ? '../js/' : 'js/';
-  }
-  function cssBase() {
-    return inSub() ? '../css/' : 'css/';
-  }
+  function jsBase() { return '/js/'; }
+  function cssBase() { return '/css/'; }
   function pageName(url) {
+    if (window.HshsPaths) {
+      var key = url ? HshsPaths.key(url) : HshsPaths.key();
+      return ALIAS[key] || ALIAS[key + '.html'] || key || 'home';
+    }
     var file = currentFile();
     try {
-      if (url) file = (new URL(url, location.href).pathname.split('/').pop() || 'index.html').toLowerCase();
+      if (url) file = (new URL(url, location.href).pathname.split('/').filter(Boolean).pop() || 'index.html').toLowerCase();
     } catch (e) {}
     var key = file.replace(/\.html$/, '');
     return ALIAS[file] || ALIAS[key] || key || 'home';
@@ -130,22 +132,21 @@
     'notifications.html': 1, 'login.html': 1, 'edit-profile.html': 1
   };
   function appRoot() {
-    var path = location.pathname || '/';
-    var cut = path.indexOf('/index/');
-    if (cut !== -1) return path.slice(0, cut + 1);
-    return path.replace(/[^/]*$/, '');
+    return '/';
   }
   function canonicalize(url) {
     var next = new URL(url, location.href);
-    var file = (next.pathname.split('/').pop() || 'index.html').toLowerCase();
-    if (!file) file = 'index.html';
-    if (file === 'contat.html') file = 'contact.html';
-    if (file === 'clips.html' || file === 'shorts.html') file = 'buzz.html';
-    if (file === 'index.html' || PAGE_FILES[file]) {
-      var root = appRoot();
-      if (root.charAt(root.length - 1) !== '/') root += '/';
-      next.pathname = file === 'index.html' ? (root + 'index.html') : (root + 'index/' + file);
-    }
+    if (next.origin !== location.origin) return next;
+    var path = next.pathname || '/';
+    var file = (path.split('/').filter(Boolean).pop() || 'index').toLowerCase();
+    if (file === 'index.html') file = 'index';
+    var known = file === 'index' || PAGE_FILES[file] || PAGE_FILES[file + '.html'] || PAGE_FILES[file.replace(/\.html$/, '') + '.html'];
+    if (!known && path.indexOf('/index/') === -1 && !/\.html$/i.test(path)) return next;
+    var target = window.HshsPaths ? HshsPaths.href(path + next.search + next.hash) : path;
+    var clean = new URL(target, location.origin);
+    next.pathname = clean.pathname;
+    next.search = clean.search;
+    next.hash = clean.hash;
     return next;
   }
   function fixLinks(scope) {

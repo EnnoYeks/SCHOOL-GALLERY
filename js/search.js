@@ -75,7 +75,7 @@ class SearchManager {
             const isUser = result.kind === 'user';
             const icon = isUser ? 'fa-user' : (result.image ? 'fa-image' : result.thumbnail ? 'fa-video' : 'fa-file');
             const href = isUser
-                ? ((location.pathname.indexOf('/index/') !== -1 ? '' : 'index/') + 'profile.html?uid=' + encodeURIComponent(result.uid || result.id || ''))
+                ? ('/profile/?uid=' + encodeURIComponent(result.uid || result.id || ''))
                 : '#';
             return `
                 <a class="search-result-item" href="${href}" style="

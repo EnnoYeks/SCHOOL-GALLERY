@@ -20,16 +20,16 @@
   })();
 
   function inSub() {
-    return /\/index\//i.test(location.pathname);
+    return false;
   }
   function loginHref() {
-    return inSub() ? 'login.html' : 'index/login.html';
+    return '/login/';
   }
   function homeHref() {
-    return inSub() ? '../index.html' : 'index.html';
+    return '/';
   }
   function moreHref() {
-    return inSub() ? 'more.html' : 'index/more.html';
+    return '/more/';
   }
 
   function profile() {

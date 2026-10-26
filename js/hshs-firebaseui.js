@@ -27,9 +27,9 @@
 
   function nextUrl() {
     var n = qs("next");
+    if (window.HshsPaths) return HshsPaths.href(n || '/');
     if (n && n.charAt(0) === "/") return n;
-    if (n && /^index\//.test(n)) return "../" + n;
-    return "../index.html";
+    return "/";
   }
 
   function msg(text, ok) {
@@ -123,7 +123,7 @@
         }
       );
       if (needsSchoolFields(profile)) {
-        location.href = "edit-profile.html?welcome=1";
+        location.href = (window.HshsPaths ? HshsPaths.href("edit-profile") : "/edit-profile/") + "?welcome=1";
         return;
       }
       location.href = nextUrl();

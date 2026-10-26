@@ -11,6 +11,11 @@
   var driver = null;
 
   function fileOf(href) {
+    if (window.HshsPaths) {
+      var key = href ? HshsPaths.key(href) : HshsPaths.key();
+      if (!key || key === 'home') return 'index.html';
+      return key + '.html';
+    }
     var path = href || location.pathname;
     try { path = new URL(path, location.href).pathname; } catch (e) {}
     var f = (path.split('/').pop() || 'index.html').toLowerCase();

@@ -74,7 +74,7 @@
   }
   function openCompose() {
     var sheet = document.getElementById('hshsComposeSheet');
-    if (!sheet) { location.href = 'login.html'; return; }
+    if (!sheet) { location.href = window.HshsPaths ? HshsPaths.href('login') : '/login/'; return; }
     sheet.hidden = false;
     document.body.classList.add('hshs-chat-compose-open');
     var box = document.getElementById('hshsComposeResults');

@@ -24,8 +24,12 @@
   };
 
   function destinationFromPath(pathname) {
-    var file = ((pathname || location.pathname).split('/').pop() || '').toLowerCase();
-    return PAGE_DEST[file] || null;
+    var key = window.HshsPaths ? HshsPaths.key(pathname || location.pathname) : ((pathname || location.pathname).split('/').filter(Boolean).pop() || '').toLowerCase().replace(/\.html$/, '');
+    if (key === 'videos' || key === 'studio') return 'buzz';
+    if (key === 'buzz' || key === 'clips' || key === 'shorts' || key === 'vibe') return 'vibe';
+    if (PAGE_DEST[key] ) return PAGE_DEST[key];
+    if (PAGE_DEST[key + '.html']) return PAGE_DEST[key + '.html'];
+    return null;
   }
 
   window.__hshsUploadDestinationFromPath = destinationFromPath;

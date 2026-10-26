@@ -39,7 +39,7 @@
     <section class="chat-main-panel">
       <header class="chat-home-head">
         <div class="chat-topline">
-          <a class="chat-back" href="more.html" aria-label="Back"><i class="fas fa-chevron-left"></i></a>
+          <a class="chat-back" href="/more/" aria-label="Back"><i class="fas fa-chevron-left"></i></a>
           <span class="chat-kicker">HSHS WORLD · MESSAGES</span>
           <button type="button" class="chat-new-btn" id="hshsComposeTop" aria-label="New chat"><i class="fas fa-plus"></i></button>
         </div>
@@ -128,7 +128,7 @@
       </div>
       <div class="quick-actions">
         <button type="button" id="hshsPanelCompose">New chat</button>
-        <a href="../index/login.html">Sign in</a>
+        <a href="/login/">Sign in</a>
       </div>
     </aside>
   </div>

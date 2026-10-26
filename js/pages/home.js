@@ -8,11 +8,12 @@
   global.__hshsHomePageModule = true;
 
   function isPage() {
+    if (window.HshsPaths) return HshsPaths.key() === 'home';
     var file = (location.pathname.split('/').pop() || '').toLowerCase();
-    return file === 'index.html' || file === '';
+    return file === 'index.html' || file === '' || file === 'index';
   }
   function assetBase() {
-    return location.pathname.indexOf('/index/') !== -1 ? '../' : '';
+    return '/';
   }
   function loadOnce(src, id) {
     return new Promise(function (resolve) {
@@ -65,7 +66,7 @@
   function trendCard(post, rank) {
     if (!post) return '<div class="home-empty"><i class="fas fa-fire"></i><strong>No trending yet</strong></div>';
     var thumb = mediaOf(post);
-    return '<a class="home-trend-item" href="index/trending.html"><span class="home-trend-thumb"' + (thumb ? ' style="background-image:url(\'' + esc(thumb) + '\')"' : '') + '></span><span class="home-trend-rank">#' + rank + '</span><span><strong>' + esc(post.title || 'HSHS moment') + '</strong><small>' + formatCount(post.likes) + ' likes · ' + formatCount(post.views) + ' views</small></span></a>';
+    return '<a class="home-trend-item" href="/trending/"><span class="home-trend-thumb"' + (thumb ? ' style="background-image:url(\'' + esc(thumb) + '\')"' : '') + '></span><span class="home-trend-rank">#' + rank + '</span><span><strong>' + esc(post.title || 'HSHS moment') + '</strong><small>' + formatCount(post.likes) + ' likes · ' + formatCount(post.views) + ' views</small></span></a>';
   }
   function eventCard(ev) {
     if (!ev) return '<div class="home-empty"><i class="fas fa-calendar-days"></i><strong>No events yet</strong></div>';

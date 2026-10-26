@@ -11,7 +11,7 @@
             .find(function (s) { return s.indexOf('navigation.js') !== -1 && s.indexOf('mobile-navigation') === -1; });
         var href = guess
             ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-theme.css')
-            : (location.pathname.indexOf('/index/') !== -1 ? '../css/hshs-theme.css' : 'css/hshs-theme.css');
+            : ('/css/hshs-theme.css');
         var link = document.createElement('link');
         link.id = 'hshs-theme-css';
         link.rel = 'stylesheet';
