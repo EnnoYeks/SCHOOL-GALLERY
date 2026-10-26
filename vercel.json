@@ -50,27 +50,7 @@
     { "source": "/videos.html", "destination": "/videos/", "permanent": true },
     { "source": "/buzz.html", "destination": "/buzz/", "permanent": true },
     { "source": "/chat.html", "destination": "/chat/", "permanent": true },
-    { "source": "/login.html", "destination": "/login/", "permanent": true },
-    { "source": "/more/index.html", "destination": "/more/", "permanent": true },
-    { "source": "/about/index.html", "destination": "/about/", "permanent": true },
-    { "source": "/profile/index.html", "destination": "/profile/", "permanent": true },
-    { "source": "/settings/index.html", "destination": "/settings/", "permanent": true },
-    { "source": "/gallery/index.html", "destination": "/gallery/", "permanent": true },
-    { "source": "/photos/index.html", "destination": "/photos/", "permanent": true },
-    { "source": "/videos/index.html", "destination": "/videos/", "permanent": true },
-    { "source": "/buzz/index.html", "destination": "/buzz/", "permanent": true },
-    { "source": "/chat/index.html", "destination": "/chat/", "permanent": true },
-    { "source": "/polls/index.html", "destination": "/polls/", "permanent": true },
-    { "source": "/memories/index.html", "destination": "/memories/", "permanent": true },
-    { "source": "/notifications/index.html", "destination": "/notifications/", "permanent": true },
-    { "source": "/saved/index.html", "destination": "/saved/", "permanent": true },
-    { "source": "/search/index.html", "destination": "/search/", "permanent": true },
-    { "source": "/admin/index.html", "destination": "/admin/", "permanent": true },
-    { "source": "/login/index.html", "destination": "/login/", "permanent": true },
-    { "source": "/contact/index.html", "destination": "/contact/", "permanent": true },
-    { "source": "/edit-profile/index.html", "destination": "/edit-profile/", "permanent": true },
-    { "source": "/spotlight/index.html", "destination": "/spotlight/", "permanent": true },
-    { "source": "/trending/index.html", "destination": "/trending/", "permanent": true }
+    { "source": "/login.html", "destination": "/login/", "permanent": true }
   ],
   "rewrites": [
     { "source": "/vibe", "destination": "/buzz/" },
@@ -84,6 +64,6 @@
     { "source": "/contat", "destination": "/contact/" },
     { "source": "/contat.html", "destination": "/contact/" }
   ],
-  "cleanUrls": false,
+  "cleanUrls": true,
   "trailingSlash": true
 }
