@@ -28,7 +28,7 @@
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = base() + href + '?v=261002photos2';
+    l.href = base() + href + '?v=261026media1';
     l.setAttribute('data-hshs-css', href);
     document.head.appendChild(l);
   }
@@ -52,8 +52,10 @@
     if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
     loadCss('css/photos.css');
     loadCss('css/photos-campus.css');
+    loadCss('css/hshs-media-cards.css');
     if (!mountTemplate()) return;
-    await loadOnce(base() + 'js/photos.js?v=261005real1', 'hshs-leg-photos');
+    await loadOnce(base() + 'js/hshs-media-cards.js?v=261026media1', 'hshs-media-cards');
+    await loadOnce(base() + 'js/photos.js?v=261026media1', 'hshs-leg-photos');
     try {
       if (typeof global.startPhotos === 'function') global.startPhotos();
     } catch (e) {
