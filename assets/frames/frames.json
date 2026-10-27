@@ -1,0 +1,8 @@
+[
+  {"id":"gold-feed","name":"HSHS Gold and Blue","size":"feed","event":"all","startDate":null,"endDate":null},
+  {"id":"polaroid-feed","name":"Polaroid","size":"feed","event":"all","startDate":null,"endDate":null},
+  {"id":"gold-story","name":"HSHS Gold and Blue","size":"story","event":"all","startDate":null,"endDate":null},
+  {"id":"polaroid-story","name":"Polaroid","size":"story","event":"all","startDate":null,"endDate":null},
+  {"id":"gold-square","name":"HSHS Gold and Blue","size":"square","event":"all","startDate":null,"endDate":null},
+  {"id":"polaroid-square","name":"Polaroid","size":"square","event":"all","startDate":null,"endDate":null}
+]

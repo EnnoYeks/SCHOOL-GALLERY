@@ -10,6 +10,8 @@ class VideosPage {
         this.pageSize = 12;
         this.loading = false;
         this.hasMore = true;
+        this.previewCleanups = [];
+        this.previewObserver = null;
         this.init();
     }
     async init() {
@@ -52,7 +54,7 @@ class VideosPage {
     apply() {
         let videos = [...this.videos];
         if (this.filter === "latest") videos.sort((a,b) => this.date(b.createdAt) - this.date(a.createdAt));
-        else if (this.filter === "trending") videos.sort((a,b) => this.score(b) - this.score(a));
+        else if (this.filter === "trending") videos.sort((a,b) => ((+b.trendingScore || this.score(b)) - (+a.trendingScore || this.score(a))));
         else if (this.filter !== "all") videos = videos.filter(v => String(v.category || "").toLowerCase().replace(/\s+/g,"-") === this.filter);
         if (this.search) videos = videos.filter(v => [v.title,v.description,v.category,v.author].join(" ").toLowerCase().includes(this.search));
         this.filtered = videos;
@@ -82,6 +84,12 @@ class VideosPage {
         if (title) title.textContent = this.filter === "trending" ? "Trending Videos" : this.filter === "latest" ? "Latest Videos" : this.filter === "all" ? "Latest Videos" : this.label(this.filter) + " Videos";
         document.querySelectorAll("[data-video-index]").forEach(el => {
             el.onclick = () => this.play(Number(el.dataset.videoIndex));
+            if (el.dataset.keyboardWired !== "1") {
+                el.dataset.keyboardWired = "1";
+                el.addEventListener("keydown", event => {
+                    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); this.play(Number(el.dataset.videoIndex)); }
+                });
+            }
         });
         this.enhanceCards();
     }
@@ -89,19 +97,19 @@ class VideosPage {
         const title = this.escape(v.title || "Untitled");
         const thumb = this.attr(v.thumbnailUrl || v.thumbnail || "");
         const dur = this.escape(v.duration || "");
-        return `<article class="vibe-feat" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
+        return `<article class="vibe-feat" role="button" tabindex="0" aria-label="Play ${title} by ${this.escape(v.author || v.creator || 'Campus student')}, ${dur || 'video'}" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
             ${thumb ? `<img src="${thumb}" alt="${title}" loading="lazy">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}
             ${first ? `<span class="badge">FEATURED</span>` : ""}
             <span class="play"><i class="fas fa-play"></i></span>
             ${dur ? `<span class="dur">${dur}</span>` : ""}
-            <div class="meta"><b>${title}</b><small>${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div>
+            <div class="meta"><b>${title}</b><small>${this.escape(v.author || v.creator || "Campus student")} • ${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div>
         </article>`;
     }
     rowCard(v, index) {
         const title = this.escape(v.title || "Untitled");
         const thumb = this.attr(v.thumbnailUrl || v.thumbnail || "");
         const dur = this.escape(v.duration || "");
-        return `<article class="vibe-row" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
+        return `<article class="vibe-row" role="button" tabindex="0" aria-label="Play ${title} by ${this.escape(v.author || v.creator || 'Campus student')}, ${dur || 'video'}" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
             <div class="shot">
                 ${thumb ? `<img src="${thumb}" alt="${title}" loading="lazy">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}
                 <span class="play"><i class="fas fa-play"></i></span>
@@ -172,8 +180,8 @@ class VideosPage {
     }
     async updateViews(video){
         if (!video?.id || !window.HshsMediaCards) return;
-        await window.HshsMediaCards.incrementViews(video.id);
-        video.views = (+video.views || 0) + 1;
+        const saved = await window.HshsMediaCards.incrementViews(video.id);
+        if (saved) video.views = (+video.views || 0) + 1;
     }
     score(v){ return ((+v.likes||0)+(+v.comments||0))*4 + (+v.views||0); }
     date(v){ if (!v) return 0; if (typeof v.toMillis === "function") return v.toMillis(); if (v.seconds) return v.seconds * 1000; const n = new Date(v).getTime(); return Number.isFinite(n) ? n : 0; }
@@ -183,7 +191,7 @@ class VideosPage {
     label(v){ return String(v || "").replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()); }
     escape(v){ return String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
     attr(v){ return this.escape(v); }
-    destroy(){ try { const player = document.getElementById("videoPlayer"); const modal = document.getElementById("videoPlayerModal"); if (player) { player.pause(); player.removeAttribute("src"); player.load(); } if (modal) modal.classList.remove("active"); } catch (e) {} }
+    destroy(){ try { (this.previewCleanups || []).forEach(fn => fn()); this.previewCleanups = []; if (this.previewObserver) this.previewObserver.disconnect(); const player = document.getElementById("videoPlayer"); const modal = document.getElementById("videoPlayerModal"); if (player) { player.pause(); player.removeAttribute("src"); player.load(); } if (modal) modal.classList.remove("active"); } catch (e) {} }
 }
 
 function startVideos() {

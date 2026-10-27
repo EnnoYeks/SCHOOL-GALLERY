@@ -95,15 +95,41 @@
     createPhotoCard(photo) {
       var card = document.createElement('article');
       card.className = 'photo-card';
-      card.setAttribute('data-photo-id', String(photo.id || ''));
+      card.setAttribute('data-photo-id', String(photo.id || photo.mediaKey || photo.media_key || ''));
+      if (photo.width && photo.height) card.style.aspectRatio = String(photo.width) + ' / ' + String(photo.height);
+      card.style.setProperty('--photo-dominant', photo.dominantColor || '#10245a');
+      card.classList.add('is-loading');
+      if (photo.blurData) {
+        var blur = document.createElement('img');
+        blur.className = 'photo-blur'; blur.alt = ''; blur.setAttribute('aria-hidden', 'true');
+        blur.src = photo.blurData; card.appendChild(blur);
+      }
       var img = document.createElement('img');
       img.className = 'photo-image';
       img.alt = photo.title || 'Campus photo';
       img.loading = 'lazy';
-      img.src = photo.image || '';
+      img.decoding = 'async';
+      if (photo.width) img.width = Number(photo.width);
+      if (photo.height) img.height = Number(photo.height);
+      var processedBase = photo.processedKey || photo.processed_key || '';
+      var availableWidths = [320, 640, 960, 1440].filter(function (width) { return Number(photo.width) >= width; });
+      var processedUrl = processedBase && Number(photo.width) >= 320 && window.HshsStorage && window.HshsStorage.publicUrl
+        ? window.HshsStorage.publicUrl(processedBase) : '';
+      if (processedUrl && availableWidths.length) {
+        img.srcset = availableWidths.map(function (width) {
+          return window.HshsStorage.publicUrl(processedBase + '-' + width + '.webp') + ' ' + width + 'w';
+        }).join(', ');
+        img.sizes = '(max-width: 639px) 50vw, (max-width: 1023px) 33vw, (max-width: 1439px) 25vw, 20vw';
+        var selectedWidth = availableWidths.indexOf(640) !== -1 ? 640 : availableWidths[availableWidths.length - 1];
+        img.src = window.HshsStorage.publicUrl(processedBase + '-' + selectedWidth + '.webp');
+      } else {
+        img.src = photo.image || '';
+      }
+      img.addEventListener('load', function () { card.classList.add('is-loaded'); card.classList.remove('is-loading'); var blur = card.querySelector('.photo-blur'); if (blur) blur.remove(); }, { once: true });
       img.addEventListener('error', function () {
         img.removeAttribute('src');
         card.classList.add('is-fallback');
+        card.classList.remove('is-loading');
       });
       var cap = document.createElement('div');
       cap.className = 'photo-caption';
@@ -111,6 +137,32 @@
       cap.querySelector('strong').textContent = photo.title || 'Campus photo';
       cap.querySelector('span').textContent = (photo.house || 'HSHS') + ' · ' + (photo.likes || 0) + ' likes';
       card.appendChild(img);
+      var like = document.createElement('button');
+      like.type = 'button'; like.className = 'like-btn'; like.setAttribute('aria-label', 'Like photo');
+      like.innerHTML = '<span aria-hidden="true">♥</span>';
+      var likeKey = 'hshs-liked-photo-' + String(photo.id || '');
+      try { if (sessionStorage.getItem(likeKey) === '1') like.classList.add('liked'); } catch (_) {}
+      like.addEventListener('click', async function (event) {
+        event.stopPropagation();
+        if (!photo.id || like.classList.contains('liked')) return;
+        var sb = window.supabase;
+        if (!sb || typeof sb.rpc !== 'function') return;
+        like.disabled = true;
+        like.classList.add('heart-pop');
+        window.setTimeout(function () { like.classList.remove('heart-pop'); }, 450);
+        try {
+          var result = await sb.rpc('increment_photo_likes', { photo_id: photo.id });
+          if (result && result.error) throw result.error;
+          like.classList.add('liked');
+          photo.likes = (Number(photo.likes) || 0) + 1;
+          cap.querySelector('span').textContent = (photo.house || 'HSHS') + ' · ' + photo.likes + ' likes';
+          try { sessionStorage.setItem(likeKey, '1'); } catch (_) {}
+        } catch (error) {
+          console.warn('[HSHS] Could not save photo like:', error && error.message);
+          like.setAttribute('aria-label', 'Could not save like. Try again.');
+        } finally { like.disabled = false; }
+      });
+      card.appendChild(like);
       card.appendChild(cap);
       card.addEventListener('click', this.openModal.bind(this, photo));
       return card;
