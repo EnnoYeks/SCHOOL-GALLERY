@@ -49,6 +49,7 @@ class Database {
             height: item.height || null,
             duration: item.duration || null,
             posterKey: item.poster_key || item.posterKey || "",
+            processedKey: item.processed_key || item.processedKey || "",
             previewKey: item.preview_key || item.previewKey || "",
             blurData: item.blur_data || item.blurData || "",
             dominantColor: item.dominant_color || item.dominantColor || "",
