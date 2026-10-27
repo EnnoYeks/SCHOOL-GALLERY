@@ -125,16 +125,27 @@
       var like = document.createElement('button');
       like.type = 'button'; like.className = 'like-btn'; like.setAttribute('aria-label', 'Like photo');
       like.innerHTML = '<span aria-hidden="true">♥</span>';
-      like.addEventListener('click', function (event) {
+      var likeKey = 'hshs-liked-photo-' + String(photo.id || '');
+      try { if (sessionStorage.getItem(likeKey) === '1') like.classList.add('liked'); } catch (_) {}
+      like.addEventListener('click', async function (event) {
         event.stopPropagation();
+        if (!photo.id || like.classList.contains('liked')) return;
+        var sb = window.supabase;
+        if (!sb || typeof sb.rpc !== 'function') return;
+        like.disabled = true;
         like.classList.add('heart-pop');
         window.setTimeout(function () { like.classList.remove('heart-pop'); }, 450);
-        // No optimistic count change unless a supported persistence method exists.
-        if (window.db && typeof window.db.addLike === 'function') {
-          Promise.resolve(window.db.addLike(photo.id, 'photo')).then(function (ok) {
-            if (ok) like.classList.toggle('liked');
-          }).catch(function () {});
-        }
+        try {
+          var result = await sb.rpc('increment_photo_likes', { photo_id: photo.id });
+          if (result && result.error) throw result.error;
+          like.classList.add('liked');
+          photo.likes = (Number(photo.likes) || 0) + 1;
+          cap.querySelector('span').textContent = (photo.house || 'HSHS') + ' · ' + photo.likes + ' likes';
+          try { sessionStorage.setItem(likeKey, '1'); } catch (_) {}
+        } catch (error) {
+          console.warn('[HSHS] Could not save photo like:', error && error.message);
+          like.setAttribute('aria-label', 'Could not save like. Try again.');
+        } finally { like.disabled = false; }
       });
       card.appendChild(like);
       card.appendChild(cap);
