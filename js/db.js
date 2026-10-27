@@ -43,7 +43,7 @@ class Database {
             shares: item.shares ?? 0,
             image: item.image || item.image_url || item.thumbnail_url || "",
             imageUrl: item.image_url || item.image || "",
-            thumbnailUrl: item.thumbnail_url || item.image_url || item.image || "",
+            thumbnailUrl: item.thumbnail_url || item.image_url || item.image || "",\n            videoUrl: item.video_url || item.videoUrl || item.media_url || item.mediaUrl || "",\n            width: item.width || null,\n            height: item.height || null,\n            duration: item.duration || null,\n            posterKey: item.poster_key || item.posterKey || "",\n            previewKey: item.preview_key || item.previewKey || "",\n            blurData: item.blur_data || item.blurData || "",\n            dominantColor: item.dominant_color || item.dominantColor || "",\n            trendingScore: item.trending_score || item.trendingScore || 0,
             authorId: item.author_id || item.authorId,
             mediaKey: item.media_key || item.mediaKey,
             mediaProvider: item.media_provider || item.mediaProvider,
