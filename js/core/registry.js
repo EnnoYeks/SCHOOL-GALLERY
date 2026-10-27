@@ -3,39 +3,39 @@
   if (global.HshsRegistry) return;
   var ROUTES = {
     home: { path: '/', module: 'home', template: 'home', title: 'HSHS World' },
-    gallery: { path: '/gallery/', module: 'gallery', template: 'gallery', title: 'Gallery · HSHS World' },
-    photos: { path: '/photos/', module: 'photos', template: 'photos', title: 'Photos · HSHS World' },
-    videos: { path: '/videos/', module: 'videos', template: 'videos', title: 'HSHS Studio · HSHS World' },
-    vibe: { path: '/videos/', module: 'videos', template: 'videos', title: 'HSHS Studio · HSHS World', alias: true },
-    trending: { path: '/trending/', module: 'trending', template: 'trending', title: 'Trending · HSHS World' },
-    polls: { path: '/polls/', module: 'polls', template: 'polls', title: 'Polls · HSHS World' },
-    memories: { path: '/memories/', module: 'memories', template: 'memories', title: 'Memories · HSHS World' },
-    more: { path: '/more/', module: 'more', template: 'more', title: 'More · HSHS World' },
-    search: { path: '/search/', module: 'search', template: 'search', title: 'Search · HSHS World' },
-    about: { path: '/about/', module: 'about', template: 'about', title: 'About · HSHS World' },
-    contact: { path: '/contact/', module: 'contact', template: 'contact', title: 'Contact · HSHS World' },
-    profile: { path: '/profile/', module: 'profile', template: 'profile', title: 'Profile · HSHS World' },
-    settings: { path: '/settings/', module: 'settings', template: 'settings', title: 'Settings · HSHS World' },
-    notifications: { path: '/notifications/', module: 'notifications', template: 'notifications', title: 'Notifications · HSHS World' },
-    saved: { path: '/saved/', module: 'saved', template: 'saved', title: 'Saved · HSHS World' },
-    buzz: { path: '/buzz/', module: 'buzz', template: 'buzz', title: 'Vibe · HSHS World' },
-    clips: { path: '/buzz/', module: 'buzz', template: 'buzz', title: 'Vibe · HSHS World', alias: true },
-    shorts: { path: '/buzz/', module: 'buzz', template: 'buzz', title: 'Vibe · HSHS World', alias: true },
-    chat: { path: '/chat/', module: 'chat', template: 'chat', title: 'Chat · HSHS World' },
-    admin: { path: '/admin/', module: 'admin', template: 'admin', title: 'Admin · HSHS World' },
-    spotlight: { path: '/spotlight/', module: 'spotlight', template: 'spotlight', title: 'Spotlight · HSHS World' },
-    login: { path: '/login/', module: 'login', template: 'login', title: 'Sign in · HSHS World' },
-    'edit-profile': { path: '/edit-profile/', module: 'edit-profile', template: 'edit-profile', title: 'Edit profile · HSHS World' }
+    gallery: { path: '/gallery', module: 'gallery', template: 'gallery', title: 'Gallery · HSHS World' },
+    photos: { path: '/photos', module: 'photos', template: 'photos', title: 'Photos · HSHS World' },
+    videos: { path: '/videos', module: 'videos', template: 'videos', title: 'HSHS Studio · HSHS World' },
+    vibe: { path: '/videos', module: 'videos', template: 'videos', title: 'HSHS Studio · HSHS World', alias: true },
+    trending: { path: '/trending', module: 'trending', template: 'trending', title: 'Trending · HSHS World' },
+    polls: { path: '/polls', module: 'polls', template: 'polls', title: 'Polls · HSHS World' },
+    memories: { path: '/memories', module: 'memories', template: 'memories', title: 'Memories · HSHS World' },
+    more: { path: '/more', module: 'more', template: 'more', title: 'More · HSHS World' },
+    search: { path: '/search', module: 'search', template: 'search', title: 'Search · HSHS World' },
+    about: { path: '/about', module: 'about', template: 'about', title: 'About · HSHS World' },
+    contact: { path: '/contact', module: 'contact', template: 'contact', title: 'Contact · HSHS World' },
+    profile: { path: '/profile', module: 'profile', template: 'profile', title: 'Profile · HSHS World' },
+    settings: { path: '/settings', module: 'settings', template: 'settings', title: 'Settings · HSHS World' },
+    notifications: { path: '/notifications', module: 'notifications', template: 'notifications', title: 'Notifications · HSHS World' },
+    saved: { path: '/saved', module: 'saved', template: 'saved', title: 'Saved · HSHS World' },
+    buzz: { path: '/buzz', module: 'buzz', template: 'buzz', title: 'Vibe · HSHS World' },
+    clips: { path: '/buzz', module: 'buzz', template: 'buzz', title: 'Vibe · HSHS World', alias: true },
+    shorts: { path: '/buzz', module: 'buzz', template: 'buzz', title: 'Vibe · HSHS World', alias: true },
+    chat: { path: '/chat', module: 'chat', template: 'chat', title: 'Chat · HSHS World' },
+    admin: { path: '/admin', module: 'admin', template: 'admin', title: 'Admin · HSHS World' },
+    spotlight: { path: '/spotlight', module: 'spotlight', template: 'spotlight', title: 'Spotlight · HSHS World' },
+    login: { path: '/login', module: 'login', template: 'login', title: 'Sign in · HSHS World' },
+    'edit-profile': { path: '/edit-profile', module: 'edit-profile', template: 'edit-profile', title: 'Edit profile · HSHS World' }
   };
   function currentFile() {
     try {
       if (global.HshsPaths) {
         var key = HshsPaths.key();
-        return key === 'home' ? '/' : '/' + key + '/';
+        return key === 'home' ? '/' : '/' + key;
       }
       var p = (location.pathname || '/').replace(/\/+$/, '') || '/';
       if (p === '' || p === '/') return '/';
-      return p.endsWith('/') ? p : p + '/';
+      return p;
     } catch (e) { return '/'; }
   }
   function resolveByPath(file) {

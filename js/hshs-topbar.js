@@ -6,7 +6,7 @@
     return false;
   }
   function href(file) {
-    return window.HshsPaths ? HshsPaths.href(file) : ('/' + String(file || '').replace(/\.html$/, '') + '/');
+    return window.HshsPaths ? HshsPaths.href(file) : ('/' + String(file || '').replace(/\.html$/, '').replace(/\/$/, ''));
   }
   function go(file) {
     var url = href(file);
