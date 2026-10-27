@@ -25,7 +25,7 @@
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = '/' + href.replace(/^\\/+/, '') + '?v=261027media2';
+    l.href = '/' + href + '?v=261027media2';
     l.setAttribute('data-hshs-css', href);
     document.head.appendChild(l);
   }
