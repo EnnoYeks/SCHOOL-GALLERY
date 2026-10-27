@@ -112,14 +112,16 @@
       if (photo.width) img.width = Number(photo.width);
       if (photo.height) img.height = Number(photo.height);
       var processedBase = photo.processedKey || photo.processed_key || '';
-      var processedUrl = processedBase && window.HshsStorage && window.HshsStorage.publicUrl
+      var availableWidths = [320, 640, 960, 1440].filter(function (width) { return Number(photo.width) >= width; });
+      var processedUrl = processedBase && Number(photo.width) >= 320 && window.HshsStorage && window.HshsStorage.publicUrl
         ? window.HshsStorage.publicUrl(processedBase) : '';
-      if (processedUrl) {
-        img.srcset = [320, 640, 960, 1440].map(function (width) {
+      if (processedUrl && availableWidths.length) {
+        img.srcset = availableWidths.map(function (width) {
           return window.HshsStorage.publicUrl(processedBase + '-' + width + '.webp') + ' ' + width + 'w';
         }).join(', ');
         img.sizes = '(max-width: 639px) 50vw, (max-width: 1023px) 33vw, (max-width: 1439px) 25vw, 20vw';
-        img.src = window.HshsStorage.publicUrl(processedBase + '-640.webp');
+        var selectedWidth = availableWidths.indexOf(640) !== -1 ? 640 : availableWidths[availableWidths.length - 1];
+        img.src = window.HshsStorage.publicUrl(processedBase + '-' + selectedWidth + '.webp');
       } else {
         img.src = photo.image || '';
       }
