@@ -109,7 +109,20 @@
       img.alt = photo.title || 'Campus photo';
       img.loading = 'lazy';
       img.decoding = 'async';
-      img.src = photo.image || '';
+      if (photo.width) img.width = Number(photo.width);
+      if (photo.height) img.height = Number(photo.height);
+      var processedBase = photo.processedKey || photo.processed_key || '';
+      var processedUrl = processedBase && window.HshsStorage && window.HshsStorage.publicUrl
+        ? window.HshsStorage.publicUrl(processedBase) : '';
+      if (processedUrl) {
+        img.srcset = [320, 640, 960, 1440].map(function (width) {
+          return window.HshsStorage.publicUrl(processedBase + '-' + width + '.webp') + ' ' + width + 'w';
+        }).join(', ');
+        img.sizes = '(max-width: 639px) 50vw, (max-width: 1023px) 33vw, (max-width: 1439px) 25vw, 20vw';
+        img.src = window.HshsStorage.publicUrl(processedBase + '-640.webp');
+      } else {
+        img.src = photo.image || '';
+      }
       img.addEventListener('load', function () { card.classList.add('is-loaded'); card.classList.remove('is-loading'); var blur = card.querySelector('.photo-blur'); if (blur) blur.remove(); }, { once: true });
       img.addEventListener('error', function () {
         img.removeAttribute('src');
