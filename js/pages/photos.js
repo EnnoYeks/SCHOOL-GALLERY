@@ -6,13 +6,9 @@
 
   function isPage() {
     if (window.HshsPaths) return HshsPaths.key() === 'photos';
-    var path = (location.pathname || '').toLowerCase();
-    var file = path.split('/').pop() || '';
-    if (file === 'photos.html' || file === 'photos') return true;
     if (document.documentElement.getAttribute('data-hshs-page') === 'photos') return true;
     return !!document.getElementById('masonryGrid');
   }
-  function base() { return '/'; }
   function loadOnce(src, id) {
     return new Promise(function (resolve) {
       if (id && document.getElementById(id)) return resolve();
@@ -29,7 +25,7 @@
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = base() + href + '?v=261002photos2';
+    l.href = '/' + href.replace(/^\\/+/, '') + '?v=261027media2';
     l.setAttribute('data-hshs-css', href);
     document.head.appendChild(l);
   }
@@ -55,8 +51,8 @@
     loadCss('css/photos-campus.css');
     loadCss('css/hshs-media-cards.css');
     if (!mountTemplate()) return;
-    await loadOnce(base() + 'js/hshs-media-cards.js?v=261026media1', 'hshs-media-cards');
-    await loadOnce(base() + 'js/photos.js?v=261026media1', 'hshs-leg-photos');
+    await loadOnce('/js/hshs-media-cards.js?v=261027media2', 'hshs-media-cards');
+    await loadOnce('/js/photos.js?v=261027media2', 'hshs-leg-photos');
     try {
       if (typeof global.startPhotos === 'function') global.startPhotos();
     } catch (e) {
