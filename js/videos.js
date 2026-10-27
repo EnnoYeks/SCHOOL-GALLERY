@@ -54,7 +54,7 @@ class VideosPage {
     apply() {
         let videos = [...this.videos];
         if (this.filter === "latest") videos.sort((a,b) => this.date(b.createdAt) - this.date(a.createdAt));
-        else if (this.filter === "trending") videos.sort((a,b) => this.score(b) - this.score(a));
+        else if (this.filter === "trending") videos.sort((a,b) => ((+b.trendingScore || this.score(b)) - (+a.trendingScore || this.score(a))));
         else if (this.filter !== "all") videos = videos.filter(v => String(v.category || "").toLowerCase().replace(/\s+/g,"-") === this.filter);
         if (this.search) videos = videos.filter(v => [v.title,v.description,v.category,v.author].join(" ").toLowerCase().includes(this.search));
         this.filtered = videos;
@@ -84,6 +84,12 @@ class VideosPage {
         if (title) title.textContent = this.filter === "trending" ? "Trending Videos" : this.filter === "latest" ? "Latest Videos" : this.filter === "all" ? "Latest Videos" : this.label(this.filter) + " Videos";
         document.querySelectorAll("[data-video-index]").forEach(el => {
             el.onclick = () => this.play(Number(el.dataset.videoIndex));
+            if (el.dataset.keyboardWired !== "1") {
+                el.dataset.keyboardWired = "1";
+                el.addEventListener("keydown", event => {
+                    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); this.play(Number(el.dataset.videoIndex)); }
+                });
+            }
         });
         this.enhanceCards();
     }
@@ -91,19 +97,19 @@ class VideosPage {
         const title = this.escape(v.title || "Untitled");
         const thumb = this.attr(v.thumbnailUrl || v.thumbnail || "");
         const dur = this.escape(v.duration || "");
-        return `<article class="vibe-feat" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
+        return `<article class="vibe-feat" role="button" tabindex="0" aria-label="Play ${title} by ${this.escape(v.author || v.creator || 'Campus student')}, ${dur || 'video'}" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
             ${thumb ? `<img src="${thumb}" alt="${title}" loading="lazy">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}
             ${first ? `<span class="badge">FEATURED</span>` : ""}
             <span class="play"><i class="fas fa-play"></i></span>
             ${dur ? `<span class="dur">${dur}</span>` : ""}
-            <div class="meta"><b>${title}</b><small>${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div>
+            <div class="meta"><b>${title}</b><small>${this.escape(v.author || v.creator || "Campus student")} • ${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div>
         </article>`;
     }
     rowCard(v, index) {
         const title = this.escape(v.title || "Untitled");
         const thumb = this.attr(v.thumbnailUrl || v.thumbnail || "");
         const dur = this.escape(v.duration || "");
-        return `<article class="vibe-row" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
+        return `<article class="vibe-row" role="button" tabindex="0" aria-label="Play ${title} by ${this.escape(v.author || v.creator || 'Campus student')}, ${dur || 'video'}" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
             <div class="shot">
                 ${thumb ? `<img src="${thumb}" alt="${title}" loading="lazy">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}
                 <span class="play"><i class="fas fa-play"></i></span>
