@@ -30,8 +30,8 @@ $$;
 
 revoke all on function public.increment_video_views(text) from public;
 revoke all on function public.increment_photo_likes(text) from public;
-grant execute on function public.increment_video_views(uuid) to anon, authenticated;
-grant execute on function public.increment_photo_likes(uuid) to anon, authenticated;
+grant execute on function public.increment_video_views(text) to anon, authenticated;
+grant execute on function public.increment_photo_likes(text) to anon, authenticated;
 
 -- These public counters are best-effort and can be abused; add server-side rate limiting
 -- and stricter per-user reaction tables before treating them as authoritative analytics.
