@@ -5,9 +5,8 @@
   global.__hshsvideosPageModule = true;
   function isPage() {
     var f = (window.HshsPaths ? HshsPaths.key() : '');
-    return f === 'videos' || f === 'studio' || (global.HshsRoute && global.HshsRoute.is(PAGE));
+    return f === 'videos' || f === 'studio' || document.documentElement.getAttribute('data-hshs-page') === 'videos' || (global.HshsRoute && global.HshsRoute.is(PAGE));
   }
-  function base() { return '/'; }
   function loadOnce(src, id) {
     return new Promise(function (res) {
       if (id && document.getElementById(id)) return res();
@@ -18,7 +17,7 @@
   }
   function loadCss(href) {
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=261002route1';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/' + href.replace(/^\\/+/, '') + '?v=261027media2';
     l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
   }
   function mount() {
@@ -31,11 +30,11 @@
     if (!tpl) return;
     if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl;
     loadCss('css/videos.css'); loadCss('css/vibe.css'); loadCss('css/hshs-hub.css'); loadCss('css/hshs-media-cards.css');
-    loadOnce(base() + 'js/hshs-media-cards.js?v=261026media1', 'hshs-media-cards').then(function () {
-      return loadOnce(base() + 'js/vibe-skel.js?v=261002route1', 'hshs-vibe-skel');
+    loadOnce('/js/hshs-media-cards.js?v=261027media2', 'hshs-media-cards').then(function () {
+      return loadOnce('/js/vibe-skel.js?v=261002route1', 'hshs-vibe-skel');
     }).then(function () {
       if (typeof global.startVideos === 'function') global.startVideos();
-      return loadOnce(base() + 'js/hshs-discover-ui.js?v=261002route1', 'hshs-discover-ui');
+      return loadOnce('/js/hshs-discover-ui.js?v=261002route1', 'hshs-discover-ui');
     }).then(function () { if (global.HshsDiscoverUi) global.HshsDiscoverUi.boot(); if (global.HshsRoute) global.HshsRoute.reveal(); });
   }
   function boot() {
