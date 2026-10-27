@@ -13,6 +13,9 @@
  *   POST   /admin/posts
  *   PATCH  /admin/posts/:id
  *   DELETE /admin/posts/:id
+ *   POST   /admin/content          (unified posts|photos|videos)
+ *   PATCH  /admin/content/:target/:id
+ *   DELETE /admin/content/:target/:id
  *   PUT    /admin/upload
  *   POST   /admin/feature
  *   POST   /admin/events
@@ -174,6 +177,46 @@ export default {
         return new Response(null, { status: 204, headers: cors(true) });
       }
 
+      // Unified content routes used by admin-api.js (posts | photos | videos)
+      if (url.pathname === "/admin/content" && request.method === "POST") {
+        let body = {};
+        try { body = await request.json(); } catch (e) {}
+        const target = String(body.target || "posts");
+        if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
+        const row = contentPayload(body, target, uid);
+        if (!row.ok) return json({ error: row.error }, 400, true);
+        const { data, error } = await sb.from(target).insert(row.data).select().single();
+        if (error) return json({ error: error.message || "Insert failed" }, 500, true);
+        if (body.feature && data && data.id) {
+          const patch = { featured: true, featured_at: new Date().toISOString() };
+          await sb.from(target).update(patch).eq("id", data.id).single().catch(() => {});
+        }
+        return json(data, 201, true);
+      }
+
+      const contentMatch = url.pathname.match(/^\/admin\/content\/([^/]+)\/([^/]+)$/);
+      if (contentMatch && request.method === "PATCH") {
+        const target = contentMatch[1];
+        const id = contentMatch[2];
+        if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
+        let body = {};
+        try { body = await request.json(); } catch (e) {}
+        const row = contentPayload(body, target, uid, true);
+        if (!row.ok) return json({ error: row.error }, 400, true);
+        const { data, error } = await sb.from(target).update(row.data).eq("id", id).single();
+        if (error) return json({ error: error.message || "Update failed" }, 500, true);
+        return json(data, 200, true);
+      }
+
+      if (contentMatch && request.method === "DELETE") {
+        const target = contentMatch[1];
+        const id = contentMatch[2];
+        if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
+        const { error } = await sb.from(target).delete().eq("id", id);
+        if (error) return json({ error: error.message || "Delete failed" }, 500, true);
+        return new Response(null, { status: 204, headers: cors(true) });
+      }
+
       return json({ error: "Not found" }, 404, true);
     }
 
@@ -260,6 +303,48 @@ function supabaseClient(env) {
       };
     }
   };
+}
+
+
+function contentPayload(body, target, uid, partial = false) {
+  const title = String(body.title || "").slice(0, 200);
+  const description = String(body.description || "").slice(0, 2000);
+  const category = String(body.category || "events").slice(0, 40);
+  const class_tag = String(body.class_tag || body.classTag || "Campus").slice(0, 40);
+  const type = String(body.type || (target === "videos" ? "video" : "photo")).slice(0, 20);
+  const image_url = String(body.image_url || body.image || "").slice(0, 1000);
+  const video_url = String(body.video_url || "").slice(0, 1000);
+  const thumbnail_url = String(body.thumbnail_url || image_url || "").slice(0, 1000);
+  const media_key = String(body.media_key || body.mediaKey || "").slice(0, 500);
+  if (!partial && target === "photos" && !image_url && !media_key) return { ok: false, error: "Photo requires media" };
+  if (!partial && target === "videos" && !video_url && !media_key) return { ok: false, error: "Video requires media" };
+  if (!partial && target === "posts" && !description && !image_url && !media_key) return { ok: false, error: "Description or media required" };
+  const data = {
+    title: title || (target === "photos" ? "Photo" : target === "videos" ? "Video" : "Untitled"),
+    description,
+    category,
+    class_tag,
+    image: image_url,
+    image_url,
+    thumbnail_url,
+    media_key,
+    media_provider: media_key ? "cloudflare-r2" : null,
+    author: body.author || "HSHS Admin",
+    author_id: uid,
+    updated_at: new Date().toISOString()
+  };
+  if (target === "posts") {
+    data.type = type;
+    data.status = ["draft", "published"].includes(body.status) ? body.status : "published";
+    data.is_official = true;
+    data.author_role = "admin";
+  }
+  if (target === "videos") {
+    data.video_url = video_url;
+    data.type = "video";
+  }
+  if (body.feature) data.featured = true;
+  return { ok: true, data };
 }
 
 function validatePost(body, partial = false) {
