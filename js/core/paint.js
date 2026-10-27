@@ -1,7 +1,7 @@
 (function (global) {
   'use strict';
 
-  // Clean app paths. Always /page/ — never index/*.html or page/index.html.
+  // Clean app paths. Always /page — never .html, and no required trailing slash.
   var HSHS_PAGES = {
     home: 1, gallery: 1, photos: 1, videos: 1, trending: 1, spotlight: 1,
     polls: 1, memories: 1, more: 1, search: 1, about: 1, contact: 1,
@@ -36,7 +36,7 @@
     if (!raw || raw === "index" || raw === "index.html") return "/" + q + hash;
     var key = hshsKey(raw);
     if (!key || key === "home") return "/" + q + hash;
-    return "/" + key + "/" + q + hash;
+    return "/" + key + q + hash;
   }
   global.HshsPaths = { key: hshsKey, href: hshsHref, pages: HSHS_PAGES };
   try {

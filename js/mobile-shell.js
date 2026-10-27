@@ -85,27 +85,27 @@
   function sub(name) {
     // map file names to clean app paths where possible
     var map = {
-      'buzz.html': '/buzz/',
-      'clips.html': '/buzz/',
-      'shorts.html': '/buzz/',
-      'gallery.html': '/gallery/',
-      'photos.html': '/photos/',
-      'videos.html': '/videos/',
-      'trending.html': '/trending/',
-      'spotlight.html': '/spotlight/',
-      'polls.html': '/polls/',
-      'memories.html': '/memories/',
-      'more.html': '/more/',
-      'about.html': '/about/',
-      'contact.html': '/contact/',
-      'profile.html': '/profile/',
-      'settings.html': '/settings/',
-      'chat.html': '/chat/',
-      'admin.html': '/admin/',
-      'login.html': '/login/',
-      'notifications.html': '/notifications/',
-      'saved.html': '/saved/',
-      'search.html': '/search/'
+      'buzz.html': '/buzz',
+      'clips.html': '/buzz',
+      'shorts.html': '/buzz',
+      'gallery.html': '/gallery',
+      'photos.html': '/photos',
+      'videos.html': '/videos',
+      'trending.html': '/trending',
+      'spotlight.html': '/spotlight',
+      'polls.html': '/polls',
+      'memories.html': '/memories',
+      'more.html': '/more',
+      'about.html': '/about',
+      'contact.html': '/contact',
+      'profile.html': '/profile',
+      'settings.html': '/settings',
+      'chat.html': '/chat',
+      'admin.html': '/admin',
+      'login.html': '/login',
+      'notifications.html': '/notifications',
+      'saved.html': '/saved',
+      'search.html': '/search'
     };
     return map[name] || abs(name);
   }
