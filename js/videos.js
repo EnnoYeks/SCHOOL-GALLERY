@@ -10,6 +10,8 @@ class VideosPage {
         this.pageSize = 12;
         this.loading = false;
         this.hasMore = true;
+        this.previewCleanups = [];
+        this.previewObserver = null;
         this.init();
     }
     async init() {
@@ -172,8 +174,8 @@ class VideosPage {
     }
     async updateViews(video){
         if (!video?.id || !window.HshsMediaCards) return;
-        await window.HshsMediaCards.incrementViews(video.id);
-        video.views = (+video.views || 0) + 1;
+        const saved = await window.HshsMediaCards.incrementViews(video.id);
+        if (saved) video.views = (+video.views || 0) + 1;
     }
     score(v){ return ((+v.likes||0)+(+v.comments||0))*4 + (+v.views||0); }
     date(v){ if (!v) return 0; if (typeof v.toMillis === "function") return v.toMillis(); if (v.seconds) return v.seconds * 1000; const n = new Date(v).getTime(); return Number.isFinite(n) ? n : 0; }
@@ -183,7 +185,7 @@ class VideosPage {
     label(v){ return String(v || "").replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()); }
     escape(v){ return String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
     attr(v){ return this.escape(v); }
-    destroy(){ try { const player = document.getElementById("videoPlayer"); const modal = document.getElementById("videoPlayerModal"); if (player) { player.pause(); player.removeAttribute("src"); player.load(); } if (modal) modal.classList.remove("active"); } catch (e) {} }
+    destroy(){ try { (this.previewCleanups || []).forEach(fn => fn()); this.previewCleanups = []; if (this.previewObserver) this.previewObserver.disconnect(); const player = document.getElementById("videoPlayer"); const modal = document.getElementById("videoPlayerModal"); if (player) { player.pause(); player.removeAttribute("src"); player.load(); } if (modal) modal.classList.remove("active"); } catch (e) {} }
 }
 
 function startVideos() {
