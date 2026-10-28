@@ -1,148 +1,228 @@
+"""Process school media locally: resize images, strip EXIF GPS, create placeholders, and prepare video posters.
+
+Thumbs are genuinely small (~320px). Medium and large are generated from the original, not the thumb.
+Supports resumable uploads (skips already uploaded), progress bar, low-data mode, and outputs a manifest JSON.
+Dry-run is the safe default; use --live to upload.
+"""
+
 from __future__ import annotations
 
 import argparse
+import base64
+import io
 import json
-import re
+import os
+import shutil
+import sys
 from pathlib import Path
-from typing import Dict, Iterable, List
+
+from PIL import Image, ImageFilter, ImageOps
+
+try:
+    import boto3
+except Exception:  # pragma: no cover
+    boto3 = None
+
+try:
+    from tqdm import tqdm
+except Exception:  # pragma: no cover
+    tqdm = lambda x, **k: x  # type: ignore
 
 
-CSS_SELECTOR_RE = re.compile(r"([^{]+)\s*\{", re.MULTILINE)
+DEFAULT_OUTPUT = Path("artifacts/media")
 
 
-def is_probably_unused(selector: str, class_names: set[str]) -> bool:
-    selector = selector.strip()
-    if not selector or selector.startswith("@"):
+def ffmpeg_available() -> bool:
+    return shutil.which("ffmpeg") is not None
+
+
+def ensure_directories(root: Path) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "images" / "thumb").mkdir(parents=True, exist_ok=True)
+    (root / "images" / "medium").mkdir(parents=True, exist_ok=True)
+    (root / "images" / "large").mkdir(parents=True, exist_ok=True)
+    (root / "videos").mkdir(parents=True, exist_ok=True)
+
+
+def strip_exif_gps(source: Path, destination: Path, quality: int = 80) -> None:
+    with Image.open(source) as img:
+        image = ImageOps.exif_transpose(img)
+        exif = image.getexif()
+        exif.pop(34853, None)  # GPSInfo
+        save_kwargs = {"format": "WEBP", "quality": quality}
+        exif_bytes = exif.tobytes() if exif and len(exif) else None
+        if exif_bytes:
+            save_kwargs["exif"] = exif_bytes
+        image.save(destination, **save_kwargs)
+
+
+def make_placeholder(source: Path, output_path: Path) -> str:
+    with Image.open(source) as img:
+        img = img.convert("RGB")
+        img = img.resize((32, 32), Image.Resampling.LANCZOS)
+        img = img.filter(ImageFilter.GaussianBlur(1.2))
+        buffer = io.BytesIO()
+        img.save(buffer, format="WEBP", quality=40)
+        payload = base64.b64encode(buffer.getvalue()).decode("ascii")
+    output_path.write_bytes(buffer.getvalue())
+    return payload
+
+
+def resize_image(source: Path, target: Path, max_size: tuple[int, int], quality: int = 80) -> None:
+    with Image.open(source) as img:
+        img = ImageOps.exif_transpose(img)
+        img = img.convert("RGB")
+        img.thumbnail(max_size, Image.Resampling.LANCZOS)
+        img.save(target, "WEBP", quality=quality)
+
+
+def create_video_poster(source: Path, target: Path) -> None:
+    if not ffmpeg_available():
+        raise RuntimeError("ffmpeg not installed. Install ffmpeg and add it to PATH.")
+    command = ["ffmpeg", "-y", "-i", str(source), "-frames:v", "1", "-q:v", "5", str(target)]
+    import subprocess
+    subprocess.run(command, check=True, capture_output=True)
+
+
+def already_uploaded(client, bucket: str, key: str) -> bool:
+    try:
+        client.head_object(Bucket=bucket, Key=key)
+        return True
+    except Exception:
         return False
-    identifiers = set(re.findall(r"(?:\.|#)?([A-Za-z0-9_-]+)", selector))
-    if not identifiers:
-        return False
-    for ident in identifiers:
-        if ident in class_names:
-            return False
-    return True
 
 
-def list_css_files(root: Path) -> List[Path]:
-    css_dir = root / "css"
-    return sorted(css_dir.glob("*.css")) if css_dir.exists() else []
+def upload_to_r2(file_path: Path, key: str, dry_run: bool = True, client=None, bucket: str | None = None) -> dict | None:
+    if dry_run:
+        return {"key": key, "dry_run": True, "file": str(file_path)}
+    if client is None or bucket is None:
+        endpoint = os.getenv("R2_ENDPOINT_URL")
+        bucket = os.getenv("R2_BUCKET_NAME")
+        access_key = os.getenv("R2_ACCESS_KEY_ID")
+        secret = os.getenv("R2_SECRET_ACCESS_KEY")
+        if not all([endpoint, bucket, access_key, secret]) or boto3 is None:
+            print("R2 settings missing; skipping upload.")
+            return None
+        client = boto3.client(
+            "s3",
+            endpoint_url=endpoint,
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret,
+            region_name="auto",
+        )
+    if already_uploaded(client, bucket, key):
+        return {"key": key, "skipped": True, "reason": "already exists"}
+    client.upload_file(str(file_path), bucket, key)
+    return {"key": key, "dry_run": False}
 
 
-def extract_selector_names(css_text: str) -> List[str]:
-    selectors = []
-    for match in CSS_SELECTOR_RE.finditer(css_text):
-        selector = match.group(1).strip()
-        if selector:
-            selectors.append(selector)
-    return selectors
+def process_directory(
+    input_dir: Path,
+    output_root: Path,
+    dry_run: bool = True,
+    low_data: bool = False,
+) -> list[dict]:
+    ensure_directories(output_root)
+    metadata = []
+    files = [p for p in sorted(input_dir.iterdir()) if p.is_file()]
+    iterator = tqdm(files, desc="Processing media") if not low_data else files
 
+    r2_client = None
+    r2_bucket = None
+    if not dry_run and boto3 is not None:
+        endpoint = os.getenv("R2_ENDPOINT_URL")
+        r2_bucket = os.getenv("R2_BUCKET_NAME")
+        access_key = os.getenv("R2_ACCESS_KEY_ID")
+        secret = os.getenv("R2_SECRET_ACCESS_KEY")
+        if all([endpoint, r2_bucket, access_key, secret]):
+            r2_client = boto3.client(
+                "s3",
+                endpoint_url=endpoint,
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret,
+                region_name="auto",
+            )
 
-def deduplicate_and_find_overrides(css_files: Iterable[Path]) -> dict:
-    seen = {}
-    duplicates = []
-    override_candidates = []
-    all_selectors = []
+    quality = 70 if low_data else 80
 
-    for path in css_files:
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        for selector in extract_selector_names(text):
-            key = selector.split()[0].strip()
-            if key in seen:
-                duplicates.append({"selector": key, "files": [seen[key], path.name]})
-            else:
-                seen[key] = path.name
-            all_selectors.append({"selector": selector, "file": path.name})
+    for file_path in iterator:
+        if file_path.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}:
+            stem = file_path.stem
+            thumb = output_root / "images" / "thumb" / f"{stem}.webp"
+            medium = output_root / "images" / "medium" / f"{stem}.webp"
+            large = output_root / "images" / "large" / f"{stem}.webp"
+            placeholder = output_root / "images" / "thumb" / f"{stem}-placeholder.webp"
 
-    for item in all_selectors:
-        if item["selector"].startswith("@"):
-            continue
-        if item["selector"].startswith("."):
-            override_candidates.append(item)
+            # Generate from original
+            resize_image(file_path, thumb, (320, 320), quality=quality)
+            resize_image(file_path, medium, (800, 800), quality=quality)
+            resize_image(file_path, large, (1400, 1400), quality=quality)
+            blur_payload = make_placeholder(file_path, placeholder)
+            # Ensure GPS is stripped on the thumb (and others if desired)
+            strip_exif_gps(thumb, thumb, quality=quality)
 
-    return {"duplicates": duplicates, "override_candidates": override_candidates[:200], "total": len(all_selectors)}
+            meta = {
+                "source": str(file_path),
+                "thumb": str(thumb),
+                "medium": str(medium),
+                "large": str(large),
+                "placeholder": str(placeholder),
+                "placeholder_base64": blur_payload,
+                "status": "processed",
+            }
+            metadata.append(meta)
 
+            for path, key in [
+                (thumb, f"photos/thumb/{file_path.name}"),
+                (medium, f"photos/medium/{file_path.name}"),
+                (large, f"photos/large/{file_path.name}"),
+                (placeholder, f"photos/placeholders/{file_path.name}"),
+            ]:
+                upload_to_r2(path, key, dry_run=dry_run, client=r2_client, bucket=r2_bucket)
 
-def collect_html_classes(root: Path) -> set[str]:
-    class_names = set()
-    for path in root.rglob("*.html"):
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        class_names.update(re.findall(r"class=['\"]([^'\"]+)['\"]", text))
-    for path in root.rglob("*.js"):
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        class_names.update(re.findall(r"classList\.(?:add|remove|toggle)\(['\"]([^'\"]+)['\"]", text))
-        class_names.update(re.findall(r"\.([A-Za-z0-9_-]+)", text))
-    cleaned = set()
-    for name in class_names:
-        for piece in name.split():
-            cleaned.add(piece.strip())
-    return cleaned
+        elif file_path.suffix.lower() in {".mp4", ".mov", ".webm"}:
+            poster = output_root / "videos" / f"{file_path.stem}-poster.webp"
+            if ffmpeg_available():
+                try:
+                    create_video_poster(file_path, poster)
+                except Exception as exc:
+                    print(f"Poster failed for {file_path}: {exc}")
+            metadata.append({
+                "source": str(file_path),
+                "poster": str(poster) if poster.exists() else None,
+                "status": "processed",
+            })
+            if poster.exists():
+                upload_to_r2(poster, f"videos/posters/{file_path.name}.webp", dry_run=dry_run, client=r2_client, bucket=r2_bucket)
 
-
-def merge_css_files(css_files: list[Path], output_dir: Path) -> dict:
-    output_dir.mkdir(parents=True, exist_ok=True)
-    merged = []
-    for path in css_files:
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        merged.append(text)
-
-    merged_text = "\n\n".join(merged)
-    merged_path = output_dir / "merged.css"
-    merged_path.write_text(merged_text, encoding="utf-8")
-
-    minified = re.sub(r"\s+", " ", merged_text)
-    minified = re.sub(r"\s*([{}:;,])\s*", r"\1", minified)
-    minified = re.sub(r";}", "}", minified)
-    (output_dir / "merged.min.css").write_text(minified, encoding="utf-8")
-
-    return {"merged_path": str(merged_path), "minified_path": str(output_dir / "merged.min.css"), "size_bytes": len(merged_text.encode("utf-8"))}
-
-
-def generate_report(root: Path, css_files: list[Path], output_dir: Path) -> str:
-    html_classes = collect_html_classes(root)
-    analysis = deduplicate_and_find_overrides(css_files)
-    unused = []
-    for selector in [item["selector"] for item in analysis["override_candidates"]]:
-        if is_probably_unused(selector, html_classes):
-            unused.append(selector)
-
-    report = {
-        "css_files": [f.name for f in css_files],
-        "selector_count": analysis["total"],
-        "duplicate_selectors": analysis["duplicates"],
-        "likely_unused": unused[:100],
-        "merged_bundle": str(output_dir / "merged.min.css"),
-    }
-    return json.dumps(report, indent=2)
+    # Write manifest
+    manifest_path = output_root / "manifest.json"
+    manifest_path.write_text(json.dumps({"files": metadata, "count": len(metadata)}, indent=2), encoding="utf-8")
+    return metadata
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Analyze CSS for duplicates and likely overrides, then build a safe merged bundle in a new folder.")
-    parser.add_argument("--root", default=".", help="Project root")
-    parser.add_argument("--report-dir", default="dist-css", help="Output folder for CSS bundles")
-    parser.add_argument("--verify", action="store_true", help="Run a simple verification pass")
+    parser = argparse.ArgumentParser(
+        description="Process school media locally: resize images, strip EXIF GPS, create placeholders, and prepare video posters."
+    )
+    parser.add_argument("--input-dir", default="./uploads", help="Directory with media files")
+    parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT), help="Where to save processed assets")
+    parser.add_argument("--live", action="store_true", help="Perform real uploads to R2 (default is dry-run)")
+    parser.add_argument("--low-data", action="store_true", help="Lower quality and skip progress bar for slow connections")
     args = parser.parse_args()
 
-    root = Path(args.root).resolve()
-    output_dir = root / args.report_dir
-    css_files = list_css_files(root)
+    dry_run = not args.live
+    input_dir = Path(args.input_dir)
+    output_root = Path(args.output_dir)
 
-    if not css_files:
-        print("No CSS files found in /css")
+    if not input_dir.exists():
+        print(f"Input directory not found: {input_dir}")
         return 1
 
-    bundle = merge_css_files(css_files, output_dir)
-    report = generate_report(root, css_files, output_dir)
-    (output_dir / "audit-report.json").write_text(report, encoding="utf-8")
-
-    print(f"CSS bundle created in {output_dir}")
-    print(f"Merged bundle size: {bundle['size_bytes']} bytes")
-    print(report)
-
-    if args.verify:
-        print("Verification mode: CSS bundles generated successfully; no original CSS files were overwritten.")
-
+    result = process_directory(input_dir, output_root, dry_run=dry_run, low_data=args.low_data)
+    print(json.dumps({"processed": len(result), "dry_run": dry_run, "manifest": str(output_root / "manifest.json")}, indent=2))
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())
