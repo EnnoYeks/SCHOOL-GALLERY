@@ -31,3 +31,36 @@ body.has-mobile-shell, body { padding-bottom: calc(72px + env(safe-area-inset-bo
   padding: 24px;
   opacity: .7;
 }
+
+/* Smooth pill search bars site-wide */
+.search-container .search-input,
+.search-input,
+input[type="search"],
+.hs-bar,
+.msg-search,
+.search-box,
+.hshs-chat-search,
+.gallery-search,
+.admin-search,
+.pk-search,
+.photos-search,
+.chat-compose-search,
+.msg-emoji-search {
+  border-radius: 999px !important;
+  transition: border-radius 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.search-container .search-input:focus,
+.search-input:focus,
+input[type="search"]:focus,
+.hs-bar:focus-within,
+.msg-search:focus-within,
+.search-box:focus-within,
+.hshs-chat-search:focus-within,
+.gallery-search:focus-within,
+.admin-search:focus-within,
+.pk-search:focus-within,
+.photos-search:focus-within,
+.chat-compose-search:focus-within,
+.msg-emoji-search:focus-within {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
