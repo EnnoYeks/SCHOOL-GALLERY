@@ -1,52 +1,97 @@
+"""Pytest tests for the Python tooling.
+
+Uses temporary directories and mocks for boto3 / supabase so no real network or keys are required.
+"""
+
 from __future__ import annotations
 
-import argparse
+import json
 import os
-import sys
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
-from reportlab.pdfgen import canvas
-
-
-def create_yearbook_pdf(album_name: str, output_path: Path, photo_paths: list[str] | None = None) -> Path:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    c = canvas.Canvas(str(output_path), pagesize=letter)
-    c.setTitle(f"HSHS World — {album_name}")
-    c.setAuthor("HSHS World")
-    c.setFont("Helvetica-Bold", 22)
-    c.drawString(1 * inch, 10 * inch, "HSHS World")
-    c.setFont("Helvetica-Oblique", 12)
-    c.drawString(1 * inch, 9.6 * inch, "Educate. Engage. Empower.")
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(1 * inch, 8.8 * inch, album_name)
-
-    photo_paths = photo_paths or []
-    x_positions = [1.0 * inch, 3.6 * inch, 6.2 * inch]
-    y_positions = [7.1 * inch, 5.1 * inch, 3.1 * inch]
-    for index, photo in enumerate(photo_paths[:9]):
-        x = x_positions[index % 3]
-        y = y_positions[index // 3]
-        if os.path.exists(photo):
-            c.drawImage(photo, x, y, width=2.1 * inch, height=1.7 * inch)
-        else:
-            c.rect(x, y, 2.1 * inch, 1.7 * inch, stroke=1, fill=0)
-    c.save()
-    return output_path
+import pytest
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate a printable yearbook-style PDF with the HSHS World brand.")
-    parser.add_argument("--album-name", default="School Moments 2026", help="Album or event name")
-    parser.add_argument("--output", default="./reports/yearbook.pdf", help="Where to save the PDF")
-    parser.add_argument("--images", nargs="*", default=[], help="Optional image paths used in the yearbook")
-    args = parser.parse_args()
+@pytest.fixture
+def tmp_media(tmp_path: Path):
+    d = tmp_path / "uploads"
+    d.mkdir()
+    # Create a tiny fake image
+    from PIL import Image
+    img = Image.new("RGB", (400, 300), color="red")
+    img.save(d / "test.jpg")
+    return d
 
-    pdf_path = create_yearbook_pdf(args.album_name, Path(args.output), args.images)
-    print(f"Yearbook PDF created: {pdf_path}")
-    return 0
+
+def test_site_check_import():
+    from tools.site_check import main
+    assert callable(main)
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+def test_css_tool_no_css(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    from tools.css_tool import list_css_files
+    assert list_css_files(tmp_path) == []
+
+
+def test_media_pipeline_dry_run(tmp_media: Path, tmp_path: Path):
+    from tools.media_pipeline import process_directory
+    out = tmp_path / "out"
+    result = process_directory(tmp_media, out, dry_run=True)
+    assert len(result) == 1
+    assert (out / "images" / "thumb" / "test.webp").exists()
+    assert (out / "manifest.json").exists()
+    # Thumb should be small
+    from PIL import Image
+    with Image.open(out / "images" / "thumb" / "test.webp") as im:
+        assert max(im.size) <= 320
+
+
+def test_moderate_flags_tiny(tmp_path: Path):
+    from tools.moderate import heuristic_score
+    from PIL import Image
+    tiny = tmp_path / "tiny.jpg"
+    Image.new("RGB", (50, 50)).save(tiny)
+    decision, reason = heuristic_score(tiny)
+    assert decision == "flag"
+    assert "small" in reason
+
+
+def test_auto_albums_groups(tmp_media: Path):
+    from tools.auto_albums import build_album_suggestions
+    suggestions = build_album_suggestions(tmp_media)
+    assert len(suggestions) >= 1
+    assert "date" in suggestions[0]
+
+
+def test_weekly_report_missing_creds(monkeypatch):
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
+    from tools.weekly_report import fetch_summary
+    summary = fetch_summary()
+    assert summary["status"] == "missing-credentials"
+    assert summary["total_posts"] is None
+
+
+def test_yearbook_creates_pdf(tmp_path: Path, tmp_media: Path):
+    from tools.yearbook_pdf import create_yearbook_pdf
+    out = tmp_path / "yb.pdf"
+    img = str(tmp_media / "test.jpg")
+    result = create_yearbook_pdf("Test Album", out, [img], ["Caption"])
+    assert result.exists()
+    assert result.stat().st_size > 100
+
+
+def test_backup_dry_run():
+    from tools.backup import copy_r2_to_b2
+    result = copy_r2_to_b2(dry_run=True)
+    assert result[0]["status"] == "dry_run"
+
+
+@patch("tools.backup.boto3")
+def test_backup_verify_structure(mock_boto):
+    from tools.backup import verify_backup
+    summary = verify_backup([{"table": "posts", "count": 1}], [{"status": "copied"}])
+    assert "verified" in summary
+    assert summary["counts"]["copied_objects"] == 1
