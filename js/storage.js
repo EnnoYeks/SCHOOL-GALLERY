@@ -235,8 +235,8 @@
           provider: "cloudflare-r2",
           kind: kind,
           size: (file && file.size) || 0,
-        width: dims.width,
-        height: dims.height
+          width: dims.width,
+          height: dims.height
         };
       } catch (err) {
         console.warn("[HshsStorage] R2 upload failed, local fallback:", err && err.message);
@@ -258,7 +258,9 @@
           key: key,
           provider: "local-dataurl",
           kind: kind,
-          size: dataUrl.length
+          size: dataUrl.length,
+          width: dims.width,
+          height: dims.height
         };
       } catch (e) { /* fall through */ }
     }
@@ -272,8 +274,8 @@
           provider: "local-dataurl",
           kind: kind,
           size: (file && file.size) || 0,
-        width: dims.width,
-        height: dims.height
+          width: dims.width,
+          height: dims.height
         });
       };
       reader.onerror = reject;
