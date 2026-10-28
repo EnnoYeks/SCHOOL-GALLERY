@@ -19,7 +19,7 @@ body:has(.hs-search) {
 }
 .hs-bar {
   display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 8px 0 14px;
-  border-radius: 16px; background: #0b1f4d; border: 1px solid rgba(59, 130, 246, .28);
+  border-radius: 999px; background: #0b1f4d; border: 1px solid rgba(59, 130, 246, .28);
 }
 .hs-bar i.lead { color: #3b82f6; width: 18px; text-align: center; }
 .hs-bar input {
