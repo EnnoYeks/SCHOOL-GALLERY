@@ -160,12 +160,15 @@
       this.busy = true; this.setFeedback('upFeedback', 'Uploading…'); this.setProgress(10);
       try {
         let media_key = '', image_url = '', video_url = '', thumbnail_url = '', poster_key = '';
+        let width = null, height = null;
         if (file && window.HshsStorage) {
           this.setProgress(30);
           const up = window.HshsStorage.uploadAdmin
             ? await window.HshsStorage.uploadAdmin(file)
             : await window.HshsStorage.upload(file, { kind: file.type.indexOf('video/') === 0 ? 'video' : 'photo' });
           media_key = up.key || '';
+          width = Number(up.width) > 0 ? Number(up.width) : null;
+          height = Number(up.height) > 0 ? Number(up.height) : null;
           if (file.type.indexOf('video/') === 0) video_url = up.url; else { image_url = up.url; thumbnail_url = up.url; }
           this.setProgress(60);
         }
@@ -177,7 +180,7 @@
         }
         const payload = {
           target, title: title || (target === 'posts' ? 'Untitled' : target === 'photos' ? 'Photo' : 'Video'),
-          description, category, class_tag, media_key, image_url, video_url, thumbnail_url, poster_key, feature,
+          description, category, class_tag, media_key, image_url, video_url, thumbnail_url, poster_key, width, height, feature,
           status: target === 'posts' ? status : 'published',
           type: file && file.type.indexOf('video/') === 0 ? 'video' : 'photo'
         };
@@ -202,6 +205,8 @@
             videoUrl: payload.video_url || '',
             mediaKey: payload.media_key || '',
             mediaProvider: 'cloudflare-r2',
+            width: payload.width,
+            height: payload.height,
             type: payload.type
           };
           if (target === 'photos') saved = await window.db.createPhoto(common);
