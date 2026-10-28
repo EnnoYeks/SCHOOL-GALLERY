@@ -87,6 +87,52 @@
     return kind + "s/" + y + "/" + m + "/" + day + "/" + uid() + "-" + Date.now() + "." + e;
   }
 
+  function mediaSize(file) {
+    return new Promise(function (resolve) {
+      var empty = { width: 0, height: 0 };
+      if (!file) return resolve(empty);
+
+      if (file.type && file.type.indexOf("video/") === 0) {
+        var video = document.createElement("video");
+        var objectUrl = URL.createObjectURL(file);
+        video.preload = "metadata";
+        video.onloadedmetadata = function () {
+          var dims = { width: video.videoWidth || 0, height: video.videoHeight || 0 };
+          URL.revokeObjectURL(objectUrl);
+          resolve(dims);
+        };
+        video.onerror = function () {
+          URL.revokeObjectURL(objectUrl);
+          resolve(empty);
+        };
+        video.src = objectUrl;
+        return;
+      }
+
+      if (typeof createImageBitmap === "function") {
+        createImageBitmap(file).then(function (bitmap) {
+          var dims = { width: bitmap.width || 0, height: bitmap.height || 0 };
+          if (bitmap.close) bitmap.close();
+          resolve(dims);
+        }).catch(function () { resolve(empty); });
+        return;
+      }
+
+      var image = new Image();
+      var objectUrl = URL.createObjectURL(file);
+      image.onload = function () {
+        var dims = { width: image.naturalWidth || 0, height: image.naturalHeight || 0 };
+        URL.revokeObjectURL(objectUrl);
+        resolve(dims);
+      };
+      image.onerror = function () {
+        URL.revokeObjectURL(objectUrl);
+        resolve(empty);
+      };
+      image.src = objectUrl;
+    });
+  }
+
   function checkSize(file, kind) {
     var max = kind === "video" ? (cfg.maxVideoSize || 104857600) : (cfg.maxPhotoSize || 52428800);
     if (file && file.size && file.size > max) {
@@ -148,6 +194,7 @@
     options = options || {};
     var kind = options.kind || (file && file.type && file.type.indexOf("video") === 0 ? "video" : "photo");
     checkSize(file, kind);
+    var dims = await mediaSize(file);
 
     var key = objectKey(kind, file);
     var r2 = r2Config();
@@ -187,7 +234,9 @@
           key: key,
           provider: "cloudflare-r2",
           kind: kind,
-          size: (file && file.size) || 0
+          size: (file && file.size) || 0,
+          width: dims.width,
+          height: dims.height
         };
       } catch (err) {
         console.warn("[HshsStorage] R2 upload failed, local fallback:", err && err.message);
@@ -209,7 +258,9 @@
           key: key,
           provider: "local-dataurl",
           kind: kind,
-          size: dataUrl.length
+          size: dataUrl.length,
+          width: dims.width,
+          height: dims.height
         };
       } catch (e) { /* fall through */ }
     }
@@ -222,7 +273,9 @@
           key: key,
           provider: "local-dataurl",
           kind: kind,
-          size: (file && file.size) || 0
+          size: (file && file.size) || 0,
+          width: dims.width,
+          height: dims.height
         });
       };
       reader.onerror = reject;
@@ -234,7 +287,9 @@
             key: key,
             provider: "local-blob",
             kind: kind,
-            size: (file && file.size) || 0
+            size: (file && file.size) || 0,
+          width: dims.width,
+          height: dims.height
           });
           return;
         } catch (e) {}
@@ -275,6 +330,7 @@
     if (!file) throw new Error("No file");
     var kind = (file.type && file.type.indexOf("video") === 0) ? "video" : "photo";
     checkSize(file, kind);
+    var dims = await mediaSize(file);
     var allowed = kind === "video" ? ["video/mp4", "video/webm"] : ["image/jpeg", "image/png", "image/webp"];
     if (allowed.indexOf(file.type) === -1) throw new Error("Unsupported file type");
     var token = await (g.auth && g.auth.currentUser ? g.auth.currentUser.getIdToken() : Promise.reject(new Error("Not signed in")));
@@ -299,7 +355,9 @@
       key: data.key,
       provider: "cloudflare-r2",
       kind: kind,
-      size: file.size
+      size: file.size,
+      width: dims.width,
+      height: dims.height
     };
   }
 
@@ -313,6 +371,7 @@
     mediaUrl: mediaUrl,
     publicBase: publicBase,
     r2Config: r2Config,
+    mediaSize: mediaSize,
     provider: function () {
       var r = r2Config();
       return r && r.signUrl ? "cloudflare-r2" : (cfg.provider || "local");
