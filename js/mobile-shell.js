@@ -296,7 +296,7 @@
       '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="buzz" aria-label="Vibe" title="Vibe"><i class="fas fa-bolt"></i></a>' +
       '<button type="button" class="tab-upload" data-tab="upload" id="openUploadStudio" aria-label="Create" title="Create"><span class="tab-upload-btn"><i class="fas fa-plus"></i></span></button>' +
       '<a href="' + r.PRIMARY[2].href + '" class="' + (isActive(r.PRIMARY[2]) ? 'active' : '') + '" data-tab="gallery" aria-label="Gallery" title="Gallery"><i class="fas fa-images"></i></a>' +
-      '<a href="#more" class="' + (moreActive ? 'active' : '') + '" data-tab="more" id="openMoreSheet" aria-label="More" title="More"><i class="fas fa-ellipsis"></i></a>' +
+      '<a href="#more" class="' + (moreActive ? 'active' : '') + '" data-tab="more" id="openMoreSheet" aria-label="More" title="More"><i class="fas fa-grip"></i></a>' +
       '<div class="nav-indicator" aria-hidden="true"></div>';
     var backdrop = document.createElement('div');
     backdrop.className = 'more-backdrop';
