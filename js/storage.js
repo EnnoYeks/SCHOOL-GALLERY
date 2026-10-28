@@ -330,6 +330,7 @@
     if (!file) throw new Error("No file");
     var kind = (file.type && file.type.indexOf("video") === 0) ? "video" : "photo";
     checkSize(file, kind);
+    var dims = await mediaSize(file);
     var allowed = kind === "video" ? ["video/mp4", "video/webm"] : ["image/jpeg", "image/png", "image/webp"];
     if (allowed.indexOf(file.type) === -1) throw new Error("Unsupported file type");
     var token = await (g.auth && g.auth.currentUser ? g.auth.currentUser.getIdToken() : Promise.reject(new Error("Not signed in")));
@@ -349,7 +350,6 @@
       throw new Error(msg);
     }
     var data = await res.json();
-    var dims = await mediaSize(file);
     return {
       url: publicUrl(data.key),
       key: data.key,
