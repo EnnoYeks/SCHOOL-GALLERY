@@ -14,7 +14,7 @@
   }
   function loadCss(href) {
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=261025admin4';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=261028media1';
     l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
   }
   async function mount() {
@@ -27,7 +27,9 @@
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
     loadCss('css/admin.css');
-    await loadOnce(base() + 'js/admin.js?v=261025open1', 'hshs-leg-admin');
+    loadCss('css/admin-media-manager.css');
+    await loadOnce(base() + 'js/admin.js?v=261028media1', 'hshs-leg-admin');
+    await loadOnce(base() + 'js/admin-media-manager.js?v=261028media1', 'hshs-admin-media-manager');
     global['__hshs' + PAGE + 'Mounted'] = true;
     if (global.HshsRoute) global.HshsRoute.reveal();
   }
