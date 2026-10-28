@@ -257,6 +257,19 @@
       else on = file === tab + '.html' || location.pathname === '/' + tab;
       a.classList.toggle('active', on);
     });
+    // Position sliding indicator
+    var indicator = document.querySelector('.mobile-tabbar .nav-indicator');
+    var activeLink = document.querySelector('.mobile-tabbar a.active');
+    if (indicator && activeLink) {
+      var bar = indicator.parentElement;
+      var barRect = bar.getBoundingClientRect();
+      var linkRect = activeLink.getBoundingClientRect();
+      var left = linkRect.left - barRect.left + (linkRect.width / 2) - 22;
+      indicator.style.left = left + 'px';
+      indicator.style.opacity = '1';
+    } else if (indicator) {
+      indicator.style.opacity = '0';
+    }
     document.querySelectorAll('.navbar .nav-link, .more-grid a').forEach(function (a) {
       var href = (a.getAttribute('href') || '').split('/').pop();
       var on = href === file || ((file === 'index.html' || file === '') && href === 'index.html') || (file === 'contact.html' && href === 'contat.html');
@@ -279,11 +292,12 @@
     bar.className = 'mobile-tabbar';
     bar.setAttribute('aria-label', 'Primary');
     bar.innerHTML =
-      '<a href="' + r.PRIMARY[0].href + '" class="' + (isActive(r.PRIMARY[0]) ? 'active' : '') + '" data-tab="home"><i class="fas fa-house"></i><span>Home</span></a>' +
-      '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="buzz"><i class="fas fa-bolt"></i><span>Vibe</span></a>' +
-      '<button type="button" class="tab-upload" data-tab="upload" id="openUploadStudio" aria-label="Upload"><span class="tab-upload-btn"><i class="fas fa-plus"></i></span></button>' +
-      '<a href="' + r.PRIMARY[2].href + '" class="' + (isActive(r.PRIMARY[2]) ? 'active' : '') + '" data-tab="gallery"><i class="fas fa-images"></i><span>Gallery</span></a>' +
-      '<a href="#more" class="' + (moreActive ? 'active' : '') + '" data-tab="more" id="openMoreSheet"><i class="fas fa-ellipsis"></i><span>More</span></a>';
+      '<a href="' + r.PRIMARY[0].href + '" class="' + (isActive(r.PRIMARY[0]) ? 'active' : '') + '" data-tab="home" aria-label="Home" title="Home"><i class="fas fa-house"></i></a>' +
+      '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="buzz" aria-label="Vibe" title="Vibe"><i class="fas fa-bolt"></i></a>' +
+      '<button type="button" class="tab-upload" data-tab="upload" id="openUploadStudio" aria-label="Create" title="Create"><span class="tab-upload-btn"><i class="fas fa-plus"></i></span></button>' +
+      '<a href="' + r.PRIMARY[2].href + '" class="' + (isActive(r.PRIMARY[2]) ? 'active' : '') + '" data-tab="gallery" aria-label="Gallery" title="Gallery"><i class="fas fa-images"></i></a>' +
+      '<a href="#more" class="' + (moreActive ? 'active' : '') + '" data-tab="more" id="openMoreSheet" aria-label="More" title="More"><i class="fas fa-ellipsis"></i></a>' +
+      '<div class="nav-indicator" aria-hidden="true"></div>';
     var backdrop = document.createElement('div');
     backdrop.className = 'more-backdrop';
     backdrop.id = 'moreBackdrop';
