@@ -6,9 +6,9 @@
   var PAGE = 'gallery';
   var PAGE_SIZE = 48;
   var GAP = 14;
-  var MIN_COL = 150;
+  var MIN_COL = 180;
+  var MAX_COL_W = 340;
   var MAX_COLS = 5;
-  /* Approximate chrome under the media (copy overlay is absolute; actions bar is in flow) */
   var ACTIONS_H = 44;
   var COPY_PAD = 0;
 
@@ -32,8 +32,8 @@
   }
   function base() { return '/'; }
   function esc(v) {
-    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
-      return { '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' }[c];
+    return String(v == null ? '' : v).replace(/[&<>\"']/g, function (c) {
+      return { '&': '&', '<': '<', '>': '>', '\"': '"', "'": '&#39;' }[c];
     });
   }
   function count(v) {
@@ -70,7 +70,7 @@
       if (document.querySelector('link[data-hshs-gallery-css="' + href + '"]')) return;
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = base() + href + '?v=261027masonry1';
+      l.href = base() + href + '?v=261028cap1';
       l.dataset.hshsGalleryCss = href;
       document.head.appendChild(l);
     });
@@ -93,11 +93,9 @@
     item.createdAt = item.createdAt || item.created_at || item.date || Date.now();
     item._media = mediaUrl(item);
     item._video = videoUrl(item);
-    /* Intrinsic size for stable masonry before file loads */
     var w = Number(item.width || item.w || 0);
     var h = Number(item.height || item.h || 0);
     if (!(w > 0 && h > 0)) {
-      /* Sensible defaults: portrait photos, landscape videos */
       if (item.type === 'video') { w = 16; h = 9; }
       else { w = 4; h = 5; }
     }
@@ -122,13 +120,17 @@
     return Math.max(1, Math.min(MAX_COLS, n));
   }
 
-  /**
-   * Shortest column, leftmost on a tie.
-   * Card height = columnWidth × (h/w) + actions bar (+ gap applied after place).
-   */
   function layout(items, containerWidth) {
     var cols = columnCount(containerWidth);
     var colW = (containerWidth - GAP * (cols - 1)) / cols;
+    // Cap column width so few items don't become huge on wide screens
+    if (colW > MAX_COL_W) {
+      colW = MAX_COL_W;
+      // Recalculate how many columns fit at the capped width
+      var fit = Math.floor((containerWidth + GAP) / (colW + GAP));
+      cols = Math.max(1, Math.min(MAX_COLS, fit, items.length || 1));
+      colW = Math.min(MAX_COL_W, (containerWidth - GAP * (cols - 1)) / cols);
+    }
     var bottoms = Array(cols);
     for (var c = 0; c < cols; c++) bottoms[c] = 0;
 
@@ -255,7 +257,7 @@
       return;
     }
 
-    var width = feed.clientWidth || feed.parentElement && feed.parentElement.clientWidth || 320;
+    var width = feed.clientWidth || (feed.parentElement && feed.parentElement.clientWidth) || 320;
     var result = layout(state.items, width);
     feed.style.height = result.height + 'px';
     feed.replaceChildren();
