@@ -6,45 +6,44 @@
     --hshs-card-max: 320px;
   }
 
-  .home-featured-grid {
+  /* Featured + similar constrained grids: never stretch single/few cards */
+  .home-featured-grid,
+  .photos-grid,
+  .spotlightGrid,
+  .poll-grid,
+  .memories-grid,
+  .trending-grid,
+  #trendingGrid,
+  .videos-container {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, minmax(var(--hshs-card-min), var(--hshs-card-max))) !important;
     justify-content: start;
     gap: 16px !important;
   }
 
-  .gallery-feed,
-  .masonry-grid,
-  .videos-container,
-  .photos-grid,
-  .spotlightGrid,
-  .poll-grid,
-  .memories-grid,
-  .trending-grid,
-  #trendingGrid {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(var(--hshs-card-min), 1fr)) !important;
-    justify-content: stretch;
-    gap: 16px !important;
+  /* Gallery uses JS masonry (absolute). Do not force CSS grid on it. */
+  .gallery-feed {
+    display: block !important;
+    position: relative;
+    width: 100%;
   }
 
-  .home-feature-card {
-    max-width: var(--hshs-card-max);
-    width: 100% !important;
-    min-width: 0 !important;
-    aspect-ratio: 4 / 5;
-    height: auto !important;
-  }
-
+  .home-feature-card,
   .photo-card,
   .gallery-card,
   .gallery-skel,
   .student-card,
   .poll-card,
   .memories-card {
-    max-width: none;
-    width: 100% !important;
+    max-width: var(--hshs-card-max);
+    width: auto !important;
     min-width: 0 !important;
+  }
+
+  .home-feature-card {
+    width: 100% !important;
+    aspect-ratio: 4 / 5;
+    height: auto !important;
   }
 
   #hshs-page { width: min(100%, var(--hshs-content-max)); margin-inline: auto; }
