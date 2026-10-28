@@ -3,9 +3,16 @@
   :root {
     --hshs-content-max: 1680px;
     --hshs-card-min: 220px;
+    --hshs-card-max: 320px;
   }
 
-  .home-featured-grid,
+  .home-featured-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(var(--hshs-card-min), var(--hshs-card-max))) !important;
+    justify-content: start;
+    gap: 16px !important;
+  }
+
   .gallery-feed,
   .masonry-grid,
   .videos-container,
@@ -21,7 +28,14 @@
     gap: 16px !important;
   }
 
-  .home-feature-card,
+  .home-feature-card {
+    max-width: var(--hshs-card-max);
+    width: 100% !important;
+    min-width: 0 !important;
+    aspect-ratio: 4 / 5;
+    height: auto !important;
+  }
+
   .photo-card,
   .gallery-card,
   .gallery-skel,
