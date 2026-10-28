@@ -264,7 +264,7 @@
       var bar = indicator.parentElement;
       var barRect = bar.getBoundingClientRect();
       var linkRect = activeLink.getBoundingClientRect();
-      var left = linkRect.left - barRect.left + (linkRect.width / 2) - 22;
+      var left = linkRect.left - barRect.left + (linkRect.width / 2) - 2.5;
       indicator.style.left = left + 'px';
       indicator.style.opacity = '1';
     } else if (indicator) {

@@ -139,7 +139,7 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
   }
   .mobile-tabbar a i,
   .mobile-tabbar .tab-upload i {
-    font-size: 24px !important;
+    font-size: 20px !important;
     color: #A9A4C9 !important;
     opacity: 0.7 !important;
     transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
@@ -148,22 +148,23 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
   }
   .mobile-tabbar a.active i {
     opacity: 1 !important;
-    font-size: 27.6px !important; /* ~1.15 scale */
+    font-size: 22px !important; /* slight scale */
     background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     filter: drop-shadow(0 0 10px rgba(255, 61, 154, 0.55)) !important;
-    transform: scale(1.15) !important;
+    transform: scale(1.08) !important;
   }
   .mobile-tabbar .nav-indicator {
     position: absolute !important;
-    bottom: 8px !important;
+    bottom: 6px !important;
     height: 5px !important;
-    width: 44px !important;
-    border-radius: 999px !important;
+    width: 5px !important;
+    border-radius: 50% !important;
     background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
-    transition: left 220ms ease-out, transform 220ms ease-out, opacity 150ms !important;
+    box-shadow: 0 0 6px rgba(255, 61, 154, 0.6) !important;
+    transition: left 220ms ease-out, opacity 150ms !important;
     pointer-events: none !important;
     z-index: 1 !important;
     opacity: 0;
