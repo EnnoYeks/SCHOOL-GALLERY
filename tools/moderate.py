@@ -1,102 +1,148 @@
+"""Basic media screening for suspicious content.
+
+Downscales images before analysis. Checks for tiny, dark, blurry, oversized, wrong type, and simple duplicates.
+Clearly labeled as basic screening that needs human review. Never deletes files.
+Writes created_at as real UTC timestamp. Dry-run is the safe default.
+"""
+
 from __future__ import annotations
 
 import argparse
-import csv
-import hashlib
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
+from PIL import Image, ImageFilter, ImageStat
+
 try:
-    import boto3
+    from supabase import create_client
 except Exception:  # pragma: no cover
-    boto3 = None
-
-from supabase import create_client
+    create_client = None  # type: ignore
 
 
-def sha256_file(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as fp:
-        for chunk in iter(lambda: fp.read(65536), b""):
-            h.update(chunk)
-    return h.hexdigest()
+def is_blurry(img: Image.Image, threshold: float = 100.0) -> bool:
+    gray = img.convert("L")
+    # Simple Laplacian variance approximation via edge filter
+    edges = gray.filter(ImageFilter.FIND_EDGES)
+    stat = ImageStat.Stat(edges)
+    variance = stat.var[0] if stat.var else 0
+    return variance < threshold
 
 
-def export_supabase_tables(out_dir: Path) -> list[dict]:
+def simple_phash(img: Image.Image) -> str:
+    """Very lightweight average hash for duplicate detection."""
+    small = img.resize((8, 8), Image.Resampling.LANCZOS).convert("L")
+    pixels = list(small.getdata())
+    avg = sum(pixels) / len(pixels)
+    bits = "".join("1" if p > avg else "0" for p in pixels)
+    return bits
+
+
+def heuristic_score(path: Path) -> tuple[str, str]:
+    try:
+        with Image.open(path) as img:
+            img = img.convert("RGB")
+            # Downscale first for analysis
+            analysis_img = img.resize((128, 128), Image.Resampling.LANCZOS)
+            width, height = img.size
+            if width < 200 or height < 200:
+                return "flag", "image too small or suspiciously cropped"
+            if width > 8000 or height > 8000:
+                return "flag", "image oversized; may need review"
+            # Dark check on downscaled
+            pixels = list(analysis_img.getdata())
+            dark = sum(1 for r, g, b in pixels if r < 40 and g < 40 and b < 40)
+            ratio = dark / max(1, len(pixels))
+            if ratio > 0.6:
+                return "flag", "very dark image may need human review"
+            if is_blurry(analysis_img):
+                return "flag", "image appears blurry"
+            return "ok", "passed basic sanity check"
+    except Exception as exc:
+        return "flag", f"could not inspect file ({exc}); needs admin review"
+
+
+def write_flag_to_supabase(file_key: str, status: str, reason: str) -> dict:
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-    if not url or not key:
-        print("Supabase credentials missing; skipping table export.")
-        return []
+    if not url or not key or create_client is None:
+        return {"status": "skipped", "reason": "Supabase keys not configured."}
     client = create_client(url, key)
-    tables = ["posts", "photos", "videos", "events"]
-    exported = []
-    for table in tables:
-        data = client.table(table).select("*").execute()
-        rows = data.data or []
-        table_dir = out_dir / table
-        table_dir.mkdir(parents=True, exist_ok=True)
-        export_path = table_dir / f"{table}-{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}.json"
-        export_path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
-        exported.append({"table": table, "path": str(export_path), "count": len(rows)})
-    return exported
+    payload = {
+        "file_key": file_key,
+        "status": status,
+        "reason": reason,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "screening_note": "basic automated screening; human review required",
+    }
+    try:
+        result = client.table("media_flags").insert(payload).execute()
+        return {"status": "written", "data": result.data}
+    except Exception as exc:
+        return {"status": "error", "message": str(exc)}
 
 
-def copy_r2_to_b2(dry_run: bool = True) -> list[dict]:
-    if dry_run:
-        return [{"status": "dry_run", "message": "R2->B2 copy skipped because dry_run is enabled."}]
-    endpoint = os.getenv("R2_ENDPOINT_URL")
-    b2_endpoint = os.getenv("B2_ENDPOINT_URL")
-    r2_bucket = os.getenv("R2_BUCKET_NAME")
-    b2_bucket = os.getenv("B2_BUCKET_NAME")
-    if not all([endpoint, b2_endpoint, r2_bucket, b2_bucket]) or boto3 is None:
-        raise RuntimeError("Missing R2/B2 config; cannot run a live copy.")
-    r2 = boto3.client(
-        "s3",
-        endpoint_url=endpoint,
-        aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
-        region_name="auto",
-    )
-    b2 = boto3.client(
-        "s3",
-        endpoint_url=b2_endpoint,
-        aws_access_key_id=os.getenv("B2_KEY_ID"),
-        aws_secret_access_key=os.getenv("B2_APPLICATION_KEY"),
-        region_name="us-east-005",
-    )
-    objects = r2.list_objects_v2(Bucket=r2_bucket).get("Contents", [])
-    copied = []
-    for obj in objects:
-        key = obj["Key"]
-        source = {"Bucket": r2_bucket, "Key": key}
-        b2.copy_object(Bucket=b2_bucket, CopySource=source, Key=key)
-        copied.append({"source": key, "target": key, "etag": obj.get("ETag")})
-    return copied
+def process_directory(input_dir: Path, dry_run: bool = True) -> list[dict]:
+    results = []
+    seen_hashes: dict[str, str] = {}
+    for file_path in sorted(input_dir.iterdir()):
+        if not file_path.is_file():
+            continue
+        ext = file_path.suffix.lower()
+        if ext not in {".jpg", ".jpeg", ".png", ".webp", ".gif", ".mp4", ".mov", ".webm"}:
+            results.append({
+                "file": str(file_path),
+                "decision": "flag",
+                "reason": "wrong or unsupported file type",
+                "dry_run": dry_run,
+            })
+            continue
 
+        score, reason = heuristic_score(file_path)
+        # Duplicate check for images
+        if ext in {".jpg", ".jpeg", ".png", ".webp"} and score == "ok":
+            try:
+                with Image.open(file_path) as img:
+                    h = simple_phash(img)
+                    if h in seen_hashes:
+                        score = "flag"
+                        reason = f"possible duplicate of {seen_hashes[h]}"
+                    else:
+                        seen_hashes[h] = file_path.name
+            except Exception:
+                pass
 
-def verify_backup(exported: list[dict], copied: list[dict]) -> dict:
-    counts = {"supabase_tables": len(exported), "copied_objects": len(copied)}
-    return {"verified": True, "counts": counts}
+        result = {
+            "file": str(file_path),
+            "decision": score,
+            "reason": reason,
+            "dry_run": dry_run,
+            "note": "basic screening only; human review required",
+        }
+        if not dry_run and score == "flag":
+            result["supabase"] = write_flag_to_supabase(file_path.name, "pending", reason)
+        results.append(result)
+    return results
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Safely back up media from R2 to B2 and export key Supabase tables without deleting source data.")
-    parser.add_argument("--dry-run", action="store_true", default=True, help="Default safe mode: do not copy any data to B2")
-    parser.add_argument("--output-dir", default="./backups", help="Where to store Supabase JSON exports")
+    parser = argparse.ArgumentParser(
+        description="Scan uploaded media with basic screening and flag suspicious content for admin review. Never deletes."
+    )
+    parser.add_argument("--input-dir", default="./uploads", help="Folder with media files to review")
+    parser.add_argument("--live", action="store_true", help="Write flags to Supabase (default is dry-run)")
     args = parser.parse_args()
 
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    dry_run = not args.live
+    input_dir = Path(args.input_dir)
+    if not input_dir.exists():
+        print(f"Input directory {input_dir} not found.")
+        return 1
 
-    supabase_exports = export_supabase_tables(output_dir)
-    copied = copy_r2_to_b2(dry_run=args.dry_run)
-    summary = verify_backup(supabase_exports, copied)
-
-    print(json.dumps({"dry_run": args.dry_run, "supabase_exports": supabase_exports, "copied": copied, "verification": summary}, indent=2))
+    result = process_directory(input_dir, dry_run=dry_run)
+    print(json.dumps({"reviewed": len(result), "dry_run": dry_run, "files": result}, indent=2))
     return 0
 
 
