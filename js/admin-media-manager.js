@@ -65,12 +65,18 @@
       var results = await Promise.all([
         global.db.getPhotos ? global.db.getPhotos(100, 0) : Promise.resolve([]),
         global.db.getVideos ? global.db.getVideos(100, 0) : Promise.resolve([]),
-        (global.adminApi && global.adminApi.listPosts ? global.adminApi.listPosts().catch(function () { return global.db.getPosts ? global.db.getPosts(100, 0) : []; }) : (global.db.getPosts ? global.db.getPosts(100, 0) : Promise.resolve([])))
+        global.db.getPosts ? global.db.getPosts(100, 0) : Promise.resolve([]),
+        (global.adminApi && global.adminApi.listPosts ? global.adminApi.listPosts().catch(function () { return []; }) : Promise.resolve([]))
       ]);
+      var officialRows = Array.isArray(results[3]) ? results[3] : (results[3] && Array.isArray(results[3].posts) ? results[3].posts : []);
+      var postById = new Map();
+      (results[2] || []).concat(officialRows).forEach(function (row) {
+        if (row && row.id != null) postById.set(String(row.id), row);
+      });
       items = []
         .concat((results[0] || []).map(function (x) { return normalise(x, 'photos'); }))
         .concat((results[1] || []).map(function (x) { return normalise(x, 'videos'); }))
-        .concat((results[2] || []).map(function (x) { return normalise(x, 'posts'); }));
+        .concat(Array.from(postById.values()).map(function (x) { return normalise(x, 'posts'); }));
       items.sort(function (a, b) {
         var at = Date.parse(a.created_at || a.createdAt || 0) || 0;
         var bt = Date.parse(b.created_at || b.createdAt || 0) || 0;
