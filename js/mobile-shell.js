@@ -71,10 +71,7 @@
     if (!key || key === 'home' || key === 'index') return 'index.html';
     return key + '.html';
   }
-  function inSub() {
-    return false;
-  }
-  // Root-absolute hrefs so they work from any route (/vibe, /gallery, etc.)
+  function inSub() { return false; }
   function abs(path) {
     if (!path) return '/';
     if (path.charAt(0) === '/') return path;
@@ -83,29 +80,14 @@
   }
   function homeHref() { return '/'; }
   function sub(name) {
-    // map file names to clean app paths where possible
     var map = {
-      'buzz.html': '/buzz',
-      'clips.html': '/buzz',
-      'shorts.html': '/buzz',
-      'gallery.html': '/gallery',
-      'photos.html': '/photos',
-      'videos.html': '/videos',
-      'trending.html': '/trending',
-      'spotlight.html': '/spotlight',
-      'polls.html': '/polls',
-      'memories.html': '/memories',
-      'more.html': '/more',
-      'about.html': '/about',
-      'contact.html': '/contact',
-      'profile.html': '/profile',
-      'settings.html': '/settings',
-      'chat.html': '/chat',
-      'admin.html': '/admin',
-      'login.html': '/login',
-      'notifications.html': '/notifications',
-      'saved.html': '/saved',
-      'search.html': '/search'
+      'buzz.html': '/buzz', 'clips.html': '/buzz', 'shorts.html': '/buzz',
+      'gallery.html': '/gallery', 'photos.html': '/photos', 'videos.html': '/videos',
+      'trending.html': '/trending', 'spotlight.html': '/spotlight', 'polls.html': '/polls',
+      'memories.html': '/memories', 'more.html': '/more', 'about.html': '/about',
+      'contact.html': '/contact', 'profile.html': '/profile', 'settings.html': '/settings',
+      'chat.html': '/chat', 'admin.html': '/admin', 'login.html': '/login',
+      'notifications.html': '/notifications', 'saved.html': '/saved', 'search.html': '/search'
     };
     return map[name] || abs(name);
   }
@@ -131,9 +113,7 @@
     'chat.html': 1, 'more.html': 1, 'search.html': 1, 'saved.html': 1,
     'notifications.html': 1, 'login.html': 1, 'edit-profile.html': 1
   };
-  function appRoot() {
-    return '/';
-  }
+  function appRoot() { return '/'; }
   function canonicalize(url) {
     var next = new URL(url, location.href);
     if (next.origin !== location.origin) return next;
@@ -154,7 +134,6 @@
     root.querySelectorAll('a[href]').forEach(function (a) {
       var raw = a.getAttribute('href') || '';
       if (!raw || raw.charAt(0) === '#' || raw.indexOf('mailto:') === 0 || raw.indexOf('tel:') === 0) return;
-      // skip already absolute app routes
       if (raw.charAt(0) === '/' && raw.indexOf('/index/') === -1) return;
       try {
         var next = canonicalize(a.href);
@@ -196,29 +175,48 @@
     if (line) line.textContent = me.line;
     if (pic) pic.src = me.photo;
   }
+
   function routes() {
-    var more = [
-      { href: sub('chat.html'), icon: 'fa-comments', label: 'Chat', tone: 'sky', match: ['chat.html'] },
-      { href: sub('spotlight.html'), icon: 'fa-trophy', label: 'Spotlight', tone: 'gold', match: ['spotlight.html'] },
-      { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', tone: 'ember', match: ['trending.html'] },
+    var create = [
+      { href: sub('videos.html'), icon: 'fa-play', label: 'Studio', tone: 'navy', match: ['videos.html'] }
+    ];
+    var explore = [
+      { href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', tone: 'teal', match: ['gallery.html'] },
       { href: sub('photos.html'), icon: 'fa-camera', label: 'Photos', tone: 'teal', match: ['photos.html'] },
-      { href: sub('videos.html'), icon: 'fa-play', label: 'Studio', tone: 'navy', match: ['videos.html'] },
-      { href: sub('polls.html'), icon: 'fa-square-poll-vertical', label: 'Polls', tone: 'leaf', match: ['polls.html'] },
-      { href: sub('memories.html'), icon: 'fa-clock-rotate-left', label: 'Memories', tone: 'lilac', match: ['memories.html'] },
-      { href: sub('about.html'), icon: 'fa-graduation-cap', label: 'About', tone: 'navy', match: ['about.html'] },
-      { href: sub('contact.html'), icon: 'fa-envelope', label: 'Contact', tone: 'cyan', match: ['contact.html', 'contat.html'] },
+      { href: sub('trending.html'), icon: 'fa-fire', label: 'Trending', tone: 'ember', match: ['trending.html'] },
+      { href: sub('spotlight.html'), icon: 'fa-trophy', label: 'Spotlight', tone: 'gold', match: ['spotlight.html'] },
+      { href: sub('buzz.html'), icon: 'fa-bolt', label: 'Vibe', tone: 'sky', match: ['buzz.html', 'clips.html', 'shorts.html'] }
+    ];
+    var me = [
+      { href: sub('profile.html'), icon: 'fa-user', label: 'Profile', tone: 'navy', match: ['profile.html'] },
+      { href: sub('saved.html'), icon: 'fa-bookmark', label: 'Saved', tone: 'lilac', match: ['saved.html'] },
+      { href: sub('chat.html'), icon: 'fa-comments', label: 'Chat', tone: 'sky', match: ['chat.html'] },
       { href: sub('settings.html'), icon: 'fa-gear', label: 'Settings', tone: 'slate', match: ['settings.html'] }
     ];
-    if (isAdmin()) more.push({ href: sub('admin.html'), icon: 'fa-user-shield', label: 'Staff', tone: 'gold', match: ['admin.html'] });
+    var school = [
+      { href: sub('about.html'), icon: 'fa-graduation-cap', label: 'About', tone: 'navy', match: ['about.html'] },
+      { href: sub('contact.html'), icon: 'fa-envelope', label: 'Contact', tone: 'cyan', match: ['contact.html', 'contat.html'] },
+      { href: sub('polls.html'), icon: 'fa-square-poll-vertical', label: 'Polls', tone: 'leaf', match: ['polls.html'] },
+      { href: sub('memories.html'), icon: 'fa-clock-rotate-left', label: 'Memories', tone: 'lilac', match: ['memories.html'] }
+    ];
+    if (isAdmin()) school.push({ href: sub('admin.html'), icon: 'fa-user-shield', label: 'Staff', tone: 'gold', match: ['admin.html'] });
+
     return {
       PRIMARY: [
         { href: homeHref(), icon: 'fa-house', label: 'Home', match: ['index.html', ''] },
         { href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html', 'shorts.html'] },
         { href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] }
       ],
-      MORE: more
+      GROUPS: [
+        { title: 'Create', items: create },
+        { title: 'Explore', items: explore },
+        { title: 'Me', items: me },
+        { title: 'School', items: school }
+      ],
+      MORE: create.concat(explore).concat(me).concat(school)
     };
   }
+
   function isActive(item) {
     var file = currentFile();
     if (file === 'index.html' || file === '') return item.match.indexOf('index.html') !== -1 || item.match.indexOf('') !== -1;
@@ -257,7 +255,6 @@
       else on = file === tab + '.html' || location.pathname === '/' + tab;
       a.classList.toggle('active', on);
     });
-    // Position sliding indicator
     var indicator = document.querySelector('.mobile-tabbar .nav-indicator');
     var activeLink = document.querySelector('.mobile-tabbar a.active');
     if (indicator && activeLink) {
@@ -276,13 +273,30 @@
       a.classList.toggle('active', on);
     });
   }
+
   function rebuildMoreGrid() {
-    var grid = document.querySelector('#moreSheet .more-grid');
-    if (!grid) return;
-    grid.innerHTML = routes().MORE.map(function (item) {
-      return '<a href="' + item.href + '" data-tone="' + item.tone + '" class="' + (isActive(item) ? 'active' : '') + '"><span class="ico"><i class="fas ' + item.icon + '"></i></span><span>' + item.label + '</span></a>';
+    var container = document.querySelector('#moreSheet .more-groups');
+    if (!container) return;
+    var groups = routes().GROUPS;
+    container.innerHTML = groups.map(function (group) {
+      var items = group.items.map(function (item) {
+        return '<a href="' + item.href + '" data-tone="' + item.tone + '" class="' + (isActive(item) ? 'active' : '') + '"><span class="ico"><i class="fas ' + item.icon + '"></i></span><span>' + item.label + '</span></a>';
+      }).join('');
+      return '<div class="more-group"><p class="more-kicker">' + group.title + '</p><div class="more-grid">' + items + '</div></div>';
     }).join('');
   }
+
+  function openContextualUpload() {
+    var path = location.pathname || '/';
+    var prefer = 'any';
+    if (/\/(buzz|vibe|clips|shorts)/i.test(path)) prefer = 'video';
+    else if (/\/(gallery|photos)/i.test(path)) prefer = 'photo';
+    else if (/\/(videos|studio)/i.test(path)) prefer = 'video';
+    closeMore();
+    if (window.__hshsOpenUploadForPage) window.__hshsOpenUploadForPage(path);
+    else if (window.__hshsOpenUpload) window.__hshsOpenUpload({ prefer: prefer });
+  }
+
   function buildBar() {
     if (document.querySelector('.mobile-tabbar')) return;
     document.body.classList.add('has-mobile-shell', 'hshs-nav-slim');
@@ -312,7 +326,7 @@
       '<span class="more-me-copy"><strong id="moreMeName">Guest student</strong>' +
       '<small id="moreMeLine">Student · Hawthorne Scribner</small></span>' +
       '<span class="more-me-go">View profile</span></a>' +
-      '<p class="more-kicker">All pages</p><div class="more-grid"></div>';
+      '<div class="more-groups"></div>';
     document.body.appendChild(bar);
     document.body.appendChild(backdrop);
     document.body.appendChild(sheet);
@@ -321,9 +335,7 @@
     document.getElementById('openUploadStudio').addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
-      closeMore();
-      if (window.__hshsOpenUploadForPage) window.__hshsOpenUploadForPage(location.pathname);
-      else if (window.__hshsOpenUpload) window.__hshsOpenUpload();
+      openContextualUpload();
     });
     document.getElementById('openMoreSheet').addEventListener('click', function (e) {
       e.preventDefault();
@@ -340,6 +352,7 @@
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMore(); });
   }
+
   function ensurePopCss() {
     if (document.getElementById('hshs-tpl-pop')) return;
     var st = document.createElement('style');
@@ -416,7 +429,6 @@
     if (HARD[name]) { location.assign(next.href); return; }
     closeMore();
     var tpl = await ensureTemplate(name);
-    if (window.HshsSkeleton && window.HshsSkeleton.insert) window.HshsSkeleton.insert(rootEl(), name);
     if (!tpl) { location.assign(next.href); return; }
     if (!fromHistory) history.pushState({ url: next.href, page: name }, '', next.href);
     document.documentElement.setAttribute('data-hshs-page', name);
@@ -424,70 +436,45 @@
     var root = rootEl();
     clearBindFlags(root);
     window.__hshsHomeMounted = false;
-    window.__hshsRevealQueued = false;
-    var css = PAGE_CSS[name] || [];
-    await Promise.all(css.map(loadCss));
     if (window.HshsRender && window.HshsRender.mountHTML) window.HshsRender.mountHTML(root, tpl);
     else root.innerHTML = tpl;
-    document.title = TITLES[name] || 'HSHS World';
-    fixLinks(document);
-    rebuildMoreGrid();
-    markActive();
-    popIn(root);
-    window.scrollTo(0, 0);
-    await ensurePageScript(name);
-    document.dispatchEvent(new CustomEvent('hshs:page', { detail: { page: name, url: next.href } }));
-    if (window.HshsRoute && window.HshsRoute.reveal) window.HshsRoute.reveal();
-    document.title = TITLES[name] || 'HSHS World';
-    fixLinks(document);
-  }
-
-  function isAppLink(anchor) {
-    if (!anchor || !anchor.getAttribute) return false;
-    if (anchor.target === '_blank') return false;
-    var raw = anchor.getAttribute('href') || '';
-    if (!raw || raw.indexOf('mailto:') === 0 || raw.indexOf('tel:') === 0) return false;
-    if (raw === '#more') return true;
-    if (raw.charAt(0) === '#') return false;
-    var next;
-    try { next = new URL(anchor.href, location.href); } catch (e) { return false; }
-    if (next.origin !== location.origin) return false;
-    var file = (next.pathname.split('/').pop() || '').toLowerCase();
-    if (file && file.indexOf('.') !== -1 && !/\.html$/i.test(file)) return false;
-    return true;
-  }
-
-  document.addEventListener('click', function (e) {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
-    var a = e.target && e.target.closest && e.target.closest('a[href]');
-    if (!isAppLink(a)) return;
-    var raw = a.getAttribute('href') || '';
-    if (raw === '#more') {
-      e.preventDefault();
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-      toggleMore();
-      return;
-    }
-    var name = pageName(a.href);
-    if (HARD[name]) return;
-    e.preventDefault();
-    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-    navigate(a.href);
-  }, true);
-
-  // Boot
-  function boot() {
     ensurePopCss();
-    buildBar();
-    fixLinks(document);
+    popIn(root);
+    var cssList = PAGE_CSS[name] || [];
+    for (var i = 0; i < cssList.length; i++) await loadCss(cssList[i]);
+    await ensurePageScript(name);
+    fixLinks(root);
     markActive();
+    rebuildMoreGrid();
+    if (window.HshsRoute) window.HshsRoute.reveal();
   }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
-  } else {
-    boot();
+  function bind() {
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href]');
+      if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      var href = a.getAttribute('href') || '';
+      if (!href || href.charAt(0) === '#' || href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0) return;
+      try {
+        var next = new URL(a.href, location.href);
+        if (next.origin !== location.origin) return;
+        e.preventDefault();
+        navigate(next.href);
+      } catch (err) {}
+    });
+    window.addEventListener('popstate', function (e) {
+      if (e.state && e.state.url) navigate(e.state.url, true);
+      else navigate(location.href, true);
+    });
   }
-  window.addEventListener('popstate', function () {
-    navigate(location.href, true);
-  });
+  function boot() {
+    buildBar();
+    markActive();
+    bind();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () { markActive(); });
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.HshsMobileShell = { navigate: navigate, rebuildMoreGrid: rebuildMoreGrid, openContextualUpload: openContextualUpload };
 })();
