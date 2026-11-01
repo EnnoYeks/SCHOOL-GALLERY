@@ -1,7 +1,15 @@
 (function (global) {
   'use strict';
   if (global.HshsRender) return;
-  function fadeSkeleton(root) { var sk = root && root.querySelector('.hshs-load-skel'); if (!sk || !sk.parentNode) return; sk.classList.add('is-leaving'); setTimeout(function(){ if(sk && sk.parentNode) sk.parentNode.removeChild(sk); }, 150); }
+
+  function dropPageSkeletons(root) {
+    var scope = root || document;
+    var nodes = scope.querySelectorAll('.hshs-load-skel, .hshs-skel-bottom');
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].parentNode) nodes[i].parentNode.removeChild(nodes[i]);
+    }
+  }
+
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
     if (attrs) {
@@ -35,15 +43,15 @@
     clear(root);
     if (Array.isArray(content)) content.forEach(function (c) { if (c) root.appendChild(c); });
     else if (content) root.appendChild(content);
+    dropPageSkeletons(root);
     if (mountedReal(root)) revealPage();
     return root;
   }
   function revealPage() {
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
+        dropPageSkeletons(document.getElementById('hshs-page'));
         if (typeof window.__hshsRevealPage === 'function') {
-          // paint.js holds the early reveal while the skeleton is the only content.
-          // A real mount reaches this point, so release the guard before revealing.
           window.__hshsRevealQueued = false;
           window.__hshsRevealPage();
           return;
@@ -56,31 +64,35 @@
         window.__hshsBootDone = true;
         var boot = document.getElementById('hshs-boot');
         if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
-        fadeSkeleton(document.getElementById('hshs-page'));
       });
     });
   }
   function mountedReal(root) {
     if (!root || root.id !== 'hshs-page') return false;
-    var sk = root.querySelector('.hshs-load-skel');
-    return root.childElementCount > (sk ? 1 : 0);
+    return root.childElementCount > 0;
   }
   function mountHTML(target, html) {
     var page = document.documentElement.getAttribute('data-hshs-page');
-    if (global.HshsSkeleton && page) global.HshsSkeleton.insert(typeof target === 'string' ? document.querySelector(target) : target, page);
     var root = typeof target === 'string' ? document.querySelector(target) : target;
     if (!root) return null;
-    var skel = root.querySelector('.hshs-load-skel');
+    var markup = html || '';
+    if (!markup.replace(/\s+/g, '')) {
+      if (global.HshsSkeleton && page && !root.querySelector('.hshs-load-skel')) {
+        global.HshsSkeleton.insert(root, page);
+      }
+      return root;
+    }
     clear(root);
     var wrap = document.createElement('div');
-    wrap.innerHTML = html || '';
+    wrap.innerHTML = markup;
     while (wrap.firstChild) root.appendChild(wrap.firstChild);
-    if (skel) root.appendChild(skel);
+    // Real content owns the page. Never park a skeleton under it.
+    dropPageSkeletons(root);
     if (mountedReal(root)) revealPage();
     return root;
   }
   function icon(name, extra) {
     return el('i', { className: 'fas ' + name + (extra ? ' ' + extra : '') });
   }
-  global.HshsRender = { el: el, clear: clear, mount: mount, mountHTML: mountHTML, icon: icon };
+  global.HshsRender = { el: el, clear: clear, mount: mount, mountHTML: mountHTML, icon: icon, dropPageSkeletons: dropPageSkeletons };
 })(typeof window !== 'undefined' ? window : this);
