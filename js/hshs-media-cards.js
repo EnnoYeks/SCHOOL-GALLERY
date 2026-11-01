@@ -6,6 +6,7 @@
   var posterCache = new Map();
   var viewedFallback = new Set();
   var reducedMotion = !!(g.matchMedia && g.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var hoverTimers = new WeakMap();
 
   function dataSaver() {
     var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
@@ -66,6 +67,44 @@
     video.src = url;
     video.load();
   }
+
+  function setupVideoCard(card) {
+    if (!card || card.dataset.mediaEnhanced === '1') return;
+    card.dataset.mediaEnhanced = '1';
+    var img = card.querySelector('img');
+    if (img) {
+      img.addEventListener('load', function () { card.classList.add('is-loaded'); }, { once: true });
+      if (img.complete && img.naturalWidth) card.classList.add('is-loaded');
+    }
+    if (dataSaver() || reducedMotion || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    var url = card.getAttribute('data-video-url');
+    if (!url) return;
+    card.addEventListener('mouseenter', function () {
+      var t = setTimeout(function () {
+        if (card.classList.contains('is-previewing')) return;
+        var video = card.querySelector('.hover-preview');
+        if (!video) {
+          video = document.createElement('video');
+          video.className = 'hover-preview';
+          video.muted = true; video.playsInline = true; video.loop = true; video.preload = 'metadata';
+          video.src = url;
+          var shot = card.querySelector('.shot') || card;
+          shot.appendChild(video);
+        }
+        card.classList.add('is-previewing');
+        video.play().catch(function () {});
+      }, 400);
+      hoverTimers.set(card, t);
+    });
+    card.addEventListener('mouseleave', function () {
+      var t = hoverTimers.get(card);
+      if (t) clearTimeout(t);
+      card.classList.remove('is-previewing');
+      var video = card.querySelector('.hover-preview');
+      if (video) { video.pause(); video.currentTime = 0; }
+    });
+  }
+
   function keyedPhotoUpdate(grid, list, createCard) {
     if (!grid) return;
     var existing = new Map();
@@ -104,12 +143,12 @@
   }
   function escapeHtml(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+      return ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' })[c];
     });
   }
   g.HshsMediaCards = {
     capturePoster: capturePoster, incrementViews: incrementViews, hasViewed: hasViewed,
     keyedPhotoUpdate: keyedPhotoUpdate, dataSaver: dataSaver, formatNumber: formatNumber,
-    timeAgo: timeAgo, escapeHtml: escapeHtml
+    timeAgo: timeAgo, escapeHtml: escapeHtml, setupVideoCard: setupVideoCard
   };
 })(typeof window !== 'undefined' ? window : this);
