@@ -97,31 +97,44 @@ class VideosPage {
         const title = this.escape(v.title || "Untitled");
         const thumb = this.attr(v.thumbnailUrl || v.thumbnail || "");
         const dur = this.escape(v.duration || "");
+        const views = this.num(v.views);
         return `<article class="vibe-feat" role="button" tabindex="0" aria-label="Play ${title} by ${this.escape(v.author || v.creator || 'Campus student')}, ${dur || 'video'}" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
-            ${thumb ? `<img src="${thumb}" alt="${title}" loading="lazy">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}
+            ${thumb ? `<img src="${thumb}" alt="${title}" loading="lazy">` : `<div class="thumb-fallback"><i class="fas fa-play"></i><small>${title}</small></div>`}
             ${first ? `<span class="badge">FEATURED</span>` : ""}
             <span class="play"><i class="fas fa-play"></i></span>
-            ${dur ? `<span class="dur">${dur}</span>` : ""}
-            <div class="meta"><b>${title}</b><small>${this.escape(v.author || v.creator || "Campus student")} • ${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div>
+            <div class="badge-stack">
+              ${dur ? `<span class="dur">${dur}</span>` : ""}
+              <span class="views-badge">${views} views</span>
+            </div>
+            <div class="quick-actions">
+              <button type="button" class="like-btn" aria-label="Like"><i class="far fa-heart"></i></button>
+              <button type="button" class="save-btn" aria-label="Save"><i class="far fa-bookmark"></i></button>
+            </div>
+            <div class="meta"><b>${title}</b><small>${this.escape(v.author || v.creator || "Campus student")} • ${views} views • ${this.ago(v.createdAt)}</small></div>
         </article>`;
     }
     rowCard(v, index) {
         const title = this.escape(v.title || "Untitled");
         const thumb = this.attr(v.thumbnailUrl || v.thumbnail || "");
         const dur = this.escape(v.duration || "");
+        const views = this.num(v.views);
         return `<article class="vibe-row" role="button" tabindex="0" aria-label="Play ${title} by ${this.escape(v.author || v.creator || 'Campus student')}, ${dur || 'video'}" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || '')}">
             <div class="shot">
-                ${thumb ? `<img src="${thumb}" alt="${title}" loading="lazy">` : `<div class="thumb-fallback"><i class="fas fa-play"></i></div>`}
+                ${thumb ? `<img src="${thumb}" alt="${title}" loading="lazy">` : `<div class="thumb-fallback"><i class="fas fa-play"></i><small>${title}</small></div>`}
                 <span class="play"><i class="fas fa-play"></i></span>
-                ${dur ? `<span class="dur">${dur}</span>` : ""}
+                <div class="badge-stack">
+                  ${dur ? `<span class="dur">${dur}</span>` : ""}
+                  <span class="views-badge">${views}</span>
+                </div>
             </div>
-            <div class="copy"><b>${title}</b><small>${this.num(v.views)} views • ${this.ago(v.createdAt)}</small></div>
+            <div class="copy"><b>${title}</b><small>${views} views • ${this.ago(v.createdAt)}</small></div>
             <button class="more" type="button" aria-label="More">⋮</button>
         </article>`;
     }
     enhanceCards() {
         if (!window.HshsMediaCards) return;
         document.querySelectorAll('[data-video-url]').forEach(el => {
+            window.HshsMediaCards.setupVideoCard(el);
             const url = el.getAttribute('data-video-url');
             if (!url || el.querySelector('img')) return;
             window.HshsMediaCards.capturePoster(url, function (poster) {
@@ -132,6 +145,7 @@ class VideosPage {
                 img.loading = 'lazy';
                 const fallback = el.querySelector('.thumb-fallback');
                 if (fallback) fallback.replaceWith(img);
+                el.classList.add('is-loaded');
             });
         });
     }
@@ -189,7 +203,7 @@ class VideosPage {
     time(v){ if (!Number.isFinite(v)) return "0:00"; const s = Math.max(0, Math.floor(v)); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); }
     num(v){ return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(+v || 0); }
     label(v){ return String(v || "").replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()); }
-    escape(v){ return String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+    escape(v){ return String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;" }[c])); }
     attr(v){ return this.escape(v); }
     destroy(){ try { (this.previewCleanups || []).forEach(fn => fn()); this.previewCleanups = []; if (this.previewObserver) this.previewObserver.disconnect(); const player = document.getElementById("videoPlayer"); const modal = document.getElementById("videoPlayerModal"); if (player) { player.pause(); player.removeAttribute("src"); player.load(); } if (modal) modal.classList.remove("active"); } catch (e) {} }
 }
