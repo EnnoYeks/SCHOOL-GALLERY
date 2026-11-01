@@ -78,6 +78,50 @@ html.hshs-device-desktop .more-backdrop {
   display: none !important;
 }
 
+/* Grouped More sheet */
+.more-groups { padding: 0 16px 24px; }
+.more-group { margin-top: 18px; }
+.more-group .more-kicker {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+.more-group .more-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.more-group .more-grid a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.04);
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.more-group .more-grid a.active {
+  background: rgba(139, 92, 246, .18);
+  color: #fff;
+}
+.more-group .more-grid .ico {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.08);
+  font-size: 16px;
+}
+
 .home-footer,
 footer.footer {
   margin-top: 18px;
