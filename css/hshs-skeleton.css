@@ -1,5 +1,5 @@
 /* HSHS World shared loading skeletons */
-:root{--hshs-topbar-h:56px;--hshs-bottomnav-h:78px;--hshs-pad:14px;--hshs-gap:12px;--hshs-radius:18px}
+:root{--hshs-topbar-h:56px;--hshs-bottomnav-h:64px;--hshs-pad:14px;--hshs-gap:12px;--hshs-radius:18px}
 #hshs-page{position:relative;min-height:100vh}.hshs-load-skel{position:relative;z-index:1;min-height:100%;padding:0 var(--hshs-pad) calc(var(--hshs-bottomnav-h) + 24px);background:#071433;color:transparent;overflow:hidden;opacity:1;visibility:visible;transition:opacity .15s ease}.hshs-load-skel.is-leaving{opacity:0;pointer-events:none}.hshs-load-skel::before,.hshs-load-skel::after{content:none!important}
 .sk{position:relative;display:block;background:rgba(255,255,255,.05);border-radius:var(--hshs-radius);overflow:hidden}.sk::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.075) 48%,transparent 76%);transform:translateX(-120%);animation:hshs-skeleton-shimmer 1.35s ease-in-out infinite}
 .sk-line{height:12px;border-radius:999px}.sk-line.sm{height:9px}.sk-line.lg{height:18px}.sk-circle{width:48px;height:48px;border-radius:50%;flex:0 0 48px}.sk-chip{height:36px;min-width:72px;border-radius:20px}.sk-img{width:100%;aspect-ratio:1/1}.sk-row{display:flex;align-items:center;gap:var(--hshs-gap)}.sk-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.sk-grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.sk-grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
@@ -28,7 +28,7 @@ html.hshs-device-desktop .skel-poll-grid,html.hshs-device-desktop .skel-spot-gri
 html.hshs-device-desktop .skel-feature-grid,html.hshs-device-desktop .skel-year-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 html.hshs-device-desktop .skel-admin-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 html.hshs-device-desktop .sk-grid-2{grid-template-columns:repeat(3,minmax(0,1fr))}
-html.hshs-device-mobile .hshs-load-skel{width:auto;margin-inline:0;padding-left:14px;padding-right:14px;padding-bottom:calc(78px + 24px)}
+html.hshs-device-mobile .hshs-load-skel{width:auto;margin-inline:0;padding-left:14px;padding-right:14px;padding-bottom:calc(64px + 24px)}
 html.hshs-device-mobile .hshs-skel-bottom{display:grid}
 html.hshs-device-mobile .skel-gallery-grid,html.hshs-device-mobile .skel-video-grid,html.hshs-device-mobile .skel-poll-grid,html.hshs-device-mobile .skel-contact-grid,html.hshs-device-mobile .skel-lower,html.hshs-device-mobile .skel-feature-grid{grid-template-columns:1fr}
 html.hshs-device-mobile .skel-spot-grid,html.hshs-device-mobile .skel-year-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -92,27 +92,28 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
 .memories-feature-grid .hshs-sk-mem{width:100%;flex:none}
 @media(prefers-reduced-motion:reduce){.hshs-sk-card::after,.hshs-sk-poll::after,.gallery-skel-media::after{animation:none}}
 
-/* Force proper mobile bottom tab bar — visual redesign */
+/* Force proper mobile bottom tab bar — visual redesign (smaller) */
 @media (max-width: 1024px) {
   .mobile-tabbar {
     display: flex !important;
     position: fixed !important;
-    left: 12px !important;
-    right: 12px !important;
-    bottom: 12px !important;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
     z-index: 1200 !important;
     width: auto !important;
-    min-height: 64px !important;
-    height: 64px !important;
+    min-height: 52px !important;
+    height: 52px !important;
     align-items: center !important;
     justify-content: space-around !important;
-    padding: 0 8px calc(0px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 0 4px !important;
     background: rgba(15, 12, 40, 0.75) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 28px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4) !important;
+    overflow: visible !important;
   }
   .mobile-tabbar a,
   .mobile-tabbar button.tab-upload {
@@ -121,10 +122,10 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    min-height: 48px !important;
-    min-width: 48px !important;
+    min-height: 40px !important;
+    min-width: 40px !important;
     gap: 0 !important;
-    font-size: 0 !important; /* hide any residual text */
+    font-size: 0 !important;
     font-weight: 700 !important;
     text-decoration: none !important;
     color: #B8B3DB !important;
@@ -135,11 +136,11 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
   }
   .mobile-tabbar a:active,
   .mobile-tabbar button.tab-upload:active {
-    transform: scale(0.9) translateY(2px) !important;
+    transform: scale(0.92) translateY(1px) !important;
   }
   .mobile-tabbar a i,
   .mobile-tabbar .tab-upload i {
-    font-size: 24px !important;
+    font-size: 18px !important;
     color: #B8B3DB !important;
     opacity: 0.85 !important;
     transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
@@ -148,45 +149,45 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
   }
   .mobile-tabbar a.active i {
     opacity: 1 !important;
-    font-size: 24px !important;
+    font-size: 18px !important;
     background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
-    filter: drop-shadow(0 0 10px rgba(255, 61, 154, 0.55)) !important;
-    transform: scale(1.08) !important;
+    filter: drop-shadow(0 0 8px rgba(255, 61, 154, 0.5)) !important;
+    transform: scale(1.06) !important;
   }
   .mobile-tabbar .nav-indicator {
     position: absolute !important;
-    bottom: 10px !important;
-    height: 5px !important;
-    width: 5px !important;
+    bottom: 6px !important;
+    height: 4px !important;
+    width: 4px !important;
     border-radius: 50% !important;
     background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
-    box-shadow: 0 0 6px rgba(255, 61, 154, 0.6) !important;
+    box-shadow: 0 0 4px rgba(255, 61, 154, 0.5) !important;
     transition: left 220ms ease-out, opacity 150ms !important;
     pointer-events: none !important;
     z-index: 1 !important;
     opacity: 0;
   }
   .mobile-tabbar .tab-upload-btn {
-    width: 52px !important;
-    height: 52px !important;
-    margin-top: -10px !important;
-    border-radius: 16px !important;
+    width: 40px !important;
+    height: 40px !important;
+    margin-top: -6px !important;
+    border-radius: 12px !important;
     background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
     color: #fff !important;
     display: grid !important;
     place-items: center !important;
-    box-shadow: 0 6px 20px rgba(255, 61, 154, 0.40) !important;
+    box-shadow: 0 4px 14px rgba(255, 61, 154, 0.35) !important;
     position: relative !important;
     animation: navPlusPulse 3s ease-in-out infinite !important;
   }
   .mobile-tabbar .tab-upload-btn::before {
     content: "" !important;
     position: absolute !important;
-    inset: -4px !important;
-    border-radius: 20px !important;
+    inset: -3px !important;
+    border-radius: 15px !important;
     background: rgba(15, 12, 40, 0.75) !important;
     z-index: -1 !important;
   }
@@ -196,15 +197,15 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
   .mobile-tabbar .tab-upload i {
     color: #fff !important;
     opacity: 1 !important;
-    font-size: 24px !important;
+    font-size: 18px !important;
     -webkit-text-fill-color: #fff !important;
     background: none !important;
     filter: none !important;
   }
 }
 @keyframes navPlusPulse {
-  0%, 100% { box-shadow: 0 6px 20px rgba(255, 61, 154, 0.40); }
-  50% { box-shadow: 0 8px 28px rgba(255, 61, 154, 0.65), 0 0 0 6px rgba(255, 61, 154, 0.15); }
+  0%, 100% { box-shadow: 0 4px 14px rgba(255, 61, 154, 0.35); }
+  50% { box-shadow: 0 6px 20px rgba(255, 61, 154, 0.55), 0 0 0 4px rgba(255, 61, 154, 0.12); }
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-tabbar .nav-indicator,
