@@ -396,6 +396,15 @@
     document.body.appendChild(root);
     return root;
   }
+
+  function clearSkeletons(root) {
+    if (!root) return;
+    root.querySelectorAll('.hshs-load-skel, .hshs-skel-bottom, .vibe-skel-row, .vibe-skel-feat').forEach(function (sk) {
+      sk.classList.add('is-leaving');
+      setTimeout(function () { if (sk.parentNode) sk.parentNode.removeChild(sk); }, 120);
+    });
+  }
+
   function popIn(root) {
     root.classList.remove('hshs-pop');
     void root.offsetWidth;
@@ -405,9 +414,10 @@
     window.__hshsBootDone = true;
     var boot = document.getElementById('hshs-boot');
     if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
-    var sk = root.querySelector('.hshs-load-skel');
-    if (sk && sk.parentNode) { sk.classList.add('is-leaving'); setTimeout(function(){ if(sk && sk.parentNode) sk.parentNode.removeChild(sk); },150); }
+    clearSkeletons(root);
+    setTimeout(function () { clearSkeletons(root); }, 300);
   }
+
   function clearBindFlags(root) {
     if (!root || !root.dataset) return;
     Object.keys(root.dataset).forEach(function (k) { delete root.dataset[k]; });
@@ -446,6 +456,7 @@
     fixLinks(root);
     markActive();
     rebuildMoreGrid();
+    clearSkeletons(root);
     if (window.HshsRoute) window.HshsRoute.reveal();
   }
   function bind() {
