@@ -1,7 +1,6 @@
 (function (global) {
   'use strict';
 
-  // Clean app paths. Always /page — never .html, and no required trailing slash.
   var HSHS_PAGES = {
     home: 1, gallery: 1, photos: 1, videos: 1, trending: 1, spotlight: 1,
     polls: 1, memories: 1, more: 1, search: 1, about: 1, contact: 1,
@@ -58,12 +57,23 @@
     });
   }
 
+  function pageHasRealContent(parent, skel) {
+    if (!parent) return false;
+    for (var c = parent.firstElementChild; c; c = c.nextElementSibling) {
+      if (c === skel) continue;
+      if (c.classList && (c.classList.contains('hshs-load-skel') || c.classList.contains('hshs-skel-bottom'))) continue;
+      return true;
+    }
+    return false;
+  }
+
   function section(host, state, opts) {
     opts = opts || {};
     if (!host) return;
     host.setAttribute('data-hshs-state', state);
-    var old = host.querySelector(':scope > .hshs-section-state');
-    if (old) old.parentNode.removeChild(old);
+    host.querySelectorAll(':scope > .hshs-section-state, :scope > .hshs-section-skel').forEach(function (old) {
+      if (old.parentNode) old.parentNode.removeChild(old);
+    });
     if (state === 'loading') {
       host.insertAdjacentHTML('afterbegin', opts.skeleton || '<div class="hshs-section-state hshs-section-skel" role="status" aria-label="Loading"><span></span><span></span><span></span></div>');
       return;
@@ -78,9 +88,9 @@
   }
 
   function releaseStuckSkeletons() {
-    document.querySelectorAll('.hshs-load-skel').forEach(function (sk) {
+    document.querySelectorAll('.hshs-load-skel, .hshs-skel-bottom').forEach(function (sk) {
       if (!sk.parentNode) return;
-      if (document.querySelector('.chat-shell, .hshs-chat-page')) {
+      if (pageHasRealContent(sk.parentNode, sk) || document.querySelector('.gallery-page, .videos-page, .home-page, .hshs-chat-page, .chat-shell')) {
         sk.parentNode.removeChild(sk);
         return;
       }
