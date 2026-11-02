@@ -25,7 +25,7 @@
       <div><span class="polls-kicker">YOUR SCHOOL. YOUR VOICE.</span><h2>Live right now</h2><p>Pick an option and see how the HSHS community is voting.</p></div>
       <button type="button" class="poll-create" id="createPollBtn"><i class="fas fa-plus"></i><span>Start a poll</span></button>
     </div>
-    <div id="activePollsList" class="poll-grid" aria-live="polite"><article class="hshs-sk-poll" aria-hidden="true"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar short"></span></article><article class="hshs-sk-poll" aria-hidden="true"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar short"></span></article></div>
+    <div id="activePollsList" class="poll-grid" aria-live="polite"></div>
   </section>
 
   <section class="polls-content polls-results-strip" id="results">
@@ -33,14 +33,14 @@
       <div><span class="polls-kicker">THE NUMBERS</span><h2>Poll snapshot</h2><p>A quick look at participation across the live polls.</p></div>
       <span class="poll-stat-pill" id="pollCount">0 live polls</span>
     </div>
-    <div id="pollSnapshot" class="poll-snapshot"><div class="poll-empty">Vote data will appear here when polls are available.</div></div>
+    <div id="pollSnapshot" class="poll-snapshot"></div>
   </section>
 
   <section class="polls-content" id="closed">
     <div class="polls-heading">
       <div><span class="polls-kicker">THE ARCHIVE</span><h2>Past polls</h2><p>See what HSHS has asked and answered before.</p></div>
     </div>
-    <div id="closedPollsList" class="poll-grid" aria-live="polite"><article class="hshs-sk-poll" aria-hidden="true"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar short"></span></article><article class="hshs-sk-poll" aria-hidden="true"><span class="hshs-sk-line sm"></span><span class="hshs-sk-line"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar"></span><span class="hshs-sk-bar short"></span></article></div>
+    <div id="closedPollsList" class="poll-grid" aria-live="polite"></div>
   </section>
 
   <section class="polls-cta">

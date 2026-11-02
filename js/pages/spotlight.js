@@ -23,7 +23,7 @@
     if (document.querySelector('link[data-hshs-css="css/spotlight.css"]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = base() + 'css/spotlight.css?v=261002route2';
+    l.href = base() + 'css/spotlight.css?v=261102ready';
     l.setAttribute('data-hshs-css', 'css/spotlight.css');
     document.head.appendChild(l);
   }
@@ -139,14 +139,14 @@
     var root = document.getElementById('hshs-page'); if (!root) return;
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl && !document.getElementById('featuredStudent')) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
-    loadCss(); renderNoms(); wireForm(); loadData();
+    loadCss(); state.posts = seed(); renderBoard(); renderNoms(); wireForm(); loadData();
     if (global.HshsRoute) global.HshsRoute.reveal();
   }
   async function loadData() {
     var posts = [];
     try { if (global.db && global.db.getPosts) posts = await global.db.getPosts(60, 0); } catch (e) { posts = []; }
     posts = (posts || []).filter(function (p) { return p && p.id; });
-    if (!posts.length) posts = [];
+    if (!posts.length) posts = seed();
     state.posts = posts.sort(function (a, b) { return score(b) - score(a) || dateValue(b.createdAt || b.timestamp) - dateValue(a.createdAt || a.timestamp); });
     renderBoard();
   }
