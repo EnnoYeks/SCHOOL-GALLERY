@@ -20,7 +20,7 @@
       var uid='';
       try{ if(g.auth&&g.auth.currentUser) uid=g.auth.currentUser.uid; }catch(e){}
       if(!uid&&g.HshsStore&&typeof g.HshsStore.currentUser==='function'){ var me=g.HshsStore.currentUser(); uid=me&&(me.uid||me.id)||''; }
-      cache=await g.db.getNotifications(uid)||[];
+      cache=await g.db.getNotifications(uid||'')||[];
       if(!Array.isArray(cache)) cache=[];
     }catch(e){ failed=true; cache=[]; }
     return cache;
@@ -50,14 +50,12 @@
     if(badge){ badge.textContent=String(unreadMsgs); badge.hidden=!unreadMsgs; }
     if(!all.length){
       var extra=tab==='messages'?'<a class="hshs-open-chats" href="'+base()+'/chat/">Open chats</a>':'';
-      list.innerHTML='';
       if(g.HshsPaint) g.HshsPaint.section(list,'empty',{empty:'<div class="hshs-empty"><i class="fas fa-bell-slash"></i><h4>Nothing here yet</h4>'+extra+'</div>'});
       else list.innerHTML='<div class="hshs-empty"><i class="fas fa-bell-slash"></i><h4>Nothing here yet</h4>'+extra+'</div>';
       return;
     }
-    list.innerHTML='';
     if(g.HshsPaint) g.HshsPaint.section(list,'success');
-    list.insertAdjacentHTML('beforeend',all.map(function(n){
+    list.querySelectorAll('.hshs-notif-card').forEach(function(n){n.remove()});list.insertAdjacentHTML('beforeend',all.map(function(n){
       return '<button type="button" class="hshs-notif-card'+(n.read?'':' unread')+'" data-go="'+esc(dest(n))+'">'+ '<span class="hshs-notif-ico"><i class="fas '+esc(icon(n.type))+'"></i></span>'+ '<span class="hshs-notif-copy"><strong>'+esc(n.title||'Notification')+'</strong><p>'+esc(n.message||'')+'</p><time>'+esc(rel(n.createdAt||Date.now()))+(isMsg(n)?' · Chat':'')+'</time></span>'+ (isMsg(n)?'<span class="hshs-notif-go">Open</span>':'')+ '</button>';
     }).join(''));
     if(tab==='messages') list.insertAdjacentHTML('beforeend','<a class="hshs-open-chats" href="'+base()+'/chat/">See all chats</a>');

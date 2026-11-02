@@ -59,7 +59,7 @@
   }
 
   function clearSkeletons(host) {
-    host.querySelectorAll(':scope > .hshs-section-state, :scope > .hshs-sk-poll, :scope > .hshs-sk-spot, :scope > .hshs-sk-feat, :scope > .hshs-sk-mem, :scope > .hshs-sk-row, :scope > .hshs-sk-card, :scope > [aria-hidden="true"]').forEach(function (node) {
+    host.querySelectorAll(':scope > .hshs-section-state, :scope > .hshs-sk-poll, :scope > .hshs-sk-spot, :scope > .hshs-sk-feat, :scope > .hshs-sk-mem, :scope > .hshs-sk-row, :scope > .hshs-sk-card, :scope > .poll-empty, :scope > .sp-empty, :scope > .hshs-empty, :scope > .memories-empty, :scope > [aria-hidden="true"]').forEach(function (node) {
       if (node.parentNode === host) node.parentNode.removeChild(node);
     });
   }
@@ -67,6 +67,10 @@
     opts = opts || {};
     if (!host) return;
     host.setAttribute('data-hshs-state', state);
+    if (state !== 'loading') {
+      var reserved = host.getBoundingClientRect().height;
+      if (reserved > 0) host.style.minHeight = reserved + 'px';
+    }
     if (state === 'loading') {
       if (!host.querySelector(':scope > .hshs-section-state, :scope > .hshs-sk-poll, :scope > .hshs-sk-spot, :scope > .hshs-sk-feat, :scope > .hshs-sk-mem, :scope > .hshs-sk-row')) {
         host.insertAdjacentHTML('afterbegin', opts.skeleton || '<div class="hshs-section-state hshs-section-skel" role="status" aria-label="Loading"><span></span><span></span><span></span></div>');

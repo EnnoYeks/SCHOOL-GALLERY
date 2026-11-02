@@ -316,11 +316,10 @@ class Database {
     }
 
     async getNotifications(uid) {
-        if (!uid) return [];
         const { data, error } = await supabase
             .from("notifications")
             .select("id, firebase_uid, type, title, message, href, read, created_at")
-            .eq("firebase_uid", uid)
+            .eq("firebase_uid", uid || "__none__")
             .order("created_at", { ascending: false })
             .limit(40);
         if (error) throw error;
