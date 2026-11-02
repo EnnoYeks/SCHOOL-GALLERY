@@ -75,9 +75,15 @@
     var grid = document.getElementById('spotlightGrid');
     var featured = document.getElementById('featuredStudent');
     var list = visible();
-    if (featured) featured.innerHTML = featureHtml(list[0] || state.posts[0] || null);
+    if (featured) {
+      featured.innerHTML = '';
+      if (global.HshsPaint) global.HshsPaint.section(featured, (list[0] || state.posts[0]) ? 'success' : 'empty', { empty: '<div class="sp-empty"><i class="fas fa-star"></i><strong>The week is still open</strong><p>When a school post is shared, the most active moment becomes the featured spotlight.</p></div>' });
+      featured.insertAdjacentHTML('beforeend', featureHtml(list[0] || state.posts[0] || null));
+    }
     if (!grid) return;
-    grid.innerHTML = list.length ? list.slice(0, 12).map(cardHtml).join('') : '<div class="sp-empty"><i class="fas fa-compass"></i><strong>Nothing in this hall yet</strong><p>Share a photo or video in that area, or nominate someone below.</p></div>';
+    grid.innerHTML = '';
+    if (global.HshsPaint) global.HshsPaint.section(grid, list.length ? 'success' : 'empty', { empty: '<div class="sp-empty"><i class="fas fa-compass"></i><strong>Nothing in this hall yet</strong><p>Share a photo or video in that area, or nominate someone below.</p></div>' });
+    if (list.length) grid.insertAdjacentHTML('beforeend', list.slice(0, 12).map(cardHtml).join(''));
     renderFilters(); renderStats(); renderHall(); renderCats(); wireModal();
   }
   function renderHall() {
@@ -85,7 +91,9 @@
     var by = {};
     state.posts.forEach(function (p) { var n = author(p); if (!by[n]) by[n] = { name: n, points: 0 }; by[n].points += Math.round(score(p)); });
     var people = Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return b.points - a.points; }).slice(0, 6);
-    hall.innerHTML = people.length ? people.map(function (x, i) { return '<div class="sp-rank"><b>' + (i + 1) + '</b><span>' + esc(x.name) + '</span><em>' + x.points + '</em></div>'; }).join('') : '<div class="sp-empty compact"><strong>Hall of Fame starts with real posts</strong><p>Likes, comments, and views decide the order.</p></div>';
+    hall.innerHTML = '';
+    if (global.HshsPaint) global.HshsPaint.section(hall, people.length ? 'success' : 'empty', { empty: '<div class="sp-empty compact"><strong>Hall of Fame starts with real posts</strong><p>Likes, comments, and views decide the order.</p></div>' });
+    if (people.length) hall.insertAdjacentHTML('beforeend', people.map(function (x, i) { return '<div class="sp-rank"><b>' + (i + 1) + '</b><span>' + esc(x.name) + '</span><em>' + x.points + '</em></div>'; }).join(''));
   }
   function renderCats() {
     var cats = document.getElementById('spotlightCategories'); if (!cats) return;
@@ -132,16 +140,39 @@
     var root = document.getElementById('hshs-page'); if (!root) return;
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl && !document.getElementById('featuredStudent')) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
-    loadCss(); state.posts = []; renderBoard(); renderNoms(); wireForm(); loadData();
-    if (global.HshsRoute) global.HshsRoute.reveal();
+    var grid = document.getElementById('spotlightGrid');
+    var featured = document.getElementById('featuredStudent');
+    var hall = document.getElementById('hallOfFameList');
+    if (global.HshsPaint) {
+      if (featured) global.HshsPaint.section(featured, 'loading');
+      if (grid) global.HshsPaint.section(grid, 'loading');
+      if (hall) global.HshsPaint.section(hall, 'loading');
+    }
+    renderNoms(); wireForm(); loadData();
   }
   async function loadData() {
-    var posts = [];
-    try { if (global.db && global.db.getPosts) posts = await global.db.getPosts(60, 0); } catch (e) { posts = []; }
+    var posts = [], failed = false;
+    try {
+      if (!(global.db && global.db.getPosts)) throw new Error('Spotlight source unavailable');
+      posts = await global.db.getPosts(60, 0);
+    } catch (e) { failed = true; posts = []; }
+    if (failed) {
+      var grid = document.getElementById('spotlightGrid');
+      var featured = document.getElementById('featuredStudent');
+      var hall = document.getElementById('hallOfFameList');
+      var err = '<div class="sp-empty"><strong>Could not load spotlight</strong><button type="button" data-hshs-retry>Retry</button></div>';
+      if (global.HshsPaint) {
+        if (featured) global.HshsPaint.section(featured, 'error', { onRetry: loadData, error: err });
+        if (grid) global.HshsPaint.section(grid, 'error', { onRetry: loadData, error: err });
+        if (hall) global.HshsPaint.section(hall, 'error', { onRetry: loadData, error: err });
+      }
+      if (global.HshsPaint && global.HshsPaint.ready) global.HshsPaint.ready('spotlight');
+      return;
+    }
     posts = (posts || []).filter(function (p) { return p && p.id; });
-    if (!posts.length) posts = [];
     state.posts = posts.sort(function (a, b) { return score(b) - score(a) || dateValue(b.createdAt || b.timestamp) - dateValue(a.createdAt || a.timestamp); });
     renderBoard();
+    if (global.HshsPaint && global.HshsPaint.ready) global.HshsPaint.ready('spotlight');
   }
   function boot() {
     function go() { if (!isPage()) return; if (global.HshsRender) mount(); else setTimeout(go, 40); }

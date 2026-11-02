@@ -12,14 +12,20 @@
   function rel(ts){ var d=Date.now()-Number(ts||0); if(d<60000)return'Just now'; if(d<3600000)return Math.floor(d/60000)+'m'; if(d<86400000)return Math.floor(d/3600000)+'h'; return Math.floor(d/86400000)+'d'; }
   function icon(type){ return ({friend_request:'fa-user-plus',friend_accept:'fa-user-check',message:'fa-comment-dots',like:'fa-heart',mention:'fa-at',follow:'fa-user-plus',system:'fa-bell',featured:'fa-star',poll:'fa-square-poll-vertical'}[type]||'fa-bell'); }
 
-  function rows(){
+  var cache=null, failed=false;
+  async function loadRows(){
+    failed=false;
+    if(!(g.db&&typeof g.db.getNotifications==='function')){ failed=true; cache=[]; return cache; }
     try{
-      var s=g.HshsStore;
-      var list=s&&s.listNotifications?s.listNotifications(40)||[]:[];
-      return Array.isArray(list)?list:[];
-    }catch(e){}
-    return [];
+      var uid='';
+      try{ if(g.auth&&g.auth.currentUser) uid=g.auth.currentUser.uid; }catch(e){}
+      if(!uid&&g.HshsStore&&typeof g.HshsStore.currentUser==='function'){ var me=g.HshsStore.currentUser(); uid=me&&(me.uid||me.id)||''; }
+      cache=await g.db.getNotifications(uid)||[];
+      if(!Array.isArray(cache)) cache=[];
+    }catch(e){ failed=true; cache=[]; }
+    return cache;
   }
+  function rows(){ return cache||[]; }
   function isMsg(n){ var t=String(n.type||'').toLowerCase(); return t==='message'||t==='chat'; }
   function matches(n,tab){
     var t=String(n.type||'').toLowerCase();
@@ -44,12 +50,16 @@
     if(badge){ badge.textContent=String(unreadMsgs); badge.hidden=!unreadMsgs; }
     if(!all.length){
       var extra=tab==='messages'?'<a class="hshs-open-chats" href="'+base()+'/chat/">Open chats</a>':'';
-      list.innerHTML='<div class="hshs-empty"><i class="fas fa-bell-slash"></i><h4>Nothing here yet</h4>'+extra+'</div>';
+      list.innerHTML='';
+      if(g.HshsPaint) g.HshsPaint.section(list,'empty',{empty:'<div class="hshs-empty"><i class="fas fa-bell-slash"></i><h4>Nothing here yet</h4>'+extra+'</div>'});
+      else list.innerHTML='<div class="hshs-empty"><i class="fas fa-bell-slash"></i><h4>Nothing here yet</h4>'+extra+'</div>';
       return;
     }
-    list.innerHTML=all.map(function(n){
+    list.innerHTML='';
+    if(g.HshsPaint) g.HshsPaint.section(list,'success');
+    list.insertAdjacentHTML('beforeend',all.map(function(n){
       return '<button type="button" class="hshs-notif-card'+(n.read?'':' unread')+'" data-go="'+esc(dest(n))+'">'+ '<span class="hshs-notif-ico"><i class="fas '+esc(icon(n.type))+'"></i></span>'+ '<span class="hshs-notif-copy"><strong>'+esc(n.title||'Notification')+'</strong><p>'+esc(n.message||'')+'</p><time>'+esc(rel(n.createdAt||Date.now()))+(isMsg(n)?' · Chat':'')+'</time></span>'+ (isMsg(n)?'<span class="hshs-notif-go">Open</span>':'')+ '</button>';
-    }).join('');
+    }).join(''));
     if(tab==='messages') list.insertAdjacentHTML('beforeend','<a class="hshs-open-chats" href="'+base()+'/chat/">See all chats</a>');
   }
   function mount(){
@@ -75,7 +85,16 @@
       if(!card) return;
       location.href=window.HshsPaths?HshsPaths.href(card.getAttribute('data-go')):('/'+String(card.getAttribute('data-go')||'').replace(/^.*\//,'').replace(/\.html$/,'')+'/');
     });
-    render(tab);
+    var list=document.getElementById('hshsNotifList');
+    if(list&&g.HshsPaint) g.HshsPaint.section(list,'loading');
+    loadRows().then(function(){
+      if(failed){
+        if(list&&g.HshsPaint) g.HshsPaint.section(list,'error',{onRetry:function(){mount()},error:'<div class="hshs-empty"><i class="fas fa-triangle-exclamation"></i><h4>Could not load notifications</h4><button type="button" data-hshs-retry>Retry</button></div>'});
+      } else {
+        render(tab);
+      }
+      if(g.HshsPaint&&g.HshsPaint.ready) g.HshsPaint.ready('notifications');
+    });
   }
   function boot(){
     function go(){ if(!isPage()) return; if(!g.HshsRender){ setTimeout(go,40); return; } mount(); }
