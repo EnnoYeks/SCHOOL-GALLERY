@@ -6,5 +6,5 @@
     <button type="button" class="hshs-tab" data-notif-tab="messages">Messages <em id="hshsMsgTabCount" hidden>0</em></button>
     <button type="button" class="hshs-tab" data-notif-tab="school">School</button>
   </div>
-  <section id="hshsNotifList" aria-live="polite"></section>
+  <section id="hshsNotifList" aria-live="polite"><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div><div class="hshs-sk-row" aria-hidden="true"><i class="hshs-sk-ava"></i><span class="hshs-sk-copy"><b></b><em></em></span></div></section>
 </main>`;})(typeof window!=='undefined'?window:this);
