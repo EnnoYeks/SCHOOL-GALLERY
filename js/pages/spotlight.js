@@ -23,7 +23,7 @@
     if (document.querySelector('link[data-hshs-css="css/spotlight.css"]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = base() + 'css/spotlight.css?v=261102ready';
+    l.href = base() + 'css/spotlight.css?v=261102real';
     l.setAttribute('data-hshs-css', 'css/spotlight.css');
     document.head.appendChild(l);
   }
@@ -32,14 +32,7 @@
       return { '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '"' }[c];
     });
   }
-  function seed() {
-    return [
-      { id: 'sp1', title: 'House colour day', description: 'Eagle, Lion and Falcon brought the campus to life.', author: 'House Captains', category: 'events', likes: 116, views: 610, comments: 15, image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=900&q=70' },
-      { id: 'sp2', title: 'Sports Day track', description: 'The 100 metres opened Sports Day.', author: 'Sports Desk', category: 'sports', likes: 124, views: 690, comments: 18, image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=900&q=70' },
-      { id: 'sp3', title: 'Library hour', description: 'A quiet afternoon in the school library.', author: 'Library Club', category: 'academics', likes: 64, views: 310, comments: 6, image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=70' },
-      { id: 'sp4', title: 'Art studio', description: 'Colour studies from the creative arts club.', author: 'Arts Club', category: 'arts', likes: 73, views: 280, comments: 9, image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=900&q=70' }
-    ];
-  }
+
   function dateValue(v) { var d = v && v.toDate ? v.toDate() : new Date(v || 0); return isNaN(d.getTime()) ? 0 : d.getTime(); }
   function score(p) { return Number(p.likes || 0) * 3 + Number(p.comments || 0) * 2 + Number(p.views || 0) * 0.05 + Number(p.shares || 0); }
   function media(p) { return p.imageUrl || p.image || p.thumbnailUrl || p.mediaURL || p.mediaUrl || ''; }
@@ -139,14 +132,14 @@
     var root = document.getElementById('hshs-page'); if (!root) return;
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl && !document.getElementById('featuredStudent')) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
-    loadCss(); state.posts = seed(); renderBoard(); renderNoms(); wireForm(); loadData();
+    loadCss(); state.posts = []; renderBoard(); renderNoms(); wireForm(); loadData();
     if (global.HshsRoute) global.HshsRoute.reveal();
   }
   async function loadData() {
     var posts = [];
     try { if (global.db && global.db.getPosts) posts = await global.db.getPosts(60, 0); } catch (e) { posts = []; }
     posts = (posts || []).filter(function (p) { return p && p.id; });
-    if (!posts.length) posts = seed();
+    if (!posts.length) posts = [];
     state.posts = posts.sort(function (a, b) { return score(b) - score(a) || dateValue(b.createdAt || b.timestamp) - dateValue(a.createdAt || a.timestamp); });
     renderBoard();
   }

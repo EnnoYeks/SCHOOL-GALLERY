@@ -2,16 +2,7 @@
     if (window.HshsStore) return;
     var KEY = 'hshsWorldStore_v2';
     var ONLINE_MS = 45000;
-    var PICS = [
-        'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=900&q=70',
-        'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=900&q=70',
-        'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=900&q=70',
-        'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=900&q=70',
-        'https://images.unsplash.com/photo-1577896852618-01fff3891965?auto=format&fit=crop&w=900&q=70',
-        'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=70'
-    ];
-
-    function now() { return Date.now(); }
+function now() { return Date.now(); }
     function id(prefix) { return (prefix || 'id') + '-' + Math.random().toString(36).slice(2, 9); }
     function slugify(name) {
         return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 18) || 'student';

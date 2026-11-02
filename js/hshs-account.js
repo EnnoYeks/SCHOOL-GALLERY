@@ -5,11 +5,7 @@
     var BADGE = 'https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png';
     var HERO_KEY = 'hshsHeroSlides';
     var DEFAULT_HERO = [
-        BADGE,
-        'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=70',
-        'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=70',
-        'https://images.unsplash.com/photo-1461896836934-ffe607ba6851?auto=format&fit=crop&w=1200&q=70',
-        'https://images.unsplash.com/photo-1577896852618-01fff3891965?auto=format&fit=crop&w=1200&q=70'
+        BADGE
     ];
 
     function fileName() {
