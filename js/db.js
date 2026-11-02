@@ -246,6 +246,96 @@ class Database {
         }
     }
 
+
+    async getPolls() {
+        const { data, error } = await supabase
+            .from("polls")
+            .select("id, question, options, image, closed, status, author_id, created_at")
+            .order("created_at", { ascending: false })
+            .limit(60);
+        if (error) throw error;
+        const polls = data || [];
+        const ids = polls.map((row) => row.id);
+        let votes = [];
+        if (ids.length) {
+            const voteRes = await supabase
+                .from("poll_votes")
+                .select("poll_id, option_index, firebase_uid")
+                .in("poll_id", ids);
+            if (voteRes.error) throw voteRes.error;
+            votes = voteRes.data || [];
+        }
+        return polls.map((row) => {
+            const options = Array.isArray(row.options) ? row.options.map((opt) => ({
+                text: opt.text || opt.label || "",
+                votes: 0
+            })) : [];
+            votes.filter((v) => v.poll_id === row.id).forEach((v) => {
+                const i = Number(v.option_index);
+                if (options[i]) options[i].votes += 1;
+            });
+            return {
+                id: row.id,
+                question: row.question,
+                options,
+                image: row.image || "",
+                closed: row.closed === true || row.status === "closed",
+                status: row.status || (row.closed ? "closed" : "open"),
+                authorId: row.author_id || "",
+                createdAt: row.created_at
+            };
+        });
+    }
+
+    async createPoll(payload) {
+        const uid = await this.getCurrentUserId();
+        if (!uid) throw new Error("Sign in to start a poll");
+        const options = (payload.options || []).map((opt) => ({ text: opt.text || opt.label || "" })).filter((opt) => opt.text);
+        const { data, error } = await supabase.from("polls").insert({
+            question: payload.question,
+            options,
+            image: payload.image || null,
+            closed: false,
+            status: "open",
+            author_id: uid
+        }).select().single();
+        if (error) throw error;
+        return data;
+    }
+
+    async votePoll(pollId, optionIndex) {
+        const uid = await this.getCurrentUserId();
+        if (!uid) throw new Error("Sign in to vote");
+        const { data, error } = await supabase.from("poll_votes").insert({
+            poll_id: pollId,
+            firebase_uid: uid,
+            option_index: optionIndex
+        }).select().single();
+        if (error) throw error;
+        return data;
+    }
+
+    async getNotifications(uid) {
+        if (!uid) return [];
+        const { data, error } = await supabase
+            .from("notifications")
+            .select("id, firebase_uid, type, title, message, href, read, created_at")
+            .eq("firebase_uid", uid)
+            .order("created_at", { ascending: false })
+            .limit(40);
+        if (error) throw error;
+        return (data || []).map((row) => ({
+            id: row.id,
+            type: row.type,
+            title: row.title,
+            message: row.message,
+            href: row.href,
+            read: row.read,
+            createdAt: row.created_at,
+            userId: row.firebase_uid
+        }));
+    }
+
     // Stub methods so older code doesn't break (chat still on Firebase for now)
     async getById() { return null; }
     async deletePost() { return false; }
