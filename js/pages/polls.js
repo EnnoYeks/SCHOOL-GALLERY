@@ -9,7 +9,6 @@ function isPage(){
   return !!document.querySelector('.hshs-polls-page,#activePollsList');
 }
 function base(){return '/'}
-function loadCss(href){if(document.querySelector('link[data-hshs-css="'+href+'"]'))return;var l=document.createElement('link');l.rel='stylesheet';l.href=base()+href+'?v=261102real';l.setAttribute('data-hshs-css',href);document.head.appendChild(l)}
 function voteKey(id){return'hshs_poll_vote_'+String(id||'unknown')}
 function readLocal(){try{var raw=localStorage.getItem(LOCAL_KEY);var list=raw?JSON.parse(raw):[];return Array.isArray(list)?list:[]}catch(e){return[]}}
 function writeLocal(list){try{localStorage.setItem(LOCAL_KEY,JSON.stringify(list))}catch(e){}}

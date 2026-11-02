@@ -19,7 +19,7 @@ def find_html(root):
 def normalize_file(path):
     with open(path, "r", encoding="utf-8") as fh:
         text = fh.read()
-    new = re.sub(r'( ["\'])(/?(?:css|js)/[^"\']+?)\?v=[^"\']+', r'\1\2?v=' + VERSION, text)
+    new = re.sub(r'((?:href|src)=["\'])/?(css|js)/([^"\'?]+)\?v=[^"\']+', r'\1/\2/\3?v=' + VERSION, text)
     if new != text:
         with open(path, "w", encoding="utf-8") as fh:
             fh.write(new)

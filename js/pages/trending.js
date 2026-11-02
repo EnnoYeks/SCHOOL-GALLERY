@@ -25,7 +25,7 @@
     document.documentElement.setAttribute('data-hshs-page', PAGE);
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
-    loadCss('css/trending.css'); loadCss('css/hshs-hub.css');
+    loadCss('css/trending.css?v=261102fix1'); loadCss('css/hshs-hub.css?v=261102fix1');
     loadOnce(base() + 'js/trending.js?v=261002route1', 'hshs-leg-trending').then(function () {
       if (typeof global.startTrending === 'function') global.startTrending();
       return loadOnce(base() + 'js/hshs-discover-ui.js?v=261002route1', 'hshs-discover');

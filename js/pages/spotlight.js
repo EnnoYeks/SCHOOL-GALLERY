@@ -19,14 +19,6 @@
     return f === PAGE || (global.HshsRoute && global.HshsRoute.is(PAGE));
   }
   function base() { return '/'; }
-  function loadCss() {
-    if (document.querySelector('link[data-hshs-css="css/spotlight.css"]')) return;
-    var l = document.createElement('link');
-    l.rel = 'stylesheet';
-    l.href = base() + 'css/spotlight.css?v=261102real';
-    l.setAttribute('data-hshs-css', 'css/spotlight.css');
-    document.head.appendChild(l);
-  }
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>'"]/g, function (c) {
       return { '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '"' }[c];

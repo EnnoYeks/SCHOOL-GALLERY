@@ -47,9 +47,9 @@
   async function mount() {
     if (!isPage()) return;
     if (global.HshsShell) try { global.HshsShell.ensureShell(); } catch (e) {}
-    loadCss('css/photos.css');
-    loadCss('css/photos-campus.css');
-    loadCss('css/hshs-media-cards.css');
+    loadCss('css/photos.css?v=261102fix1');
+    loadCss('css/photos-campus.css?v=261102fix1');
+    loadCss('css/hshs-media-cards.css?v=261102fix1');
     if (!mountTemplate()) return;
     await loadOnce('/js/hshs-media-cards.js?v=261027media2', 'hshs-media-cards');
     await loadOnce('/js/photos.js?v=261027media2', 'hshs-leg-photos');

@@ -26,7 +26,7 @@
     var root = document.getElementById('hshs-page');
     if (!root) { root = document.createElement('div'); root.id = 'hshs-page'; document.body.appendChild(root); }
     document.documentElement.setAttribute('data-hshs-page', PAGE);
-    loadCss('css/hshs-settings.css');
+    loadCss('css/hshs-settings.css?v=261102fix1');
     await loadOnce(base() + 'js/core/templates/settings.js?v=' + VER, 'hshs-tpl-settings');
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }

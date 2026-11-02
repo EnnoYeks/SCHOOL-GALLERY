@@ -26,8 +26,8 @@
     document.documentElement.setAttribute('data-hshs-page', PAGE);
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
-    loadCss('css/admin.css');
-    loadCss('css/admin-media-manager.css');
+    loadCss('css/admin.css?v=261102fix1');
+    loadCss('css/admin-media-manager.css?v=261102fix1');
     await loadOnce(base() + 'js/admin.js?v=261028media1', 'hshs-leg-admin');
     await loadOnce(base() + 'js/admin-media-manager.js?v=261028media1', 'hshs-admin-media-manager');
     global['__hshs' + PAGE + 'Mounted'] = true;

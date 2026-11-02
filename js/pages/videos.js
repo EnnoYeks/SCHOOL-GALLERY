@@ -29,7 +29,7 @@
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (!tpl) return;
     if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl;
-    loadCss('css/videos.css'); loadCss('css/vibe.css'); loadCss('css/hshs-hub.css'); loadCss('css/hshs-media-cards.css');
+    loadCss('css/videos.css?v=261102fix1'); loadCss('css/vibe.css?v=261102fix1'); loadCss('css/hshs-hub.css?v=261102fix1'); loadCss('css/hshs-media-cards.css?v=261102fix1');
     loadOnce('/js/hshs-media-cards.js?v=261027media2', 'hshs-media-cards').then(function () {
       return loadOnce('/js/vibe-skel.js?v=261002route1', 'hshs-vibe-skel');
     }).then(function () {

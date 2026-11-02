@@ -6,8 +6,8 @@
             .map(function (s) { return s.getAttribute('src') || ''; })
             .find(function (s) { return s.indexOf('navigation.js') !== -1 && s.indexOf('mobile-navigation') === -1; });
         var href = guess
-            ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-perf.css')
-            : ('/css/hshs-perf.css');
+            ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-perf.css?v=261102fix1')
+            : ('/css/hshs-perf.css?v=261102fix1');
         var link = document.createElement('link');
         link.id = 'hshs-perf-css';
         link.rel = 'stylesheet';
