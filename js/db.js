@@ -82,6 +82,25 @@ class Database {
     async getPosts(limitCount = 10, offset = 0) {
         return this.queryTable("posts", limitCount, offset);
     }
+    async getPostsStrict(limitCount = 10, offset = 0) {
+        let q = supabase
+            .from("posts")
+            .select("*")
+            .eq("status", "published")
+            .order("created_at", { ascending: false })
+            .range(0, limitCount - 1);
+        const { data, error } = await q;
+        if (error) throw error;
+        return (data || []).map(row => this.normalizeItem(row));
+    }
+    async getPolls() {
+        const { data, error } = await supabase
+            .from("polls")
+            .select("*")
+            .order("created_at", { ascending: false });
+        if (error) throw error;
+        return (data || []).map(row => this.normalizeItem(row));
+    }
     async getPhotos(limitCount = 20, offset = 0) {
         return this.queryTable("photos", limitCount, offset);
     }
