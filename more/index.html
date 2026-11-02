@@ -16,8 +16,7 @@
   <link rel="stylesheet" href="/css/hshs-shared-header.css?v=261002fast1">
   <style>
     html, body { background: #071433; margin: 0; }
-    #hshs-page { min-height: 100vh; background: #071433; opacity: 1 !important; visibility: visible !important; }
-    html, #hshs-page, .mobile-tabbar, .navbar { opacity: 1; visibility: visible; }
+    #hshs-page { min-height: 100vh; background: #071433; }
     html.hshs-ready #hshs-page > :not(.hshs-load-skel) { animation: none; }
     .hshs-load-skel {
       position: relative;
@@ -27,8 +26,6 @@
         radial-gradient(520px 280px at 50% 18%, rgba(37, 99, 235, 0.16), transparent 62%),
         #071433;
       overflow: hidden;
-      opacity: 1 !important;
-      visibility: visible !important;
     }
     body:has(.hshs-load-skel) #hshs-boot { display: none !important; }
     .hshs-load-skel::before,
@@ -70,7 +67,7 @@
 <body class="dark-mode">
   <script src="/js/core/paint.js?v=261007paint1"></script>
 
-  <div id="hshs-page" style="opacity:1!important;visibility:visible!important">
+  <div id="hshs-page">
     <div class="hshs-load-skel" data-skel-page="more" role="status" aria-label="Loading"><main class="skel-account"><div class="sk skel-more-card"></div><div class="skel-list"><span class="sk skel-menu"></span><span class="sk skel-menu"></span><span class="sk skel-menu"></span><span class="sk skel-menu"></span><span class="sk skel-menu"></span><span class="sk skel-menu"></span><span class="sk skel-menu"></span><span class="sk skel-menu"></span><span class="sk skel-menu"></span></div></main></div>
   </div>
   <script>
