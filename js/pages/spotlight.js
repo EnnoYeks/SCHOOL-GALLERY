@@ -35,7 +35,7 @@
   function dateValue(v) { var d = v && v.toDate ? v.toDate() : new Date(v || 0); return isNaN(d.getTime()) ? 0 : d.getTime(); }
   function score(p) { return Number(p.likes || 0) * 3 + Number(p.comments || 0) * 2 + Number(p.views || 0) * 0.05 + Number(p.shares || 0); }
   function media(p) { return p.imageUrl || p.image || p.thumbnailUrl || p.mediaURL || p.mediaUrl || ''; }
-  function author(p) { return p.author || p.authorName || p.displayName || p.userName || 'HSHS Student'; }
+  function author(p) { return p.author || p.authorName || p.displayName || p.userName || ''; }
   function hallOf(p) {
     var raw = String(p.category || p.type || 'community').toLowerCase();
     if (/sport/.test(raw)) return 'sports';
@@ -53,17 +53,21 @@
   function featureHtml(p) {
     if (!p) return '<div class="sp-empty"><i class="fas fa-star"></i><strong>The week is still open</strong><p>When a school post is shared, the most active moment becomes the featured spotlight.</p></div>';
     var img = media(p);
-    return '<article class="sp-feature-body"><div class="sp-feature-media">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span>' + initial(author(p)) + '</span>') + '</div><div><span class="sp-pill">' + esc(hallLabel(hallOf(p))) + '</span><h3>' + esc(author(p)) + '</h3><p class="sp-title">' + esc(p.title || 'Campus moment') + '</p><p>' + esc(p.description || 'Recognized from HSHS campus activity.') + '</p><div class="sp-metrics"><span><i class="fas fa-heart"></i> ' + Number(p.likes || 0) + '</span><span><i class="fas fa-eye"></i> ' + Number(p.views || 0) + '</span><span><i class="fas fa-comment"></i> ' + Number(p.comments || 0) + '</span></div><button type="button" class="sp-open" data-spotlight-id="' + esc(p.id) + '">Open spotlight</button></div></article>';
+    var name = author(p);
+    var title = p.title || '';
+    var desc = p.description || '';
+    return '<article class="sp-feature-body"><div class="sp-feature-media">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span>' + (name ? initial(name) : '') + '</span>') + '</div><div><span class="sp-pill">' + esc(hallLabel(hallOf(p))) + '</span>' + (name ? '<h3>' + esc(name) + '</h3>' : '') + (title ? '<p class="sp-title">' + esc(title) + '</p>' : '') + (desc ? '<p>' + esc(desc) + '</p>' : '') + '<div class="sp-metrics"><span><i class="fas fa-heart"></i> ' + Number(p.likes || 0) + '</span><span><i class="fas fa-eye"></i> ' + Number(p.views || 0) + '</span><span><i class="fas fa-comment"></i> ' + Number(p.comments || 0) + '</span></div><button type="button" class="sp-open" data-spotlight-id="' + esc(p.id) + '">Open spotlight</button></div></article>';
   }
   function cardHtml(p) {
     var img = media(p);
-    return '<button type="button" class="sp-card" data-spotlight-id="' + esc(p.id) + '"><div class="sp-card-media">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span>' + initial(author(p)) + '</span>') + '</div><div><span>' + esc(hallLabel(hallOf(p))) + '</span><strong>' + esc(author(p)) + '</strong><small>' + esc(p.title || 'Featured moment') + '</small></div></button>';
+    var name = author(p);
+    return '<button type="button" class="sp-card" data-spotlight-id="' + esc(p.id) + '"><div class="sp-card-media">' + (img ? '<img src="' + esc(img) + '" alt="">' : '<span>' + (name ? initial(name) : '') + '</span>') + '</div><div><span>' + esc(hallLabel(hallOf(p))) + '</span>' + (name ? '<strong>' + esc(name) + '</strong>' : '') + (p.title ? '<small>' + esc(p.title) + '</small>' : '') + '</div></button>';
   }
   function visible() { return state.posts.filter(function (p) { return state.filter === 'all' || hallOf(p) === state.filter; }); }
   function renderStats() {
     var box = document.getElementById('spStats'); if (!box) return;
     var people = {}; state.posts.forEach(function (p) { people[author(p)] = 1; });
-    box.innerHTML = [[state.posts.length, 'Moments'], [Object.keys(people).length, 'Groups'], [readNoms().length, 'Nominations']].map(function (x) { return '<div><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('');
+    box.innerHTML = ''; [[state.posts.length, 'Posts'], [Object.keys(people).length, 'Named authors']].forEach(function (x) { var d = document.createElement('div'); var b = document.createElement('b'); b.textContent = String(x[0]); var s = document.createElement('span'); s.textContent = x[1]; d.append(b, s); box.appendChild(d); });
   }
   function renderFilters() {
     var box = document.getElementById('spFilters'); if (!box) return;
@@ -82,7 +86,7 @@
   function renderHall() {
     var hall = document.getElementById('hallOfFameList'); if (!hall) return;
     var by = {};
-    state.posts.forEach(function (p) { var n = author(p); if (!by[n]) by[n] = { name: n, points: 0 }; by[n].points += Math.round(score(p)); });
+    state.posts.forEach(function (p) { var n = author(p); if (!n) return; if (!by[n]) by[n] = { name: n, points: 0 }; by[n].points += Math.round(score(p)); });
     var people = Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return b.points - a.points; }).slice(0, 6);
     hall.innerHTML = people.length ? people.map(function (x, i) { return '<div class="sp-rank"><b>' + (i + 1) + '</b><span>' + esc(x.name) + '</span><em>' + x.points + '</em></div>'; }).join('') : '<div class="sp-empty compact"><strong>Hall of Fame starts with real posts</strong><p>Likes, comments, and views decide the order.</p></div>';
   }
@@ -97,7 +101,7 @@
   function renderNoms() {
     var box = document.getElementById('spNominations'); if (!box) return;
     var list = readNoms();
-    box.innerHTML = list.length ? '<h3>Saved on this device</h3>' + list.map(function (n) { return '<article><b>' + esc(n.name) + '</b><span>' + esc(n.category) + (n.classTag ? ' · ' + esc(n.classTag) : '') + '</span><p>' + esc(n.note) + '</p></article>'; }).join('') : '';
+    box.innerHTML = list.length ? '<h3>Saved on this device only</h3><p class="sp-note">These nominations are not shared with the school and are not community records.</p>' + list.map(function (n) { return '<article><b>' + esc(n.name) + '</b><span>' + esc(n.category) + (n.classTag ? ' · ' + esc(n.classTag) : '') + '</span><p>' + esc(n.note) + '</p></article>'; }).join('') : '';
     renderStats();
   }
   function wireForm() {
@@ -108,7 +112,7 @@
       var item = { name: String(data.get('name') || '').trim(), classTag: String(data.get('classTag') || '').trim(), category: String(data.get('category') || 'Community'), note: String(data.get('note') || '').trim(), at: Date.now() };
       if (!item.name || !item.note) return;
       var list = readNoms(); list.unshift(item); writeNoms(list); form.reset();
-      var status = document.getElementById('spFormStatus'); if (status) status.textContent = 'Nomination saved on this device.';
+      var status = document.getElementById('spFormStatus'); if (status) status.textContent = 'Saved on this device only. Not shared with the school.';
       renderNoms();
     });
   }
@@ -119,7 +123,8 @@
     function open(id) {
       var p = state.posts.filter(function (x) { return String(x.id) === String(id); })[0]; if (!p) return;
       var img = media(p);
-      body.innerHTML = (img ? '<img src="' + esc(img) + '" alt="">' : '<div class="sp-sheet-mark">' + initial(author(p)) + '</div>') + '<span class="sp-pill">' + esc(hallLabel(hallOf(p))) + '</span><h2 id="spSheetTitle">' + esc(author(p)) + '</h2><p><strong>' + esc(p.title || 'HSHS Spotlight') + '</strong></p><p>' + esc(p.description || '') + '</p>';
+      var name = author(p);
+      body.innerHTML = (img ? '<img src="' + esc(img) + '" alt="">' : '<div class="sp-sheet-mark">' + (name ? initial(name) : '') + '</div>') + '<span class="sp-pill">' + esc(hallLabel(hallOf(p))) + '</span><h2 id="spSheetTitle">' + esc(name || 'Untitled post') + '</h2>' + (p.title ? '<p><strong>' + esc(p.title) + '</strong></p>' : '') + (p.description ? '<p>' + esc(p.description) + '</p>' : '');
       modal.hidden = false;
     }
     document.getElementById('hshs-page').addEventListener('click', function (e) { var btn = e.target.closest('[data-spotlight-id]'); if (btn) open(btn.getAttribute('data-spotlight-id')); });
@@ -147,12 +152,33 @@
     var featured = document.getElementById('featuredStudent');
     var grid = document.getElementById('spotlightGrid');
     var hall = document.getElementById('hallOfFameList');
-    var html = '<div class="sp-empty"><i class="fas fa-triangle-exclamation"></i><strong>Could not load Spotlight</strong><p>' + esc(msg) + '</p><button type="button" class="sp-open" id="spRetry">Retry</button></div>';
-    if (featured) featured.innerHTML = html;
+    if (featured) {
+      featured.innerHTML = '';
+      var box = document.createElement('div');
+      box.className = 'sp-empty';
+      var strong = document.createElement('strong');
+      strong.textContent = 'Could not load Spotlight';
+      var para = document.createElement('p');
+      para.textContent = msg;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sp-open';
+      btn.id = 'spRetry';
+      btn.textContent = 'Retry';
+      btn.onclick = function () { loadData(); };
+      box.append(strong, para, btn);
+      featured.appendChild(box);
+    }
     if (grid) grid.innerHTML = '';
-    if (hall) hall.innerHTML = '<div class="sp-empty compact"><strong>Hall of Fame is unavailable</strong></div>';
-    var btn = document.getElementById('spRetry');
-    if (btn) btn.onclick = function () { loadData(); };
+    if (hall) {
+      hall.innerHTML = '';
+      var empty = document.createElement('div');
+      empty.className = 'sp-empty compact';
+      var h = document.createElement('strong');
+      h.textContent = 'Hall of Fame is unavailable';
+      empty.appendChild(h);
+      hall.appendChild(empty);
+    }
   }
   async function loadData() {
     showLoading();
