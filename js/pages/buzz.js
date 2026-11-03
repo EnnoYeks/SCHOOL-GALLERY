@@ -142,16 +142,22 @@
   async function refreshSocial(items) {
     var api = db();
     if (!api || !api.getVideoSocial) return;
-    var ids = items.map(idOf);
-    var social = await api.getVideoSocial(ids);
-    state.currentUserId = social.currentUserId || state.currentUserId;
-    items.forEach(function (item, index) {
-      var id = idOf(item, index);
-      state.likeCounts[id] = social.likeCounts[id] == null ? Number(item.likes || item.likes_count || 0) : social.likeCounts[id];
-      state.commentCounts[id] = social.commentCounts[id] == null ? Number(item.comments || item.comments_count || 0) : social.commentCounts[id];
-    });
-    (social.likedIds || []).forEach(function (id) { state.liked.add(String(id)); });
-    (social.followedCreatorIds || []).forEach(function (id) { state.follows.add(String(id)); });
+    try {
+      var ids = items.map(idOf);
+      var social = await api.getVideoSocial(ids);
+      state.currentUserId = social.currentUserId;
+      items.forEach(function (item, index) {
+        var id = idOf(item, index);
+        state.liked.delete(id);
+        state.likeCounts[id] = social.likeCounts[id] == null ? Number(item.likes || item.likes_count || 0) : social.likeCounts[id];
+        state.commentCounts[id] = social.commentCounts[id] == null ? Number(item.comments || item.comments_count || 0) : social.commentCounts[id];
+      });
+      state.follows.clear();
+      (social.likedIds || []).forEach(function (id) { state.liked.add(String(id)); });
+      (social.followedCreatorIds || []).forEach(function (id) { state.follows.add(String(id)); });
+    } catch (error) {
+      console.warn('[HSHS Vibe] social state unavailable; keeping feed readable:', error && error.message);
+    }
   }
 
   async function loadVideos(reset) {
