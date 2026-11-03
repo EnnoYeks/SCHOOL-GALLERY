@@ -46,9 +46,8 @@ html.hshs-nav-scrolled .brand-school { color: #eab308 !important; }
 .home-feature-card, .home-stat, .home-panel, .home-empty, .home-trend-item, .home-event-card {
   border-radius: 12px !important; border: 1px solid rgba(201,162,39,.16) !important; box-shadow: 0 8px 20px rgba(7,20,51,.08) !important;
 }
-.home-featured-grid { display: flex !important; gap: 14px !important; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none; }
-.home-featured-grid::-webkit-scrollbar { display: none; }
-.home-feature-card { min-width: min(260px, 78vw); scroll-snap-align: start; padding: 0 !important; }
+.home-featured-grid { display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 12px !important; overflow: visible; padding-bottom: 0; }
+.home-feature-card { min-width: 0; scroll-snap-align: none; padding: 0 !important; }
 .home-empty { display: grid; justify-items: center; text-align: center; gap: 8px; padding: 28px 18px !important; }
 .home-empty i { font-size: 1.6rem; color: #c9a227; }
 .home-stat { transition: transform 180ms ease, box-shadow 180ms ease; }
