@@ -9,7 +9,7 @@
   window.__hshsMobileShell = true;
   window.__hshsMobileShellBoot = true;
 
-  var VER = '261103dark1';
+  var VER = '261103bar1';
   var ALIAS = {
     '': 'home',
     index: 'home',
@@ -246,14 +246,14 @@
   }
   function markActive() {
     var file = currentFile();
+    var moreFiles = ['photos.html', 'videos.html', 'polls.html', 'memories.html', 'about.html', 'contact.html', 'contat.html', 'profile.html', 'settings.html', 'trending.html', 'spotlight.html', 'chat.html', 'search.html', 'saved.html', 'notifications.html', 'more.html'];
     document.querySelectorAll('.mobile-tabbar a').forEach(function (a) {
       var tab = a.getAttribute('data-tab');
       if (!tab || tab === 'upload') return;
       var on = false;
       if (tab === 'home') on = file === 'index.html' || file === '' || location.pathname === '/' || location.pathname === '';
+      else if (tab === 'more') on = moreFiles.indexOf(file) !== -1;
       else if (tab === 'buzz') on = file === 'buzz.html' || file === 'clips.html' || file === 'shorts.html' || /\/(vibe|buzz|clips|shorts)/i.test(location.pathname);
-      else if (tab === 'gallery') on = file === 'gallery.html' || /\/gallery/i.test(location.pathname);
-      else if (tab === 'profile') on = file === 'profile.html' || /\/profile/i.test(location.pathname);
       else on = file === tab + '.html' || location.pathname === '/' + tab;
       a.classList.toggle('active', on);
     });
@@ -292,11 +292,11 @@
     bar.className = 'mobile-tabbar';
     bar.setAttribute('aria-label', 'Primary');
     bar.innerHTML =
-      '<a href="' + r.PRIMARY[0].href + '" class="' + (isActive(r.PRIMARY[0]) ? 'active' : '') + '" data-tab="home" aria-label="Home" title="Home"><i class="fa-solid fa-house"></i><span>Home</span></a>' +
-      '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="buzz" aria-label="Vibe" title="Vibe"><i class="fa-solid fa-bolt-lightning"></i><span>Vibe</span></a>' +
+      '<a href="' + r.PRIMARY[0].href + '" class="' + (isActive(r.PRIMARY[0]) ? 'active' : '') + '" data-tab="home" aria-label="Home" title="Home"><i class="fas fa-house"></i></a>' +
+      '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="buzz" aria-label="Vibe" title="Vibe"><i class="fas fa-bolt"></i></a>' +
       '<button type="button" class="tab-upload" data-tab="upload" id="openUploadStudio" aria-label="Create" title="Create"><span class="tab-upload-btn"><i class="fas fa-plus"></i></span></button>' +
-      '<a href="' + r.PRIMARY[2].href + '" class="' + (isActive(r.PRIMARY[2]) ? 'active' : '') + '" data-tab="gallery" aria-label="Media" title="Media"><i class="fa-regular fa-images"></i><span>Media</span></a>' +
-      '<a href="' + sub('profile.html') + '" class="' + (currentFile() === 'profile.html' ? 'active' : '') + '" data-tab="profile" aria-label="Profile" title="Profile"><i class="fa-regular fa-user"></i><span>Profile</span></a>' +
+      '<a href="' + r.PRIMARY[2].href + '" class="' + (isActive(r.PRIMARY[2]) ? 'active' : '') + '" data-tab="gallery" aria-label="Gallery" title="Gallery"><i class="fas fa-images"></i></a>' +
+      '<a href="#more" class="' + (moreActive ? 'active' : '') + '" data-tab="more" id="openMoreSheet" aria-label="More" title="More"><i class="fas fa-grip"></i></a>' +
       '<div class="nav-indicator" aria-hidden="true"></div>';
     var backdrop = document.createElement('div');
     backdrop.className = 'more-backdrop';
