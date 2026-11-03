@@ -92,27 +92,26 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
 .memories-feature-grid .hshs-sk-mem{width:100%;flex:none}
 @media(prefers-reduced-motion:reduce){.hshs-sk-card::after,.hshs-sk-poll::after,.gallery-skel-media::after{animation:none}}
 
-/* Force proper mobile bottom tab bar — visual redesign */
+/* Force proper mobile bottom tab bar — TikTok-style */
 @media (max-width: 1024px) {
   .mobile-tabbar {
     display: flex !important;
     position: fixed !important;
-    left: 12px !important;
-    right: 12px !important;
-    bottom: 12px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     z-index: 1200 !important;
-    width: auto !important;
-    min-height: 64px !important;
-    height: 64px !important;
+    width: 100% !important;
+    min-height: 62px !important;
+    height: 62px !important;
     align-items: center !important;
     justify-content: space-around !important;
-    padding: 0 8px calc(0px + env(safe-area-inset-bottom, 0px)) !important;
-    background: rgba(15, 12, 40, 0.75) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 28px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
+    padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+    background: #000 !important;
+    border-top: 0.5px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
   }
   .mobile-tabbar a,
   .mobile-tabbar button.tab-upload {
@@ -122,98 +121,67 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
     align-items: center !important;
     justify-content: center !important;
     min-height: 48px !important;
-    min-width: 48px !important;
-    gap: 0 !important;
-    font-size: 0 !important; /* hide any residual text */
-    font-weight: 700 !important;
+    gap: 2px !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
     text-decoration: none !important;
-    color: #B8B3DB !important;
+    color: rgba(255, 255, 255, 0.55) !important;
     background: transparent !important;
     border: 0 !important;
     position: relative !important;
-    transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    transition: color 0.15s ease !important;
+  }
+  .mobile-tabbar a span {
+    font-size: 10px !important;
+    line-height: 1 !important;
+    letter-spacing: 0.1px !important;
+  }
+  .mobile-tabbar a.active {
+    color: #fff !important;
+  }
+  .mobile-tabbar a.active span {
+    font-weight: 600 !important;
   }
   .mobile-tabbar a:active,
   .mobile-tabbar button.tab-upload:active {
-    transform: scale(0.9) translateY(2px) !important;
+    opacity: 0.7 !important;
   }
   .mobile-tabbar a i,
   .mobile-tabbar .tab-upload i {
-    font-size: 24px !important;
-    color: #B8B3DB !important;
-    opacity: 0.85 !important;
-    transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    font-size: 22px !important;
+    color: inherit !important;
+    opacity: 1 !important;
     -webkit-text-fill-color: currentColor !important;
-    background: none !important;
-  }
-  .mobile-tabbar a.active i {
-    opacity: 1 !important;
-    font-size: 24px !important;
-    background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    filter: drop-shadow(0 0 10px rgba(255, 61, 154, 0.55)) !important;
-    transform: scale(1.08) !important;
-  }
-  .mobile-tabbar .nav-indicator {
-    position: absolute !important;
-    bottom: 10px !important;
-    height: 5px !important;
-    width: 5px !important;
-    border-radius: 50% !important;
-    background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
-    box-shadow: 0 0 6px rgba(255, 61, 154, 0.6) !important;
-    transition: left 220ms ease-out, opacity 150ms !important;
-    pointer-events: none !important;
-    z-index: 1 !important;
-    opacity: 0;
-  }
-  .mobile-tabbar .tab-upload-btn {
-    width: 52px !important;
-    height: 52px !important;
-    margin-top: -10px !important;
-    border-radius: 16px !important;
-    background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
-    color: #fff !important;
-    display: grid !important;
-    place-items: center !important;
-    box-shadow: 0 6px 20px rgba(255, 61, 154, 0.40) !important;
-    position: relative !important;
-    animation: navPlusPulse 3s ease-in-out infinite !important;
-  }
-  .mobile-tabbar .tab-upload-btn::before {
-    content: "" !important;
-    position: absolute !important;
-    inset: -4px !important;
-    border-radius: 20px !important;
-    background: rgba(15, 12, 40, 0.75) !important;
-    z-index: -1 !important;
-  }
-  body.studio-open .mobile-tabbar .tab-upload i {
-    transform: rotate(135deg) !important;
-  }
-  .mobile-tabbar .tab-upload i {
-    color: #fff !important;
-    opacity: 1 !important;
-    font-size: 24px !important;
-    -webkit-text-fill-color: #fff !important;
     background: none !important;
     filter: none !important;
   }
-}
-@keyframes navPlusPulse {
-  0%, 100% { box-shadow: 0 6px 20px rgba(255, 61, 154, 0.40); }
-  50% { box-shadow: 0 8px 28px rgba(255, 61, 154, 0.65), 0 0 0 6px rgba(255, 61, 154, 0.15); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .mobile-tabbar .nav-indicator,
-  .mobile-tabbar a i,
-  .mobile-tabbar .tab-upload-btn,
-  .mobile-tabbar a,
-  .mobile-tabbar button.tab-upload {
-    transition: none !important;
-    animation: none !important;
+  .mobile-tabbar a.active i {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+  .mobile-tabbar .nav-indicator {
+    display: none !important;
+  }
+  .mobile-tabbar .tab-upload-btn {
+    width: 44px !important;
+    height: 30px !important;
+    margin-top: -2px !important;
+    border-radius: 8px !important;
+    background: linear-gradient(90deg, #25f4ee 0%, #25f4ee 40%, #fe2c55 60%, #fe2c55 100%) !important;
+    color: #fff !important;
+    display: grid !important;
+    place-items: center !important;
+    box-shadow: 0 2px 8px rgba(254, 44, 85, 0.4) !important;
+    position: relative !important;
+  }
+  .mobile-tabbar .tab-upload-btn::before,
+  .mobile-tabbar .tab-upload-btn::after {
+    content: none !important;
+  }
+  .mobile-tabbar .tab-upload i {
+    color: #fff !important;
+    font-size: 20px !important;
+    -webkit-text-fill-color: #fff !important;
   }
 }
 @media (min-width: 1025px) {
