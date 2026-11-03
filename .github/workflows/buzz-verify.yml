@@ -1,0 +1,33 @@
+name: Buzz 2.0 verification
+
+on:
+  push:
+    branches:
+      - feat/buzz-2.0
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "js/pages/buzz.js"
+      - "js/db.js"
+      - "js/config.js"
+      - "js/core/templates/buzz.js"
+      - "css/buzz.css"
+      - "supabase-migration-buzz-social.sql"
+
+jobs:
+  javascript-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/pages/buzz.js
+          node --check js/db.js
+          node --check js/config.js
+          node --check js/core/templates/buzz.js
