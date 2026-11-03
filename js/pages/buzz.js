@@ -181,8 +181,8 @@
       state.hasMore = rows.length === PAGE_SIZE;
       var videos = rows.filter(function (item) { return !!mediaUrl(item); });
       state.all = state.all.concat(videos);
-      await refreshSocial(videos);
       render();
+      refreshSocial(videos).then(render);
     } catch (error) {
       console.error('[HSHS Vibe] load failed:', error);
       if (feed && !state.all.length) feed.innerHTML = '<div class="buzz-state buzz-empty"><strong>Could not load Vibe</strong><small>Check your connection and try again.</small><button type="button" data-buzz-action="retry">Retry</button></div>';
