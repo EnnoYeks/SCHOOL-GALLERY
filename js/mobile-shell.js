@@ -9,7 +9,7 @@
   window.__hshsMobileShell = true;
   window.__hshsMobileShellBoot = true;
 
-  var VER = '261005sk1';
+  var VER = '261103nav1';
   var ALIAS = {
     '': 'home',
     index: 'home',
@@ -326,12 +326,14 @@
       if (window.__hshsOpenUploadForPage) window.__hshsOpenUploadForPage(location.pathname);
       else if (window.__hshsOpenUpload) window.__hshsOpenUpload();
     });
-    document.getElementById('openMoreSheet').addEventListener('click', function (e) {
+    var moreBtn = document.getElementById('openMoreSheet');
+    if (moreBtn) moreBtn.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
       toggleMore();
     });
-    document.getElementById('closeMoreSheet').addEventListener('click', function (e) {
+    var closeBtn = document.getElementById('closeMoreSheet');
+    if (closeBtn) closeBtn.addEventListener('click', function (e) {
       e.preventDefault();
       closeMore();
     });
