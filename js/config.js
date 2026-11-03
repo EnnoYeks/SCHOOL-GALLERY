@@ -32,6 +32,16 @@ export const SUPABASE_URL = "https://hhlogdqpgjiajeufwnop.supabase.co";
 export const SUPABASE_ANON_KEY = "sb_publishable_RVPCBfzNQ5OvdPp96MUqVA_AG5wazGk";
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Separate Firebase-authenticated client for account-owned social actions.
+// Enable Firebase under Supabase Authentication > Third-Party Auth first.
+export const supabaseSocial = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  accessToken: async () => {
+    const user = auth.currentUser;
+    if (!user || user.isAnonymous) return null;
+    return user.getIdToken();
+  }
+});
+
 let analytics = null;
 try {
   if (typeof window !== "undefined") analytics = getAnalytics(app);
@@ -115,6 +125,7 @@ window.firestore = firestore;
 window.auth = auth;
 window.analytics = analytics;
 window.supabase = supabase;
+window.supabaseSocial = supabaseSocial;
 window.CONFIG = CONFIG;
 window.firebaseConfig = firebaseConfig;
 
