@@ -9,7 +9,7 @@
   window.__hshsMobileShell = true;
   window.__hshsMobileShellBoot = true;
 
-  var VER = '261103nav2';
+  var VER = '261103dark1';
   var ALIAS = {
     '': 'home',
     index: 'home',
@@ -41,7 +41,7 @@
     chat: 'Chat'
   };
   var PAGE_CSS = {
-    home: ['home.css', 'hshs-home-polish.css', 'hshs-vibe-home.css'],
+    home: ['home.css', 'hshs-home-polish.css', 'hshs-vibe-home.css', 'hshs-dark-refresh.css'],
     gallery: ['gallery.css', 'hshs-wave.css'],
     photos: ['photos.css', 'photos-campus.css'],
     videos: ['videos.css', 'vibe.css', 'hshs-hub.css'],
@@ -292,11 +292,11 @@
     bar.className = 'mobile-tabbar';
     bar.setAttribute('aria-label', 'Primary');
     bar.innerHTML =
-      '<a href="' + r.PRIMARY[0].href + '" class="' + (isActive(r.PRIMARY[0]) ? 'active' : '') + '" data-tab="home" aria-label="Home" title="Home"><i class="fas fa-house"></i></a>' +
-      '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="buzz" aria-label="Vibe" title="Vibe"><i class="fas fa-bolt"></i></a>' +
+      '<a href="' + r.PRIMARY[0].href + '" class="' + (isActive(r.PRIMARY[0]) ? 'active' : '') + '" data-tab="home" aria-label="Home" title="Home"><i class="fa-solid fa-house"></i><span>Home</span></a>' +
+      '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="buzz" aria-label="Vibe" title="Vibe"><i class="fa-solid fa-bolt-lightning"></i><span>Vibe</span></a>' +
       '<button type="button" class="tab-upload" data-tab="upload" id="openUploadStudio" aria-label="Create" title="Create"><span class="tab-upload-btn"><i class="fas fa-plus"></i></span></button>' +
-      '<a href="' + r.PRIMARY[2].href + '" class="' + (isActive(r.PRIMARY[2]) ? 'active' : '') + '" data-tab="gallery" aria-label="Gallery" title="Gallery"><i class="fas fa-images"></i></a>' +
-      '<a href="' + sub('profile.html') + '" class="' + (currentFile() === 'profile.html' ? 'active' : '') + '" data-tab="profile" aria-label="Profile" title="Profile"><i class="fas fa-user"></i></a>' +
+      '<a href="' + r.PRIMARY[2].href + '" class="' + (isActive(r.PRIMARY[2]) ? 'active' : '') + '" data-tab="gallery" aria-label="Media" title="Media"><i class="fa-regular fa-images"></i><span>Media</span></a>' +
+      '<a href="' + sub('profile.html') + '" class="' + (currentFile() === 'profile.html' ? 'active' : '') + '" data-tab="profile" aria-label="Profile" title="Profile"><i class="fa-regular fa-user"></i><span>Profile</span></a>' +
       '<div class="nav-indicator" aria-hidden="true"></div>';
     var backdrop = document.createElement('div');
     backdrop.className = 'more-backdrop';
