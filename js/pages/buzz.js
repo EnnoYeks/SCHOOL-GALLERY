@@ -72,7 +72,7 @@
         ? '<video playsinline webkit-playsinline loop preload="metadata" muted ' + (poster ? 'poster="' + esc(poster) + '" ' : '') + 'src="' + esc(src) + '"></video>'
         : '<div class="buzz-placeholder"><i class="fas fa-circle-play"></i></div>') + '</div>' +
       '<div class="buzz-shade"></div>' +
-      '<button class="buzz-sound" type="button" data-buzz-action="sound" aria-label="Turn sound on"><i class="fas fa-volume-xmark"></i></button>' +
+      '<button class="buzz-sound" type="button" data-buzz-action="sound" aria-label="' + (state.muted ? 'Turn sound on' : 'Mute videos') + '"><i class="fas ' + (state.muted ? 'fa-volume-xmark' : 'fa-volume-high') + '"></i></button>' +
       '<div class="buzz-rail">' +
         '<button class="buzz-action' + (liked ? ' liked' : '') + '" type="button" data-buzz-action="like" aria-pressed="' + (liked ? 'true' : 'false') + '"><i class="fas fa-heart"></i><span>' + compact(likes) + '</span></button>' +
         '<button class="buzz-action" type="button" data-buzz-action="comments"><i class="fas fa-comment"></i><span>' + compact(comments) + '</span></button>' +
