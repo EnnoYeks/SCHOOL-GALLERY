@@ -29,7 +29,7 @@
     if (document.querySelector('link[data-hshs-profile-css]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = base() + 'css/hshs-profile.css?v=260921people2';
+    l.href = base() + 'css/hshs-profile.css?v=261103nav3';
     l.setAttribute('data-hshs-profile-css', '1');
     document.head.appendChild(l);
   }

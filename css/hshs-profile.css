@@ -454,49 +454,56 @@ body:has(.pf) {
 
 @media (max-width:1024px) {
   html[data-hshs-page="profile"] .mobile-tabbar { display:flex!important; }
-  .pf { padding:8px 12px 30px; }
-  .pf-cover { min-height:190px; border-radius:17px; }
-  .pf-cover::before { right:6%; top:28%; font-size:2.25rem; }
-  .pf-cover::after { right:6%; top:58%; font-size:.68rem; }
-  .pf-profile-head { margin-top:-54px; }
-  .pf-identity { grid-template-columns:96px minmax(0,1fr); gap:13px; align-items:end; }
-  .pf-ava-wrap,.pf-ava { width:96px; height:96px; }
-  .pf-ava-cam { width:34px; height:34px; }
-  .pf-tools { grid-column:2; padding:0 0 4px; }
-  .pf-names h1 { font-size:1.45rem; }
-  .pf-bio { font-size:.82rem; }
-  .pf-stats { grid-template-columns:repeat(4,1fr); gap:6px; margin-top:13px; }
-  .pf-stats button { min-height:62px; }
-  .pf-stats b { font-size:1rem; }
-  .pf-tabs { top:58px; min-height:54px; overflow-x:auto; }
-  .pf-tabs button { flex:0 0 auto; padding:0 12px; }
-  .pf-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; margin-top:10px; }
-  .pf-cell { border-radius:9px; }
+  .pf { padding:8px 14px 100px; }
+  .pf-cover { min-height:160px; border-radius:16px; }
+  .pf-cover::before { font-size:1.6rem; top:22%; right:8%; opacity:.9; }
+  .pf-cover::after { font-size:.62rem; top:52%; right:8%; opacity:.85; }
+  .pf-profile-head { margin-top:-40px; }
+  .pf-identity { grid-template-columns:80px minmax(0,1fr); gap:12px; align-items:end; }
+  .pf-ava-wrap,.pf-ava { width:80px; height:80px; }
+  .pf-names h1 { font-size:1.25rem; }
+  .pf-handle { font-size:.78rem; margin-top:4px; }
+  .pf-role { font-size:.75rem; }
+  .pf-bio { font-size:.78rem; margin-top:8px; line-height:1.4; }
+  .pf-stats { grid-template-columns:repeat(4,1fr); gap:8px; margin-top:16px; }
+  .pf-stats button { min-height:58px; padding:8px 4px; border-radius:12px; }
+  .pf-stats b { font-size:.95rem; }
+  .pf-stats span { font-size:.62rem; }
+  .pf-tabs { top:56px; min-height:48px; overflow-x:auto; gap:4px; padding:4px; border-radius:14px; }
+  .pf-tabs button { flex:0 0 auto; padding:0 14px; font-size:.78rem; border-radius:10px; }
+  .pf-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:14px; }
+  .pf-cell { border-radius:10px; }
+  .pf-guest-card { margin-top:16px; padding:20px 16px; border-radius:16px; }
 }
 @media (max-width:620px) {
   html[data-hshs-page="profile"] .navbar .search-container { display:none!important; }
-  .pf-cover { min-height:150px; }
-  .pf-cover-edit { right:10px; bottom:10px; min-height:34px; padding:0 10px; font-size:.68rem; }
+  .pf { padding:6px 12px 110px; }
+  .pf-cover { min-height:140px; border-radius:14px; }
+  .pf-cover::before { font-size:1.35rem; top:20%; right:6%; }
+  .pf-cover::after { font-size:.55rem; top:50%; right:6%; }
+  .pf-cover-edit { right:8px; bottom:8px; min-height:32px; padding:0 8px; font-size:.65rem; }
   .pf-cover-edit span { display:none; }
-  .pf-profile-head { margin-top:-45px; }
-  .pf-identity { grid-template-columns:78px minmax(0,1fr); gap:10px; }
-  .pf-ava-wrap,.pf-ava { width:78px; height:78px; }
+  .pf-profile-head { margin-top:-36px; }
+  .pf-identity { grid-template-columns:72px minmax(0,1fr); gap:10px; }
+  .pf-ava-wrap,.pf-ava { width:72px; height:72px; }
   .pf-ava { border-width:3px; }
-  .pf-ava-cam { width:28px; height:28px; font-size:.7rem; right:-1px; bottom:0; }
-  .pf-names h1 { font-size:1.2rem; }
-  .pf-session { font-size:.62rem; }
-  .pf-handle,.pf-role { font-size:.72rem; }
-  .pf-bio { font-size:.74rem; margin-top:6px; }
-  .pf-tags { margin-top:6px; }
-  .pf-tags span { padding:4px 7px; font-size:.58rem; }
-  .pf-tools { grid-column:1/-1; padding:0; }
-  .pf-tools .pf-btn { width:100%; justify-content:center; min-height:38px; }
-  .pf-stats { grid-template-columns:repeat(4,1fr); }
-  .pf-stats span { font-size:.6rem; }
-  .pf-stats b { font-size:.88rem; }
-  .pf-tabs { border-radius:13px; top:52px; }
-  .pf-tabs button { padding:0 10px; }
-  .pf-tabs button i { font-size:.82rem; }
+  .pf-ava-cam { width:26px; height:26px; font-size:.65rem; right:-2px; bottom:0; }
+  .pf-names h1 { font-size:1.1rem; }
+  .pf-session { font-size:.6rem; }
+  .pf-handle,.pf-role { font-size:.7rem; }
+  .pf-bio { font-size:.72rem; margin-top:6px; }
+  .pf-tools { grid-column:1/-1; padding:0; margin-top:8px; }
+  .pf-tools .pf-btn { width:100%; justify-content:center; min-height:40px; border-radius:12px; }
+  .pf-stats { grid-template-columns:repeat(4,1fr); gap:6px; margin-top:14px; }
+  .pf-stats button { min-height:54px; border-radius:10px; }
+  .pf-stats span { font-size:.58rem; }
+  .pf-stats b { font-size:.85rem; }
+  .pf-tabs { border-radius:12px; top:50px; min-height:44px; gap:2px; }
+  .pf-tabs button { padding:0 12px; font-size:.72rem; }
+  .pf-tabs button i { font-size:.75rem; margin-right:4px; }
+  .pf-guest-card { padding:18px 14px; border-radius:14px; margin-top:14px; }
+  .pf-guest-card h3 { font-size:1.05rem; }
+  .pf-guest-card p { font-size:.8rem; }
 }
 @media (prefers-reduced-motion:reduce) {
   .pf-skel { animation:none; }
