@@ -3,16 +3,21 @@
   g.HshsTemplates = g.HshsTemplates || {};
   g.HshsTemplates.gallery = `
     <main class="gallery-page">
-      <section class="gallery-hero">
+      <section class="gallery-hero" aria-labelledby="galleryHeading">
         <div class="gallery-hero-card">
-          <span class="gallery-pill">Campus feed</span>
-          <h1>Gallery</h1>
-          <p>Photos, clips and school moments in one place.</p>
-          <div class="gallery-hero-actions">
-            <button class="gallery-btn-primary" type="button" id="galleryShareBtn"><i class="fas fa-plus"></i> Share a moment</button>
-            <a class="gallery-btn-ghost" href="/videos/"><i class="fas fa-clapperboard"></i> HSHS Studio</a>
-            <a class="gallery-btn-ghost" href="/chat/"><i class="fas fa-envelope"></i> Messages</a>
+          <div class="gallery-hero-glow" aria-hidden="true"></div>
+          <div class="gallery-hero-copy">
+            <span class="gallery-pill"><span class="gallery-live-dot"></span> HAWTHORNE SCRIBNER HIGH SCHOOL</span>
+            <p class="gallery-kicker">THE CAMPUS, THROUGH YOUR LENS</p>
+            <h1 id="galleryHeading">Every moment<br><span>has a place here.</span></h1>
+            <p class="gallery-intro">The people, events, wins and little moments that make HSHS what it is.</p>
+            <div class="gallery-hero-actions">
+              <button class="gallery-btn-primary" type="button" id="galleryShareBtn"><i class="fas fa-plus"></i> Share a moment</button>
+              <a class="gallery-btn-ghost" href="/videos/"><i class="fas fa-play"></i> Watch clips</a>
+            </div>
           </div>
+          <div class="gallery-hero-mark" aria-hidden="true"><span>H</span><i class="fas fa-sparkles"></i></div>
+          <div class="gallery-hero-foot"><span>EDUCATE</span><i></i><span>ENGAGE</span><i></i><span>EMPOWER</span></div>
         </div>
       </section>
       <section class="gallery-toolbar" aria-label="Gallery filters">
