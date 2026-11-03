@@ -9,7 +9,7 @@
   window.__hshsMobileShell = true;
   window.__hshsMobileShellBoot = true;
 
-  var VER = '261103nav1';
+  var VER = '261103nav2';
   var ALIAS = {
     '': 'home',
     index: 'home',
@@ -213,9 +213,8 @@
     return {
       PRIMARY: [
         { href: homeHref(), icon: 'fa-house', label: 'Home', match: ['index.html', ''] },
-        { href: sub('buzz.html'), icon: 'fa-user-group', label: 'Friends', match: ['buzz.html', 'clips.html', 'shorts.html'] },
-        { href: sub('chat.html'), icon: 'fa-comment', label: 'Inbox', match: ['chat.html'] },
-        { href: sub('profile.html'), icon: 'fa-user', label: 'Profile', match: ['profile.html'] }
+        { href: sub('buzz.html'), icon: 'fa-bolt', label: 'Buzz', match: ['buzz.html', 'clips.html', 'shorts.html'] },
+        { href: sub('gallery.html'), icon: 'fa-images', label: 'Gallery', match: ['gallery.html'] }
       ],
       MORE: more
     };
@@ -252,8 +251,8 @@
       if (!tab || tab === 'upload') return;
       var on = false;
       if (tab === 'home') on = file === 'index.html' || file === '' || location.pathname === '/' || location.pathname === '';
-      else if (tab === 'friends') on = file === 'buzz.html' || file === 'clips.html' || file === 'shorts.html' || /\/(vibe|buzz|clips|shorts)/i.test(location.pathname);
-      else if (tab === 'inbox') on = file === 'chat.html' || /\/chat/i.test(location.pathname);
+      else if (tab === 'buzz') on = file === 'buzz.html' || file === 'clips.html' || file === 'shorts.html' || /\/(vibe|buzz|clips|shorts)/i.test(location.pathname);
+      else if (tab === 'gallery') on = file === 'gallery.html' || /\/gallery/i.test(location.pathname);
       else if (tab === 'profile') on = file === 'profile.html' || /\/profile/i.test(location.pathname);
       else on = file === tab + '.html' || location.pathname === '/' + tab;
       a.classList.toggle('active', on);
@@ -293,11 +292,11 @@
     bar.className = 'mobile-tabbar';
     bar.setAttribute('aria-label', 'Primary');
     bar.innerHTML =
-      '<a href="' + r.PRIMARY[0].href + '" class="' + (isActive(r.PRIMARY[0]) ? 'active' : '') + '" data-tab="home" aria-label="Home" title="Home"><i class="fas fa-house"></i><span>Home</span></a>' +
-      '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="friends" aria-label="Friends" title="Friends"><i class="fas fa-user-group"></i><span>Friends</span></a>' +
+      '<a href="' + r.PRIMARY[0].href + '" class="' + (isActive(r.PRIMARY[0]) ? 'active' : '') + '" data-tab="home" aria-label="Home" title="Home"><i class="fas fa-house"></i></a>' +
+      '<a href="' + r.PRIMARY[1].href + '" class="' + (isActive(r.PRIMARY[1]) ? 'active' : '') + '" data-tab="buzz" aria-label="Vibe" title="Vibe"><i class="fas fa-bolt"></i></a>' +
       '<button type="button" class="tab-upload" data-tab="upload" id="openUploadStudio" aria-label="Create" title="Create"><span class="tab-upload-btn"><i class="fas fa-plus"></i></span></button>' +
-      '<a href="' + r.PRIMARY[2].href + '" class="' + (isActive(r.PRIMARY[2]) ? 'active' : '') + '" data-tab="inbox" aria-label="Inbox" title="Inbox"><i class="fas fa-comment"></i><span>Inbox</span></a>' +
-      '<a href="' + r.PRIMARY[3].href + '" class="' + (isActive(r.PRIMARY[3]) ? 'active' : '') + '" data-tab="profile" aria-label="Profile" title="Profile"><i class="fas fa-user"></i><span>Profile</span></a>' +
+      '<a href="' + r.PRIMARY[2].href + '" class="' + (isActive(r.PRIMARY[2]) ? 'active' : '') + '" data-tab="gallery" aria-label="Gallery" title="Gallery"><i class="fas fa-images"></i></a>' +
+      '<a href="' + sub('profile.html') + '" class="' + (currentFile() === 'profile.html' ? 'active' : '') + '" data-tab="profile" aria-label="Profile" title="Profile"><i class="fas fa-user"></i></a>' +
       '<div class="nav-indicator" aria-hidden="true"></div>';
     var backdrop = document.createElement('div');
     backdrop.className = 'more-backdrop';
