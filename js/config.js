@@ -27,13 +27,10 @@ const app = initializeApp(firebaseConfig);
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
 
-// Supabase — database only (auth stays on Firebase, media stays on R2)
 export const SUPABASE_URL = "https://hhlogdqpgjiajeufwnop.supabase.co";
 export const SUPABASE_ANON_KEY = "sb_publishable_RVPCBfzNQ5OvdPp96MUqVA_AG5wazGk";
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Separate Firebase-authenticated client for account-owned social actions.
-// Enable Firebase under Supabase Authentication > Third-Party Auth first.
 export const supabaseSocial = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   accessToken: async () => {
     const user = auth.currentUser;
@@ -79,17 +76,56 @@ export const CONFIG = {
     bucket: "hshs-world-media",
     publicBaseUrl: "https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev",
     signUrl: "https://hshs-r2-sign.ennoyeks.workers.dev"
+  },
+  pagination: {
+    postsPerPage: 10,
+    photosPerPage: 20,
+    videosPerPage: 12
+  },
+  features: {
+    enableComments: true,
+    enableLikes: true,
+    enableSharing: true,
+    enableLiveChat: true
   }
 };
 
-if (typeof window !== "undefined") {
-  window.CONFIG = CONFIG;
-  window.__R2 = CONFIG.r2;
-  window.auth = auth;
-  window.firestore = firestore;
-  window.supabase = supabase;
-  window.supabaseSocial = supabaseSocial;
+function applyAuthUser(user) {
+  var real = !!(user && !user.isAnonymous);
+  window.hshsAuthUser = real ? user : null;
+  window.hshsAuthState = user ? (real ? "authenticated" : "guest") : "guest";
+  if (real) {
+    window.hshsUid = user.uid;
+  } else if (!window.hshsUid) {
+    try { window.hshsUid = localStorage.getItem("guestId") || null; } catch (e) {}
+  }
+  document.documentElement.dataset.hshsAuth = window.hshsAuthState;
+  document.dispatchEvent(new CustomEvent("hshs:auth", {
+    detail: { user: window.hshsAuthUser, state: window.hshsAuthState }
+  }));
+  if (window.HshsAnalytics && window.HshsAnalytics.setUser) {
+    window.HshsAnalytics.setUser(window.hshsAuthUser);
+  }
 }
 
-setPersistence(auth, browserLocalPersistence).catch(function () {});
-onAuthStateChanged(auth, function () {});
+window.hshsAuthState = "loading";
+document.documentElement.dataset.hshsAuth = "loading";
+
+setPersistence(auth, browserLocalPersistence).catch(function (err) {
+  console.warn("Auth persistence fallback:", err && err.message);
+});
+
+onAuthStateChanged(auth, applyAuthUser);
+
+window.firebaseApp = app;
+window.firestore = firestore;
+window.auth = auth;
+window.analytics = analytics;
+window.supabase = supabase;
+window.supabaseSocial = supabaseSocial;
+window.CONFIG = CONFIG;
+window.firebaseConfig = firebaseConfig;
+
+if (typeof window !== "undefined") {
+  window.__R2 = CONFIG.r2;
+}
