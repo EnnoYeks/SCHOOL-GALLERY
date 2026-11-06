@@ -10,6 +10,7 @@
     <span class="hshs-me-go"><i class="fas fa-user"></i> View Profile</span>
   </a>
   <p class="hshs-session-badge is-guest" id="morePageStatus"><i class="fas fa-user"></i> Guest</p>
+  <a class="hshs-signin-cta" id="moreSignIn" href="/login/"><i class="fas fa-right-to-bracket"></i> Sign in</a>
   <div class="hshs-menu-list" id="hshsMoreMenu">
     <p class="hshs-menu-kicker">You</p>
     <a class="hshs-menu-item" href="/search/"><i class="fas fa-magnifying-glass"></i><span><b>Search</b><small>Find people, photos and videos</small></span><i class="fas fa-chevron-right"></i></a>

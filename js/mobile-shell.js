@@ -401,7 +401,7 @@
   }
   async function ensureTemplate(name) {
     if (window.HshsTemplates && window.HshsTemplates[name]) return window.HshsTemplates[name];
-    await loadScript(jsBase() + 'core/templates/' + name + '.js?v=' + (name === 'gallery' ? '261104fine1' : VER), 'hshs-tpl-' + name);
+    await loadScript(jsBase() + 'core/templates/' + name + '.js?v=' + (name === 'gallery' ? '261104fine1' : name === 'more' ? '261106signin1' : VER), 'hshs-tpl-' + name);
     return window.HshsTemplates && window.HshsTemplates[name];
   }
   async function ensurePageScript(name) {
