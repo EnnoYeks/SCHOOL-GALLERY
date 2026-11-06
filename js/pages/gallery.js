@@ -69,7 +69,7 @@
     return p.videoUrl || p.video_url || (kindOf(p) === 'video' ? (p.url || p.src || p.imageUrl || '') : '');
   }
   function loadCss() {
-    ['css/hshs-wave.css', 'css/gallery.css'].forEach(function (href) {
+    ['css/hshs-wave.css?v=261102fix1', 'css/gallery.css?v=261102fix1'].forEach(function (href) {
       if (document.querySelector('link[data-hshs-gallery-css="' + href + '"]')) return;
       var l = document.createElement('link');
       l.rel = 'stylesheet';

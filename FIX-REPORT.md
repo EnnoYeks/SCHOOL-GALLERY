@@ -73,3 +73,14 @@ Reason: Merging ~71 CSS + 14–19 JS patch files while guaranteeing identical co
 - Live cache header confirmation after deploy (TASK 3)
 
 All changes preserve existing visual design (colors, fonts, spacing, layout, copy). No working features were altered beyond the visibility overrides that were causing the flicker.
+
+## TASK 4: Skeletons and demo data
+**What was broken:** Polls, Spotlight, Memories, and Notifications painted Unsplash/demo seed content as if it were real school data when remote data was empty. Templates also shipped skeleton markup that flashed before the fake content.
+
+**What changed:**
+- Removed `seed()` demo fallbacks (Unsplash polls, spotlight moments, memories posts, fake notifications) from page modules.
+- Pages now paint honest empty states immediately, then replace with real remote data when available.
+- Cleared skeleton markup from Memories and Notifications templates so first paint is empty containers, not loading placeholders that look like content.
+- Removed unused Unsplash `PICS` array from `hshs-store.js` and Unsplash slides from hero `DEFAULT_HERO` (school badge remains).
+
+**How to verify:** Open `/polls`, `/spotlight`, `/memories`, `/notifications` with no remote data — empty states should appear, no Unsplash images or fake names/messages.

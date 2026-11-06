@@ -10,8 +10,8 @@
             .map(function (s) { return s.getAttribute('src') || ''; })
             .find(function (s) { return s.indexOf('navigation.js') !== -1 && s.indexOf('mobile-navigation') === -1; });
         var href = guess
-            ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-theme.css')
-            : ('/css/hshs-theme.css');
+            ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-theme.css?v=261102fix1')
+            : ('/css/hshs-theme.css?v=261102fix1');
         var link = document.createElement('link');
         link.id = 'hshs-theme-css';
         link.rel = 'stylesheet';

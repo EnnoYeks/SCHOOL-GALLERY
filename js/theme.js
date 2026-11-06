@@ -41,8 +41,8 @@
         } catch (e) {}
         var ver = window.__hshsAssetVer || '260924look1';
         var href = guess
-            ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-official.css')
-            : ('/css/hshs-official.css');
+            ? guess.replace(/js\/navigation\.js.*$/, 'css/hshs-official.css?v=261102fix1')
+            : ('/css/hshs-official.css?v=261102fix1');
         if (href.indexOf('?') === -1) href += '?v=' + ver;
         return href;
     }

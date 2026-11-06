@@ -58,16 +58,26 @@
     });
   }
 
+  function clearSkeletons(host) {
+    host.querySelectorAll(':scope > .hshs-section-state, :scope > .hshs-sk-poll, :scope > .hshs-sk-spot, :scope > .hshs-sk-feat, :scope > .hshs-sk-mem, :scope > .hshs-sk-row, :scope > .hshs-sk-card, :scope > .poll-empty, :scope > .sp-empty, :scope > .hshs-empty, :scope > .memories-empty, :scope > [aria-hidden="true"]').forEach(function (node) {
+      if (node.parentNode === host) node.parentNode.removeChild(node);
+    });
+  }
   function section(host, state, opts) {
     opts = opts || {};
     if (!host) return;
     host.setAttribute('data-hshs-state', state);
-    var old = host.querySelector(':scope > .hshs-section-state');
-    if (old) old.parentNode.removeChild(old);
+    if (state !== 'loading') {
+      var reserved = host.getBoundingClientRect().height;
+      if (reserved > 0) host.style.minHeight = reserved + 'px';
+    }
     if (state === 'loading') {
-      host.insertAdjacentHTML('afterbegin', opts.skeleton || '<div class="hshs-section-state hshs-section-skel" role="status" aria-label="Loading"><span></span><span></span><span></span></div>');
+      if (!host.querySelector(':scope > .hshs-section-state, :scope > .hshs-sk-poll, :scope > .hshs-sk-spot, :scope > .hshs-sk-feat, :scope > .hshs-sk-mem, :scope > .hshs-sk-row')) {
+        host.insertAdjacentHTML('afterbegin', opts.skeleton || '<div class="hshs-section-state hshs-section-skel" role="status" aria-label="Loading"><span></span><span></span><span></span></div>');
+      }
       return;
     }
+    clearSkeletons(host);
     if (state === 'success') return;
     var html = state === 'error'
       ? (opts.error || '<div class="hshs-section-state hshs-error"><strong>Could not load this section</strong><button type="button" data-hshs-retry>Retry</button></div>')
@@ -77,26 +87,11 @@
     if (retry && typeof opts.onRetry === 'function') retry.addEventListener('click', opts.onRetry);
   }
 
-  function releaseStuckSkeletons() {
-    document.querySelectorAll('.hshs-load-skel').forEach(function (sk) {
-      if (!sk.parentNode) return;
-      if (document.querySelector('.chat-shell, .hshs-chat-page')) {
-        sk.parentNode.removeChild(sk);
-        return;
-      }
-      var page = sk.getAttribute('data-skel-page') || 'this page';
-      var box = document.createElement('div');
-      box.className = 'hshs-section-state hshs-error';
-      box.innerHTML = '<strong>Couldn\'t load ' + page + '</strong><p>The HSHS World shell is ready. This section did not finish.</p><button type="button">Retry</button>';
-      box.querySelector('button').addEventListener('click', function () { location.reload(); });
-      sk.parentNode.replaceChild(box, sk);
-    });
-  }
-
-  paintNow();
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintNow);
-  else paintNow();
   global.__hshsRevealPage = paintNow;
+  function ready(page) {
+    global.__hshsReadyPage = page || global.__hshsReadyPage || '';
+    paintNow();
+  }
   function repeat(html, n) {
     n = n || 1;
     var out = '';
@@ -126,6 +121,5 @@
       return '<div class="hshs-section-state hshs-error"><strong>' + (title || 'Could not load this section') + '</strong><button type="button" data-hshs-retry>Retry</button></div>';
     }
   };
-  global.HshsPaint = { now: paintNow, section: section, markup: markup };
-  setTimeout(releaseStuckSkeletons, 8000);
+  global.HshsPaint = { now: paintNow, ready: ready, section: section, markup: markup };
 })(typeof window !== 'undefined' ? window : this);

@@ -102,8 +102,8 @@
     if (!tpl) return;
     global.HshsRender.mountHTML ? global.HshsRender.mountHTML(root, tpl) : root.innerHTML = tpl;
     document.documentElement.setAttribute('data-hshs-page', PAGE);
-    loadCss('css/hshs-more.css');
-    loadCss('css/hshs-hub.css');
+    loadCss('css/hshs-more.css?v=261102fix1');
+    loadCss('css/hshs-hub.css?v=261102fix1');
     hydrateProfile();
   }
   function boot() {
