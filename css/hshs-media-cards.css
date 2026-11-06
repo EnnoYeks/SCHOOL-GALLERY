@@ -24,7 +24,7 @@
 .photo-card .photo-caption strong{display:block;font-size:14px;line-height:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .photo-card .photo-caption span{display:block;color:rgba(255,255,255,.72);margin-top:3px}
 .photo-card .like-btn{position:absolute;z-index:2;right:8px;top:8px;width:40px;height:40px;border:1px solid rgba(255,255,255,.16);border-radius:50%;background:rgba(10,20,50,.72);color:#fff;display:grid;place-items:center}
-.photo-card .like-btn.liked{color:#ff3b6b}
+.photo-card .like-btn.liked{color:#eab308}
 .vibe-feat:focus-visible,.vibe-row:focus-visible,.photo-card:focus-visible,.photo-card button:focus-visible{outline:3px solid var(--hshs-media-gold);outline-offset:2px}
 #videoPlayerModal.active,#photoModal.active{display:flex;align-items:center;justify-content:center;background:rgba(3,8,24,.92);z-index:1000}
 #videoPlayerModal video{width:min(1100px,92vw);max-height:100dvh;object-fit:contain;background:#000}

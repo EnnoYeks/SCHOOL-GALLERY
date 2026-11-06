@@ -5,8 +5,8 @@
     animation: hshsHeartPop 0.7s ease forwards;
 }
 .hshs-heart-burst i {
-    font-size: 4rem; color: #f43f5e;
-    text-shadow: 0 8px 24px rgba(244, 63, 94, 0.45);
+    font-size: 4rem; color: #eab308;
+    text-shadow: 0 8px 24px rgba(234, 179, 8, 0.45);
 }
 @keyframes hshsHeartPop {
     0% { transform: scale(0.4); opacity: 0; }
@@ -14,7 +14,7 @@
     100% { transform: scale(1.4); opacity: 0; }
 }
 .like-action.is-on i, .like-action.liked i, .hshs-like-btn.is-on i {
-    color: #f43f5e;
+    color: #eab308;
 }
 .save-action.is-on i, .hshs-save-btn.is-on i {
     color: var(--primary-color, #6366f1);

@@ -5,6 +5,15 @@
 var HSHS_ASSET_VER = '261106glass1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
+(function () {
+  var r = document.documentElement;
+  var probe = document.createElement('div');
+  var ok = ('backdropFilter' in probe.style) || ('webkitBackdropFilter' in probe.style);
+  if (!ok) r.classList.add('hshs-no-backdrop');
+  var mem = navigator.deviceMemory;
+  var cores = navigator.hardwareConcurrency;
+  if ((typeof mem === 'number' && mem <= 2) || (mem == null && typeof cores === 'number' && cores <= 2)) r.classList.add('hshs-no-backdrop');
+})();
 
 class Navigation {
     constructor() { this.init(); }

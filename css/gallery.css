@@ -132,7 +132,7 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
   font-size:.75rem;
   cursor:pointer;
 }
-.gallery-actions button.is-on{color:#fb7185}
+.gallery-actions button.is-on{color:#eab308}
 .gallery-loader{height:56px;display:grid;place-items:center}
 .gallery-empty{text-align:center;padding:48px 16px;color:#94a3b8}
 .empty-orb{width:68px;height:68px;margin:0 auto 14px;border-radius:22px;display:grid;place-items:center;background:#0d1d44;border:1px solid rgba(234,179,8,.28);color:#eab308;font-size:1.5rem}
@@ -272,7 +272,7 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
 .gallery-actions button:hover{background:rgba(255,255,255,.06)}
 .gallery-actions button:active{transform:scale(.94)}
 .gallery-actions button[data-action="like"].is-on{
-  color:#fb7185;
+  color:#eab308;
   background:rgba(251,113,133,.14);
 }
 .gallery-actions button[data-action="comment"].is-on{

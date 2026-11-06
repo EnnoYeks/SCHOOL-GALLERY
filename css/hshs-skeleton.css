@@ -149,11 +149,11 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
   .mobile-tabbar a.active i {
     opacity: 1 !important;
     font-size: 17px !important;
-    background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
+    background: linear-gradient(135deg, #eab308, #b8860b) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
-    filter: drop-shadow(0 0 10px rgba(255, 61, 154, 0.55)) !important;
+    filter: drop-shadow(0 0 8px rgba(234, 179, 8, 0.45)) !important;
     transform: scale(1.08) !important;
   }
   .mobile-tabbar .nav-indicator {
@@ -162,8 +162,8 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
     height: 5px !important;
     width: 5px !important;
     border-radius: 50% !important;
-    background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
-    box-shadow: 0 0 6px rgba(255, 61, 154, 0.6) !important;
+    background: linear-gradient(135deg, #eab308, #b8860b) !important;
+    box-shadow: 0 0 6px rgba(234, 179, 8, 0.5) !important;
     transition: left 220ms ease-out, opacity 150ms !important;
     pointer-events: none !important;
     z-index: 1 !important;
@@ -174,11 +174,11 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
     height: 34px !important;
     margin-top: -4px !important;
     border-radius: 11px !important;
-    background: linear-gradient(135deg, #8B5CF6, #FF3D9A) !important;
-    color: #fff !important;
+    background: linear-gradient(135deg, #eab308, #b8860b) !important;
+    color: #071433 !important;
     display: grid !important;
     place-items: center !important;
-    box-shadow: 0 4px 12px rgba(255, 61, 154, 0.38) !important;
+    box-shadow: 0 4px 12px rgba(234, 179, 8, 0.4) !important;
     position: relative !important;
     animation: navPlusPulse 3s ease-in-out infinite !important;
   }
@@ -203,8 +203,8 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
   }
 }
 @keyframes navPlusPulse {
-  0%, 100% { box-shadow: 0 4px 12px rgba(255, 61, 154, 0.38); }
-  50% { box-shadow: 0 6px 16px rgba(255, 61, 154, 0.55), 0 0 0 4px rgba(255, 61, 154, 0.12); }
+  0%, 100% { box-shadow: 0 4px 12px rgba(234, 179, 8, 0.4); }
+  50% { box-shadow: 0 6px 16px rgba(234, 179, 8, 0.55), 0 0 0 4px rgba(234, 179, 8, 0.12); }
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-tabbar .nav-indicator,
