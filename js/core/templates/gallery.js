@@ -17,24 +17,25 @@
       </section>
       <section class="gallery-toolbar" aria-label="Gallery filters">
         <div class="gallery-search">
-          <i class="fas fa-magnifying-glass"></i>
-          <input id="gallerySearch" type="search" placeholder="Search moments, clubs, sports…" aria-label="Search gallery">
+          <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+          <input id="gallerySearch" type="search" placeholder="Search moments, clubs, sports…" aria-label="Search gallery" autocomplete="off">
+          <button type="button" class="gallery-search-clear" id="gallerySearchClear" hidden aria-label="Clear search"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="gallery-types" id="galleryTypes" role="tablist">
           <button class="gallery-chip is-on" type="button" data-type="all">All</button>
-          <button class="gallery-chip" type="button" data-type="photo">Photos</button>
-          <button class="gallery-chip" type="button" data-type="video">Videos</button>
+          <button class="gallery-chip" type="button" data-type="photo"><i class="fas fa-image"></i>Photos</button>
+          <button class="gallery-chip" type="button" data-type="video"><i class="fas fa-play"></i>Videos</button>
         </div>
         <div class="gallery-toolbar-head"><strong>Explore</strong><span id="galleryResultCount">Loading…</span></div>
         <div class="category-filter" id="categoryFilter">
-          <button class="category-btn active" data-category="all">All</button>
-          <button class="category-btn" data-category="academics">Academics</button>
-          <button class="category-btn" data-category="sports">Sports</button>
-          <button class="category-btn" data-category="clubs">Clubs</button>
-          <button class="category-btn" data-category="events">Events</button>
-          <button class="category-btn" data-category="arts">Arts</button>
-          <button class="category-btn" data-category="music">Music</button>
-          <button class="category-btn" data-category="graduation">Graduation</button>
+          <button class="category-btn active" type="button" data-category="all">All</button>
+          <button class="category-btn" type="button" data-category="academics"><i class="fas fa-book"></i>Academics</button>
+          <button class="category-btn" type="button" data-category="sports"><i class="fas fa-medal"></i>Sports</button>
+          <button class="category-btn" type="button" data-category="clubs"><i class="fas fa-users"></i>Clubs</button>
+          <button class="category-btn" type="button" data-category="events"><i class="fas fa-calendar-day"></i>Events</button>
+          <button class="category-btn" type="button" data-category="arts"><i class="fas fa-palette"></i>Arts</button>
+          <button class="category-btn" type="button" data-category="music"><i class="fas fa-music"></i>Music</button>
+          <button class="category-btn" type="button" data-category="graduation"><i class="fas fa-graduation-cap"></i>Graduation</button>
         </div>
       </section>
       <section class="gallery-feed" id="galleryFeed" aria-live="polite">

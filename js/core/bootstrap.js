@@ -111,7 +111,9 @@
       ? templateUrl + '?v=260928chat1'
       : name === 'spotlight'
         ? templateUrl + '?v=261002spot1'
-        : ver(templateUrl);
+        : name === 'gallery'
+          ? templateUrl + '?v=261104fine1'
+          : ver(templateUrl);
     return loadScript(src, 'hshs-tpl-' + name);
   }
 

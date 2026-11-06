@@ -9,7 +9,7 @@
   var MIN_COL = 180;
   var MAX_COL_W = 340;
   var MAX_COLS = 5;
-  var ACTIONS_H = 44;
+  var ACTIONS_H = 40;
   var COPY_PAD = 0;
 
   var state = {
@@ -23,7 +23,9 @@
     done: false,
     observer: null,
     resizeObserver: null,
-    view: -1
+    view: -1,
+    liked: {},
+    saved: {}
   };
 
   function isPage() {
@@ -70,7 +72,7 @@
       if (document.querySelector('link[data-hshs-gallery-css="' + href + '"]')) return;
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = base() + href + '?v=261028cap1';
+      l.href = base() + href + '?v=261104fine1';
       l.dataset.hshsGalleryCss = href;
       document.head.appendChild(l);
     });
@@ -229,10 +231,10 @@
     var actions = document.createElement('div');
     actions.className = 'gallery-actions';
     actions.innerHTML =
-      '<button type="button" data-action="like"><i class="far fa-heart"></i><span>' + count(p.likes) + '</span></button>' +
-      '<button type="button" data-action="comment"><i class="far fa-comment"></i><span>' + count(p.comments) + '</span></button>' +
-      '<button type="button" data-action="save"><i class="far fa-bookmark"></i></button>' +
-      '<button type="button" data-action="share"><i class="fas fa-share"></i></button>';
+      '<button type="button" data-action="like" aria-label="Like" class="' + (state.liked[p.id] ? 'is-on' : '') + '"><i class="' + (state.liked[p.id] ? 'fas' : 'far') + ' fa-heart"></i><span>' + count(p.likes) + '</span></button>' +
+      '<button type="button" data-action="comment" aria-label="Comment"><i class="far fa-comment"></i><span>' + count(p.comments) + '</span></button>' +
+      '<button type="button" data-action="save" aria-label="Save" class="' + (state.saved[p.id] ? 'is-on' : '') + '"><i class="' + (state.saved[p.id] ? 'fas' : 'far') + ' fa-bookmark"></i></button>' +
+      '<button type="button" data-action="share" aria-label="Share"><i class="fas fa-share"></i></button>';
     fig.appendChild(actions);
 
     return fig;
@@ -347,31 +349,127 @@
     }
     return null;
   }
+  function setIcon(btn, cls) {
+    var icon = btn && btn.querySelector('i');
+    if (icon) icon.className = cls;
+  }
+  function pop(btn) {
+    if (!btn) return;
+    btn.classList.remove('is-pop');
+    void btn.offsetWidth;
+    btn.classList.add('is-pop');
+  }
+  function closeNotes() {
+    var sheet = document.getElementById('galleryNotes');
+    if (!sheet) return;
+    sheet.classList.remove('is-open');
+    setTimeout(function () { if (sheet.parentNode) sheet.parentNode.removeChild(sheet); }, 200);
+  }
+  function openNotes(item, btn) {
+    if (!item) return;
+    closeNotes();
+    item._notes = item._notes || [];
+    var sheet = document.createElement('div');
+    sheet.id = 'galleryNotes';
+    sheet.className = 'gallery-notes';
+    var rows = item._notes.map(function (note) {
+      return '<div class="gallery-note"><b>You</b><p>' + esc(note) + '</p></div>';
+    }).join('');
+    sheet.innerHTML =
+      '<div class="gallery-notes-back" data-notes-close></div>' +
+      '<div class="gallery-notes-panel" role="dialog" aria-label="Comments">' +
+      '<div class="gallery-notes-head"><strong>Comments</strong><button type="button" data-notes-close aria-label="Close">×</button></div>' +
+      '<div class="gallery-notes-list">' + (rows || '<p class="gallery-notes-empty">No comments yet. Say something kind.</p>') + '</div>' +
+      '<form class="gallery-notes-form">' +
+      '<input type="text" maxlength="160" placeholder="Add a kind note…" aria-label="Comment" required>' +
+      '<button type="submit">Post</button></form></div>';
+    document.body.appendChild(sheet);
+    requestAnimationFrame(function () { sheet.classList.add('is-open'); });
+    sheet.querySelectorAll('[data-notes-close]').forEach(function (el) {
+      el.addEventListener('click', closeNotes);
+    });
+    var form = sheet.querySelector('form');
+    var input = sheet.querySelector('input');
+    if (input) input.focus();
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var text = input.value.trim();
+      if (!text) return;
+      item._notes.unshift(text);
+      item.comments = (item.comments || 0) + 1;
+      if (btn) {
+        var s = btn.querySelector('span');
+        if (s) s.textContent = count(item.comments);
+        pop(btn);
+      }
+      var list = sheet.querySelector('.gallery-notes-list');
+      var empty = list.querySelector('.gallery-notes-empty');
+      if (empty) empty.remove();
+      var row = document.createElement('div');
+      row.className = 'gallery-note';
+      row.innerHTML = '<b>You</b><p>' + esc(text) + '</p>';
+      list.insertBefore(row, list.firstChild);
+      input.value = '';
+    });
+  }
   async function onAction(action, id, btn) {
     var item = itemById(id);
     if (!item) return;
     if (action === 'like') {
-      item.likes = (item.likes || 0) + 1;
+      var liked = !state.liked[item.id];
+      state.liked[item.id] = liked;
+      item.likes = Math.max(0, (item.likes || 0) + (liked ? 1 : -1));
       if (btn) {
-        btn.classList.add('is-on');
-        var s = btn.querySelector('span');
-        if (s) s.textContent = count(item.likes);
+        btn.classList.toggle('is-on', liked);
+        setIcon(btn, liked ? 'fas fa-heart' : 'far fa-heart');
+        var likeCount = btn.querySelector('span');
+        if (likeCount) likeCount.textContent = count(item.likes);
+        pop(btn);
       }
       return;
     }
     if (action === 'save') {
-      btn && btn.classList.toggle('is-on');
+      var saved = !state.saved[item.id];
+      state.saved[item.id] = saved;
+      if (btn) {
+        btn.classList.toggle('is-on', saved);
+        setIcon(btn, saved ? 'fas fa-bookmark' : 'far fa-bookmark');
+        pop(btn);
+      }
       return;
     }
     if (action === 'share') {
       var url = location.origin + '/gallery';
+      var shared = false;
       try {
-        if (navigator.share) await navigator.share({ title: item.title, url: url });
-        else await navigator.clipboard.writeText(url);
-      } catch (e) {}
+        if (navigator.share) {
+          await navigator.share({ title: item.title || 'HSHS moment', text: 'A campus moment on HSHS World', url: url });
+          shared = true;
+        } else if (navigator.clipboard) {
+          await navigator.clipboard.writeText(url);
+          shared = true;
+        }
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        try {
+          if (navigator.clipboard) {
+            await navigator.clipboard.writeText(url);
+            shared = true;
+          }
+        } catch (err) {}
+      }
+      if (shared && btn) {
+        btn.classList.add('is-on');
+        setIcon(btn, 'fas fa-check');
+        pop(btn);
+        setTimeout(function () {
+          btn.classList.remove('is-on');
+          setIcon(btn, 'fas fa-share');
+        }, 900);
+      }
       return;
     }
-    if (action === 'comment') openViewer(state.items.indexOf(item));
+    if (action === 'comment') openNotes(item, btn);
   }
   function openViewer(index) {
     var item = state.items[index];
@@ -432,12 +530,27 @@
     }
 
     var search = document.getElementById('gallerySearch');
+    var clearSearch = document.getElementById('gallerySearchClear');
     if (search) {
+      var syncClear = function () {
+        if (clearSearch) clearSearch.hidden = !search.value;
+      };
       search.addEventListener('input', function () {
         state.query = search.value.trim().toLowerCase();
         state.offset = 0;
+        syncClear();
         paint();
       });
+      if (clearSearch) {
+        clearSearch.addEventListener('click', function () {
+          search.value = '';
+          state.query = '';
+          state.offset = 0;
+          syncClear();
+          paint();
+          search.focus();
+        });
+      }
     }
 
     var share = document.getElementById('galleryShareBtn');
