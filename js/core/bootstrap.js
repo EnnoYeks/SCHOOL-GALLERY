@@ -176,8 +176,6 @@
       await loadScript(ver(base + 'components/ui.js'), 'hshs-comp-ui');
       await loadScript(ver(base + 'components/shell.js'), 'hshs-comp-shell');
 
-      // Page-specific CSS and the optional store are enhancements, not prerequisites
-      // for mounting the real DOM. Loading them here used to hold the entire first paint.
       var pageCss = PAGE_CSS[page] || [];
       Promise.all(pageCss.map(function (file, i) {
         return loadCssWait(ver(cssBase + file), 'hshs-page-css-' + i);
@@ -209,7 +207,9 @@
       try { await loadScript(ver(base + 'router/history.js'), 'hshs-router-history'); } catch (e) {}
       try { await loadScript(ver(base + 'router/router.js'), 'hshs-router-main'); } catch (e) {}
       try { await loadScript(ver(base + 'hshs-labels.js'), 'hshs-labels'); } catch (e) {}
+      try { await loadScript(ver(base + 'core/media-prep.js'), 'hshs-media-prep'); } catch (e) {}
       try { await loadScript(ver(base + 'storage.js'), 'hshs-storage'); } catch (e) {}
+      try { await loadScript(ver(base + 'components/upload-manager.js'), 'hshs-upload-manager'); } catch (e) {}
       try { await loadScript(ver(base + 'hshs-upload.js'), 'hshs-upload'); } catch (e) {}
       try { await loadScript(ver(base + 'hshs-filter-engine.js'), 'hshs-filter-engine'); } catch (e) {}
       try { await loadScript(ver(base + 'hshs-studio-stable.js'), 'hshs-studio-stable'); } catch (e) {}
