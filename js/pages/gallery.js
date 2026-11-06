@@ -25,7 +25,8 @@
     resizeObserver: null,
     view: -1,
     liked: {},
-    saved: {}
+    saved: {},
+    failed: {}
   };
 
   function isPage() {
@@ -107,9 +108,17 @@
     return item;
   }
 
+  function mediaKeyOf(p) {
+    var raw = String(p.mediaKey || p.media_key || p._media || p._video || '');
+    raw = raw.split('?')[0].replace(/\/+$/, '').toLowerCase();
+    if (raw) return 'm:' + raw;
+    return 't:' + [p.author, p.title, p.category, date(p.createdAt)].join('|').toLowerCase();
+  }
+
   function visible() {
     var q = state.query;
     return state.all.filter(function (p) {
+      if (state.failed[mediaKeyOf(p)]) return false;
       if (state.type !== 'all' && p.type !== state.type) return false;
       if (state.category !== 'all' && p.category !== state.category) return false;
       if (q && (p.title + ' ' + (p.description || '') + ' ' + p.author + ' ' + p.category).toLowerCase().indexOf(q) === -1) return false;
@@ -199,8 +208,9 @@
       media.style.aspectRatio = p.w + ' / ' + p.h;
       media.onerror = function () {
         this.onerror = null;
-        var card = this.closest('.gallery-card');
-        if (card && card.parentNode) card.parentNode.removeChild(card);
+        var key = mediaKeyOf(p);
+        state.failed[key] = 1;
+        paint();
       };
     }
     wrap.appendChild(media);
@@ -315,12 +325,6 @@
       (r2 || []).map(function (p) { return normalize(p, p.type); })
     ).filter(Boolean);
     var seen = {};
-    function mediaKeyOf(p) {
-      var raw = String(p.mediaKey || p.media_key || p._media || p._video || '');
-      raw = raw.split('?')[0].replace(/\/+$/, '').toLowerCase();
-      if (raw) return 'm:' + raw;
-      return 't:' + [p.author, p.title, p.category, date(p.createdAt)].join('|').toLowerCase();
-    }
     state.all = merged.filter(function (p) {
       var key = mediaKeyOf(p);
       if (seen[key]) return false;
@@ -333,6 +337,8 @@
     state.loading = false;
     setLoading(false);
     paint();
+    var skel = document.querySelector('#hshs-page .hshs-load-skel');
+    if (skel && skel.parentNode) skel.parentNode.removeChild(skel);
     ensureResizeObserver();
     try {
       if (document.fonts && document.fonts.ready) {
