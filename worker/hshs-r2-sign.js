@@ -316,6 +316,8 @@ function contentPayload(body, target, uid, partial = false) {
   const video_url = String(body.video_url || "").slice(0, 1000);
   const thumbnail_url = String(body.thumbnail_url || image_url || "").slice(0, 1000);
   const media_key = String(body.media_key || body.mediaKey || "").slice(0, 500);
+  const width = Number.isSafeInteger(Number(body.width)) && Number(body.width) > 0 ? Number(body.width) : null;
+  const height = Number.isSafeInteger(Number(body.height)) && Number(body.height) > 0 ? Number(body.height) : null;
   if (!partial && target === "photos" && !image_url && !media_key) return { ok: false, error: "Photo requires media" };
   if (!partial && target === "videos" && !video_url && !media_key) return { ok: false, error: "Video requires media" };
   if (!partial && target === "posts" && !description && !image_url && !media_key) return { ok: false, error: "Description or media required" };
@@ -329,6 +331,8 @@ function contentPayload(body, target, uid, partial = false) {
     thumbnail_url,
     media_key,
     media_provider: media_key ? "cloudflare-r2" : null,
+    width,
+    height,
     author: body.author || "HSHS Admin",
     author_id: uid,
     updated_at: new Date().toISOString()
