@@ -199,7 +199,8 @@
       media.style.aspectRatio = p.w + ' / ' + p.h;
       media.onerror = function () {
         this.onerror = null;
-        this.style.opacity = '.35';
+        var card = this.closest('.gallery-card');
+        if (card && card.parentNode) card.parentNode.removeChild(card);
       };
     }
     wrap.appendChild(media);
@@ -314,8 +315,14 @@
       (r2 || []).map(function (p) { return normalize(p, p.type); })
     ).filter(Boolean);
     var seen = {};
+    function mediaKeyOf(p) {
+      var raw = String(p.mediaKey || p.media_key || p._media || p._video || '');
+      raw = raw.split('?')[0].replace(/\/+$/, '').toLowerCase();
+      if (raw) return 'm:' + raw;
+      return 't:' + [p.author, p.title, p.category, date(p.createdAt)].join('|').toLowerCase();
+    }
     state.all = merged.filter(function (p) {
-      var key = String(p.id || p.mediaKey || p.media_key || p._media || p.title);
+      var key = mediaKeyOf(p);
       if (seen[key]) return false;
       seen[key] = 1;
       return true;

@@ -405,7 +405,7 @@
     return window.HshsTemplates && window.HshsTemplates[name];
   }
   async function ensurePageScript(name) {
-    await loadScript(jsBase() + 'pages/' + name + '.js?v=' + (name === 'gallery' ? '261104fine1' : VER), 'hshs-page-mod-' + name);
+    await loadScript(jsBase() + 'pages/' + name + '.js?v=' + (name === 'gallery' ? '261106dedupe1' : VER), 'hshs-page-mod-' + name);
   }
   async function navigate(url, fromHistory) {
     var next;
