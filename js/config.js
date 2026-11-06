@@ -70,65 +70,26 @@ export const CONFIG = {
   },
   storage: {
     provider: "cloudflare-r2",
-    maxFileSize: 104857600,
+    maxFileSize: 52428800,
     maxPhotoSize: 52428800,
-    maxVideoSize: 104857600
+    maxVideoSize: 52428800
   },
   r2: {
     accountId: "cb48d11c7f8f22a34c27a2874f1cd6e3",
     bucket: "hshs-world-media",
     publicBaseUrl: "https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev",
     signUrl: "https://hshs-r2-sign.ennoyeks.workers.dev"
-  },
-  pagination: {
-    postsPerPage: 10,
-    photosPerPage: 20,
-    videosPerPage: 12
-  },
-  features: {
-    enableComments: true,
-    enableLikes: true,
-    enableSharing: true,
-    enableLiveChat: true
   }
 };
 
-function applyAuthUser(user) {
-  var real = !!(user && !user.isAnonymous);
-  window.hshsAuthUser = real ? user : null;
-  window.hshsAuthState = user ? (real ? "authenticated" : "guest") : "guest";
-  if (real) {
-    window.hshsUid = user.uid;
-  } else if (!window.hshsUid) {
-    try { window.hshsUid = localStorage.getItem("guestId") || null; } catch (e) {}
-  }
-  document.documentElement.dataset.hshsAuth = window.hshsAuthState;
-  document.dispatchEvent(new CustomEvent("hshs:auth", {
-    detail: { user: window.hshsAuthUser, state: window.hshsAuthState }
-  }));
-  if (window.HshsAnalytics && window.HshsAnalytics.setUser) {
-    window.HshsAnalytics.setUser(window.hshsAuthUser);
-  }
-}
-
-window.hshsAuthState = "loading";
-document.documentElement.dataset.hshsAuth = "loading";
-
-setPersistence(auth, browserLocalPersistence).catch(function (err) {
-  console.warn("Auth persistence fallback:", err && err.message);
-});
-
-onAuthStateChanged(auth, applyAuthUser);
-
-window.firebaseApp = app;
-window.firestore = firestore;
-window.auth = auth;
-window.analytics = analytics;
-window.supabase = supabase;
-window.supabaseSocial = supabaseSocial;
-window.CONFIG = CONFIG;
-window.firebaseConfig = firebaseConfig;
-
 if (typeof window !== "undefined") {
+  window.CONFIG = CONFIG;
   window.__R2 = CONFIG.r2;
+  window.auth = auth;
+  window.firestore = firestore;
+  window.supabase = supabase;
+  window.supabaseSocial = supabaseSocial;
 }
+
+setPersistence(auth, browserLocalPersistence).catch(function () {});
+onAuthStateChanged(auth, function () {});
