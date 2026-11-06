@@ -5,14 +5,6 @@
 var HSHS_ASSET_VER = '261106glass1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
-(function markGlassCapability() {
-    var root = document.documentElement;
-    var supports = !!(window.CSS && CSS.supports && (CSS.supports('backdrop-filter', 'blur(1px)') || CSS.supports('-webkit-backdrop-filter', 'blur(1px)')));
-    var memory = Number(navigator.deviceMemory);
-    var cores = Number(navigator.hardwareConcurrency);
-    var constrained = (Number.isFinite(memory) && memory <= 2) || (!Number.isFinite(memory) && Number.isFinite(cores) && cores <= 2);
-    if (!supports || constrained) root.classList.add('hshs-no-backdrop');
-})();
 
 class Navigation {
     constructor() { this.init(); }
