@@ -1,96 +1,87 @@
-/* HSHS WORLD Glassmorphism. Keeps navy + gold/amber. */
-:root {
-  --hshs-navy: #071433;
-  --hshs-navy-deep: #0b1f4d;
-  --hshs-gold: #eab308;
-  --hshs-amber: #3b82f6;
-  --hshs-glass-bg: rgba(255, 255, 255, 0.08);
-  --hshs-glass-bg-strong: rgba(255, 255, 255, 0.12);
-  --hshs-glass-border: rgba(255, 255, 255, 0.15);
-  --hshs-glass-blur: 12px;
-  --hshs-glass-sat: 180%;
-  --hshs-glass-radius: 18px;
-  --hshs-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --hshs-glass-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-  --hshs-glass-fallback: rgba(7, 20, 51, 0.88);
-  --hshs-glass-fallback-soft: rgba(11, 31, 77, 0.92);
-  --hshs-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+/* HSHS World · Glass + 2026 Material system */
+:root{
+  --hshs-navy:#071433;--hshs-navy-deep:#0b1f4d;--hshs-gold:#eab308;--hshs-amber:#eab308;
+  --hshs-blue:#3b82f6;--hshs-blue-deep:#1d4ed8;--hshs-violet:#6d5bd0;
+  --glass-1:rgba(255,255,255,.06);--glass-1-blur:10px;
+  --glass-2:rgba(255,255,255,.10);--glass-2-blur:14px;
+  --glass-3:rgba(255,255,255,.14);--glass-3-blur:18px;
+  --glass-inset:inset 0 1px 0 rgba(255,255,255,.25);--glass-shadow:0 10px 30px rgba(0,0,0,.28);
+  --glass-fallback:rgba(12,28,68,.9);
+  --mat-chrome:linear-gradient(180deg,#f4f6fb 0%,#b9c0cf 45%,#8a92a6 55%,#d9deea 100%);
+  --mat-gold:linear-gradient(180deg,#fff1b8 0%,#eab308 50%,#b8860b 100%);
+  --mat-puffy-shadow:8px 10px 22px rgba(0,0,0,.35),-6px -6px 16px rgba(255,255,255,.10),inset 0 2px 3px rgba(255,255,255,.35),inset 0 -4px 8px rgba(0,0,0,.25);
+  --mat-pressed-shadow:inset 4px 6px 12px rgba(0,0,0,.4),inset -3px -3px 8px rgba(255,255,255,.08);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);--hshs-glass-text-shadow:0 1px 2px rgba(0,0,0,.45);
 }
-.hshs-glass, .navbar, .navbar.hshs-flat-top, .vibe-hero-glass, .vibe-hero-copy, .home-stat, .home-split-card, .home-trend-item, .home-event-card, .home-panel, .home-feature-card, .home-cta, .home-empty, .gallery-card, .post-card, .media-card, .video-card, .buzz-card, .student-card, .spotlight-card {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background: var(--hshs-glass-bg) !important;
-  border: 1px solid var(--hshs-glass-border) !important;
-  border-radius: var(--hshs-glass-radius) !important;
-  box-shadow: var(--hshs-glass-shadow) !important;
-  -webkit-backdrop-filter: blur(var(--hshs-glass-blur)) saturate(var(--hshs-glass-sat));
-  backdrop-filter: blur(var(--hshs-glass-blur)) saturate(var(--hshs-glass-sat));
-}
-.vibe-hero-glass, .vibe-hero-copy, .home-stat, .home-split-card, .home-panel, .home-cta { background: var(--hshs-glass-bg-strong) !important; }
-.hshs-glass::before, .navbar::before, .vibe-hero-glass::before, .vibe-hero-copy::before, .home-stat::before, .home-split-card::before, .home-trend-item::before, .home-event-card::before, .home-panel::before, .home-cta::before {
-  content: "";
-  position: absolute; inset: 0; pointer-events: none; z-index: 1; border-radius: inherit; opacity: 0.07;
-  background-image: var(--hshs-grain); background-size: 180px 180px; mix-blend-mode: overlay;
-}
-.navbar > *, .vibe-hero-glass > *, .vibe-hero-copy > *, .home-stat > *, .home-split-card > *, .home-trend-item > *, .home-event-card > *, .home-panel > *, .home-cta > * { position: relative; z-index: 2; }
-.navbar, .vibe-hero-copy, .home-stat, .home-split-card, .home-trend-item, .home-event-card, .home-panel, .home-cta, .home-section-title, .home-feature-body, .gallery-card-copy { text-shadow: var(--hshs-glass-text-shadow); }
-.vibe-hero-copy h1, .home-section-title, .home-stat strong, .home-feature-card h3, .home-cta h2, .navbar .logo, .brand-copy strong { font-weight: 800 !important; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
-.home-stat span, .vibe-desc, .home-section-sub, .home-feature-meta { font-weight: 600; }
-.navbar, .navbar.hshs-flat-top, html.hshs-nav-scrolled .navbar, html.hshs-nav-scrolled .navbar.hshs-flat-top, body.has-mobile-shell .navbar, body.has-mobile-shell .navbar.hshs-flat-top {
-  background: rgba(255, 255, 255, 0.08) !important; border: 0 !important; border-bottom: 1px solid var(--hshs-glass-border) !important; border-radius: 0 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22) !important; -webkit-backdrop-filter: blur(12px) saturate(180%) !important; backdrop-filter: blur(12px) saturate(180%) !important;
-}
-.navbar-container, .navbar-container.hshs-topbar, body.has-mobile-shell .navbar-container, body.has-mobile-shell .navbar-container.hshs-topbar { background: transparent !important; border: 0 !important; box-shadow: none !important; overflow: visible; }
-.navbar .hshs-search-btn, .navbar .notification-icon, .navbar .profile-icon, .navbar .hshs-profile {
-  background: rgba(255, 255, 255, 0.1) !important; border: 1px solid var(--hshs-glass-border) !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-  -webkit-backdrop-filter: blur(10px) saturate(160%); backdrop-filter: blur(10px) saturate(160%);
-}
-.navbar .hshs-search-btn { background: rgba(234, 179, 8, 0.92) !important; color: #102047 !important; border-color: rgba(255, 255, 255, 0.28) !important; }
-.vibe-hero-card {
-  background: linear-gradient(135deg, #0b1f4d 0%, #12306b 42%, #1d4ed8 68%, #eab308 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important; border-radius: 24px !important; box-shadow: var(--hshs-glass-shadow) !important; overflow: hidden; isolation: isolate;
-}
-.vibe-hero-photos, .vibe-hero-crest, .vibe-hero-sparkles { z-index: 0; }
-.vibe-hero-glass, .vibe-hero-copy {
-  position: relative; z-index: 2; max-width: 28rem; padding: 18px 18px 20px; border-radius: 20px !important;
-  background: rgba(255, 255, 255, 0.1) !important; border: 1px solid var(--hshs-glass-border) !important; box-shadow: var(--hshs-glass-shadow) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(180%) !important; backdrop-filter: blur(12px) saturate(180%) !important;
-}
-.vibe-hero-glass .vibe-hero-copy { background: transparent !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; padding: 0; max-width: none; overflow: visible; }
-.vibe-hero-glass .vibe-hero-copy::before { display: none; }
-.vibe-pill { background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.18); color: #fff; font-weight: 800; }
-.vibe-btn-ghost { background: rgba(255, 255, 255, 0.08) !important; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-.home-feature-card { background: rgba(255, 255, 255, 0.08) !important; }
-.home-feature-overlay { background: linear-gradient(180deg, transparent, rgba(7, 20, 51, 0.72)) !important; }
-.home-split-card { background: linear-gradient(135deg, rgba(18, 32, 68, 0.35), rgba(29, 78, 216, 0.18) 62%, rgba(234, 179, 8, 0.12)), rgba(255, 255, 255, 0.1) !important; }
-.home-empty { background: rgba(255, 255, 255, 0.06) !important; color: #f8fafc !important; }
-.home-cta { background: radial-gradient(circle at 50% 0, rgba(29, 78, 216, 0.28), transparent 55%), rgba(255, 255, 255, 0.1) !important; }
-.home-event-date { background: rgba(7, 20, 51, 0.55); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-.navbar .profile-icon, .navbar .hshs-profile, .navbar .hshs-search-btn, .navbar .notification-icon, .logo i, .logo .brand-mark { overflow: hidden; border-radius: 50% !important; }
-.navbar::before { border-radius: 0; }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .hshs-glass, .navbar, .navbar.hshs-flat-top, .vibe-hero-glass, .vibe-hero-copy, .home-stat, .home-split-card, .home-trend-item, .home-event-card, .home-panel, .home-feature-card, .home-cta, .home-empty, .gallery-card, .post-card, .media-card, .video-card, .buzz-card, html.hshs-nav-scrolled .navbar, body.has-mobile-shell .navbar {
-    background: var(--hshs-glass-fallback) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
-  }
-}
-@media (prefers-reduced-transparency: reduce) {
-  .hshs-glass, .navbar, .vibe-hero-glass, .vibe-hero-copy, .home-stat, .home-split-card, .home-trend-item, .home-event-card, .home-panel, .home-cta, .home-empty {
-    background: var(--hshs-glass-fallback-soft) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
-  }
-}
-@media (max-width: 768px) {
-  .hshs-glass, .navbar, .navbar.hshs-flat-top, html.hshs-nav-scrolled .navbar, body.has-mobile-shell .navbar, body.has-mobile-shell .navbar.hshs-flat-top, .vibe-hero-glass, .vibe-hero-copy, .home-stat, .home-split-card, .home-trend-item, .home-event-card, .home-panel, .home-feature-card, .home-cta, .home-empty, .gallery-card, .post-card, .media-card, .video-card, .buzz-card {
-    background: rgba(12, 28, 68, 0.86) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
-  }
-  .navbar .hshs-search-btn, .navbar .notification-icon, .navbar .profile-icon, .navbar .hshs-profile { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-  .navbar .hshs-search-btn { background: #3b82f6 !important; }
-  .navbar .notification-icon { background: rgba(18, 32, 68, 0.95) !important; }
-  .hshs-glass::before, .navbar::before, .vibe-hero-glass::before, .vibe-hero-copy::before, .home-stat::before, .home-split-card::before, .home-trend-item::before, .home-event-card::before, .home-panel::before, .home-cta::before { display: none; }
-  .vibe-hero-card { background: linear-gradient(135deg, #0b1f4d 0%, #12306b 42%, #1d4ed8 68%, #eab308 100%) !important; }
-  .vibe-hero-glass, .vibe-hero-copy { background: rgba(7, 20, 51, 0.72) !important; }
-}
-html.hshs-no-backdrop .hshs-glass, html.hshs-no-backdrop .navbar, html.hshs-no-backdrop .vibe-hero-glass, html.hshs-no-backdrop .vibe-hero-copy, html.hshs-no-backdrop .home-stat, html.hshs-no-backdrop .home-split-card, html.hshs-no-backdrop .home-trend-item, html.hshs-no-backdrop .home-event-card, html.hshs-no-backdrop .home-panel, html.hshs-no-backdrop .home-cta, html.hshs-no-backdrop .home-empty {
-  background: var(--hshs-glass-fallback) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
-}
-@media (prefers-reduced-motion: reduce) { .hshs-glass::before, .navbar::before, .vibe-hero-copy::before { display: none; } }
+html,body{min-height:100%;background:#071433!important;color:#f4f7ff!important}
+body{position:relative;isolation:isolate;text-shadow:var(--hshs-glass-text-shadow)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 12% 8%,rgba(29,78,216,.35),transparent 38%),radial-gradient(ellipse at 92% 84%,rgba(234,179,8,.22),transparent 34%),radial-gradient(ellipse at 4% 55%,rgba(109,91,208,.25),transparent 38%),radial-gradient(ellipse at 94% 8%,rgba(59,130,246,.13),transparent 24%);transform:translate3d(0,0,0);animation:hshs-ambient-drift 48s ease-in-out infinite alternate}
+@keyframes hshs-ambient-drift{to{transform:translate3d(1.5%,-1%,0)}}
+/* Shared glass cards are opaque enough for readable type and intentionally unblurred. */
+html body #hshs-page :is(.gallery-card,.post-card,.media-card,.photo-card,.video-card,.buzz-card,.student-card,.spotlight-card,.home-stat,.home-split-card,.home-trend-item,.home-event-card,.home-panel,.home-feature-card,.home-cta,.home-empty,.poll-card,.notif-item,.saved-card,.trend-card,.hshs-set-card,.pf-card,.more-card,.hshs-school-card,.about-story,.about-feature-grid article,.hshs-contact-info,.hshs-contact-form,.hshs-profile-hero,.hshs-section-state,.hshs-sk-card){background:var(--glass-1)!important;background-image:linear-gradient(135deg,rgba(255,255,255,.025),transparent 48%)!important;border:1px solid rgba(255,255,255,.16)!important;border-top-color:rgba(255,255,255,.28)!important;border-radius:22px;box-shadow:var(--glass-inset),var(--glass-shadow)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;color:#f4f7ff!important}
+html body #hshs-page :is(.home-stat,.home-split-card,.home-panel,.home-cta,.pf-card,.more-card,.hshs-contact-info,.hshs-contact-form){background-color:rgba(255,255,255,.10)!important}
+@media(hover:hover){html body #hshs-page :is(.gallery-card,.post-card,.media-card,.photo-card,.video-card,.buzz-card,.student-card,.spotlight-card,.home-stat,.home-split-card,.home-trend-item,.home-event-card,.home-panel,.home-feature-card,.home-cta,.home-empty,.poll-card,.notif-item,.saved-card,.trend-card,.hshs-set-card,.pf-card,.more-card):hover{transform:translateY(-3px);border-color:rgba(255,255,255,.34)!important}}
+/* Only shared navigation and explicit overlays use backdrop blur. */
+html body :is(.navbar,.navbar.hshs-flat-top){background:rgba(12,28,68,.80)!important;color:#f4f7ff!important;border:0!important;border-bottom:1px solid rgba(255,255,255,.22)!important;border-radius:0!important;box-shadow:0 1px 0 rgba(255,255,255,.12),var(--glass-shadow)!important;-webkit-backdrop-filter:blur(18px) saturate(160%)!important;backdrop-filter:blur(18px) saturate(160%)!important}
+.navbar-container,.navbar-container.hshs-topbar{background:transparent!important;box-shadow:none!important;border:0!important}
+html body .navbar :is(.hshs-search-btn,.notification-icon,.profile-icon,.hshs-profile){background:rgba(255,255,255,.10)!important;border:1px solid rgba(255,255,255,.22)!important;border-radius:999px!important;color:#fff!important;box-shadow:var(--glass-inset),0 6px 18px rgba(0,0,0,.22)!important}
+html body .navbar .hshs-search-btn{background:var(--mat-gold)!important;color:#071433!important;border-color:rgba(255,255,255,.45)!important;box-shadow:var(--mat-puffy-shadow)!important}
+html body :is(.mobile-tabbar,.gallery-notes-panel,.hshs-comment-panel,.more-sheet,.modal,.modal-content,.dropdown-menu,.notification-dropdown,#notificationDropdown,#profileDropdown,.gallery-viewer,.gv-actions button,.gv-close,.gv-nav,.lightbox-controls,.video-player-controls,.chat-emoji-sheet,.msg-attach-sheet,.hshs-chat-toast){background:rgba(12,28,68,.86)!important;border:1px solid rgba(255,255,255,.24)!important;box-shadow:var(--glass-inset),var(--glass-shadow)!important;-webkit-backdrop-filter:blur(18px) saturate(160%)!important;backdrop-filter:blur(18px) saturate(160%)!important;color:#f4f7ff!important}
+html body :is(.gallery-notes-panel,.hshs-comment-panel,.more-sheet){border-radius:28px 28px 0 0!important}
+html body :is(.gallery-notes-back,.hshs-comment-backdrop,.more-backdrop,.modal-backdrop){background:rgba(7,20,51,.55)!important}
+/* Home hero is the sole material hero card; only its inner panel frosts. */
+html body #hshs-page .vibe-hero-card{background:linear-gradient(135deg,#0b1f4d 0%,#12306b 42%,#1d4ed8 68%,#eab308 100%)!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:28px!important;box-shadow:var(--glass-shadow)!important}
+.vibe-hero-card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(130deg,rgba(255,255,255,.20),transparent 22% 76%,rgba(255,255,255,.08))}
+html body #hshs-page :is(.vibe-hero-copy,.vibe-hero-glass){background:rgba(7,20,51,.78)!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:28px!important;box-shadow:var(--glass-inset),var(--glass-shadow)!important;-webkit-backdrop-filter:blur(14px) saturate(160%)!important;backdrop-filter:blur(14px) saturate(160%)!important}
+/* Whitelisted material: crest/logo, primary actions, approved badges, toggles, upload progress. */
+html body :is(.logo .brand-mark,.login-crest,.auth-crest){border:2px solid #eab308!important;background:var(--mat-gold)!important;box-shadow:var(--mat-puffy-shadow)!important;position:relative;overflow:hidden}
+html body #hshs-page :is(.btn-primary,.gallery-btn-primary,.vibe-upload,.vibe-btn-primary,.home-btn-primary,.pf-save,.msg-fab-compose,.auth-submit,.admin-primary,.chat-send-btn,.gallery-notes-form button,.hshs-comment-form button,.about-cta a,.tab-upload-btn,.hshs-search-btn){background:var(--mat-gold)!important;color:#071433!important;border:1px solid rgba(255,255,255,.42)!important;box-shadow:var(--mat-puffy-shadow)!important;transition:transform 140ms var(--ease-spring),opacity 260ms ease!important}
+html body #hshs-page :is(.btn-primary,.gallery-btn-primary,.vibe-upload,.vibe-btn-primary,.home-btn-primary,.pf-save,.msg-fab-compose,.auth-submit,.admin-primary,.chat-send-btn,.gallery-notes-form button,.hshs-comment-form button,.about-cta a,.tab-upload-btn,.hshs-search-btn):active{transform:translateY(1px);box-shadow:var(--mat-pressed-shadow)!important}
+html body :is(.brand-verified,.verified-badge,.notification-badge,.unread-badge,.home-event-date,.gallery-type,.gallery-category){background:var(--mat-gold)!important;color:#071433!important;border:1px solid rgba(255,255,255,.4)!important;border-radius:999px!important;box-shadow:var(--mat-puffy-shadow)!important}
+html body #hshs-page :is(.hshs-toggle,.setting-toggle,.settings-toggle,.upload-progress,.progress-fill){accent-color:#eab308}
+/* Inputs, focus rings, selectable chips. */
+html body #hshs-page :is(input,textarea,select,.search-input,.msg-search,.gallery-search,.chat-compose-search){background:rgba(255,255,255,.06)!important;color:#f8fafc!important;border:1px solid rgba(255,255,255,.20)!important;border-radius:14px!important;box-shadow:inset 0 2px 5px rgba(0,0,0,.26)!important}
+html body #hshs-page :is(input,textarea,select,.search-input,.msg-search,.gallery-search,.chat-compose-search):focus,html body #hshs-page :is(input,textarea,select,.search-input,.msg-search,.gallery-search,.chat-compose-search):focus-within{outline:2px solid rgba(234,179,8,.4)!important;outline-offset:1px;border-color:#eab308!important}
+html body #hshs-page :is(.gallery-chip,.category-btn,.vibe-tab,.hs-chip,.chat-filter,.pf-tabs button){background:var(--glass-1)!important;color:#f4f7ff!important;border:1px solid rgba(255,255,255,.20)!important;border-radius:999px!important}
+html body #hshs-page :is(.gallery-chip.is-on,.category-btn.active,.vibe-tab.active,.hs-chip.is-on,.chat-filter.is-on,.pf-tabs button.on){background:#eab308!important;color:#071433!important;border-color:#eab308!important;box-shadow:var(--glass-inset)!important}
+html body #hshs-page :is(a,button,input,textarea,select,[role=button],.gallery-chip,.category-btn,.vibe-tab):focus-visible{outline:2px solid #eab308!important;outline-offset:3px}
+/* Gallery keeps clear/search controls, action row and sheet interaction unchanged. */
+html body #hshs-page .gallery-card{border-radius:22px!important}.gallery-media-wrap{border-radius:22px 22px 0 0!important}.gallery-search{height:38px!important;padding:0 6px 0 12px!important;border-radius:14px!important}.gallery-search-clear{width:30px!important;height:30px!important;flex:none}.gallery-actions{background:rgba(255,255,255,.045)!important}.gallery-actions button.is-on,.gallery-actions button[data-action="like"].is-on{color:#eab308!important;background:rgba(234,179,8,.16)!important}.gallery-notes-panel{background:rgba(12,28,68,.92)!important}.gallery-card-copy{left:0!important;right:0!important;bottom:0!important;padding:12px!important;background:rgba(7,20,51,.84)!important;backdrop-filter:none!important}
+/* Flat image captions/action rails; controls remain at least 44px. */
+html body #hshs-page :is(.photos-grid .photo-caption,.photo-caption,.buzz-caption,.buzz-action-rail,.buzz-actions,.buzz-overlay-caption){background:rgba(7,20,51,.84)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html body #hshs-page :is(.photo-like,.photo-save,.photos-grid .like-btn,.photos-grid .save-btn){min-width:44px!important;min-height:44px!important;border-radius:999px!important;background:rgba(12,28,68,.84)!important;border:1px solid rgba(255,255,255,.22)!important;color:#fff!important}
+html body #hshs-page :is(.video-play,.video-play-btn){background:rgba(12,28,68,.84)!important;border:1px solid rgba(255,255,255,.3)!important;border-radius:50%!important;color:#eab308!important}
+html body #hshs-page :is(.video-duration,.rank-badge){border-radius:999px!important}
+/* Sent bubbles retain blue/gold identity while keeping readable white type. */
+html body #hshs-page :is(.msg-bubble.theirs,.hshs-bubble.theirs,.hshs-msg.theirs .hshs-bubble){background:var(--glass-1)!important;border:1px solid rgba(255,255,255,.16)!important;color:#f4f7ff!important}
+html body #hshs-page :is(.msg-bubble.mine,.hshs-bubble.mine,.hshs-msg.mine .hshs-bubble){background:linear-gradient(135deg,#1d4ed8 0%,#1d4ed8 72%,#6b4e00 100%)!important;color:#fff!important}
+html body #hshs-page .chat-item{background:var(--glass-1)!important;border:1px solid rgba(255,255,255,.12)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html body #hshs-page :is(.chat-sidebar,.chat-thread,.chat-panel,.chat-home-head,.chat-list-welcome,.hshs-chat-list,.hshs-chat-side){backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(12,28,68,.68)!important}
+html body #hshs-page :is(.chat-thread-head,.hshs-thread-head){background:rgba(12,28,68,.90)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html body #hshs-page :is(.chat-send-btn,.hshs-fab,.hshs-chat-send){min-width:44px!important;min-height:44px!important}
+html body #hshs-page .chat-composer input{border-radius:999px!important}
+/* Remove legacy pink/rose reactions and theme values via existing states. */
+html body #hshs-page :is(.like-action.is-on i,.like-action.liked i,.hshs-like-btn.is-on i,.hshs-heart-burst i,.photo-card .like-btn.liked,.gallery-actions button[data-action=like].is-on){color:#eab308!important;text-shadow:0 4px 16px rgba(234,179,8,.22)!important}
+html body #hshs-page .hshs-profile-hero.theme-rose{background:linear-gradient(135deg,#1d4ed8,#0b1f4d)!important}
+html body #hshs-page .ico-video{background:linear-gradient(180deg,#3b82f6,#1d4ed8)!important}
+/* More/about/contact/profile, unread, rankings and timeline share surface language. */
+html body #hshs-page :is(.hshs-notify-item.unread,.notif-item.unread){background:rgba(255,255,255,.10)!important;border-left:3px solid #eab308!important}
+html body #hshs-page :is(.memories-card,.memory-card,.timeline-card){background:var(--glass-2)!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:22px!important;backdrop-filter:none!important}
+html body #hshs-page :is(.poll-option,.poll-slot,.poll-result-track){background:rgba(0,0,0,.22)!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:14px!important}
+html body #hshs-page :is(.poll-result,.poll-option-result){background:linear-gradient(90deg,#eab308,#b8860b)!important;color:#071433!important}
+html body #hshs-page :is(.about-story,.hshs-contact-info){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* Glass-3 mobile bar with 44px targets; preserve intentional Chat/auth hiding. */
+html body .mobile-tabbar{left:12px!important;right:12px!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;min-height:58px!important;height:58px!important;border-radius:28px!important;padding:0 4px!important;justify-content:space-around!important;background:rgba(12,28,68,.88)!important}
+html body .mobile-tabbar a,html body .mobile-tabbar button.tab-upload{min-width:44px!important;min-height:44px!important;color:rgba(255,255,255,.72)!important}
+html body .mobile-tabbar a.active{background:rgba(234,179,8,.18)!important;border-radius:999px!important}
+html body .mobile-tabbar a.active i{color:#eab308!important;background:none!important;-webkit-text-fill-color:#eab308!important;filter:none!important}
+html body .mobile-tabbar .tab-upload-btn{width:42px!important;height:42px!important;border-radius:50%!important;background:var(--mat-gold)!important;color:#071433!important;box-shadow:var(--mat-puffy-shadow)!important;animation:none!important}
+html body .mobile-tabbar .nav-indicator{display:none!important}
+html[data-hshs-page="buzz"] :where(*):not(.mobile-tabbar):not(.mobile-tabbar *){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html[data-hshs-page="chat"] .mobile-tabbar{display:none!important}body.hshs-auth-body .mobile-tabbar,body.ep-body .mobile-tabbar{display:none!important}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){html body :is(.navbar,.mobile-tabbar,.gallery-notes-panel,.hshs-comment-panel,.more-sheet,.modal,.dropdown-menu,#notificationDropdown,#profileDropdown){background:var(--glass-fallback)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
+html.hshs-no-backdrop body :is(.navbar,.mobile-tabbar,.gallery-notes-panel,.hshs-comment-panel,.more-sheet,.modal,.dropdown-menu,#notificationDropdown,#profileDropdown,.vibe-hero-copy,.vibe-hero-glass){background:var(--glass-fallback)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+@media(max-width:768px){html body :is(.navbar,.mobile-tabbar,.gallery-notes-panel,.hshs-comment-panel,.more-sheet,.modal,.dropdown-menu,#notificationDropdown,#profileDropdown){-webkit-backdrop-filter:blur(9px) saturate(160%)!important;backdrop-filter:blur(9px) saturate(160%)!important}.vibe-hero-copy,.vibe-hero-glass{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
+@media(prefers-reduced-transparency:reduce){html body :is(.navbar,.mobile-tabbar,.gallery-notes-panel,.hshs-comment-panel,.more-sheet,.modal,.dropdown-menu,#notificationDropdown,#profileDropdown,.vibe-hero-copy,.vibe-hero-glass){background:rgba(12,28,68,.97)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
+@media(prefers-reduced-motion:reduce){body::before{animation:none!important}}
+@media(prefers-contrast:more){html body #hshs-page :is(.gallery-card,.post-card,.media-card,.photo-card,.video-card,.buzz-card,.student-card,.spotlight-card,.home-stat,.home-split-card,.home-trend-item,.home-event-card,.home-panel,.home-feature-card,.home-cta,.home-empty,.poll-card,.notif-item,.saved-card,.trend-card,.hshs-set-card,.pf-card,.more-card){background:#0b1f4d!important;border-color:rgba(255,255,255,.58)!important;backdrop-filter:none!important}body::before{display:none}}

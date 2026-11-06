@@ -401,11 +401,11 @@
   }
   async function ensureTemplate(name) {
     if (window.HshsTemplates && window.HshsTemplates[name]) return window.HshsTemplates[name];
-    await loadScript(jsBase() + 'core/templates/' + name + '.js?v=' + VER, 'hshs-tpl-' + name);
+    await loadScript(jsBase() + 'core/templates/' + name + '.js?v=' + (name === 'gallery' ? '261104fine1' : name === 'more' ? '261106signin1' : VER), 'hshs-tpl-' + name);
     return window.HshsTemplates && window.HshsTemplates[name];
   }
   async function ensurePageScript(name) {
-    await loadScript(jsBase() + 'pages/' + name + '.js?v=' + VER, 'hshs-page-mod-' + name);
+    await loadScript(jsBase() + 'pages/' + name + '.js?v=' + (name === 'gallery' ? '261106fix1' : VER), 'hshs-page-mod-' + name);
   }
   async function navigate(url, fromHistory) {
     var next;

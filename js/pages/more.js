@@ -65,6 +65,7 @@
     var role = document.getElementById('morePageRole');
     var pic = document.getElementById('morePagePic');
     var badge = document.getElementById('morePageStatus');
+    var signIn = document.getElementById('moreSignIn');
     var card = document.getElementById('morePageMe');
     if (!info) {
       name.textContent = 'Not signed in';
@@ -74,6 +75,7 @@
         badge.className = 'hshs-session-badge is-guest';
         badge.innerHTML = '<i class="fas fa-user"></i> Guest';
       }
+      if (signIn) signIn.hidden = false;
       if (card) card.classList.remove('is-signed-in');
       return;
     }
@@ -89,6 +91,7 @@
       badge.className = 'hshs-session-badge is-in';
       badge.textContent = '';
     }
+    if (signIn) signIn.hidden = true;
     if (card) card.classList.add('is-signed-in');
   }
   function mount() {

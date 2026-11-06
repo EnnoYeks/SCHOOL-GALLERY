@@ -33,6 +33,7 @@
           <button type="button" data-buzz-action="close-comments" aria-label="Close comments"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="buzz-comment-list" id="buzzCommentList"></div>
+        <p class="buzz-signin-note" id="buzzCommentGate" hidden>Sign in to comment. <a href="/login/?next=%2Fbuzz%2F">Sign in</a></p>
         <form class="buzz-composer" id="buzzCommentForm" autocomplete="off">
           <input id="buzzCommentInput" type="text" maxlength="240" placeholder="Add a comment…" aria-label="Add a comment">
           <button type="submit" aria-label="Post comment"><i class="fas fa-paper-plane"></i></button>

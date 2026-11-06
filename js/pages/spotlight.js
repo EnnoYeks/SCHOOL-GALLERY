@@ -19,6 +19,14 @@
     return f === PAGE || (global.HshsRoute && global.HshsRoute.is(PAGE));
   }
   function base() { return '/'; }
+  function loadCss() {
+    if (document.querySelector('link[data-hshs-css="css/spotlight.css"]')) return;
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = base() + 'css/spotlight.css?v=261106ready';
+    l.setAttribute('data-hshs-css', 'css/spotlight.css');
+    document.head.appendChild(l);
+  }
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>'"]/g, function (c) {
       return { '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '"' }[c];
@@ -130,6 +138,7 @@
     var root = document.getElementById('hshs-page'); if (!root) return;
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl && !document.getElementById('featuredStudent')) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
+    loadCss();
     var grid = document.getElementById('spotlightGrid');
     var featured = document.getElementById('featuredStudent');
     var hall = document.getElementById('hallOfFameList');

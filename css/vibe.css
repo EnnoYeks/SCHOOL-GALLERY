@@ -7,7 +7,7 @@
 .vibe-hero-copy h1{margin:10px 0 8px;font-size:1.85rem;line-height:1.05;font-weight:800}
 .vibe-hero-copy h1 em{font-style:normal;color:#c4b5fd}
 .vibe-hero-copy p{margin:0 0 16px;font-size:.82rem;line-height:1.45;opacity:.92}
-.vibe-upload{border:0;border-radius:999px;padding:10px 16px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff}
+.vibe-upload{border:0;border-radius:999px;padding:10px 16px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#1d4ed8,#eab308);color:#fff}
 .vibe-dots{position:absolute;left:18px;bottom:10px;z-index:2;display:flex;gap:5px}
 .vibe-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}
 .vibe-dots span.on{width:16px;border-radius:99px;background:#fff}
