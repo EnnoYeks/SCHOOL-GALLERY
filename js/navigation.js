@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         link.href = bust(current.replace(/js\/navigation\.js(\?.*)?$/, 'css/' + file));
         document.head.appendChild(link);
     }
+    add('hshs-glass-capability-js', 'core/glass-capability.js');
     addCss('hshs-boot-css', 'hshs-boot.css');
     addCss('hshs-no-flicker-css', 'hshs-no-flicker.css');
     addCss('hshs-tt-css', 'hshs-tt.css');
