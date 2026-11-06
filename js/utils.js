@@ -78,7 +78,7 @@ class Utils {
 
     // Generate Random Color
     static getRandomColor() {
-        const colors = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'];
+        const colors = ['#1d4ed8', '#eab308', '#f59e0b', '#10b981', '#3b82f6', '#0b1f4d'];
         return colors[Math.floor(Math.random() * colors.length)];
     }
 
