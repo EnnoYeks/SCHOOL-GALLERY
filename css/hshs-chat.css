@@ -631,7 +631,7 @@ body:has(#hshsChatPage) .animated-bg { opacity: 0.28; }
 .hshs-chat-page[data-theme="grape"] { --chat-mine: #5b21b6; --chat-accent: #a855f7; }
 .hshs-chat-page[data-theme="mint"] { --chat-mine: #0f766e; --chat-accent: #2dd4bf; }
 .hshs-chat-page[data-theme="sunset"] { --chat-mine: #c2410c; --chat-accent: #fb923c; }
-.hshs-chat-page[data-theme="rose"] { --chat-mine: #be123c; --chat-accent: #fb7185; }
+.hshs-chat-page[data-theme="rose"] { --chat-mine: #1d4ed8; --chat-accent: #eab308; }
 .hshs-chat-page[data-theme="slate"] { --chat-mine: #334155; --chat-accent: #94a3b8; }
 
 @media (max-width: 860px) {

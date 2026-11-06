@@ -17,11 +17,10 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
 .gallery-btn-primary{background:#fff;color:#071433}
 .gallery-btn-ghost{background:rgba(7,20,51,.28);color:#fff;border:1px solid rgba(255,255,255,.22)}
 .gallery-toolbar{position:sticky;top:58px;z-index:20;padding:8px 0 10px;background:linear-gradient(180deg,#071433 78%,transparent)}
-.gallery-search{display:flex;align-items:center;gap:8px;background:#0d1d44;border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:10px 14px;margin-bottom:10px;color:#94a3b8}
+.gallery-search{display:flex;align-items:center;gap:8px;padding:10px 14px;margin-bottom:10px}
 .gallery-search input{flex:1;border:0;background:none;color:#fff;font:inherit;outline:none}
 .gallery-types{display:flex;gap:8px;margin-bottom:10px}
-.gallery-chip,.category-btn{border:1px solid rgba(255,255,255,.12);background:#0d1d44;color:#c7d2fe;border-radius:999px;padding:8px 12px;font-size:.78rem;font-weight:800;cursor:pointer;white-space:nowrap}
-.gallery-chip.is-on,.category-btn.active{background:linear-gradient(110deg,#1d4ed8,#eab308);color:#071433;border-color:transparent}
+.gallery-chip,.category-btn{padding:8px 12px;font-size:.78rem;font-weight:800;cursor:pointer;white-space:nowrap}
 .gallery-toolbar-head{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 8px}
 .gallery-toolbar-head span{font-size:.78rem;color:#94a3b8}
 .category-filter{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
@@ -37,10 +36,6 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
   position:absolute;
   margin:0;
   overflow:hidden;
-  border-radius:20px;
-  background:#0d1d44;
-  border:1px solid rgba(255,255,255,.08);
-  box-shadow:0 12px 28px rgba(0,0,0,.18);
   display:flex;
   flex-direction:column;
 }
@@ -119,7 +114,6 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
   min-height:44px;
   border-top:1px solid rgba(255,255,255,.06);
   flex-shrink:0;
-  background:#0d1d44;
 }
 .gallery-actions button{
   border:0;
@@ -132,7 +126,7 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
   font-size:.75rem;
   cursor:pointer;
 }
-.gallery-actions button.is-on{color:#fb7185}
+.gallery-actions button.is-on{color:#eab308}
 .gallery-loader{height:56px;display:grid;place-items:center}
 .gallery-empty{text-align:center;padding:48px 16px;color:#94a3b8}
 .empty-orb{width:68px;height:68px;margin:0 auto 14px;border-radius:22px;display:grid;place-items:center;background:#0d1d44;border:1px solid rgba(234,179,8,.28);color:#eab308;font-size:1.5rem}
@@ -179,15 +173,6 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
   gap:8px;
   margin-bottom:8px;
   padding:0 6px 0 12px;
-  border-radius:12px !important;
-  background:rgba(10,22,52,.72) !important;
-  border:1px solid rgba(148,176,255,.22) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
-  color:#93c5fd;
-}
-.gallery-search:focus-within{
-  border-color:#60a5fa !important;
-  box-shadow:0 0 0 3px rgba(37,99,235,.28) !important;
 }
 .gallery-search > i{font-size:13px;opacity:.9}
 .gallery-search input{
@@ -230,22 +215,12 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
   font-size:.72rem;
   font-weight:800;
   letter-spacing:.01em;
-  color:#d5def3;
-  background:rgba(13,29,68,.55);
-  border:1px solid rgba(255,255,255,.1);
   transition:transform .15s ease,background .15s ease,color .15s ease;
 }
 .gallery-chip i,
 .category-btn i{font-size:11px;opacity:.9}
 .gallery-chip:active,
 .category-btn:active{transform:scale(.96)}
-.gallery-chip.is-on,
-.category-btn.active{
-  background:#2563eb;
-  color:#fff;
-  border-color:transparent;
-  box-shadow:0 6px 14px rgba(37,99,235,.32);
-}
 .gallery-toolbar-head{margin:2px 2px 6px}
 .gallery-toolbar-head strong{font-size:.92rem;letter-spacing:-.01em}
 .category-filter{gap:6px;padding-bottom:2px}
@@ -254,7 +229,6 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
   padding:4px;
   gap:2px;
   justify-content:space-between;
-  background:#0b1736 !important;
   border-top:1px solid rgba(255,255,255,.06);
 }
 .gallery-actions button{
@@ -272,8 +246,8 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
 .gallery-actions button:hover{background:rgba(255,255,255,.06)}
 .gallery-actions button:active{transform:scale(.94)}
 .gallery-actions button[data-action="like"].is-on{
-  color:#fb7185;
-  background:rgba(251,113,133,.14);
+  color:#eab308;
+  background:rgba(234,179,8,.14);
 }
 .gallery-actions button[data-action="comment"].is-on{
   color:#7dd3fc;

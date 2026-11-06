@@ -2,8 +2,18 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '261104slim1';
+var HSHS_ASSET_VER = '261106glass1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
+
+(function () {
+  var r = document.documentElement;
+  var probe = document.createElement('div');
+  var ok = ('backdropFilter' in probe.style) || ('webkitBackdropFilter' in probe.style);
+  if (!ok) r.classList.add('hshs-no-backdrop');
+  var mem = navigator.deviceMemory;
+  var cores = navigator.hardwareConcurrency;
+  if ((typeof mem === 'number' && mem <= 2) || (mem == null && typeof cores === 'number' && cores <= 2)) r.classList.add('hshs-no-backdrop');
+})();
 
 class Navigation {
     constructor() { this.init(); }
@@ -140,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         link.href = bust(current.replace(/js\/navigation\.js(\?.*)?$/, 'css/' + file));
         document.head.appendChild(link);
     }
+    add('hshs-glass-capability-js', 'core/glass-capability.js');
     addCss('hshs-boot-css', 'hshs-boot.css');
     addCss('hshs-no-flicker-css', 'hshs-no-flicker.css');
     addCss('hshs-tt-css', 'hshs-tt.css');
@@ -199,7 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-final-guard-js', 'hshs-final-guard.js');
     add('hshs-nodemo-hard-js', 'hshs-nodemo-hard.js');
 })();
-
 
 (function forceAuthHardNav() {
   function fileOf(url) {
