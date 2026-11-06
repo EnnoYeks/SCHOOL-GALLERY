@@ -146,3 +146,67 @@ firebase deploy --only firestore
 - [ ] New uploads return a URL under `https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev/`
 - [ ] Search finds signed-in classmates
 - [ ] Follow + Message opens a live thread with no demo names
+
+---
+
+## Upload system deploy order (important)
+
+Client sends `Authorization: Bearer <Firebase ID token>` on `/sign` and `/put`.
+Worker accepts the header in CORS and treats the token as **optional** until you flip the switch.
+
+### Step 1 — Deploy Worker first (backward compatible)
+
+```bash
+cd worker
+# Ensure CORS allows Authorization (already in hshs-r2-sign.js)
+npx wrangler deploy
+```
+
+Confirm:
+- OPTIONS on `/sign` returns `Access-Control-Allow-Headers: Content-Type,Authorization`
+- POST `/sign` without token still works (optional auth phase)
+- POST `/sign` with a bad token is rejected only when `REQUIRE_UPLOAD_AUTH=1`
+
+### Step 2 — Ship the client (this PR)
+
+Deploy the frontend that always attaches the Firebase ID token.
+
+### Step 3 — Require auth on the Worker
+
+In Cloudflare Worker settings (or `wrangler.toml` vars):
+
+```
+REQUIRE_UPLOAD_AUTH = "1"
+```
+
+Redeploy the Worker. Unauthenticated `/sign` and `/put` then return 401.
+
+### Optional: KV rate limits
+
+Bind a KV namespace as `UPLOAD_LIMITS`. Until then the Worker uses best-effort in-memory limits (TODO in code).
+
+### Video size
+
+Hard cap is **50 MB** until multipart upload lands (PR follow-up).
+
+### Debug
+
+In the browser console:
+
+```js
+localStorage.hshsDebugUpload = "1"
+```
+
+Structured upload logs appear as `[HshsUpload]`.
+
+### Error codes (client)
+
+| Code | Meaning |
+|------|---------|
+| E_AUTH | Not signed in / token rejected |
+| E_TOO_LARGE | Over size limit |
+| E_TYPE | Bad content type / HEIC / duration |
+| E_NETWORK | Offline or transport failure |
+| E_TIMEOUT | Attempt timed out |
+| E_SERVER | 5xx / unexpected |
+| E_CANCELLED | User cancelled |
