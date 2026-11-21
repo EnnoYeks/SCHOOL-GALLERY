@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400..900&family=Outfit:wght@700..900&display=swap");
 @import url("./hshs-type.css");
 html[data-hshs-page="home"] body, body:has(.vibe-home) { background: #071433 !important; }
 .home-page, .home-page h1, .home-page h2, .home-page h3, .navbar, .navbar .logo, .navbar .brand-copy, .vibe-hero, .mobile-tabbar {

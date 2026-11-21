@@ -1,8 +1,76 @@
-/* HSHS Google Fonts tokens — faces load from fonts.googleapis.com */
+/* HSHS fonts: one place for the font tokens, chat, comments and all text fields.
+   Nunito = UI and text (variable, 400-900). Outfit = big headings only.
+   The @import makes the fonts load on every page that uses this file. */
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400..900&family=Outfit:wght@700..900&display=swap");
+
 :root {
   --font-ui: "Nunito", "Segoe UI", system-ui, sans-serif;
-  --font-display: "Nunito", "Segoe UI", sans-serif;
+  --font-display: "Outfit", "Nunito", "Segoe UI", system-ui, sans-serif;
 }
 html, body, button, input, textarea, select, .navbar, .mobile-tabbar {
   font-family: var(--font-ui);
 }
+
+/* ALL text fields: always Nunito. On phones 16px so iPhones do not zoom on tap. */
+html input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="submit"], [type="button"], [type="reset"], [type="image"], [type="hidden"]),
+html textarea,
+html select {
+  font-family: var(--font-ui) !important;
+  font-weight: 500;
+}
+@media (max-width: 900px) {
+  html input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="submit"], [type="button"], [type="reset"], [type="image"], [type="hidden"]),
+  html textarea,
+  html select {
+    font-size: 16px !important;
+  }
+}
+html textarea { line-height: 1.45; }
+html input::placeholder,
+html textarea::placeholder { font-weight: 400; }
+
+/* Comments (Vibe sheet and normal comment sheet) and Vibe captions */
+html .buzz-comment-copy p,
+html .hshs-comment-row p {
+  font-size: .92rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+html .buzz-comment-meta strong,
+html .hshs-comment-row b {
+  font-size: .85rem;
+  font-weight: 800;
+}
+html .buzz-comment-meta time { font-size: .72rem; }
+html .buzz-comments-empty,
+html .buzz-comments-loading { font-size: .85rem; }
+html .buzz-signin-note { font-size: .8rem; }
+html .buzz-caption {
+  font-size: .88rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Chat. The "html" prefix beats the older chat sheets without !important. */
+html .hshs-chat-page { font-family: var(--font-ui); }
+html .hshs-chat-page .hshs-bubble-text,
+html .hshs-chat-page .msg-bubble-text {
+  font-family: "Nunito", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI", system-ui, sans-serif;
+  font-size: .95rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+html .hshs-chat-page .hshs-bubble time,
+html .hshs-chat-page .msg-bubble time {
+  font-size: .7rem;
+  font-weight: 600;
+}
+html .hshs-chat-page .msg-sender,
+html .hshs-chat-page .hshs-sender {
+  font-size: .72rem;
+  font-weight: 800;
+}
+html .hshs-chat-page .chat-section-head { font-size: .65rem; }
+html .hshs-chat-page .chat-quick-row button { font-size: .72rem; }
+html .hshs-chat-page .chat-composer input,
+html .hshs-chat-page .hshs-thread-compose input[type="text"] { font-size: .95rem; }
