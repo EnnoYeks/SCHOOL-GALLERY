@@ -1,9 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400..900&family=Outfit:wght@700..900&display=swap");
 @import url("./hshs-type.css");
 html[data-hshs-page="home"] body, body:has(.vibe-home) { background: #071433 !important; }
-.home-page, .home-page h1, .home-page h2, .home-page h3, .navbar, .navbar .logo, .navbar .brand-copy, .vibe-hero, .mobile-tabbar {
-  font-family: "Nunito", "Source Sans 3", "Segoe UI", sans-serif !important;
-}
+.home-page, .navbar, .navbar .brand-copy, .vibe-hero, .mobile-tabbar { font-family: var(--font-ui) !important; }
+.home-page h1, .home-page h2, .home-page h3, .navbar .logo { font-family: var(--font-display) !important; }
 .navbar .brand-school, .navbar .brand-mark::after { display: none !important; }
 body.has-mobile-shell .navbar, .navbar.hshs-flat-top, html.hshs-nav-scrolled .navbar {
   background: #071433 !important; border-bottom: 0 !important; box-shadow: none !important; backdrop-filter: blur(14px);
@@ -49,7 +48,7 @@ body.has-mobile-shell .navbar, .navbar.hshs-flat-top, html.hshs-nav-scrolled .na
 @keyframes vibeSpark { 0%,100%{transform:translateY(0);opacity:.2;} 50%{transform:translateY(-8px);opacity:.9;} }
 .vibe-hero-copy { position: relative; z-index: 2; max-width: 26rem; }
 .vibe-pill { display: inline-block; padding: 6px 12px; border-radius: 999px; background: rgba(15,23,42,.35); font-size: .68rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
-.vibe-hero-card h1 { margin: 14px 0 10px; font-size: clamp(2rem,8vw,2.6rem); font-weight: 900; letter-spacing: -.03em; color: #fff !important; font-family: Nunito, sans-serif !important; }
+.vibe-hero-card h1 { margin: 14px 0 10px; font-size: clamp(2rem,8vw,2.6rem); font-weight: 900; letter-spacing: -.03em; color: #fff !important; font-family: var(--font-display) !important; }
 .vibe-sub { margin: 0 0 10px; font-size: 1.02rem; font-weight: 700; line-height: 1.35; }
 .vibe-desc { margin: 0 0 22px; color: rgba(255,255,255,.78); font-size: .92rem; line-height: 1.55; }
 .vibe-cta { display: flex; flex-wrap: wrap; gap: 10px; }
