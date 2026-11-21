@@ -79,17 +79,7 @@
 
   function releaseStuckSkeletons() {
     document.querySelectorAll('.hshs-load-skel').forEach(function (sk) {
-      if (!sk.parentNode) return;
-      if (document.querySelector('.chat-shell, .hshs-chat-page')) {
-        sk.parentNode.removeChild(sk);
-        return;
-      }
-      var page = sk.getAttribute('data-skel-page') || 'this page';
-      var box = document.createElement('div');
-      box.className = 'hshs-section-state hshs-error';
-      box.innerHTML = '<strong>Couldn\'t load ' + page + '</strong><p>The HSHS World shell is ready. This section did not finish.</p><button type="button">Retry</button>';
-      box.querySelector('button').addEventListener('click', function () { location.reload(); });
-      sk.parentNode.replaceChild(box, sk);
+      if (sk.parentNode) sk.parentNode.removeChild(sk);
     });
   }
 
