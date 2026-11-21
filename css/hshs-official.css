@@ -1,20 +1,19 @@
 /* HSHS World · official palette foundation. Visual surface system lives in hshs-glass.css. */
 :root,html.light-mode,body.light-mode{
   --hshs-navy:#071433;--hshs-navy-deep:#0b1f4d;--hshs-blue:#1d4ed8;--hshs-sky:#38bdf8;
-  --hshs-gold:#eab308;--hshs-gold-bright:#facc15;--auth-gold:#eab308;
-  --primary-color:#1d4ed8;--secondary-color:#0284c7;--accent-color:#1d4ed8;--success-color:#0f9f6e;--danger-color:#dc2626;--warning-color:#eab308;
+  --hshs-gold:#7c6bff;--hshs-gold-bright:#49c8ff;--auth-gold:#7c6bff;
+  --primary-color:#7c6bff;--secondary-color:#49c8ff;--accent-color:#49c8ff;--success-color:#0f9f6e;--danger-color:#dc2626;--warning-color:#49c8ff;
   --bg-primary:#071433;--bg-secondary:rgba(255,255,255,.06);--bg-tertiary:rgba(255,255,255,.10);
   --text-primary:#f4f7ff;--text-secondary:#d1dcf0;--text-tertiary:#b4c3e0;
   --border-color:rgba(255,255,255,.16);--glass-bg:rgba(255,255,255,.06);--glass-border:rgba(255,255,255,.16);
   --shadow-sm:0 1px 2px rgba(0,0,0,.2);--shadow-md:0 10px 30px rgba(0,0,0,.28);
-  --chat-wallpaper:#071433;--chat-mine:#1d4ed8;--chat-accent:#3b82f6;
-  --wa-panel:rgba(12,28,68,.9);--wa-panel-2:#0b1f4d;--wa-border:rgba(255,255,255,.16);--wa-text:#f4f7ff;--wa-muted:#b4c3e0;--wa-green:#3b82f6;--wa-fab:#eab308;--wa-time:#b4c3e0;--wa-pill:rgba(255,255,255,.08);
+  --chat-wallpaper:#071433;--chat-mine:#1d4ed8;--chat-accent:#49c8ff;
+  --wa-panel:rgba(12,28,68,.9);--wa-panel-2:#0b1f4d;--wa-border:rgba(255,255,255,.16);--wa-text:#f4f7ff;--wa-muted:#b4c3e0;--wa-green:#7c6bff;--wa-fab:#7c6bff;--wa-time:#b4c3e0;--wa-pill:rgba(255,255,255,.08);
 }
-html.dark-mode,html[data-theme=dark],body.dark-mode{--hshs-navy:#071433;--hshs-navy-deep:#0b1f4d;--hshs-gold:#eab308;--hshs-gold-bright:#facc15;--hshs-blue:#3b82f6;--primary-color:#3b82f6;--secondary-color:#38bdf8;--accent-color:#93c5fd;--success-color:#34d399;--danger-color:#f87171;--warning-color:#eab308;--bg-primary:#071433;--bg-secondary:rgba(255,255,255,.06);--bg-tertiary:rgba(255,255,255,.10);--text-primary:#f4f7ff;--text-secondary:#d1dcf0;--text-tertiary:#b4c3e0;--border-color:rgba(255,255,255,.16);--glass-bg:rgba(255,255,255,.06);--glass-border:rgba(255,255,255,.16);--chat-wallpaper:#071433;--chat-mine:#1d4ed8;--chat-accent:#3b82f6;--wa-panel:rgba(12,28,68,.9);--wa-panel-2:#0b1f4d;--wa-border:rgba(255,255,255,.16);--wa-text:#f4f7ff;--wa-muted:#b4c3e0;--wa-green:#3b82f6;--wa-fab:#eab308;--wa-time:#b4c3e0;--wa-pill:rgba(255,255,255,.08)}
+html.dark-mode,html[data-theme=dark],body.dark-mode{--hshs-navy:#071433;--hshs-navy-deep:#0b1f4d;--hshs-gold:#7c6bff;--hshs-gold-bright:#49c8ff;--hshs-blue:#3b82f6;--primary-color:#7c6bff;--secondary-color:#49c8ff;--accent-color:#49c8ff;--success-color:#34d399;--danger-color:#f87171;--warning-color:#49c8ff;--bg-primary:#071433;--bg-secondary:rgba(255,255,255,.06);--bg-tertiary:rgba(255,255,255,.10);--text-primary:#f4f7ff;--text-secondary:#d1dcf0;--text-tertiary:#b4c3e0;--border-color:rgba(255,255,255,.16);--glass-bg:rgba(255,255,255,.06);--glass-border:rgba(255,255,255,.16);--chat-wallpaper:#071433;--chat-mine:#1d4ed8;--chat-accent:#49c8ff;--wa-panel:rgba(12,28,68,.9);--wa-panel-2:#0b1f4d;--wa-border:rgba(255,255,255,.16);--wa-text:#f4f7ff;--wa-muted:#b4c3e0;--wa-green:#7c6bff;--wa-fab:#7c6bff;--wa-time:#b4c3e0;--wa-pill:rgba(255,255,255,.08)}
 html,body{background:#071433!important;color:#f4f7ff!important;font-family:Nunito,Segoe UI,system-ui,sans-serif}
 html.hshs-booting,html.hshs-booting body{background:#071433!important}
-#hshs-boot{background:radial-gradient(520px 360px at 50% 42%,rgba(59,130,246,.16),transparent 58%),#071433!important}
-/* Keep page identity and boot behavior; hshs-glass.css owns shared surface styling. */
+#hshs-boot{background:radial-gradient(520px 360px at 50% 42%,rgba(124,107,255,.18),transparent 58%),#071433!important}
 .navbar-container,.navbar-container.hshs-topbar{background:transparent!important}
 .logo,.navbar .logo{color:#f4f7ff!important;-webkit-text-fill-color:#f4f7ff!important}
 .logo .brand-copy strong{color:#f4f7ff!important;-webkit-text-fill-color:#f4f7ff!important}
@@ -23,4 +22,3 @@ html[data-hshs-page=chat] body,body:has(.hshs-chat-page),body:has(.hshs-chat-pag
 html[data-hshs-page=chat] .mobile-tabbar{display:none!important}
 body.hshs-auth-body .mobile-tabbar,body.ep-body .mobile-tabbar{display:none!important}
 .footer{background:rgba(255,255,255,.04);color:#d1dcf0;border-top:1px solid rgba(255,255,255,.12)}
-/* Preserve boot screen colors; avoid painting global cards/navbar over glass. */
