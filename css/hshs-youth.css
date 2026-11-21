@@ -1,0 +1,93 @@
+/* HSHS World · youth palette. No gold, no yellow. Purple and blue only. */
+:root, html, html.light-mode, html.dark-mode, html[data-theme=dark], body, body.light-mode, body.dark-mode {
+  --hshs-gold: #7c6bff !important;
+  --hshs-gold-bright: #49c8ff !important;
+  --auth-gold: #7c6bff !important;
+  --warning-color: #49c8ff !important;
+  --wa-fab: #7c6bff !important;
+  --accent-color: #49c8ff !important;
+  --primary-color: #7c6bff !important;
+  --secondary-color: #49c8ff !important;
+  --mat-gold: #7c6bff !important;
+  --pf-gold: #49c8ff !important;
+}
+
+.home-btn-primary,
+.vibe-btn-primary,
+.gallery-btn-primary,
+.btn-primary,
+.pf-btn-primary,
+.admin-btn-primary,
+.poll-create,
+.tab-upload-btn,
+.mobile-tabbar .tab-upload,
+button[type="submit"],
+.cta-section a,
+.about-cta a {
+  background: linear-gradient(135deg, #7c6bff, #49c8ff) !important;
+  color: #071433 !important;
+  border-color: transparent !important;
+  -webkit-text-fill-color: #071433 !important;
+  box-shadow: 0 8px 22px rgba(73, 200, 255, .28) !important;
+}
+
+.home-btn-secondary,
+.vibe-btn-ghost,
+.gallery-btn-ghost,
+.btn-secondary,
+.home-link,
+.home-link.home-pill {
+  border-color: rgba(73, 200, 255, .55) !important;
+  color: #49c8ff !important;
+  -webkit-text-fill-color: #49c8ff !important;
+  background: transparent !important;
+}
+
+.logo i,
+.brand-school,
+.brand-mark::after,
+.profile-img,
+.profile-icon img,
+.home-title span em,
+.home-empty i,
+.home-trend-rank,
+.home-event-date,
+.crest,
+.navbar .logo i {
+  border-color: #49c8ff !important;
+  color: #49c8ff !important;
+  -webkit-text-fill-color: #49c8ff !important;
+  box-shadow: 0 0 0 3px rgba(73, 200, 255, .16) !important;
+}
+
+.brand-mark::after {
+  background: linear-gradient(90deg, #7c6bff, rgba(73, 200, 255, 0)) !important;
+}
+
+.home-empty,
+.home-split-card {
+  background: linear-gradient(135deg, #122044, #7c6bff 70%, #49c8ff) !important;
+}
+
+.search-input:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #49c8ff !important;
+  box-shadow: 0 0 0 3px rgba(73, 200, 255, .22) !important;
+}
+
+.mobile-tabbar a.active,
+.nav-link.active,
+.nav-indicator {
+  color: #49c8ff !important;
+  background: #49c8ff !important;
+}
+.mobile-tabbar a.active {
+  background: transparent !important;
+}
+
+[data-tone="gold"],
+.tone-gold {
+  color: #7c6bff !important;
+}
