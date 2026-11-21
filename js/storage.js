@@ -36,14 +36,12 @@
     return String(r.signUrl || "").replace(/\/sign\/?$/i, "").replace(/\/$/, "");
   }
 
-  /** Build the public r2.dev URL for an object key. */
   function publicUrl(key) {
     if (!key) return "";
     if (/^https?:\/\//i.test(key)) return key;
     return publicBase() + "/" + String(key).replace(/^\/+/, "");
   }
 
-  /** Prefer an existing URL; otherwise build one from mediaKey. */
   function mediaUrl(item) {
     if (!item) return "";
     var direct = item.image || item.imageUrl || item.thumbnailUrl || item.videoUrl || "";
@@ -87,11 +85,23 @@
     return kind + "s/" + y + "/" + m + "/" + day + "/" + uid() + "-" + Date.now() + "." + e;
   }
 
+  function isTestKey(key) {
+    var k = String(key || "").toLowerCase();
+    return k.indexOf("restore-check") !== -1 || k.indexOf("/test/") !== -1 || k.indexOf("test/") === 0;
+  }
+
+  function friendlyTitle(key, type) {
+    var raw = String(key || "").split("/").pop() || "";
+    var stem = raw.replace(/\.[a-z0-9]+$/i, "");
+    var looksGenerated = /[a-z0-9]{12,}-\d{10,}/i.test(stem) || /^[a-z0-9_-]{24,}$/i.test(stem);
+    if (!stem || looksGenerated) return type === "video" ? "Campus video" : "Campus photo";
+    return stem.replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim() || (type === "video" ? "Campus video" : "Campus photo");
+  }
+
   function mediaSize(file) {
     return new Promise(function (resolve) {
       var empty = { width: 0, height: 0 };
       if (!file) return resolve(empty);
-
       if (file.type && file.type.indexOf("video/") === 0) {
         var video = document.createElement("video");
         var objectUrl = URL.createObjectURL(file);
@@ -108,7 +118,6 @@
         video.src = objectUrl;
         return;
       }
-
       if (typeof createImageBitmap === "function") {
         createImageBitmap(file).then(function (bitmap) {
           var dims = { width: bitmap.width || 0, height: bitmap.height || 0 };
@@ -117,7 +126,6 @@
         }).catch(function () { resolve(empty); });
         return;
       }
-
       var image = new Image();
       var objectUrl = URL.createObjectURL(file);
       image.onload = function () {
@@ -144,10 +152,6 @@
     return /\.(mp4|webm|mov|m4v)$/i.test(String(key || ""));
   }
 
-  /**
-   * List objects from the Worker (/list). Returns array of { key, url, type, size }.
-   * Worker must expose GET /list and return { objects: [{ key, size }] } or an array.
-   */
   async function list(options) {
     options = options || {};
     var base = workerBase();
@@ -163,6 +167,7 @@
       var raw = Array.isArray(data) ? data : (data.objects || data.items || []);
       return raw.map(function (item) {
         var key = typeof item === "string" ? item : (item.key || item.name || "");
+        if (isTestKey(key)) return null;
         var type = isVideoKey(key) ? "video" : "photo";
         return {
           id: key,
@@ -173,37 +178,30 @@
           imageUrl: publicUrl(key),
           thumbnailUrl: publicUrl(key),
           type: type,
-          title: key.split("/").pop() || "HSHS moment",
+          title: friendlyTitle(key, type),
           likes: 0,
           views: 0,
           size: (item && item.size) || 0,
           provider: "cloudflare-r2"
         };
-      }).filter(function (o) { return o.key; });
+      }).filter(function (o) { return o && o.key; });
     } catch (err) {
       console.warn("[HshsStorage] R2 list failed:", err && err.message);
       return [];
     }
   }
 
-  /**
-   * Upload a File/Blob. Returns { url, key, provider, kind, size }.
-   * Primary path: Worker signs a PUT → file goes to R2 → public URL is r2.dev base + key.
-   */
   async function upload(file, options) {
     options = options || {};
     var kind = options.kind || (file && file.type && file.type.indexOf("video") === 0 ? "video" : "photo");
     checkSize(file, kind);
     var dims = await mediaSize(file);
-
     var key = objectKey(kind, file);
     var r2 = r2Config();
     var signTarget = r2.signUrl || "";
-    // Prefer /sign if the configured URL is the Worker root
     if (signTarget && !/\/sign\/?$/i.test(signTarget)) {
       signTarget = signTarget.replace(/\/$/, "") + "/sign";
     }
-
     if (signTarget) {
       try {
         var signRes = await fetch(signTarget, {
@@ -219,7 +217,6 @@
         var signed = await signRes.json();
         var putUrl = signed.url || signed.putUrl;
         if (!putUrl) throw new Error("No presigned URL");
-
         var put = await fetch(putUrl, {
           method: "PUT",
           headers: {
@@ -228,7 +225,6 @@
           body: file
         });
         if (!put.ok) throw new Error("R2 PUT failed " + put.status);
-
         return {
           url: publicUrl(key),
           key: key,
@@ -242,8 +238,6 @@
         console.warn("[HshsStorage] R2 upload failed, local fallback:", err && err.message);
       }
     }
-
-    // Local fallback only (never writes media into Firestore)
     if (kind === "photo" && typeof createImageBitmap === "function") {
       try {
         var bitmap = await createImageBitmap(file);
@@ -262,9 +256,8 @@
           width: dims.width,
           height: dims.height
         };
-      } catch (e) { /* fall through */ }
+      } catch (e) {}
     }
-
     return new Promise(function (resolve, reject) {
       var reader = new FileReader();
       reader.onload = function () {
@@ -288,8 +281,8 @@
             provider: "local-blob",
             kind: kind,
             size: (file && file.size) || 0,
-          width: dims.width,
-          height: dims.height
+            width: dims.width,
+            height: dims.height
           });
           return;
         } catch (e) {}
@@ -302,11 +295,9 @@
     options = options || {};
     var kind = options.kind || "photo";
     if (!src) throw new Error("No media source");
-
     if (/^https?:\/\//i.test(src)) {
       return { url: src, key: objectKey(kind, null), provider: "remote", kind: kind, size: 0 };
     }
-
     try {
       var res = await fetch(src);
       var blob = await res.blob();
@@ -315,17 +306,10 @@
       });
       return upload(file, { kind: kind });
     } catch (e) {
-      return {
-        url: src,
-        key: objectKey(kind, null),
-        provider: "passthrough",
-        kind: kind,
-        size: 0
-      };
+      return { url: src, key: objectKey(kind, null), provider: "passthrough", kind: kind, size: 0 };
     }
   }
 
-  /** Admin upload: validates type/size then PUTs to /admin/upload with token. */
   async function uploadAdmin(file) {
     if (!file) throw new Error("No file");
     var kind = (file.type && file.type.indexOf("video") === 0) ? "video" : "photo";
