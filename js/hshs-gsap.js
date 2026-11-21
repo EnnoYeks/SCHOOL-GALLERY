@@ -88,7 +88,7 @@
       duration: opts.duration || 0.55,
       stagger: opts.stagger == null ? 0.08 : opts.stagger,
       ease: opts.ease || 'power3.out',
-      clearProps: 'transform'
+      clearProps: 'opacity,transform'
     };
     if (opts.x) fromVars.x = opts.x;
     if (opts.scale) fromVars.scale = opts.scale;
@@ -106,37 +106,14 @@
     var card = document.querySelector('.vibe-hero-card');
     if (!card || card.getAttribute('data-gsap') === 'done') return;
     card.setAttribute('data-gsap', 'done');
-
-    gsap.from(card, {
-      opacity: 0,
-      y: 24,
-      scale: 0.98,
-      duration: 0.7,
-      ease: 'power3.out'
-    });
-
+    gsap.from(card, { opacity: 0, y: 24, scale: 0.98, duration: 0.7, ease: 'power3.out', clearProps: 'opacity,transform' });
     var copy = fresh(qsa('.vibe-pill, .vibe-hero-copy h1, .vibe-sub, .vibe-desc, .vibe-cta', card));
     if (copy.length) {
-      gsap.from(copy, {
-        opacity: 0,
-        y: 18,
-        duration: 0.55,
-        stagger: 0.08,
-        delay: 0.12,
-        ease: 'power3.out'
-      });
+      gsap.from(copy, { opacity: 0, y: 18, duration: 0.55, stagger: 0.08, delay: 0.12, ease: 'power3.out', clearProps: 'opacity,transform' });
     }
-
     var sparks = qsa('.vibe-spark, .vibe-hero-photos span', card);
     if (sparks.length) {
-      gsap.from(sparks, {
-        opacity: 0,
-        scale: 0.6,
-        duration: 0.8,
-        stagger: 0.1,
-        delay: 0.2,
-        ease: 'back.out(1.6)'
-      });
+      gsap.from(sparks, { opacity: 0, scale: 0.6, duration: 0.8, stagger: 0.1, delay: 0.2, ease: 'back.out(1.6)', clearProps: 'opacity,transform' });
     }
   }
 
@@ -144,53 +121,29 @@
     var nav = document.querySelector('.navbar');
     if (!nav || nav.getAttribute('data-gsap') === 'done') return;
     nav.setAttribute('data-gsap', 'done');
-    gsap.from(nav, {
-      opacity: 0,
-      y: -16,
-      duration: 0.5,
-      ease: 'power3.out'
-    });
+    gsap.from(nav, { opacity: 0, y: -16, duration: 0.5, ease: 'power3.out', clearProps: 'opacity,transform' });
   }
 
   function animateHome(gsap) {
     qsa('.home-section').forEach(function (section) {
       var head = fresh(qsa('.home-section-head, .home-section-title', section));
       if (head.length) revealBatch(gsap, head, { trigger: section, y: 18, stagger: 0.06 });
-
-      var cards = fresh(qsa(
-        '.home-feature-card, .home-stat, .home-split-card, .home-event-card, .home-trend-item',
-        section
-      ));
+      var cards = fresh(qsa('.home-feature-card, .home-stat, .home-split-card, .home-event-card, .home-trend-item', section));
       if (cards.length) revealBatch(gsap, cards, { trigger: section, y: 32, stagger: 0.1, scale: 0.98 });
     });
-
     var cta = fresh(qsa('.home-cta'));
     if (cta.length) revealBatch(gsap, cta, { y: 24 });
-
     var footer = fresh(qsa('.home-footer, footer.footer'));
     if (footer.length) revealBatch(gsap, footer, { y: 20, duration: 0.5 });
   }
 
   function animateGeneric(gsap) {
     var cards = fresh(qsa([
-      '.gallery-item',
-      '.gallery-card',
-      '.photo-card',
-      '.video-card',
-      '.clip-card',
-      '.memory-card',
-      '.spotlight-card',
-      '.trending-card',
-      '.poll-card',
-      '.post-card',
-      '.media-tile',
-      '.hshs-card',
-      '.feed-card'
+      '.gallery-item', '.gallery-card', '.photo-card', '.video-card', '.clip-card',
+      '.memory-card', '.spotlight-card', '.trending-card', '.poll-card', '.post-card',
+      '.media-tile', '.hshs-card', '.feed-card'
     ].join(', ')));
-    if (cards.length) {
-      revealBatch(gsap, cards.slice(0, 40), { y: 26, stagger: 0.06, scale: 0.97 });
-    }
-
+    if (cards.length) revealBatch(gsap, cards.slice(0, 40), { y: 26, stagger: 0.06, scale: 0.97 });
     var titles = fresh(qsa('main h1, main h2, .page-title, .section-title'));
     if (titles.length) revealBatch(gsap, titles.slice(0, 12), { y: 16, stagger: 0.05 });
   }
@@ -232,20 +185,13 @@
       if (!card) return;
       gsap.to(card, { y: 0, scale: 1, duration: 0.32, ease: 'power2.out', overwrite: 'auto' });
     }, true);
-
     document.addEventListener('click', function (e) {
       if (prefersReduced()) return;
       var heart = e.target && e.target.closest
         ? e.target.closest('.fa-heart, [data-like], .like-btn, .hshs-like')
         : null;
       if (!heart) return;
-      gsap.fromTo(heart, { scale: 1 }, {
-        scale: 1.28,
-        duration: 0.18,
-        yoyo: true,
-        repeat: 1,
-        ease: 'back.out(2)'
-      });
+      gsap.fromTo(heart, { scale: 1 }, { scale: 1.28, duration: 0.18, yoyo: true, repeat: 1, ease: 'back.out(2)' });
     }, true);
   }
 
@@ -291,9 +237,7 @@
   function watchDynamic() {
     if (observer || !global.MutationObserver) return;
     var root = document.getElementById('hshs-page') || document.body;
-    observer = new MutationObserver(function () {
-      schedulePlay();
-    });
+    observer = new MutationObserver(function () { schedulePlay(); });
     observer.observe(root, { childList: true, subtree: true });
   }
 
@@ -304,10 +248,7 @@
     }
     ensureGsap().then(function (gsap) {
       if (!gsap) return;
-      global.HshsGsap = {
-        refresh: schedulePlay,
-        reduced: prefersReduced
-      };
+      global.HshsGsap = { refresh: schedulePlay, reduced: prefersReduced };
       schedulePlay();
       watchDynamic();
     }).catch(function (err) {
