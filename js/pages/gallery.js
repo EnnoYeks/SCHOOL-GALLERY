@@ -121,10 +121,13 @@
     var rawCat = String(item.category || item.tag || item.className || item.class_name || '').trim();
     item._subtitle = rawCat && rawCat.toLowerCase() !== 'all' ? rawCat : '';
     item.category = rawCat.toLowerCase();
-    item.likes = Number(item.likes || item.likesCount || 0);
-    item.comments = Number(item.comments || item.commentsCount || 0);
+    item._hasLikes = item.hasLikesCount === true || item.likes != null || item.likesCount != null;
+    item._hasComments = item.hasCommentsCount === true || item.comments != null || item.commentsCount != null;
+    item._hasShares = item.hasSharesCount === true || item.shares != null || item.sharesCount != null;
+    item.likes = Number(item.likes != null ? item.likes : item.likesCount || 0);
+    item.comments = Number(item.comments != null ? item.comments : item.commentsCount || 0);
     item.saves = Number(item.saves || 0);
-    item.shares = Number(item.shares || 0);
+    item.shares = Number(item.shares != null ? item.shares : item.sharesCount || 0);
     item.createdAt = item.createdAt || item.created_at || item.date || Date.now();
     item._media = mediaUrl(item);
     item._video = videoUrl(item);
@@ -228,11 +231,11 @@
     var actions = document.createElement('div');
     actions.className = 'gallery-actions hshs-feed-actions';
     actions.innerHTML =
-      '<button type="button" data-action="like" aria-label="Like" class="' + (state.liked[p.id] ? 'is-on' : '') + '"><i class="' + (state.liked[p.id] ? 'fas' : 'far') + ' fa-heart"></i><span>' + count(p.likes) + '</span></button>' +
-      '<button type="button" data-action="comment" aria-label="Comment"><i class="far fa-comment"></i><span>' + count(p.comments) + '</span></button>' +
-      '<button type="button" data-action="share" aria-label="Share"><i class="fas fa-share"></i><span>' + count(p.shares) + '</span></button>' +
+      '<button type="button" data-action="like" aria-label="Like" title="Like" class="' + (state.liked[p.id] ? 'is-on' : '') + '"><span class="gallery-action-symbol" aria-hidden="true">' + (state.liked[p.id] ? '♥' : '♡') + '</span><span>Like</span>' + (p._hasLikes ? '<span class="gallery-action-count">' + count(p.likes) + '</span>' : '') + '</button>' +
+      '<button type="button" data-action="comment" aria-label="Comment" title="Comment"><span class="gallery-action-symbol" aria-hidden="true">▤</span><span>Comment</span>' + (p._hasComments ? '<span class="gallery-action-count">' + count(p.comments) + '</span>' : '') + '</button>' +
+      '<button type="button" data-action="share" aria-label="Share" title="Share"><span class="gallery-action-symbol" aria-hidden="true">↗</span><span>Share</span>' + (p._hasShares ? '<span class="gallery-action-count">' + count(p.shares) + '</span>' : '') + '</button>' +
       '<time class="hshs-feed-time">' + esc(relTime(p.createdAt)) + '</time>' +
-      '<button type="button" data-action="save" aria-label="Save" class="' + (state.saved[p.id] ? 'is-on' : '') + '"><i class="' + (state.saved[p.id] ? 'fas' : 'far') + ' fa-bookmark"></i></button>';
+      '<button type="button" data-action="save" aria-label="Save" title="Save" class="' + (state.saved[p.id] ? 'is-on' : '') + '"><span class="gallery-action-symbol" aria-hidden="true">' + (state.saved[p.id] ? '▣' : '▢') + '</span><span>Save</span></button>';
     fig.appendChild(actions);
 
     return fig;
