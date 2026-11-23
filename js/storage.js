@@ -11,6 +11,7 @@
   "use strict";
   if (g.HshsStorage) return;
 
+  // r2.dev public URL is for testing only. Replace with a custom domain in Cloudflare when ready.
   var DEFAULT_PUBLIC_BASE = "https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev";
 
   var cfg = (g.CONFIG && g.CONFIG.storage) || {
@@ -361,4 +362,18 @@
       return r && r.signUrl ? "cloudflare-r2" : (cfg.provider || "local");
     }
   };
+  // Startup reachability check. Does not change the base URL.
+  (function checkR2() {
+    try {
+      var base = publicBase();
+      if (!base) return;
+      var probe = base + "/";
+      fetch(probe, { method: "HEAD", mode: "no-cors" }).catch(function () {
+        console.warn("[HSHS] R2 public URL not reachable: " + base);
+      });
+    } catch (e) {
+      console.warn("[HSHS] R2 public URL check failed:", e && e.message);
+    }
+  })();
+
 })(typeof window !== "undefined" ? window : globalThis);

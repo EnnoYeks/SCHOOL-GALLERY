@@ -208,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
     add('hshs-chrome-js', 'hshs-chrome.js');
     add('hshs-stable-js', 'hshs-stable.js');
     add('hshs-final-guard-js', 'hshs-final-guard.js');
-    add('hshs-nodemo-hard-js', 'hshs-nodemo-hard.js');
 })();
 
 (function forceAuthHardNav() {
