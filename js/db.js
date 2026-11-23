@@ -74,8 +74,9 @@ class Database {
             if (error) throw error;
             return (data || []).map(row => this.normalizeItem(row));
         } catch (error) {
-            console.error("Supabase query error:", error);
-            return [];
+            var msg = (error && (error.message || error.details || error.hint)) || String(error);
+            console.error("[HSHS] Supabase query failed on table '" + table + "':", msg, error);
+            throw error;
         }
     }
 
@@ -252,7 +253,6 @@ class Database {
         }
     }
 
-
     async getAuthenticatedUid() {
         const user = auth?.currentUser;
         return user && !user.isAnonymous ? user.uid : null;
@@ -384,7 +384,6 @@ class Database {
         return { ok: true, comment: data };
     }
 
-    // Stub methods so older code doesn't break (chat still on Firebase for now)
     async getById() { return null; }
     async deletePost() { return false; }
     async deleteVideo() { return false; }
