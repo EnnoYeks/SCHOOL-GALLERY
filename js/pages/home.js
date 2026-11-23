@@ -49,6 +49,27 @@
     return direct || '';
   }
 
+  function safeTitle(post) {
+    if (!post) return '';
+    var t = String(post.title || '').trim();
+    var c = String(post.caption || post.description || '').trim();
+    if (t && t !== 'Campus moment' && t !== 'HSHS moment' && t !== 'Campus photo' && t !== 'Campus video') return t;
+    if (c && c !== 'Campus moment' && c !== 'HSHS moment') return c;
+    return '';
+  }
+
+  function imageLoads(url) {
+    return new Promise(function (resolve) {
+      if (!url) { resolve(false); return; }
+      var img = new Image();
+      var done = false;
+      function finish(ok) { if (done) return; done = true; resolve(!!ok); }
+      img.onload = function () { finish(true); };
+      img.onerror = function () { finish(false); };
+      img.src = url;
+    });
+  }
+
   function postCard(post, index) {
     var image = mediaOf(post);
     var isVideo = String(post.type || '').toLowerCase().indexOf('video') !== -1 || !!post.videoUrl;
@@ -58,7 +79,7 @@
     return '<article class="home-feature-card is-alive" data-id="' + esc(post.id || '') + '">' + media +
       '<div class="home-feature-overlay"></div><div class="home-feature-body"><span class="home-feature-type"><i class="fas ' +
       (isVideo ? 'fa-video' : 'fa-image') + '"></i> ' + esc(isVideo ? 'Vibe' : 'Photo') + '</span><h3>' +
-      esc(post.title || post.caption || 'HSHS moment') + '</h3><div class="home-feature-meta"><span>' +
+      esc(safeTitle(post)) + '</h3><div class="home-feature-meta"><span>' +
       formatCount(post.likes) + ' likes</span><span>' + formatCount(post.views) + ' views</span></div></div></article>';
   }
 
@@ -68,7 +89,7 @@
     return '<a class="home-trend-item" href="/trending/"><span class="home-trend-thumb"' +
       (thumb ? ' style="background-image:url(\'' + esc(thumb) + '\')"' : '') +
       '></span><span class="home-trend-copy"><small>#' + rank + ' trending</small><strong>' +
-      esc(post.title || post.caption || 'Campus moment') + '</strong><em>' + formatCount(post.likes) + ' likes</em></span></a>';
+      esc(safeTitle(post) || '') + '</strong><em>' + formatCount(post.likes) + ' likes</em></span></a>';
   }
 
   function eventCard(ev) {
@@ -93,6 +114,7 @@
     var db = global.db;
     var posts = [];
     var stats = { totalPhotos: 0, totalVideos: 0, totalStudents: 0, totalLikes: 0 };
+    var dbError = null;
     if (db) {
       try {
         var lists = await Promise.all([
@@ -109,18 +131,21 @@
           stats.totalPhotos = Number(a && a.totalPhotos) || 0;
           stats.totalVideos = Number(a && a.totalVideos) || 0;
         }
-      } catch (e) {}
+      } catch (e) {
+        dbError = e;
+        console.error('[HSHS] Home loadReal failed:', e && e.message || e);
+      }
     }
-    if (!posts.length) posts = postsFromStore(global.HshsStore);
-    if (!posts.length && global.HshsStorage && typeof global.HshsStorage.list === 'function') {
+    if (!posts.length && !dbError) posts = postsFromStore(global.HshsStore);
+    if (!posts.length && !dbError && global.HshsStorage && typeof global.HshsStorage.list === 'function') {
       try { posts = await global.HshsStorage.list({ limit: 24 }) || []; } catch (e) {}
     }
     var seen = {};
     posts = posts.filter(function (p) {
-      var key = p.id || p.mediaKey || p.media_key || p.title;
+      var url = mediaOf(p);
+      var key = url || p.mediaKey || p.media_key || p.id || ((p.title || '') + '|' + (p.createdAt || p.created_at || ''));
       if (!key || seen[key]) return false;
       seen[key] = true;
-      var url = mediaOf(p);
       if (url) {
         p.image = p.image || url;
         p.imageUrl = p.imageUrl || url;
@@ -131,7 +156,7 @@
     if (!stats.totalPhotos) stats.totalPhotos = posts.filter(function (p) { return p.type !== 'video'; }).length;
     if (!stats.totalVideos) stats.totalVideos = posts.filter(function (p) { return p.type === 'video'; }).length;
     stats.totalLikes = posts.reduce(function (sum, p) { return sum + (Number(p.likes) || 0); }, 0);
-    return { posts: posts, stats: stats };
+    return { posts: posts, stats: stats, error: dbError };
   }
 
   function withMedia(list) {
@@ -179,33 +204,52 @@
     if (trendB) trendB.innerHTML = trendCard(trending[1], 2);
   }
 
+  function showEmpty(grid) {
+    if (!grid) return;
+    grid.innerHTML = '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong><p style="opacity:.75;margin:6px 0 0;font-size:.85rem">Share a photo to get started.</p></div>';
+  }
+
   async function renderData() {
     var token = ++renderToken;
     var loaded;
     try {
       loaded = await loadReal();
     } catch (err) {
-      if (token !== renderToken || lastGood) return;
+      if (token !== renderToken) return;
+      if (lastGood) { paintLoaded(lastGood); return; }
       var grid = document.getElementById('featuredGrid');
       if (grid && global.HshsPaint) {
         global.HshsPaint.section(grid, 'error', {
           onRetry: renderData,
-          error: '<div class="hshs-section-state hshs-error"><strong>Could not load the feed</strong><button type="button">Retry</button></div>'
+          error: '<div class="hshs-section-state hshs-error"><strong>Could not load the feed</strong><button type="button" data-hshs-retry>Retry</button></div>'
         });
       }
       return;
     }
     if (token !== renderToken) return;
-    var mediaPosts = withMedia(loaded.posts || []);
+    if (loaded && loaded.error && !(loaded.posts && loaded.posts.length)) {
+      if (lastGood) { paintLoaded(lastGood); return; }
+      var errGrid = document.getElementById('featuredGrid');
+      if (errGrid && global.HshsPaint) {
+        global.HshsPaint.section(errGrid, 'error', {
+          onRetry: renderData,
+          error: '<div class="hshs-section-state hshs-error"><strong>Could not load the feed</strong><button type="button" data-hshs-retry>Retry</button></div>'
+        });
+      }
+      return;
+    }
+    var candidates = withMedia(loaded.posts || []);
+    var checks = await Promise.all(candidates.map(function (p) {
+      return imageLoads(mediaOf(p)).then(function (ok) { return ok ? p : null; });
+    }));
+    if (token !== renderToken) return;
+    var mediaPosts = checks.filter(Boolean);
     if (!mediaPosts.length) {
-      if (lastGood) {
+      if (lastGood && !(loaded && loaded.error)) {
         paintLoaded(lastGood);
         return;
       }
-      var emptyGrid = document.getElementById('featuredGrid');
-      if (emptyGrid && !emptyGrid.querySelector('.home-feature-card')) {
-        emptyGrid.innerHTML = '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong><p style="opacity:.75;margin:6px 0 0;font-size:.85rem">Share a photo to get started.</p></div>';
-      }
+      showEmpty(document.getElementById('featuredGrid'));
       return;
     }
     lastGood = { posts: mediaPosts, stats: loaded.stats };
@@ -251,10 +295,10 @@
     }
     document.documentElement.setAttribute('data-hshs-page', 'home');
     if (global.HshsPaint) global.HshsPaint.now();
-    loadOnce('/css/home.css?v=261106glass1', 'hshs-home-css');
-    loadOnce('/css/hshs-home-polish.css?v=261106glass1', 'hshs-home-polish-css');
-    loadOnce('/css/hshs-vibe-home.css?v=261106glass1', 'hshs-vibe-home-css');
-    loadOnce('/css/hshs-glass.css?v=261106glass1', 'hshs-glass-css');
+    loadOnce('/css/home.css?v=261123fix1', 'hshs-home-css');
+    loadOnce('/css/hshs-home-polish.css?v=261123fix1', 'hshs-home-polish-css');
+    loadOnce('/css/hshs-vibe-home.css?v=261123fix1', 'hshs-vibe-home-css');
+    loadOnce('/css/hshs-glass.css?v=261123fix1', 'hshs-glass-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
     else if (tpl) root.innerHTML = tpl;
