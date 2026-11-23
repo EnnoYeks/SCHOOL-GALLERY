@@ -14,7 +14,7 @@
     + '<a class="vibe-btn-ghost" href="/about/"><i class="fas fa-circle-info"></i> Learn More</a></div></div></div>'
     + '</div></section>'
     + '<section class="home-section"><div class="home-section-head"><h2 class="home-section-title"><i class="fas fa-crown"></i> Featured Today</h2><a class="home-link" href="/gallery/">View all <i class="fas fa-chevron-right"></i></a></div>'
-    + '<div class="home-featured-grid" id="featuredGrid"><div class="home-skeleton"></div><div class="home-skeleton"></div><div class="home-skeleton"></div></div></section>'
+    + '<div class="home-featured-grid" id="featuredGrid"><div class="home-skeleton" aria-hidden="true"></div><div class="home-skeleton" aria-hidden="true"></div><div class="home-skeleton" aria-hidden="true"></div></div></section>'
     + '<section class="home-section"><div class="home-section-head"><h2 class="home-section-title">HSHS at a glance</h2></div>'
     + '<div class="home-stats">'
     + '<div class="home-stat"><i class="fas fa-image"></i><div><strong id="totalPhotos" data-count="0">0</strong><span>Photos</span></div><i class="fas fa-chevron-right"></i></div>'
