@@ -145,7 +145,7 @@
       ].filter(Boolean).join(' · ');
       var shortCaption = String(photo.description || photo.caption || '').trim();
       if (shortCaption.length > 90) shortCaption = shortCaption.slice(0, 87).trim() + '…';
-      cap.innerHTML = (title ? '<strong></strong>' : '') + (shortCaption ? '<span class="photo-short-caption"></span>' : '') + (details ? '<span class="photo-details"></span>' : '');
+      cap.innerHTML = '<span class="photo-type">Photo</span>' + (title ? '<strong></strong>' : '') + (shortCaption ? '<span class="photo-short-caption"></span>' : '') + (details ? '<span class="photo-details"></span>' : '');
       if (title) cap.querySelector('strong').textContent = title;
       if (shortCaption) cap.querySelector('.photo-short-caption').textContent = shortCaption;
       if (details) cap.querySelector('.photo-details').textContent = details;
