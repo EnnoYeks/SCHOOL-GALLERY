@@ -6,6 +6,47 @@
 (function () {
   if (window.__hshsUpload && window.__hshsUpload.__studioLoaded) return;
 
+  // One record per upload. Photo -> photos table, video -> videos table.
+  // Gallery and Home already merge posts + photos + videos.
+  function installOneRecordGuard() {
+    function wrap() {
+      var db = window.db;
+      if (!db || db.__oneRecord) return !!db;
+      db.__oneRecord = true;
+      var last = { key: '', at: 0 };
+      function keyOf(payload) {
+        return String((payload && (payload.mediaKey || payload.media_key || payload.imageUrl || payload.image)) || '');
+      }
+      function shouldSkip(payload) {
+        var k = keyOf(payload);
+        var now = Date.now();
+        if (k && k === last.key && (now - last.at) < 8000) return true;
+        last = { key: k, at: now };
+        return false;
+      }
+      ['createPost', 'createPhoto', 'createVideo'].forEach(function (fn) {
+        if (typeof db[fn] !== 'function') return;
+        var orig = db[fn].bind(db);
+        db[fn] = function (payload) {
+          if (shouldSkip(payload)) {
+            console.warn('[HSHS] Skipped duplicate ' + fn + ' for same media');
+            return Promise.resolve(null);
+          }
+          return orig(payload);
+        };
+      });
+      return true;
+    }
+    if (!wrap()) {
+      var n = 0;
+      var iv = setInterval(function () {
+        if (wrap() || ++n > 40) clearInterval(iv);
+      }, 200);
+    }
+  }
+  installOneRecordGuard();
+
+
   var CDN =
     'https://cdn.jsdelivr.net/gh/EnnoYeks/SCHOOL-GALLERY@255cb6608129cf952fb2c8de957a7254ae830099/js/hshs-upload.js';
 
@@ -42,10 +83,7 @@
       var input = document.getElementById('hshsUploadFallback');
       if (!input) {
         input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*,video/*';
-        input.id = 'hshsUploadFallback';
-        input.hidden = true;
+        input.type = 'file'; input.accept = 'image/*,video/*'; input.id = 'hshsUploadFallback'; input.hidden = true;
         document.body.appendChild(input);
         input.addEventListener('change', function () {
           if (!input.files || !input.files[0]) return;
