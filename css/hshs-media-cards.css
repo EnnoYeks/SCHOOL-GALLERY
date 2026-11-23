@@ -73,3 +73,6 @@
 .vibe-row .more{display:none}
 @media(max-width:639px){.photo-card .photo-caption{display:block}.home-featured-grid .home-feature-card{aspect-ratio:4/5;min-height:0}}
 @media(prefers-reduced-motion:reduce){.photo-card.is-loading:before,.vibe-feat.is-loading:before,.vibe-row.is-loading .shot:before{animation:none}}
+
+.photo-card .photo-type{display:inline-flex;margin-bottom:4px;color:#dbeafe;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.photo-card .photo-caption .photo-short-caption{display:block;margin-top:4px;color:rgba(255,255,255,.86);font-size:12px;line-height:1.35}
