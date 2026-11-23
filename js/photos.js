@@ -93,7 +93,10 @@
       } else {
         grid.innerHTML = '';
         var frag = document.createDocumentFragment();
-        list.forEach(function (photo) { frag.appendChild(this.createPhotoCard(photo)); }, this);
+        list.forEach(function (photo) {
+          var card = this.createPhotoCard(photo);
+          if (card) frag.appendChild(card);
+        }, this);
         grid.appendChild(frag);
       }
     }
