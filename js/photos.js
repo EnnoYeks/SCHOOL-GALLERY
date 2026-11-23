@@ -127,10 +127,8 @@
       }
       function markImageLoaded() { card.classList.add('is-loaded'); card.classList.remove('is-loading'); }
       img.addEventListener('load', markImageLoaded, { once: true });
-      if (img.complete) {
-        if (img.naturalWidth > 0) markImageLoaded();
-        else card.remove();
-      }
+      var imageFailed = img.complete && img.naturalWidth === 0;
+      if (img.complete && !imageFailed) markImageLoaded();
       img.addEventListener('error', function () {
         card.remove();
       }, { once: true });
@@ -180,7 +178,7 @@
       card.appendChild(like);
       card.appendChild(cap);
       card.addEventListener('click', this.openModal.bind(this, photo));
-      return card;
+      return imageFailed ? null : card;
     }
     setupSearch() {
       var self = this;
