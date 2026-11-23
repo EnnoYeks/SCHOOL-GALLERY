@@ -125,10 +125,12 @@
       } else {
         img.src = photo.image || '';
       }
-      img.addEventListener('load', function () { card.classList.add('is-loaded'); card.classList.remove('is-loading'); var blur = card.querySelector('.photo-blur'); if (blur) blur.remove(); }, { once: true });
+      function markImageLoaded() { card.classList.add('is-loaded'); card.classList.remove('is-loading'); }
+      img.addEventListener('load', markImageLoaded, { once: true });
+      if (img.complete && img.naturalWidth > 0) markImageLoaded();
       img.addEventListener('error', function () {
         card.remove();
-      });
+      }, { once: true });
       var cap = document.createElement('div');
       cap.className = 'photo-caption';
       var title = String(photo.title || '').trim();
