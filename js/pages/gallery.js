@@ -5,7 +5,7 @@
 
   var PAGE = 'gallery';
   var PAGE_SIZE = 48;
-  var CSS_VER = '261124card1';
+  var CSS_VER = '261124card2';
 
   var state = {
     type: 'all',
@@ -398,7 +398,7 @@
       item._notes.unshift(text);
       item.comments = (item.comments || 0) + 1;
       if (btn) {
-        var s = btn.querySelector('span');
+        var s = btn.querySelector('.gallery-action-count');
         if (s) s.textContent = count(item.comments);
         pop(btn);
       }
