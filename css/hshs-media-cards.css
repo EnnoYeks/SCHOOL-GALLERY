@@ -76,3 +76,5 @@
 
 .photo-card .photo-type{display:inline-flex;margin-bottom:4px;color:#dbeafe;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
 .photo-card .photo-caption .photo-short-caption{display:block;margin-top:4px;color:rgba(255,255,255,.86);font-size:12px;line-height:1.35}
+
+.vibe-feat.is-loading .meta,.vibe-feat.is-loading .vibe-type,.vibe-feat.is-loading .badge,.vibe-row.is-loading .copy{visibility:hidden}
