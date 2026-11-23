@@ -142,23 +142,27 @@ class VideosPage {
                 el.classList.remove('is-loading');
                 el.classList.add('is-loaded');
             };
+            const captureFallback = () => {
+                const url = el.getAttribute('data-video-url');
+                if (!url) { finish(false); return; }
+                window.HshsMediaCards.capturePoster(url, poster => {
+                    if (!poster) { finish(false); return; }
+                    const replacement = document.createElement('img');
+                    replacement.alt = '';
+                    replacement.src = poster;
+                    replacement.addEventListener('load', () => finish(true), { once: true });
+                    replacement.addEventListener('error', () => finish(false), { once: true });
+                    if (img) img.replaceWith(replacement);
+                    else el.insertBefore(replacement, el.firstChild);
+                });
+            };
             if (img) {
-                if (img.complete) finish(img.naturalWidth > 0);
-                else {
+                if (img.complete) {
+                    if (img.naturalWidth > 0) finish(true);
+                    else captureFallback();
+                } else {
                     img.addEventListener('load', () => finish(true), { once: true });
-                    img.addEventListener('error', () => {
-                        const url = el.getAttribute('data-video-url');
-                        if (!url) { finish(false); return; }
-                        window.HshsMediaCards.capturePoster(url, poster => {
-                            if (!poster) { finish(false); return; }
-                            const replacement = document.createElement('img');
-                            replacement.alt = '';
-                            replacement.src = poster;
-                            replacement.addEventListener('load', () => finish(true), { once: true });
-                            replacement.addEventListener('error', () => finish(false), { once: true });
-                            img.replaceWith(replacement);
-                        });
-                    }, { once: true });
+                    img.addEventListener('error', captureFallback, { once: true });
                 }
                 return;
             }
