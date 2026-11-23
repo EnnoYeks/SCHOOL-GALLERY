@@ -210,10 +210,11 @@ class VideosPage {
     play(index){
         if (index < 0 || index >= this.filtered.length) return;
         const video = this.filtered[index], player = document.getElementById("videoPlayer"), modal = document.getElementById("videoPlayerModal");
-        if (!player || !modal || !video.videoUrl) return;
+        const videoUrl = video.videoUrl || video.video_url;
+        if (!player || !modal || !videoUrl) return;
         this.index = index;
-        player.src = video.videoUrl;
-        player.poster = video.thumbnailUrl || video.thumbnail || "";
+        player.src = videoUrl;
+        player.poster = video.thumbnailUrl || video.thumbnail_url || video.thumbnail || video.posterUrl || "";
         modal.classList.add("active");
         player.play().catch(()=>{});
         this.updateViews(video);
