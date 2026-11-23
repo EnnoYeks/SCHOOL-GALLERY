@@ -526,3 +526,64 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
   .gallery-page .gallery-feed{display:block}
   .gallery-page .gallery-card{width:46%;display:inline-block;vertical-align:top;margin:0 2% 16px 0}
 }
+
+/* Gallery card clarity: readable actions without depending on icon fonts. */
+.gallery-page .hshs-feed-actions{
+  min-height:48px;
+  padding:6px 10px 8px;
+  gap:4px;
+  align-items:center;
+}
+.gallery-page .hshs-feed-actions button{
+  min-width:0;
+  height:34px;
+  padding:0 7px;
+  gap:5px;
+  border-radius:10px;
+  color:#b9c8e5;
+  font-size:.7rem;
+  font-weight:800;
+  white-space:nowrap;
+}
+.gallery-page .hshs-feed-actions button:hover{
+  background:rgba(255,255,255,.06);
+  color:#f8fafc;
+}
+.gallery-page .hshs-feed-actions button.is-on{
+  color:#fbbf24;
+  background:rgba(251,191,36,.12);
+}
+.gallery-page .gallery-action-symbol{
+  display:inline-grid;
+  place-items:center;
+  min-width:15px;
+  font-size:15px;
+  line-height:1;
+  font-family:system-ui,sans-serif;
+}
+.gallery-page .gallery-action-count{
+  color:#e2e8f0;
+  font-size:.68rem;
+  font-variant-numeric:tabular-nums;
+}
+.gallery-page .hshs-feed-time{
+  font-size:.7rem;
+  margin-left:auto;
+  padding-left:4px;
+}
+.gallery-page .hshs-feed-author{
+  min-height:68px;
+  padding:12px 14px;
+  background:rgba(255,255,255,.025);
+}
+.gallery-page .hshs-feed-who strong{
+  letter-spacing:.005em;
+}
+.gallery-page .hshs-feed-who small{
+  letter-spacing:.01em;
+}
+@media(max-width:420px){
+  .gallery-page .hshs-feed-actions{padding-left:6px;padding-right:6px;gap:1px}
+  .gallery-page .hshs-feed-actions button{padding:0 5px;font-size:.66rem;gap:3px}
+  .gallery-page .hshs-feed-time{font-size:.64rem}
+}
