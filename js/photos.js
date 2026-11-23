@@ -127,7 +127,10 @@
       }
       function markImageLoaded() { card.classList.add('is-loaded'); card.classList.remove('is-loading'); }
       img.addEventListener('load', markImageLoaded, { once: true });
-      if (img.complete && img.naturalWidth > 0) markImageLoaded();
+      if (img.complete) {
+        if (img.naturalWidth > 0) markImageLoaded();
+        else card.remove();
+      }
       img.addEventListener('error', function () {
         card.remove();
       }, { once: true });
@@ -135,16 +138,19 @@
       cap.className = 'photo-caption';
       var title = String(photo.title || '').trim();
       var author = photo.author || photo.username || photo.userName || '';
-      var dateValue = photo.createdAt || photo.created_at || photo.created_at;
+      var dateValue = photo.createdAt || photo.created_at;
       var dateLabel = dateValue ? (window.HshsMediaCards && window.HshsMediaCards.timeAgo
         ? window.HshsMediaCards.timeAgo(dateValue) : '') : '';
       var details = [author, dateLabel,
         photo.likes == null ? '' : String(Number(photo.likes) || 0) + ' likes',
         photo.views == null ? '' : String(Number(photo.views) || 0) + ' views'
       ].filter(Boolean).join(' · ');
-      cap.innerHTML = (title ? '<strong></strong>' : '') + (details ? '<span></span>' : '');
+      var shortCaption = String(photo.description || photo.caption || '').trim();
+      if (shortCaption.length > 90) shortCaption = shortCaption.slice(0, 87).trim() + '…';
+      cap.innerHTML = (title ? '<strong></strong>' : '') + (shortCaption ? '<span class="photo-short-caption"></span>' : '') + (details ? '<span class="photo-details"></span>' : '');
       if (title) cap.querySelector('strong').textContent = title;
-      if (details) cap.querySelector('span').textContent = details;
+      if (shortCaption) cap.querySelector('.photo-short-caption').textContent = shortCaption;
+      if (details) cap.querySelector('.photo-details').textContent = details;
       card.appendChild(img);
       var like = document.createElement('button');
       like.type = 'button'; like.className = 'like-btn'; like.setAttribute('aria-label', 'Like photo');
@@ -164,7 +170,7 @@
           if (result && result.error) throw result.error;
           like.classList.add('liked');
           photo.likes = (Number(photo.likes) || 0) + 1;
-          if (cap.querySelector('span')) cap.querySelector('span').textContent = [author, dateLabel, photo.likes + ' likes', photo.views == null ? '' : Number(photo.views) + ' views'].filter(Boolean).join(' · ');
+          if (cap.querySelector('.photo-details')) cap.querySelector('.photo-details').textContent = [author, dateLabel, photo.likes + ' likes', photo.views == null ? '' : Number(photo.views) + ' views'].filter(Boolean).join(' · ');
           try { sessionStorage.setItem(likeKey, '1'); } catch (_) {}
         } catch (error) {
           console.warn('[HSHS] Could not save photo like:', error && error.message);
