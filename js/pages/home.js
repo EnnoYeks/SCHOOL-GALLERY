@@ -171,9 +171,13 @@
       if (!key || seen[key]) return false;
       seen[key] = true;
       if (url) {
-        p.image = p.image || url;
-        p.imageUrl = p.imageUrl || url;
-        p.thumbnailUrl = p.thumbnailUrl || url;
+        if (isVideoPost(p)) {
+          p.videoUrl = p.videoUrl || p.video_url || url;
+        } else {
+          p.image = p.image || url;
+          p.imageUrl = p.imageUrl || url;
+          p.thumbnailUrl = p.thumbnailUrl || url;
+        }
       }
       return !!(url || p.description);
     });
