@@ -421,7 +421,6 @@
       item.likes = Math.max(0, (item.likes || 0) + (liked ? 1 : -1));
       if (btn) {
         btn.classList.toggle('is-on', liked);
-        setIcon(btn, liked ? 'fas fa-heart' : 'far fa-heart');
         var likeCount = btn.querySelector('.gallery-action-count');
         if (likeCount && item._hasLikes) likeCount.textContent = count(item.likes);
         var likeSymbol = btn.querySelector('.gallery-action-symbol');
@@ -435,7 +434,8 @@
       state.saved[item.id] = saved;
       if (btn) {
         btn.classList.toggle('is-on', saved);
-        setIcon(btn, saved ? 'fas fa-bookmark' : 'far fa-bookmark');
+        var saveSymbol = btn.querySelector('.gallery-action-symbol');
+        if (saveSymbol) saveSymbol.textContent = saved ? '▣' : '▢';
         pop(btn);
       }
       return;
