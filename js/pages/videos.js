@@ -35,7 +35,6 @@
     }).then(function () {
       return import('/js/videos.js?v=261124mediafix1');
     }).then(function () {
-      if (typeof global.startVideos === 'function') global.startVideos();
       return loadOnce('/js/hshs-discover-ui.js?v=261002route1', 'hshs-discover-ui');
     }).then(function () { if (global.HshsDiscoverUi) global.HshsDiscoverUi.boot(); if (global.HshsRoute) global.HshsRoute.reveal(); });
   }
