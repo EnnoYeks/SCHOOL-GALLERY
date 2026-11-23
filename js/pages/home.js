@@ -25,6 +25,19 @@
     });
   }
 
+  function loadScriptOnce(src, id) {
+    return new Promise(function (resolve) {
+      if (id && document.getElementById(id)) { resolve(); return; }
+      var script = document.createElement('script');
+      script.src = src;
+      script.async = false;
+      if (id) script.id = id;
+      script.onload = resolve;
+      script.onerror = resolve;
+      document.head.appendChild(script);
+    });
+  }
+
   function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
       return ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' })[c];
@@ -325,10 +338,11 @@
     }
     document.documentElement.setAttribute('data-hshs-page', 'home');
     if (global.HshsPaint) global.HshsPaint.now();
-    loadOnce('/css/home.css?v=261123fix2', 'hshs-home-css');
-    loadOnce('/css/hshs-home-polish.css?v=261123fix2', 'hshs-home-polish-css');
-    loadOnce('/css/hshs-vibe-home.css?v=261123fix2', 'hshs-vibe-home-css');
-    loadOnce('/css/hshs-glass.css?v=261123fix2', 'hshs-glass-css');
+    loadOnce('/css/home.css?v=261124mediafix1', 'hshs-home-css');
+    loadOnce('/css/hshs-home-polish.css?v=261124mediafix1', 'hshs-home-polish-css');
+    loadOnce('/css/hshs-vibe-home.css?v=261124mediafix1', 'hshs-vibe-home-css');
+    loadOnce('/css/hshs-glass.css?v=261124mediafix1', 'hshs-glass-css');
+    loadOnce('/css/hshs-media-cards.css?v=261124mediafix1', 'hshs-media-cards-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
     else if (tpl) root.innerHTML = tpl;
@@ -336,6 +350,7 @@
     if (grid && !grid.querySelector('.home-feature-card') && !grid.querySelector('.home-skeleton')) {
       grid.innerHTML = '<div class="home-skeleton" aria-hidden="true"></div><div class="home-skeleton" aria-hidden="true"></div><div class="home-skeleton" aria-hidden="true"></div>';
     }
+    await loadScriptOnce('/js/hshs-media-cards.js?v=261124mediafix1', 'hshs-media-cards');
     renderData();
     global.__hshsHomeMounted = true;
     if (typeof window.__hshsRevealPage === 'function') window.__hshsRevealPage();
