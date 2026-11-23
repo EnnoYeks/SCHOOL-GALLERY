@@ -47,13 +47,18 @@
         } catch (e) { photos = []; }
       }
 
+      var seenMedia = Object.create(null);
       photos = photos.map(function (p) {
         var url = mediaOf(p);
         p.image = p.image || url;
         p.imageUrl = p.imageUrl || url;
         p.thumbnailUrl = p.thumbnailUrl || url;
         return p;
-      }).filter(function (p) { return p.image; });
+      }).filter(function (p) {
+        if (!p.image || seenMedia[p.image]) return false;
+        seenMedia[p.image] = true;
+        return true;
+      });
 
       this.photos = photos;
       this.render();
@@ -88,7 +93,10 @@
       } else {
         grid.innerHTML = '';
         var frag = document.createDocumentFragment();
-        list.forEach(function (photo) { frag.appendChild(this.createPhotoCard(photo)); }, this);
+        list.forEach(function (photo) {
+          var card = this.createPhotoCard(photo);
+          if (card) frag.appendChild(card);
+        }, this);
         grid.appendChild(frag);
       }
     }
@@ -99,14 +107,9 @@
       if (photo.width && photo.height) card.style.aspectRatio = String(photo.width) + ' / ' + String(photo.height);
       card.style.setProperty('--photo-dominant', photo.dominantColor || '#10245a');
       card.classList.add('is-loading');
-      if (photo.blurData) {
-        var blur = document.createElement('img');
-        blur.className = 'photo-blur'; blur.alt = ''; blur.setAttribute('aria-hidden', 'true');
-        blur.src = photo.blurData; card.appendChild(blur);
-      }
       var img = document.createElement('img');
       img.className = 'photo-image';
-      img.alt = photo.title || 'Campus photo';
+      img.alt = photo.title || '';
       img.loading = 'lazy';
       img.decoding = 'async';
       if (photo.width) img.width = Number(photo.width);
@@ -125,17 +128,30 @@
       } else {
         img.src = photo.image || '';
       }
-      img.addEventListener('load', function () { card.classList.add('is-loaded'); card.classList.remove('is-loading'); var blur = card.querySelector('.photo-blur'); if (blur) blur.remove(); }, { once: true });
+      function markImageLoaded() { card.classList.add('is-loaded'); card.classList.remove('is-loading'); }
+      img.addEventListener('load', markImageLoaded, { once: true });
+      var imageFailed = img.complete && img.naturalWidth === 0;
+      if (img.complete && !imageFailed) markImageLoaded();
       img.addEventListener('error', function () {
-        img.removeAttribute('src');
-        card.classList.add('is-fallback');
-        card.classList.remove('is-loading');
-      });
+        card.remove();
+      }, { once: true });
       var cap = document.createElement('div');
       cap.className = 'photo-caption';
-      cap.innerHTML = '<strong></strong><span></span>';
-      cap.querySelector('strong').textContent = photo.title || 'Campus photo';
-      cap.querySelector('span').textContent = (photo.house || 'HSHS') + ' · ' + (photo.likes || 0) + ' likes';
+      var title = String(photo.title || '').trim();
+      var author = photo.author || photo.username || photo.userName || '';
+      var dateValue = photo.createdAt || photo.created_at;
+      var dateLabel = dateValue ? (window.HshsMediaCards && window.HshsMediaCards.timeAgo
+        ? window.HshsMediaCards.timeAgo(dateValue) : '') : '';
+      var details = [author, dateLabel,
+        photo.likes == null ? '' : String(Number(photo.likes) || 0) + ' likes',
+        photo.views == null ? '' : String(Number(photo.views) || 0) + ' views'
+      ].filter(Boolean).join(' · ');
+      var shortCaption = String(photo.description || photo.caption || '').trim();
+      if (shortCaption.length > 90) shortCaption = shortCaption.slice(0, 87).trim() + '…';
+      cap.innerHTML = '<span class="photo-type">Photo</span>' + (title ? '<strong></strong>' : '') + (shortCaption ? '<span class="photo-short-caption"></span>' : '') + (details ? '<span class="photo-details"></span>' : '');
+      if (title) cap.querySelector('strong').textContent = title;
+      if (shortCaption) cap.querySelector('.photo-short-caption').textContent = shortCaption;
+      if (details) cap.querySelector('.photo-details').textContent = details;
       card.appendChild(img);
       var like = document.createElement('button');
       like.type = 'button'; like.className = 'like-btn'; like.setAttribute('aria-label', 'Like photo');
@@ -155,7 +171,7 @@
           if (result && result.error) throw result.error;
           like.classList.add('liked');
           photo.likes = (Number(photo.likes) || 0) + 1;
-          cap.querySelector('span').textContent = (photo.house || 'HSHS') + ' · ' + photo.likes + ' likes';
+          if (cap.querySelector('.photo-details')) cap.querySelector('.photo-details').textContent = [author, dateLabel, photo.likes + ' likes', photo.views == null ? '' : Number(photo.views) + ' views'].filter(Boolean).join(' · ');
           try { sessionStorage.setItem(likeKey, '1'); } catch (_) {}
         } catch (error) {
           console.warn('[HSHS] Could not save photo like:', error && error.message);
@@ -165,7 +181,7 @@
       card.appendChild(like);
       card.appendChild(cap);
       card.addEventListener('click', this.openModal.bind(this, photo));
-      return card;
+      return imageFailed ? null : card;
     }
     setupSearch() {
       var self = this;

@@ -17,7 +17,7 @@
   }
   function loadCss(href) {
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/' + href + '?v=261027media2';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/' + href + '?v=261124mediafix1';
     l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
   }
   function mount() {
@@ -30,10 +30,11 @@
     if (!tpl) return;
     if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl;
     loadCss('css/videos.css'); loadCss('css/vibe.css'); loadCss('css/hshs-hub.css'); loadCss('css/hshs-media-cards.css');
-    loadOnce('/js/hshs-media-cards.js?v=261027media2', 'hshs-media-cards').then(function () {
+    loadOnce('/js/hshs-media-cards.js?v=261124mediafix1', 'hshs-media-cards').then(function () {
       return loadOnce('/js/vibe-skel.js?v=261002route1', 'hshs-vibe-skel');
     }).then(function () {
-      if (typeof global.startVideos === 'function') global.startVideos();
+      return import('/js/videos.js?v=261124mediafix1');
+    }).then(function () {
       return loadOnce('/js/hshs-discover-ui.js?v=261002route1', 'hshs-discover-ui');
     }).then(function () { if (global.HshsDiscoverUi) global.HshsDiscoverUi.boot(); if (global.HshsRoute) global.HshsRoute.reveal(); });
   }

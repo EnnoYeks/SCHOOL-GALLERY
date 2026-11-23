@@ -25,6 +25,19 @@
     });
   }
 
+  function loadScriptOnce(src, id) {
+    return new Promise(function (resolve) {
+      if (id && document.getElementById(id)) { resolve(); return; }
+      var script = document.createElement('script');
+      script.src = src;
+      script.async = false;
+      if (id) script.id = id;
+      script.onload = resolve;
+      script.onerror = resolve;
+      document.head.appendChild(script);
+    });
+  }
+
   function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
       return ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' })[c];
@@ -51,11 +64,20 @@
 
   function safeTitle(post) {
     if (!post) return '';
-    var t = String(post.title || '').trim();
-    var c = String(post.caption || post.description || '').trim();
-    if (t && t !== 'Campus moment' && t !== 'HSHS moment' && t !== 'Campus photo' && t !== 'Campus video') return t;
-    if (c && c !== 'Campus moment' && c !== 'HSHS moment') return c;
-    return '';
+    var title = String(post.title || '').trim();
+    if (!title || /^(campus moment|hshs moment|campus photo|campus video)$/i.test(title)) return '';
+    return title;
+  }
+
+  function isVideoPost(post) {
+    return String(post && post.type || '').toLowerCase().indexOf('video') !== -1 ||
+      !!(post && (post.videoUrl || post.video_url));
+  }
+
+  function posterOf(post) {
+    if (!post) return '';
+    return post.thumbnailUrl || post.thumbnail_url || post.thumbnail ||
+      post.posterUrl || post.poster_url || (isVideoPost(post) ? '' : mediaOf(post)) || '';
   }
 
   function imageLoads(url) {
@@ -71,16 +93,18 @@
   }
 
   function postCard(post, index) {
-    var image = mediaOf(post);
-    var isVideo = String(post.type || '').toLowerCase().indexOf('video') !== -1 || !!post.videoUrl;
-    var media = image
-      ? '<div class="home-feature-media is-live" style="background-image:url(\'' + esc(image) + '\');animation-delay:' + ((index || 0) * 1.2) + 's"></div>'
-      : '<div class="home-feature-media home-feature-media-empty"><i class="fas fa-align-left"></i></div>';
-    return '<article class="home-feature-card is-alive" data-id="' + esc(post.id || '') + '">' + media +
-      '<div class="home-feature-overlay"></div><div class="home-feature-body"><span class="home-feature-type"><i class="fas ' +
-      (isVideo ? 'fa-video' : 'fa-image') + '"></i> ' + esc(isVideo ? 'Vibe' : 'Photo') + '</span><h3>' +
-      esc(safeTitle(post)) + '</h3><div class="home-feature-meta"><span>' +
-      formatCount(post.likes) + ' likes</span><span>' + formatCount(post.views) + ' views</span></div></div></article>';
+    var isVideo = isVideoPost(post);
+    var image = post.__hshsPreview || posterOf(post);
+    var title = safeTitle(post);
+    var likes = post.likes == null ? '' : formatCount(post.likes) + ' likes';
+    var views = post.views == null ? '' : formatCount(post.views) + ' views';
+    var counts = [likes, views].filter(Boolean).join(' · ');
+    return '<article class="home-feature-card is-alive" data-id="' + esc(post.id || '') + '">' +
+      '<div class="home-feature-media" role="img" aria-label="' + esc(title || (isVideo ? 'Video' : 'Photo')) +
+      '" style="background-image:url(\'' + esc(image) + '\');animation-delay:' + ((index || 0) * 1.2) + 's"></div>' +
+      '<div class="home-feature-overlay"></div><div class="home-feature-body"><span class="home-feature-type">' +
+      esc(isVideo ? 'Vibe' : 'Photo') + '</span>' + (title ? '<h3>' + esc(title) + '</h3>' : '') +
+      (counts ? '<div class="home-feature-meta">' + esc(counts) + '</div>' : '') + '</div></article>';
   }
 
   function trendCard(post, rank) {
@@ -147,9 +171,13 @@
       if (!key || seen[key]) return false;
       seen[key] = true;
       if (url) {
-        p.image = p.image || url;
-        p.imageUrl = p.imageUrl || url;
-        p.thumbnailUrl = p.thumbnailUrl || url;
+        if (isVideoPost(p)) {
+          p.videoUrl = p.videoUrl || p.video_url || url;
+        } else {
+          p.image = p.image || url;
+          p.imageUrl = p.imageUrl || url;
+          p.thumbnailUrl = p.thumbnailUrl || url;
+        }
       }
       return !!(url || p.description);
     });
@@ -160,7 +188,28 @@
   }
 
   function withMedia(list) {
-    return (list || []).filter(function (p) { return !!mediaOf(p); });
+    return (list || []).filter(function (p) { return !!(posterOf(p) || mediaOf(p)); });
+  }
+
+  function previewReady(post) {
+    var poster = posterOf(post);
+    if (poster) return imageLoads(poster).then(function (ok) {
+      if (ok) post.__hshsPreview = poster;
+      return ok ? post : null;
+    });
+    var videoUrl = post.videoUrl || post.video_url || (isVideoPost(post) ? mediaOf(post) : '');
+    if (!videoUrl || !global.HshsMediaCards || typeof global.HshsMediaCards.capturePoster !== 'function') {
+      return Promise.resolve(null);
+    }
+    return new Promise(function (resolve) {
+      global.HshsMediaCards.capturePoster(videoUrl, function (captured) {
+        if (!captured) { resolve(null); return; }
+        imageLoads(captured).then(function (ok) {
+          if (ok) post.__hshsPreview = captured;
+          resolve(ok ? post : null);
+        });
+      }, post.id);
+    });
   }
 
   function animateHeroPhotos(posts) {
@@ -239,9 +288,7 @@
       return;
     }
     var candidates = withMedia(loaded.posts || []);
-    var checks = await Promise.all(candidates.map(function (p) {
-      return imageLoads(mediaOf(p)).then(function (ok) { return ok ? p : null; });
-    }));
+    var checks = await Promise.all(candidates.map(previewReady));
     if (token !== renderToken) return;
     var mediaPosts = checks.filter(Boolean);
     if (!mediaPosts.length) {
@@ -295,10 +342,11 @@
     }
     document.documentElement.setAttribute('data-hshs-page', 'home');
     if (global.HshsPaint) global.HshsPaint.now();
-    loadOnce('/css/home.css?v=261123fix2', 'hshs-home-css');
-    loadOnce('/css/hshs-home-polish.css?v=261123fix2', 'hshs-home-polish-css');
-    loadOnce('/css/hshs-vibe-home.css?v=261123fix2', 'hshs-vibe-home-css');
-    loadOnce('/css/hshs-glass.css?v=261123fix2', 'hshs-glass-css');
+    loadOnce('/css/home.css?v=261124mediafix1', 'hshs-home-css');
+    loadOnce('/css/hshs-home-polish.css?v=261124mediafix1', 'hshs-home-polish-css');
+    loadOnce('/css/hshs-vibe-home.css?v=261124mediafix1', 'hshs-vibe-home-css');
+    loadOnce('/css/hshs-glass.css?v=261124mediafix1', 'hshs-glass-css');
+    loadOnce('/css/hshs-media-cards.css?v=261124mediafix1', 'hshs-media-cards-css');
     var tpl = global.HshsTemplates && global.HshsTemplates.home;
     if (tpl && global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl);
     else if (tpl) root.innerHTML = tpl;
@@ -306,6 +354,7 @@
     if (grid && !grid.querySelector('.home-feature-card') && !grid.querySelector('.home-skeleton')) {
       grid.innerHTML = '<div class="home-skeleton" aria-hidden="true"></div><div class="home-skeleton" aria-hidden="true"></div><div class="home-skeleton" aria-hidden="true"></div>';
     }
+    await loadScriptOnce('/js/hshs-media-cards.js?v=261124mediafix1', 'hshs-media-cards');
     renderData();
     global.__hshsHomeMounted = true;
     if (typeof window.__hshsRevealPage === 'function') window.__hshsRevealPage();

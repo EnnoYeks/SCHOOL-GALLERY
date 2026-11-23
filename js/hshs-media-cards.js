@@ -39,8 +39,10 @@
     if (posterCache.has(key)) { cb(posterCache.get(key)); return; }
     var video = document.createElement('video');
     var done = false;
+    var timeout = setTimeout(function () { finish(''); }, 10000);
     function finish(value) {
       if (done) return; done = true;
+      clearTimeout(timeout);
       if (value) posterCache.set(key, value);
       video.pause(); video.removeAttribute('src'); video.load();
       cb(value || '');

@@ -25,7 +25,7 @@
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = '/' + href + '?v=261027media2';
+    l.href = '/' + href + '?v=261124mediafix1';
     l.setAttribute('data-hshs-css', href);
     document.head.appendChild(l);
   }
@@ -51,8 +51,8 @@
     loadCss('css/photos-campus.css');
     loadCss('css/hshs-media-cards.css');
     if (!mountTemplate()) return;
-    await loadOnce('/js/hshs-media-cards.js?v=261027media2', 'hshs-media-cards');
-    await loadOnce('/js/photos.js?v=261027media2', 'hshs-leg-photos');
+    await loadOnce('/js/hshs-media-cards.js?v=261124mediafix1', 'hshs-media-cards');
+    await loadOnce('/js/photos.js?v=261124mediafix1', 'hshs-leg-photos');
     try {
       if (typeof global.startPhotos === 'function') global.startPhotos();
     } catch (e) {
