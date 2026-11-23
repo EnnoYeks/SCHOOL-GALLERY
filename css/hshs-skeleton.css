@@ -220,24 +220,23 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
   .mobile-tabbar { display: none !important; }
 }
 
-/* Ensure home featured skeletons stay visible and styled even if other CSS loads late or overrides */
-.home-skeleton,
-.home-featured-grid .home-skeleton {
-  display: block !important;
-  min-height: 230px !important;
-  border-radius: 22px !important;
-  border: 1px solid rgba(255,255,255,.07) !important;
-  background: linear-gradient(100deg, rgba(255,255,255,.04) 30%, rgba(255,255,255,.08) 50%, rgba(255,255,255,.04) 70%) !important;
-  background-size: 220% 100% !important;
-  animation: homeShimmer 1.7s infinite !important;
+/* Home featured skeletons — higher specificity, no !important needed */
+.home-page .home-featured-grid > .home-skeleton {
+  display: block;
+  min-height: 230px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0.04) 30%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 70%);
+  background-size: 220% 100%;
+  animation: homeShimmer 1.7s infinite;
   position: relative;
   overflow: hidden;
 }
-.home-skeleton::after {
+.home-page .home-featured-grid > .home-skeleton::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.12) 50%, transparent 80%);
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.12) 50%, transparent 80%);
   transform: translateX(-120%);
   animation: hshs-skeleton-shimmer 1.35s ease-in-out infinite;
   pointer-events: none;

@@ -83,7 +83,7 @@ body.dark-mode .logo { -webkit-text-fill-color: #f4efe3 !important; color: #f4ef
 }
 .home-featured-grid, .masonry-grid, .gallery-feed, .photos-grid, .videos-grid, .spotlight-grid, .clips-grid { gap: var(--space-3) !important; }
 .home-feature-media, .photo-card img, .gallery-card img, .media-card img, .spotlight-card img, .clip-card img, .video-card video { aspect-ratio: 4/3; object-fit: cover; }
-.loading-skeleton, .home-skeleton { border-radius: var(--radius-md); background: linear-gradient(90deg,#efe6d4 0%,#fffdf8 45%,#efe6d4 100%) !important; background-size: 220% 100% !important; }
+.loading-skeleton { border-radius: var(--radius-md); background: linear-gradient(90deg,#efe6d4 0%,#fffdf8 45%,#efe6d4 100%); background-size: 220% 100%; }
 .home-hero { min-height: auto !important; padding: 56px 0 36px !important; }
 .home-kicker { background: transparent !important; border: 0 !important; color: var(--hshs-gold) !important; letter-spacing: .18em !important; padding: 0 !important; }
 .home-title { font-size: clamp(2.1rem,4.5vw,3.4rem) !important; color: var(--text-primary) !important; line-height: 1.15 !important; }
