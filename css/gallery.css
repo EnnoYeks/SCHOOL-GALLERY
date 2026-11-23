@@ -26,7 +26,7 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
 .category-filter{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
 .category-filter::-webkit-scrollbar{display:none}
 
-/* Masonry container: explicit height set by JS; cards are absolute */
+/* Feed container. Cards flow in a grid; height is not set by JS. */
 .gallery-feed{
   position:relative;
   width:100%;
@@ -350,4 +350,179 @@ html[data-hshs-page="gallery"] #galleryFeed:empty::after{ content:none !importan
   .category-btn,
   .gallery-notes,
   .gallery-notes-panel{animation:none;transition:none}
+}
+
+
+/* Pass 1 feed cards. Later rules win over the old masonry overlay above. */
+.gallery-page .gallery-feed{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:14px;
+  height:auto;
+  min-height:0;
+  position:relative;
+}
+@media (min-width:720px){
+  .gallery-page .gallery-feed{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+.gallery-page .gallery-card{
+  position:static;
+  left:auto;
+  top:auto;
+  width:auto;
+  height:auto;
+  max-width:none;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  border-radius:22px;
+  background:#0d1d44;
+  border:1px solid rgba(255,255,255,.08);
+  color:#e8eefc;
+}
+.gallery-page .hshs-feed-author{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 12px 10px;
+}
+.gallery-page .hshs-feed-avatar{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  overflow:hidden;
+  flex:none;
+  display:grid;
+  place-items:center;
+  background:#17315f;
+  color:#f8fafc;
+  font-size:.72rem;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+.gallery-page .hshs-feed-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.gallery-page .hshs-feed-who{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+}
+.gallery-page .hshs-feed-who strong{
+  font-size:.92rem;
+  line-height:1.15;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.gallery-page .hshs-feed-who small{
+  color:#9fb0d0;
+  font-size:.72rem;
+  font-weight:700;
+  text-transform:capitalize;
+}
+.gallery-page .hshs-feed-media{
+  position:relative;
+  width:100%;
+  aspect-ratio:4/5;
+  background:#071027;
+  overflow:hidden;
+}
+.gallery-page .hshs-feed-media .gallery-media{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  aspect-ratio:auto;
+  background:#0a162e;
+}
+.gallery-page .hshs-feed-caption{
+  margin:0;
+  padding:10px 12px 0;
+  color:#e8eefc;
+  font-size:.9rem;
+  line-height:1.35;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.gallery-page .hshs-feed-actions{
+  min-height:44px;
+  padding:6px 8px 8px;
+  gap:4px;
+  align-items:center;
+  justify-content:flex-start;
+  border-top:0;
+}
+.gallery-page .hshs-feed-actions button{
+  flex:0 0 auto;
+  height:36px;
+  padding:0 8px;
+  justify-content:center;
+}
+.gallery-page .hshs-feed-time{
+  margin-left:auto;
+  color:#93a4c4;
+  font-size:.72rem;
+  font-weight:700;
+  white-space:nowrap;
+}
+.gallery-page .gallery-skel{
+  position:static;
+  width:auto;
+  height:auto;
+  aspect-ratio:auto;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  border-radius:22px;
+  overflow:hidden;
+  background:#0d1d44;
+  border:1px solid rgba(255,255,255,.06);
+}
+.gallery-page .gallery-skel-author{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+}
+.gallery-page .gallery-skel-author i{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:rgba(255,255,255,.08);
+}
+.gallery-page .gallery-skel-author b{
+  display:block;
+  width:42%;
+  height:10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+}
+.gallery-page .gallery-skel-media{
+  display:block;
+  aspect-ratio:4/5;
+  background:rgba(255,255,255,.05);
+}
+.gallery-page .gallery-skel-acts{
+  display:flex;
+  gap:12px;
+  padding:12px;
+}
+.gallery-page .gallery-skel-acts i{
+  width:22px;
+  height:22px;
+  border-radius:8px;
+  background:rgba(255,255,255,.08);
+}
+@media print{
+  .gallery-page .gallery-feed{display:block}
+  .gallery-page .gallery-card{width:46%;display:inline-block;vertical-align:top;margin:0 2% 16px 0}
 }

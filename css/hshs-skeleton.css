@@ -80,8 +80,8 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
 .hshs-sk-feat{min-height:210px;border-radius:24px;background:rgba(13,29,68,.9);border:1px solid rgba(255,255,255,.08)}
 .hshs-sk-spot{min-height:180px;border-radius:18px;background:rgba(13,29,68,.9);border:1px solid rgba(255,255,255,.08)}
 .hshs-sk-mem{flex:0 0 190px;aspect-ratio:4/5;border-radius:18px;background:rgba(13,29,68,.9);border:1px solid rgba(255,255,255,.08)}
-.gallery-skel{display:flex;flex-direction:column;aspect-ratio:auto;min-height:0}
-.gallery-skel-media{display:block;aspect-ratio:4/5;background:rgba(255,255,255,.05);position:relative;overflow:hidden}
+.gallery-skel{display:flex;flex-direction:column;aspect-ratio:auto;min-height:0;position:static;width:auto;height:auto}
+.gallery-skel-author{display:flex;align-items:center;gap:10px;padding:12px}.gallery-skel-author i{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);display:block}.gallery-skel-author b{display:block;width:42%;height:10px;border-radius:999px;background:rgba(255,255,255,.08)}.gallery-skel-media{display:block;aspect-ratio:4/5;background:rgba(255,255,255,.05);position:relative;overflow:hidden}
 .gallery-skel-copy{padding:10px 12px 6px;display:grid;gap:8px}
 .gallery-skel-copy b,.gallery-skel-copy em{display:block;height:10px;width:58%;border-radius:999px;background:rgba(255,255,255,.08);position:relative;overflow:hidden}
 .gallery-skel-copy em{width:80%;height:8px}

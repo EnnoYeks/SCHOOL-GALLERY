@@ -21,11 +21,14 @@
     gap: 16px !important;
   }
 
-  /* Gallery uses JS masonry (absolute). Do not force CSS grid on it. */
+  /* Gallery feed is a calm card grid, not absolute masonry. */
   .gallery-feed {
-    display: block !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     position: relative;
     width: 100%;
+    height: auto !important;
+    gap: 16px;
   }
 
   .home-feature-card,

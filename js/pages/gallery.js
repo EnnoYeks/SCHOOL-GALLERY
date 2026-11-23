@@ -5,12 +5,7 @@
 
   var PAGE = 'gallery';
   var PAGE_SIZE = 48;
-  var GAP = 14;
-  var MIN_COL = 180;
-  var MAX_COL_W = 340;
-  var MAX_COLS = 5;
-  var ACTIONS_H = 40;
-  var COPY_PAD = 0;
+  var CSS_VER = '261124card1';
 
   var state = {
     type: 'all',
@@ -46,7 +41,41 @@
   function date(v) {
     if (global.Utils && Utils.formatDate) return Utils.formatDate(v);
     var d = v && v.toDate ? v.toDate() : new Date(v);
-    return isNaN(d) ? 'Recently' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    return isNaN(d) ? '' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+  function relTime(v) {
+    var d = v && v.toDate ? v.toDate() : new Date(v);
+    if (isNaN(d)) return '';
+    var sec = Math.max(0, (Date.now() - d.getTime()) / 1000);
+    if (sec < 45) return 'Just now';
+    if (sec < 3600) return Math.max(1, Math.floor(sec / 60)) + ' min ago';
+    if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+    if (sec < 86400 * 7) return Math.floor(sec / 86400) + 'd ago';
+    return date(v);
+  }
+  var BAD_TITLE = { 'campus moment': 1, 'hshs moment': 1, 'campus photo': 1, 'campus video': 1 };
+  function cleanLabel(value) {
+    var s = String(value || '').trim();
+    if (!s || BAD_TITLE[s.toLowerCase()]) return '';
+    if (/\.(jpe?g|png|webp|mp4|webm)$/i.test(s)) return '';
+    return s;
+  }
+  function safeTitle(post) {
+    if (!post) return '';
+    return cleanLabel(post.title) || cleanLabel(post.caption) || cleanLabel(post.description);
+  }
+  function safeAuthor(post) {
+    var a = String(post.author || post.username || post.userName || post.author_name || post.authorName || '').trim();
+    if (!a || a.toLowerCase() === 'campus student') return '';
+    return a;
+  }
+  function initials(name) {
+    var parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '';
+    return (parts[0].charAt(0) + (parts[1] ? parts[1].charAt(0) : '')).toUpperCase();
+  }
+  function avatarUrl(post) {
+    return post.avatar || post.avatarUrl || post.avatar_url || post.authorAvatar || post.author_avatar || post.photoURL || '';
   }
   function kindOf(p) {
     var t = String(p.type || p.media_type || '').toLowerCase();
@@ -73,7 +102,7 @@
       if (document.querySelector('link[data-hshs-gallery-css="' + href + '"]')) return;
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = base() + href + '?v=261104fine1';
+      l.href = base() + href + '?v=' + CSS_VER;
       l.dataset.hshsGalleryCss = href;
       document.head.appendChild(l);
     });
@@ -85,10 +114,13 @@
     item.type = (fallbackType === 'video' || kindOf(item) === 'video') ? 'video' : 'photo';
     var rawTitle = String(item.title || '');
     if (item.provider === 'cloudflare-r2' && !item.description && !item.author_id && !item.authorId && /\.(jpe?g|png|webp|mp4|webm)$/i.test(rawTitle)) return null;
-    item.title = item.title || item.caption || item.description || 'HSHS moment';
-    if (/\.(jpe?g|png|webp|mp4|webm)$/i.test(String(item.title))) item.title = 'HSHS moment';
-    item.author = item.author || item.username || item.userName || 'Campus student';
-    item.category = String(item.category || item.tag || 'events').toLowerCase();
+    item._title = safeTitle(item);
+    item.title = item._title;
+    item._author = safeAuthor(item);
+    item.author = item._author;
+    var rawCat = String(item.category || item.tag || item.className || item.class_name || '').trim();
+    item._subtitle = rawCat && rawCat.toLowerCase() !== 'all' ? rawCat : '';
+    item.category = rawCat.toLowerCase();
     item.likes = Number(item.likes || item.likesCount || 0);
     item.comments = Number(item.comments || item.commentsCount || 0);
     item.saves = Number(item.saves || 0);
@@ -126,64 +158,39 @@
     });
   }
 
-  function columnCount(width) {
-    var n = Math.floor((width + GAP) / (MIN_COL + GAP));
-    return Math.max(1, Math.min(MAX_COLS, n));
-  }
-
-  function layout(items, containerWidth) {
-    var cols = columnCount(containerWidth);
-    var colW = (containerWidth - GAP * (cols - 1)) / cols;
-    // Cap column width so few items don't become huge on wide screens
-    if (colW > MAX_COL_W) {
-      colW = MAX_COL_W;
-      // Recalculate how many columns fit at the capped width
-      var fit = Math.floor((containerWidth + GAP) / (colW + GAP));
-      cols = Math.max(1, Math.min(MAX_COLS, fit, items.length || 1));
-      colW = Math.min(MAX_COL_W, (containerWidth - GAP * (cols - 1)) / cols);
-    }
-    var bottoms = Array(cols);
-    for (var c = 0; c < cols; c++) bottoms[c] = 0;
-
-    var placed = items.map(function (item) {
-      var col = 0;
-      for (var i = 1; i < cols; i++) {
-        if (bottoms[i] < bottoms[col]) col = i;
-      }
-      var ratio = item.w > 0 ? item.h / item.w : 1.25;
-      var imgH = colW * ratio;
-      var height = imgH + ACTIONS_H + COPY_PAD;
-      var top = bottoms[col];
-      bottoms[col] += height + GAP;
-      return {
-        item: item,
-        left: col * (colW + GAP),
-        top: top,
-        width: colW,
-        height: height,
-        imgH: imgH
-      };
-    });
-
-    var used = items.length ? Math.max.apply(null, bottoms) - GAP : 0;
-    return { placed: placed, height: Math.max(0, used), colW: colW, cols: cols };
-  }
-
-  function renderCardEl(placed, index) {
-    var p = placed.item;
+  function renderCardEl(p, index) {
     var isVideo = p.type === 'video';
     var fig = document.createElement('article');
-    fig.className = 'gallery-card';
+    fig.className = 'gallery-card hshs-feed-card';
     fig.dataset.id = p.id != null ? String(p.id) : '';
     fig.dataset.index = String(index);
-    fig.style.left = placed.left + 'px';
-    fig.style.top = placed.top + 'px';
-    fig.style.width = placed.width + 'px';
+
+    if (p._author) {
+      var head = document.createElement('header');
+      head.className = 'hshs-feed-author';
+      var av = document.createElement('span');
+      av.className = 'hshs-feed-avatar';
+      var face = avatarUrl(p);
+      if (face) {
+        var faceImg = document.createElement('img');
+        faceImg.src = face;
+        faceImg.alt = '';
+        faceImg.referrerPolicy = 'no-referrer';
+        av.appendChild(faceImg);
+      } else {
+        av.textContent = initials(p._author);
+      }
+      var who = document.createElement('span');
+      who.className = 'hshs-feed-who';
+      who.innerHTML = '<strong>' + esc(p._author) + '</strong>' + (p._subtitle ? '<small>' + esc(p._subtitle) + '</small>' : '');
+      head.appendChild(av);
+      head.appendChild(who);
+      fig.appendChild(head);
+    }
 
     var wrap = document.createElement('div');
-    wrap.className = 'gallery-media-wrap';
+    wrap.className = 'hshs-feed-media';
     wrap.dataset.open = String(index);
-    wrap.style.aspectRatio = p.w + ' / ' + p.h;
 
     var media;
     if (isVideo && p._video) {
@@ -194,58 +201,38 @@
       media.muted = true;
       media.playsInline = true;
       media.preload = 'metadata';
-      media.style.aspectRatio = p.w + ' / ' + p.h;
     } else {
       media = document.createElement('img');
       media.className = 'gallery-media';
       media.src = p._media;
-      media.alt = p.title || '';
+      media.alt = p._title || '';
       media.loading = index < 4 ? 'eager' : 'lazy';
       media.decoding = 'async';
       media.referrerPolicy = 'no-referrer';
-      media.width = p.w;
-      media.height = p.h;
-      media.style.aspectRatio = p.w + ' / ' + p.h;
       media.onerror = function () {
         this.onerror = null;
-        var key = mediaKeyOf(p);
-        state.failed[key] = 1;
+        state.failed[mediaKeyOf(p)] = 1;
         paint();
       };
     }
     wrap.appendChild(media);
-
-    var vig = document.createElement('div');
-    vig.className = 'gallery-vignette';
-    wrap.appendChild(vig);
-
-    var typeSpan = document.createElement('span');
-    typeSpan.className = 'gallery-type';
-    typeSpan.innerHTML = '<i class="fas ' + (isVideo ? 'fa-play' : 'fa-image') + '"></i> ' + (isVideo ? 'Video' : 'Photo');
-    wrap.appendChild(typeSpan);
-
-    var catSpan = document.createElement('span');
-    catSpan.className = 'gallery-category';
-    catSpan.textContent = p.category || '';
-    wrap.appendChild(catSpan);
-
-    var copy = document.createElement('div');
-    copy.className = 'gallery-card-copy';
-    copy.innerHTML =
-      '<div class="gallery-author"><span>' + esc(p.author) + '</span><time>' + esc(date(p.createdAt)) + '</time></div>' +
-      '<h2>' + esc(p.title) + '</h2>' +
-      (p.description ? '<p>' + esc(String(p.description).slice(0, 120)) + '</p>' : '');
-    wrap.appendChild(copy);
-
     fig.appendChild(wrap);
 
+    if (p._title) {
+      var cap = document.createElement('p');
+      cap.className = 'hshs-feed-caption';
+      cap.textContent = p._title;
+      fig.appendChild(cap);
+    }
+
     var actions = document.createElement('div');
-    actions.className = 'gallery-actions';
+    actions.className = 'gallery-actions hshs-feed-actions';
     actions.innerHTML =
       '<button type="button" data-action="like" aria-label="Like" class="' + (state.liked[p.id] ? 'is-on' : '') + '"><i class="' + (state.liked[p.id] ? 'fas' : 'far') + ' fa-heart"></i><span>' + count(p.likes) + '</span></button>' +
       '<button type="button" data-action="comment" aria-label="Comment"><i class="far fa-comment"></i><span>' + count(p.comments) + '</span></button>' +
-      '<button type="button" data-action="save" aria-label="Save" class="' + (state.saved[p.id] ? 'is-on' : '') + '"><i class="' + (state.saved[p.id] ? 'fas' : 'far') + ' fa-bookmark"></i></button>' +
-      '<button type="button" data-action="share" aria-label="Share"><i class="fas fa-share"></i></button>';
+      '<button type="button" data-action="share" aria-label="Share"><i class="fas fa-share"></i><span>' + count(p.shares) + '</span></button>' +
+      '<time class="hshs-feed-time">' + esc(relTime(p.createdAt)) + '</time>' +
+      '<button type="button" data-action="save" aria-label="Save" class="' + (state.saved[p.id] ? 'is-on' : '') + '"><i class="' + (state.saved[p.id] ? 'fas' : 'far') + ' fa-bookmark"></i></button>';
     fig.appendChild(actions);
 
     return fig;
@@ -270,13 +257,10 @@
       return;
     }
 
-    var width = feed.clientWidth || (feed.parentElement && feed.parentElement.clientWidth) || 320;
-    var result = layout(state.items, width);
-    feed.style.height = result.height + 'px';
+    feed.style.height = '';
     feed.replaceChildren();
-
-    for (var i = 0; i < result.placed.length; i++) {
-      feed.appendChild(renderCardEl(result.placed[i], i));
+    for (var i = 0; i < state.items.length; i++) {
+      feed.appendChild(renderCardEl(state.items[i], i));
     }
   }
 
@@ -456,7 +440,7 @@
       var shared = false;
       try {
         if (navigator.share) {
-          await navigator.share({ title: item.title || 'HSHS moment', text: 'A campus moment on HSHS World', url: url });
+          await navigator.share({ title: item._title || item.title || 'HSHS World', text: 'Shared from HSHS World', url: url });
           shared = true;
         } else if (navigator.clipboard) {
           await navigator.clipboard.writeText(url);

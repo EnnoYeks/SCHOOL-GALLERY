@@ -270,14 +270,21 @@
   }
 
   .home-feature-card,
-  .photo-card,
-  .gallery-card,
-  .gallery-skel {
+  .photo-card {
     min-width: 0 !important;
     width: 100% !important;
     max-width: 280px;
     height: auto !important;
     aspect-ratio: 4 / 5;
+  }
+
+  .gallery-card,
+  .gallery-skel {
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none;
+    height: auto !important;
+    aspect-ratio: auto;
   }
 
   .home-stats {
