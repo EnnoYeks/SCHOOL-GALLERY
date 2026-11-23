@@ -121,9 +121,9 @@
     var rawCat = String(item.category || item.tag || item.className || item.class_name || '').trim();
     item._subtitle = rawCat && rawCat.toLowerCase() !== 'all' ? rawCat : '';
     item.category = rawCat.toLowerCase();
-    item._hasLikes = item.hasLikesCount === true || item.likes != null || item.likesCount != null;
-    item._hasComments = item.hasCommentsCount === true || item.comments != null || item.commentsCount != null;
-    item._hasShares = item.hasSharesCount === true || item.shares != null || item.sharesCount != null;
+    item._hasLikes = item.hasLikesCount != null ? item.hasLikesCount === true : item.likes != null || item.likesCount != null;
+    item._hasComments = item.hasCommentsCount != null ? item.hasCommentsCount === true : item.comments != null || item.commentsCount != null;
+    item._hasShares = item.hasSharesCount != null ? item.hasSharesCount === true : item.shares != null || item.sharesCount != null;
     item.likes = Number(item.likes != null ? item.likes : item.likesCount || 0);
     item.comments = Number(item.comments != null ? item.comments : item.commentsCount || 0);
     item.saves = Number(item.saves || 0);
@@ -422,8 +422,10 @@
       if (btn) {
         btn.classList.toggle('is-on', liked);
         setIcon(btn, liked ? 'fas fa-heart' : 'far fa-heart');
-        var likeCount = btn.querySelector('span');
-        if (likeCount) likeCount.textContent = count(item.likes);
+        var likeCount = btn.querySelector('.gallery-action-count');
+        if (likeCount && item._hasLikes) likeCount.textContent = count(item.likes);
+        var likeSymbol = btn.querySelector('.gallery-action-symbol');
+        if (likeSymbol) likeSymbol.textContent = liked ? '♥' : '♡';
         pop(btn);
       }
       return;
