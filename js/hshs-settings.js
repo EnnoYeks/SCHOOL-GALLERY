@@ -332,13 +332,16 @@
     }
     if (window.HshsStorage && window.HshsStorage.upload) {
       window.HshsStorage.upload(file, { kind: 'photo' }).then(function (res) {
-        applyUrl((res && res.url) || '');
-      }).catch(function () {
-        readLocal(file, applyUrl);
+        if (!res || res.provider !== 'cloudflare-r2' || !/^https:\/\//i.test(res.url || '')) {
+          throw new Error('The photo was not uploaded to Cloudflare R2.');
+        }
+        applyUrl(res.url);
+      }).catch(function (err) {
+        status('setAccountMsg', (err && err.message) || 'Photo upload failed. Please try again.', false);
       });
       return;
     }
-    readLocal(file, applyUrl);
+    status('setAccountMsg', 'Cloudflare R2 is unavailable. The photo was not saved.', false);
   }
 
   function readLocal(file, cb) {
