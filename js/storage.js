@@ -45,13 +45,13 @@
 
   function mediaUrl(item) {
     if (!item) return "";
-    var direct = item.image || item.imageUrl || item.thumbnailUrl || item.videoUrl || "";
+    var direct = item.image || item.imageUrl || item.image_url || item.thumbnailUrl || item.thumbnail_url || item.videoUrl || item.video_url || item.mediaUrl || item.media_url || "";
     if (/^(blob:|data:)/i.test(String(direct || ""))) return "";
     if (direct && /^https?:\/\//i.test(direct)) return direct;
-    if (item.mediaKey && (!item.mediaProvider || item.mediaProvider === "cloudflare-r2")) {
-      return publicUrl(item.mediaKey);
-    }
-    if (direct && /^\/(assets|images)\//i.test(direct)) return direct;
+    var key = item.mediaKey || item.media_key || "";
+    var provider = item.mediaProvider || item.media_provider;
+    if (key && (!provider || provider === "cloudflare-r2")) return publicUrl(key);
+    if (direct && /^\/?(assets|images|media)\//i.test(direct)) return direct;
     if (direct && !/^https?:\/\//i.test(direct)) return publicUrl(direct);
     return "";
   }
