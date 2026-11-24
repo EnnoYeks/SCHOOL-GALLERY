@@ -45,11 +45,17 @@ export default {
     // Existing public routes
     if (url.pathname === "/list" && request.method === "GET") {
       if (!bucket) return json({ error: "No R2 binding" }, 500);
-      const limit = Math.min(100, Number(url.searchParams.get("limit") || 40));
+      const requestedLimit = Number(url.searchParams.get("limit") || 100);
+      const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(100, Math.floor(requestedLimit))) : 100;
       const prefix = url.searchParams.get("prefix") || undefined;
-      const listed = await bucket.list({ limit, prefix });
+      const cursor = url.searchParams.get("cursor") || undefined;
+      const listed = await bucket.list({ limit, prefix, cursor });
       const objects = (listed.objects || []).map(o => ({ key: o.key, size: o.size, uploaded: o.uploaded }));
-      return json({ objects });
+      return json({
+        objects,
+        truncated: !!listed.truncated,
+        cursor: listed.truncated ? (listed.cursor || null) : null
+      });
     }
 
     if ((url.pathname === "/sign" || url.pathname === "/sign/") && request.method === "POST") {
