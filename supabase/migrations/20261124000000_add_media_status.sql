@@ -12,19 +12,19 @@ alter table public.users
 
 do $$
 begin
-  if not exists (select 1 from pg_constraint where conname = 'photos_media_status_check') then
+  if not exists (select 1 from pg_constraint where conname = 'photos_media_status_check' and conrelid = 'public.photos'::regclass) then
     alter table public.photos add constraint photos_media_status_check
       check (media_status in ('available', 'missing')) not valid;
   end if;
-  if not exists (select 1 from pg_constraint where conname = 'posts_media_status_check') then
+  if not exists (select 1 from pg_constraint where conname = 'posts_media_status_check' and conrelid = 'public.posts'::regclass) then
     alter table public.posts add constraint posts_media_status_check
       check (media_status in ('available', 'missing')) not valid;
   end if;
-  if not exists (select 1 from pg_constraint where conname = 'videos_media_status_check') then
+  if not exists (select 1 from pg_constraint where conname = 'videos_media_status_check' and conrelid = 'public.videos'::regclass) then
     alter table public.videos add constraint videos_media_status_check
       check (media_status in ('available', 'missing')) not valid;
   end if;
-  if not exists (select 1 from pg_constraint where conname = 'users_media_status_check') then
+  if not exists (select 1 from pg_constraint where conname = 'users_media_status_check' and conrelid = 'public.users'::regclass) then
     alter table public.users add constraint users_media_status_check
       check (media_status in ('available', 'missing')) not valid;
   end if;
