@@ -21,13 +21,13 @@ function validateMediaInput(data) {
         if (/^(blob:|data:)/i.test(ref)) {
             throw new Error(field + " must be uploaded to Cloudflare R2 before it can be saved.");
         }
-        if (/^https?:\\/\\//i.test(ref)) {
+        if (/^https?:\/\//i.test(ref)) {
             if (!ref.startsWith(HSHS_R2_PUBLIC_BASE + "/")) {
                 throw new Error(field + " must use the HSHS Cloudflare R2 public URL.");
             }
             continue;
         }
-        if (/^\\/assets\\/[a-z0-9._/-]+$/i.test(ref) && !ref.includes("..")) continue;
+        if (/^\/assets\/[a-z0-9._/-]+$/i.test(ref) && !ref.includes("..")) continue;
         throw new Error(field + " must be an R2 public URL or a local /assets/ path.");
     }
     const key = String(data.mediaKey || data.media_key || "").trim();
