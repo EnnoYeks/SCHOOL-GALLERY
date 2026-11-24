@@ -98,7 +98,8 @@
     return '';
   }
   function videoUrl(p) {
-    return p.videoUrl || p.video_url || (kindOf(p) === 'video' ? (p.url || p.src || p.imageUrl || '') : '');
+    var src = p.videoUrl || p.video_url || (kindOf(p) === 'video' ? (p.url || p.src || p.imageUrl || '') : '');
+    return /^(blob:|data:)/i.test(String(src || '')) ? '' : src;
   }
   function loadCss() {
     ['css/hshs-wave.css', 'css/gallery.css'].forEach(function (href) {
