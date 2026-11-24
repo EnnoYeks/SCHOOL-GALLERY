@@ -226,6 +226,7 @@
     var cursor = "";
     var seenCursors = new Set();
     var all = [];
+    var complete = false;
     try {
       for (var page = 0; page < maxPages; page++) {
         var url = base + "/list?limit=" + encodeURIComponent(limit);
@@ -238,19 +239,26 @@
         all = all.concat(raw);
         if (data.truncated === true) {
           if (!data.cursor || seenCursors.has(data.cursor)) {
-            throw new Error("R2 listing returned an invalid or repeated cursor; inventory is incomplete");
+            console.warn("[HshsStorage] R2 listing stopped: invalid or repeated cursor; results are partial.");
+            break;
           }
           seenCursors.add(data.cursor);
           cursor = data.cursor;
           continue;
         }
-        if (data.truncated === false || raw.length < limit) break;
-        throw new Error("R2 Worker does not expose pagination metadata. Deploy the updated Worker before relying on a complete listing.");
+        if (data.truncated === false || raw.length < limit) {
+          complete = true;
+          break;
+        }
+        // Older deployed Workers omit pagination metadata. Keep UI fallbacks
+        // usable, but mark the result partial; the audit script rejects it.
+        console.warn("[HshsStorage] R2 listing is partial until the updated Worker is deployed.");
+        break;
       }
       if (all.length && all.length >= limit * maxPages) {
-        throw new Error("R2 listing exceeded the page safety limit; inventory is incomplete");
+        console.warn("[HshsStorage] R2 listing reached its page safety limit; results are partial.");
       }
-      return all.map(function (item) {
+      var result = all.map(function (item) {
         var key = typeof item === "string" ? item : (item.key || item.name || "");
         if (isTestKey(key)) return null;
         var type = isVideoKey(key) ? "video" : "photo";
@@ -270,6 +278,8 @@
           provider: "cloudflare-r2"
         };
       }).filter(function (o) { return o && o.key; });
+      result.complete = complete;
+      return result;
     } catch (err) {
       console.warn("[HshsStorage] R2 list failed:", err && err.message);
       throw err;
