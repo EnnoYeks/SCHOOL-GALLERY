@@ -30,3 +30,8 @@ build/
 artifacts/
 .tmp/
 *.local
+
+# Local media audit outputs can contain private object keys and database backups.
+/audit/live-objects.json
+/audit/report.csv
+/backup/
