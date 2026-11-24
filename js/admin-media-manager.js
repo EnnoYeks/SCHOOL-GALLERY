@@ -35,7 +35,7 @@
       '<article class="hmm-stat"><span>Featured</span><strong id="hmmFeatured">0</strong></article></div>' +
       '<div class="hmm-toolbar"><label class="hmm-search"><input id="hmmSearch" type="search" placeholder="Search title, uploader, category…" aria-label="Search media"></label>' +
       '<select class="hmm-select" id="hmmType" aria-label="Filter by media type"><option value="all">All types</option><option value="photo">Photos</option><option value="video">Videos</option><option value="post">Posts</option></select>' +
-      '<select class="hmm-select" id="hmmStatus" aria-label="Filter by status"><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Drafts</option></select></div>' +
+      '<select class="hmm-select" id="hmmStatus" aria-label="Filter by status"><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Drafts</option><option value="missing">Missing media</option></select></div>' +
       '<p class="hmm-message" id="hmmMessage" role="status" aria-live="polite">Connecting to the live library…</p>' +
       '<div class="hmm-grid" id="hmmGrid" aria-live="polite"></div>' +
       '<p class="hmm-note">Live database records are shown here. Feature, edit and delete actions require an authenticated admin session. Deleting a database record may not remove its R2 object.</p></section>' +
@@ -48,6 +48,7 @@
     item._title = titleFor(item);
     item._url = mediaFor(item);
     item._status = String(item.status || 'published').toLowerCase();
+    item._mediaStatus = String(item.media_status || item.mediaStatus || 'available').toLowerCase();
     item._uploader = item.author || item.uploader || item.author_id || 'Unknown uploader';
     item._category = item.category || item.class_tag || item.classTag || 'Uncategorised';
     return item;
@@ -95,7 +96,7 @@
     var status = document.getElementById('hmmStatus').value;
     var haystack = [item._title, item._category, item._uploader, item.id, item.description].join(' ').toLowerCase();
     return (type === 'all' || item.type === type) &&
-      (status === 'all' || item._status === status) &&
+      (status === 'missing' ? item._mediaStatus === 'missing' : (status === 'all' || item._status === status)) &&
       (!search || haystack.indexOf(search) !== -1);
   }
   function updateStats() {
@@ -118,7 +119,8 @@
         ? '<video src="' + esc(item._url) + '" muted playsinline preload="metadata"></video>'
         : '<img src="' + esc(item._url) + '" alt="' + esc(item._title) + '" loading="lazy">')
         : '<span class="hmm-thumb-icon" aria-hidden="true">' + iconFor(item.type) + '</span>';
-      var status = item._status === 'draft' ? 'Draft' : 'Published';
+      var status = item._mediaStatus === 'missing' ? 'Missing media' : (item._status === 'draft' ? 'Draft' : 'Published');
+      var statusClass = item._mediaStatus === 'missing' ? 'missing' : statusClass;
       return '<article class="hmm-card" data-id="' + esc(item.id) + '" data-collection="' + esc(item._collection) + '"><div class="hmm-thumb" data-kind="' + esc(item.type) + '">' + media +
         '<span class="hmm-kind">' + esc(item._collection) + '</span>' + (item.featured ? '<span class="hmm-featured">★ Featured</span>' : '') + '</div>' +
         '<div class="hmm-card-body"><div class="hmm-card-top"><h3 class="hmm-card-title">' + esc(item._title) + '</h3><span class="hmm-status ' + (status === 'Draft' ? 'draft' : '') + '">' + status + '</span></div>' +
