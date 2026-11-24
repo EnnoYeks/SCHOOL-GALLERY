@@ -129,8 +129,9 @@ async function walk(dir, out = []) {
 }
 async function scanRepository() {
   const files = await walk(ROOT);
-  const r2Pattern = /https?:\/\/[^\s"'<>]+/gi;
+  const urlPattern = /https?:\/\/[^\s"'<>]+/gi;
   const blobPattern = /\bblob:[^\s"'<>]*/gi;
+  const dataPattern = /data:(?:image|video|audio)\/[a-z0-9.+-]+;base64,[a-z0-9+/=]+/gi;
   const objectUrlPattern = /(?:URL|webkitURL)\.createObjectURL\s*\([^)]*\)/g;
   const localPattern = /(?:\/?assets\/)[a-z0-9_./-]+\.(?:svg|png|jpe?g|gif|webp|avif|mp4|webm|ogg|mov)/gi;
   for (const file of files) {
@@ -139,14 +140,15 @@ async function scanRepository() {
     const lines = content.split(/\r?\n/);
     for (let index = 0; index < lines.length; index++) {
       const line = lines[index];
-      for (const match of line.matchAll(r2Pattern)) {
+      for (const match of line.matchAll(urlPattern)) {
         const raw = match[0].replace(/[),.;]+$/, "");
-        if (!/r2\.dev/i.test(raw)) continue;
+        if (!/r2\.dev/i.test(raw) && !/\.(?:jpe?g|png|gif|webp|avif|mp4|webm|ogg|mov)(?:[?#]|$)/i.test(raw)) continue;
         const key = parseR2(raw);
         if (key === "") continue;
         add("repo", relative, "", "", index + 1, raw, key || "", key === null ? "EXTERNAL" : (liveKeys.has(key) ? "OK" : "DEAD"));
       }
       for (const match of line.matchAll(blobPattern)) add("repo", relative, "", "", index + 1, match[0], "", "BLOB");
+      for (const match of line.matchAll(dataPattern)) add("repo", relative, "", "", index + 1, match[0].slice(0, 100) + "…", "", "DATA_URI");
       for (const match of line.matchAll(objectUrlPattern)) add("repo", relative, "", "", index + 1, match[0], "", "BLOB");
       for (const match of line.matchAll(localPattern)) {
         const raw = match[0];
