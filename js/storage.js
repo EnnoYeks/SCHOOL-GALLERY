@@ -56,6 +56,65 @@
     return "";
   }
 
+  function onMediaError(el, kind) {
+    if (!el) return;
+    var tag = String(el.tagName || "").toUpperCase();
+    if (tag === "SOURCE" && el.parentElement && String(el.parentElement.tagName).toUpperCase() === "VIDEO") {
+      el = el.parentElement;
+      tag = "VIDEO";
+    }
+    if (tag !== "IMG" && tag !== "VIDEO") return;
+    if (el.dataset && el.dataset.hshsMediaFallback === "1") return;
+    if (el.dataset) el.dataset.hshsMediaFallback = "1";
+    var isAvatar = kind === "avatar" || (el.dataset && el.dataset.mediaKind === "avatar");
+    var fallback = isAvatar ? "/assets/placeholder-avatar.svg" : "/assets/placeholder-media.svg";
+    if (tag === "IMG") {
+      if (el.getAttribute("src") !== fallback) el.setAttribute("src", fallback);
+      return;
+    }
+    try { el.pause(); } catch (e) {}
+    el.removeAttribute("src");
+    Array.prototype.forEach.call(el.querySelectorAll("source"), function (source) {
+      source.removeAttribute("src");
+    });
+    el.setAttribute("poster", fallback);
+    try { el.load(); } catch (e) {}
+  }
+
+  function installMediaGuards() {
+    if (typeof document === "undefined" || document.__hshsMediaGuards) return;
+    document.__hshsMediaGuards = true;
+    document.addEventListener("error", function (event) {
+      var target = event.target;
+      if (target && /^(IMG|VIDEO|SOURCE)$/i.test(target.tagName || "")) {
+        onMediaError(target);
+      }
+    }, true);
+    function stripEmptySources(root) {
+      if (!root || !root.querySelectorAll) return;
+      root.querySelectorAll('img[src=""],video[src=""],source[src=""]').forEach(function (el) {
+        el.removeAttribute("src");
+      });
+    }
+    stripEmptySources(document);
+    if (typeof MutationObserver === "function" && document.documentElement) {
+      var observer = new MutationObserver(function (records) {
+        records.forEach(function (record) {
+          if (record.type === "attributes" && record.target && record.target.getAttribute("src") === "") {
+            record.target.removeAttribute("src");
+          }
+          (record.addedNodes || []).forEach(function (node) {
+            if (node.nodeType === 1) {
+              if (node.matches && node.matches('img[src=""],video[src=""],source[src=""]')) node.removeAttribute("src");
+              stripEmptySources(node);
+            }
+          });
+        });
+      });
+      observer.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["src"] });
+    }
+  }
+
   function uid() {
     if (g.auth && g.auth.currentUser) return g.auth.currentUser.uid;
     if (g.hshsUid) return g.hshsUid;
@@ -325,6 +384,7 @@
     objectKey: objectKey,
     publicUrl: publicUrl,
     mediaUrl: mediaUrl,
+    onMediaError: onMediaError,
     publicBase: publicBase,
     r2Config: r2Config,
     mediaSize: mediaSize,
@@ -333,6 +393,8 @@
       return r && r.signUrl ? "cloudflare-r2" : (cfg.provider || "local");
     }
   };
+  installMediaGuards();
+
   // Startup reachability check. Does not change the base URL.
   (function checkR2() {
     try {
