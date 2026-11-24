@@ -120,10 +120,10 @@
         : '<img src="' + esc(item._url) + '" alt="' + esc(item._title) + '" loading="lazy">')
         : '<span class="hmm-thumb-icon" aria-hidden="true">' + iconFor(item.type) + '</span>';
       var status = item._mediaStatus === 'missing' ? 'Missing media' : (item._status === 'draft' ? 'Draft' : 'Published');
-      var statusClass = item._mediaStatus === 'missing' ? 'missing' : statusClass;
+      var statusClass = item._mediaStatus === 'missing' ? 'missing' : (status === 'Draft' ? 'draft' : '');
       return '<article class="hmm-card" data-id="' + esc(item.id) + '" data-collection="' + esc(item._collection) + '"><div class="hmm-thumb" data-kind="' + esc(item.type) + '">' + media +
         '<span class="hmm-kind">' + esc(item._collection) + '</span>' + (item.featured ? '<span class="hmm-featured">★ Featured</span>' : '') + '</div>' +
-        '<div class="hmm-card-body"><div class="hmm-card-top"><h3 class="hmm-card-title">' + esc(item._title) + '</h3><span class="hmm-status ' + (status === 'Draft' ? 'draft' : '') + '">' + status + '</span></div>' +
+        '<div class="hmm-card-body"><div class="hmm-card-top"><h3 class="hmm-card-title">' + esc(item._title) + '</h3><span class="hmm-status ' + statusClass + '">' + status + '</span></div>' +
         '<p class="hmm-meta">' + esc(item._category) + ' · ' + esc(item._uploader) + '<br>ID ' + esc(item.id) + '</p>' +
         '<div class="hmm-card-actions"><button class="hmm-btn" data-action="preview" data-id="' + esc(item.id) + '" data-collection="' + esc(item._collection) + '" type="button">Preview</button>' +
         '<button class="hmm-btn" data-action="feature" data-id="' + esc(item.id) + '" data-collection="' + esc(item._collection) + '" type="button">' + (item.featured ? 'Unfeature' : 'Feature') + '</button>' +
