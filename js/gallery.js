@@ -69,9 +69,11 @@ class GalleryPage {
         const card = document.createElement('div');
         card.className = 'post-card';
         card.setAttribute('data-post-id', post.id);
-        const hasMedia = !!(post.image || post.imageUrl || post.thumbnailUrl || post.mediaKey);
-        const mediaHtml = hasMedia
-            ? `<img src="${post.image || post.imageUrl || post.thumbnailUrl}" alt="${post.title}" class="post-media">`
+        const mediaSrc = window.HshsStorage && typeof window.HshsStorage.mediaUrl === 'function'
+            ? window.HshsStorage.mediaUrl(post)
+            : (/^(blob:|data:)/i.test(String(post.image || post.imageUrl || post.thumbnailUrl || '')) ? '' : (post.image || post.imageUrl || post.thumbnailUrl || ''));
+        const mediaHtml = mediaSrc
+            ? `<img src="${mediaSrc}" alt="${post.title}" class="post-media">`
             : `<div class="post-media home-feature-media-empty"><i class="fas fa-align-left"></i></div>`;
         card.innerHTML = `
             <div class="post-content">
