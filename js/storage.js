@@ -46,9 +46,13 @@
   function mediaUrl(item) {
     if (!item) return "";
     var direct = item.image || item.imageUrl || item.thumbnailUrl || item.videoUrl || "";
+    if (/^(blob:|data:)/i.test(String(direct || ""))) return "";
     if (direct && /^https?:\/\//i.test(direct)) return direct;
-    if (item.mediaKey) return publicUrl(item.mediaKey);
-    if (direct) return publicUrl(direct);
+    if (item.mediaKey && (!item.mediaProvider || item.mediaProvider === "cloudflare-r2")) {
+      return publicUrl(item.mediaKey);
+    }
+    if (direct && /^\/(assets|images)\//i.test(direct)) return direct;
+    if (direct && !/^https?:\/\//i.test(direct)) return publicUrl(direct);
     return "";
   }
 
@@ -157,16 +161,37 @@
     options = options || {};
     var base = workerBase();
     if (!base) return [];
-    var limit = options.limit || 40;
+    var limit = Math.max(1, Math.min(100, Number(options.limit) || 100));
     var prefix = options.prefix || "";
+    var maxPages = Math.max(1, Math.min(10000, Number(options.maxPages) || 1000));
+    var cursor = "";
+    var seenCursors = new Set();
+    var all = [];
     try {
-      var url = base + "/list?limit=" + encodeURIComponent(limit);
-      if (prefix) url += "&prefix=" + encodeURIComponent(prefix);
-      var res = await fetch(url, { method: "GET" });
-      if (!res.ok) throw new Error("List failed " + res.status);
-      var data = await res.json();
-      var raw = Array.isArray(data) ? data : (data.objects || data.items || []);
-      return raw.map(function (item) {
+      for (var page = 0; page < maxPages; page++) {
+        var url = base + "/list?limit=" + encodeURIComponent(limit);
+        if (prefix) url += "&prefix=" + encodeURIComponent(prefix);
+        if (cursor) url += "&cursor=" + encodeURIComponent(cursor);
+        var res = await fetch(url, { method: "GET" });
+        if (!res.ok) throw new Error("List failed " + res.status);
+        var data = await res.json();
+        var raw = Array.isArray(data) ? data : (data.objects || data.items || []);
+        all = all.concat(raw);
+        if (data.truncated === true) {
+          if (!data.cursor || seenCursors.has(data.cursor)) {
+            throw new Error("R2 listing returned an invalid or repeated cursor; inventory is incomplete");
+          }
+          seenCursors.add(data.cursor);
+          cursor = data.cursor;
+          continue;
+        }
+        if (data.truncated === false || raw.length < limit) break;
+        throw new Error("R2 Worker does not expose pagination metadata. Deploy the updated Worker before relying on a complete listing.");
+      }
+      if (all.length && all.length >= limit * maxPages) {
+        throw new Error("R2 listing exceeded the page safety limit; inventory is incomplete");
+      }
+      return all.map(function (item) {
         var key = typeof item === "string" ? item : (item.key || item.name || "");
         if (isTestKey(key)) return null;
         var type = isVideoKey(key) ? "video" : "photo";
@@ -188,7 +213,7 @@
       }).filter(function (o) { return o && o.key; });
     } catch (err) {
       console.warn("[HshsStorage] R2 list failed:", err && err.message);
-      return [];
+      throw err;
     }
   }
 
@@ -203,93 +228,39 @@
     if (signTarget && !/\/sign\/?$/i.test(signTarget)) {
       signTarget = signTarget.replace(/\/$/, "") + "/sign";
     }
-    if (signTarget) {
-      try {
-        var signRes = await fetch(signTarget, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            key: key,
-            contentType: (file && file.type) || (kind === "video" ? "video/webm" : "image/jpeg"),
-            size: file && file.size
-          })
-        });
-        if (!signRes.ok) throw new Error("Sign failed " + signRes.status);
-        var signed = await signRes.json();
-        var putUrl = signed.url || signed.putUrl;
-        if (!putUrl) throw new Error("No presigned URL");
-        var put = await fetch(putUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": (file && file.type) || (kind === "video" ? "video/webm" : "image/jpeg")
-          },
-          body: file
-        });
-        if (!put.ok) throw new Error("R2 PUT failed " + put.status);
-        return {
-          url: publicUrl(key),
-          key: key,
-          provider: "cloudflare-r2",
-          kind: kind,
-          size: (file && file.size) || 0,
-          width: dims.width,
-          height: dims.height
-        };
-      } catch (err) {
-        console.warn("[HshsStorage] R2 upload failed, local fallback:", err && err.message);
-      }
+    if (!signTarget) {
+      throw new Error("Cloudflare R2 is not configured. The file was not saved.");
     }
-    if (kind === "photo" && typeof createImageBitmap === "function") {
-      try {
-        var bitmap = await createImageBitmap(file);
-        var scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
-        var canvas = document.createElement("canvas");
-        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-        canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-        var dataUrl = canvas.toDataURL("image/jpeg", 0.82);
-        return {
-          url: dataUrl,
-          key: key,
-          provider: "local-dataurl",
-          kind: kind,
-          size: dataUrl.length,
-          width: dims.width,
-          height: dims.height
-        };
-      } catch (e) {}
-    }
-    return new Promise(function (resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function () {
-        resolve({
-          url: String(reader.result),
-          key: key,
-          provider: "local-dataurl",
-          kind: kind,
-          size: (file && file.size) || 0,
-          width: dims.width,
-          height: dims.height
-        });
-      };
-      reader.onerror = reject;
-      if (kind === "video") {
-        try {
-          var obj = URL.createObjectURL(file);
-          resolve({
-            url: obj,
-            key: key,
-            provider: "local-blob",
-            kind: kind,
-            size: (file && file.size) || 0,
-            width: dims.width,
-            height: dims.height
-          });
-          return;
-        } catch (e) {}
-      }
-      reader.readAsDataURL(file);
+    var signRes = await fetch(signTarget, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        key: key,
+        contentType: (file && file.type) || (kind === "video" ? "video/webm" : "image/jpeg"),
+        size: file && file.size
+      })
     });
+    if (!signRes.ok) throw new Error("Cloudflare R2 signing failed (" + signRes.status + "). The file was not saved.");
+    var signed = await signRes.json();
+    var putUrl = signed.url || signed.putUrl;
+    if (!putUrl) throw new Error("Cloudflare R2 did not return an upload URL.");
+    var put = await fetch(putUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": (file && file.type) || (kind === "video" ? "video/webm" : "image/jpeg")
+      },
+      body: file
+    });
+    if (!put.ok) throw new Error("Cloudflare R2 upload failed (" + put.status + "). The file was not saved.");
+    return {
+      url: publicUrl(key),
+      key: key,
+      provider: "cloudflare-r2",
+      kind: kind,
+      size: (file && file.size) || 0,
+      width: dims.width,
+      height: dims.height
+    };
   }
 
   async function uploadFromUrl(src, options) {
