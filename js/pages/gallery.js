@@ -89,10 +89,13 @@
       if (fromStore) return fromStore;
     }
     var direct = p.imageUrl || p.image_url || p.thumbnailUrl || p.thumbnail_url || p.image || p.cover || p.mediaUrl || p.media_url || p._media || '';
+    if (/^(blob:|data:)/i.test(String(direct || ''))) return '';
     if (direct && /^https?:\/\//i.test(direct)) return direct;
+    if (direct && /^\/?assets\//i.test(direct)) return direct;
     var key = p.mediaKey || p.media_key || '';
-    if (key && global.HshsStorage && typeof global.HshsStorage.publicUrl === 'function') return global.HshsStorage.publicUrl(key);
-    return direct || '';
+    var provider = p.mediaProvider || p.media_provider;
+    if (key && (!provider || provider === 'cloudflare-r2') && global.HshsStorage && typeof global.HshsStorage.publicUrl === 'function') return global.HshsStorage.publicUrl(key);
+    return '';
   }
   function videoUrl(p) {
     return p.videoUrl || p.video_url || (kindOf(p) === 'video' ? (p.url || p.src || p.imageUrl || '') : '');
