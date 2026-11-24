@@ -17,7 +17,7 @@ const R2_PUBLIC_BASE = (process.env.R2_PUBLIC_BASE || "https://pub-cf880c90c5ff4
 const PAGE_SIZE = 1000;
 const R2_PAGE_SIZE = 100;
 const SKIP = new Set([".git", "node_modules", ".vercel", "dist", "build", "coverage", "audit", "backup"]);
-const EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".html", ".css", ".json", ".md", ".webmanifest", ".xml"]);
+const EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".html", ".css", ".json", ".md", ".webmanifest", ".xml", ".txt"]);
 const TABLES = {
   photos: ["image", "image_url", "thumbnail_url", "media_key", "media_provider", "processed_key"],
   posts: ["image", "image_url", "thumbnail_url", "media_key", "media_provider"],
@@ -133,7 +133,7 @@ async function scanRepository() {
   const blobPattern = /\bblob:[^\s"'<>]*/gi;
   const dataPattern = /data:(?:image|video|audio)\/[a-z0-9.+-]+;base64,[a-z0-9+/=]+/gi;
   const objectUrlPattern = /(?:URL|webkitURL)\.createObjectURL\s*\([^)]*\)/g;
-  const localPattern = /(?:\/?assets\/)[a-z0-9_./-]+\.(?:svg|png|jpe?g|gif|webp|avif|mp4|webm|ogg|mov)/gi;
+  const localPattern = /(?:\/?(?:assets|images|media)\/)[a-z0-9_./-]+\.(?:svg|png|jpe?g|gif|webp|avif|mp4|webm|ogg|mov)/gi;
   for (const file of files) {
     const relative = path.relative(ROOT, file).split(path.sep).join("/");
     const content = await readFile(file, "utf8").catch(() => "");
