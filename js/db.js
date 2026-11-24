@@ -6,6 +6,40 @@
 
 import { supabase, supabaseSocial, auth } from "./config.js";
 
+const HSHS_R2_PUBLIC_BASE = "https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev";
+
+function validateMediaInput(data) {
+    const fields = [
+        ["image", data.image],
+        ["imageUrl", data.imageUrl],
+        ["thumbnailUrl", data.thumbnailUrl],
+        ["videoUrl", data.videoUrl]
+    ];
+    for (const [field, value] of fields) {
+        const ref = String(value || "").trim();
+        if (!ref) continue;
+        if (/^(blob:|data:)/i.test(ref)) {
+            throw new Error(field + " must be uploaded to Cloudflare R2 before it can be saved.");
+        }
+        if (/^https?:\\/\\//i.test(ref)) {
+            if (!ref.startsWith(HSHS_R2_PUBLIC_BASE + "/")) {
+                throw new Error(field + " must use the HSHS Cloudflare R2 public URL.");
+            }
+            continue;
+        }
+        if (/^\\/assets\\/[a-z0-9._/-]+$/i.test(ref) && !ref.includes("..")) continue;
+        throw new Error(field + " must be an R2 public URL or a local /assets/ path.");
+    }
+    const key = String(data.mediaKey || data.media_key || "").trim();
+    if (key && (/^(blob:|data:|https?:)/i.test(key) || key.startsWith("/") || key.includes(".."))) {
+        throw new Error("mediaKey must be a relative Cloudflare R2 object key.");
+    }
+    const provider = data.mediaProvider || data.media_provider;
+    if (key && provider && provider !== "cloudflare-r2") {
+        throw new Error("Only Cloudflare R2 media keys can be persisted.");
+    }
+}
+
 class Database {
     constructor() {
         console.log("[HSHS] Supabase database initialized");
@@ -139,6 +173,7 @@ class Database {
     }
 
     async createPost(data) {
+        validateMediaInput(data);
         try {
             const meta = await this.getAuthorMeta();
             const payload = {
@@ -177,6 +212,7 @@ class Database {
     }
 
     async createPhoto(data) {
+        validateMediaInput(data);
         try {
             const meta = await this.getAuthorMeta();
             const payload = {
@@ -207,6 +243,7 @@ class Database {
     }
 
     async createVideo(videoData) {
+        validateMediaInput(videoData);
         try {
             const meta = await this.getAuthorMeta();
             const payload = {
