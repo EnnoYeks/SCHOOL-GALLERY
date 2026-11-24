@@ -22,8 +22,15 @@
     if (n >= 1000) return (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1).replace('.0', '') + 'K';
     return String(n);
   }
-  function mediaOf(p) { return p.imageUrl || p.thumbnailUrl || p.image || p.cover || ''; }
-  function videoOf(p) { return p.videoUrl || p.video_url || ''; }
+  function mediaOf(p) {
+    if (g.HshsStorage && typeof g.HshsStorage.mediaUrl === 'function') return g.HshsStorage.mediaUrl(p) || '';
+    var src = p.imageUrl || p.image_url || p.thumbnailUrl || p.thumbnail_url || p.image || p.cover || '';
+    return /^(blob:|data:)/i.test(String(src || '')) ? '' : src;
+  }
+  function videoOf(p) {
+    var src = p.videoUrl || p.video_url || '';
+    return /^(blob:|data:)/i.test(String(src || '')) ? '' : src;
+  }
   function isVideo(p) { return String(p.type || '').toLowerCase().indexOf('video') !== -1 || !!videoOf(p); }
   function loadCss() {
     if (document.querySelector('link[data-hshs-profile-css]')) return;
