@@ -21,8 +21,14 @@
       return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
     });
   }
-  function mediaUrl(v) { return v.video_url || v.videoUrl || v.url || v.media_url || v.mediaUrl || v.src || ''; }
-  function posterUrl(v) { return v.thumbnail_url || v.thumbnailUrl || v.thumbnail || v.cover || v.image_url || v.imageUrl || v.image || ''; }
+  function mediaUrl(v) {
+    var src = v.video_url || v.videoUrl || v.url || v.media_url || v.mediaUrl || v.src || '';
+    return /^(blob:|data:)/i.test(String(src || '')) ? '' : src;
+  }
+  function posterUrl(v) {
+    var src = v.thumbnail_url || v.thumbnailUrl || v.thumbnail || v.cover || v.image_url || v.imageUrl || v.image || '';
+    return /^(blob:|data:)/i.test(String(src || '')) ? '' : src;
+  }
   function author(v) { return String(v.author || v.username || v.userName || v.creator || 'HSHS Student').replace(/^@/, ''); }
   function creatorId(v) { return String(v.author_id || v.authorId || ''); }
   function idOf(v, i) { return String(v.id || v.video_id || i); }
