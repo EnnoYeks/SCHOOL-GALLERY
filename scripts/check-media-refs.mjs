@@ -22,7 +22,7 @@ const TABLES = {
   photos: ["image", "image_url", "thumbnail_url", "media_key", "media_provider", "processed_key"],
   posts: ["image", "image_url", "thumbnail_url", "media_key", "media_provider"],
   videos: ["video_url", "image", "image_url", "thumbnail_url", "media_key", "media_provider", "poster_key", "preview_key"],
-  users: ["photo_url", "media_status"]
+  users: ["photo_url"]
 };
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
@@ -53,6 +53,7 @@ function classifyReference(raw, column = "") {
   if (/^data:/i.test(value)) return { key: "", verdict: "DATA_URI" };
   if (/^https?:\/\//i.test(value)) {
     const key = parseR2(value);
+    if (key === "") return null;
     if (key !== null) return { key, verdict: liveKeys.has(key) ? "OK" : "DEAD" };
     return { key: "", verdict: "EXTERNAL" };
   }
@@ -142,6 +143,7 @@ async function scanRepository() {
         const raw = match[0].replace(/[),.;]+$/, "");
         if (!/r2\.dev/i.test(raw)) continue;
         const key = parseR2(raw);
+        if (key === "") continue;
         add("repo", relative, "", "", index + 1, raw, key || "", key === null ? "EXTERNAL" : (liveKeys.has(key) ? "OK" : "DEAD"));
       }
       for (const match of line.matchAll(blobPattern)) add("repo", relative, "", "", index + 1, match[0], "", "BLOB");
@@ -166,11 +168,12 @@ async function scanDatabase() {
         const classified = classifyReference(raw, column);
         if (!classified) continue;
         let verdict = classified.verdict;
+        if (column === "media_key" && row.media_provider && row.media_provider !== "cloudflare-r2") verdict = "EXTERNAL";
         if (verdict === "LOCAL_PENDING") {
           verdict = await stat(path.join(ROOT, classified.key)).then(() => "LOCAL").catch(() => "DEAD");
         }
         add("database", table, row.id, column, "", raw, classified.key, verdict);
-        if (verdict === "DEAD" && classified.key && !/^https?:\/\//i.test(raw)) {
+        if (verdict === "DEAD" && classified.key) {
           deadRows.set(table + ":" + row.id, { table, id: row.id });
         }
       }
