@@ -137,16 +137,16 @@
       if (effects) effects.style.display = 'none';
     }
 
-    var root = document.getElementById('hshsStudio');
-    if (root && typeof MutationObserver !== 'undefined') {
+    if (typeof MutationObserver !== 'undefined' && document.body) {
       var observer = new MutationObserver(function () {
-        var message = root.querySelector('.hshs-cam-msg');
+        var root = document.getElementById('hshsStudio');
+        var message = root && root.querySelector('.hshs-cam-msg');
         if (message && /camera unavailable/i.test(message.textContent || '')) {
           showCamFallback(window.__hshsLastCameraError);
         }
       });
-      observer.observe(root, { childList: true, subtree: true });
-      root.__hshsCameraFallbackObserver = observer;
+      observer.observe(document.body, { childList: true, subtree: true });
+      window.__hshsCameraFallbackObserver = observer;
     }
     window.__hshsShowCameraFallback = showCamFallback;
     window.__hshsHideCameraFallback = hideCamFallback;
