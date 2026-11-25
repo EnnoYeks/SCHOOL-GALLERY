@@ -24,7 +24,7 @@ function showSkeleton(container, layout, count) {
 
 function safeMediaSource(value) {
   const raw = String(value || "");
-  return /^https?:\\/\\//i.test(raw) ? raw : "";
+  return /^https?:\/\//i.test(raw) ? raw : "";
 }
 
 function cleanTitle(value) {
