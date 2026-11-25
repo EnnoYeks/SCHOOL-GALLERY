@@ -29,7 +29,7 @@
     var src = v.thumbnail_url || v.thumbnailUrl || v.thumbnail || v.cover || v.image_url || v.imageUrl || v.image || '';
     return /^(blob:|data:)/i.test(String(src || '')) ? '' : src;
   }
-  function author(v) { return String(v.author || v.username || v.userName || v.creator || 'HSHS Student').replace(/^@/, ''); }
+  function author(v) { return String(v.author || v.username || v.userName || v.creator || '').replace(/^@/, ''); }
   function creatorId(v) { return String(v.author_id || v.authorId || ''); }
   function idOf(v, i) { return String(v.id || v.video_id || i); }
   function db() { return global.db || null; }
@@ -72,7 +72,7 @@
     var likes = state.likeCounts[id] == null ? Number(item.likes || item.likes_count || 0) : state.likeCounts[id];
     var comments = state.commentCounts[id] == null ? Number(item.comments || item.comments_count || 0) : state.commentCounts[id];
     var src = mediaUrl(item), poster = posterUrl(item);
-    var caption = String(item.description || item.title || 'A moment from HSHS');
+    var caption = String(item.description || item.title || '');
     return '<article class="buzz-card" data-buzz-id="' + esc(id) + '" data-author-id="' + esc(creator) + '">' +
       '<div class="buzz-media">' + (src
         ? '<video playsinline webkit-playsinline loop preload="metadata" muted ' + (poster ? 'poster="' + esc(poster) + '" ' : '') + 'src="' + esc(src) + '"></video>'
@@ -84,7 +84,7 @@
         '<button class="buzz-action" type="button" data-buzz-action="comments"><i class="fas fa-comment"></i><span>' + (comments > 0 ? compact(comments) : '') + '</span></button>' +
         '<button class="buzz-action" type="button" data-buzz-action="share"><i class="fas fa-share"></i><span>Share</span></button>' +
       '</div>' +
-      '<div class="buzz-info"><div class="buzz-author-row"><div class="buzz-author">@' + esc(who) + '</div>' +
+      '<div class="buzz-info">' + (who ? '<div class="buzz-author-row"><div class="buzz-author">@' + esc(who) + '</div>' : '<div class="buzz-author-row">') +
         (creator && !own ? '<button class="buzz-follow' + (following ? ' is-following' : '') + '" type="button" data-buzz-action="follow" aria-pressed="' + (following ? 'true' : 'false') + '">' + (following ? 'Following' : 'Follow') + '</button>' : '') +
       '</div><div class="buzz-caption">' + esc(caption) + '</div></div></article>';
   }
