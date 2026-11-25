@@ -339,7 +339,12 @@ function hideIfEmpty(container, preview) {
 export async function loadSlots(keys, containers, options = {}) {
   const unique = [...new Set((keys || []).filter(Boolean))];
   Object.entries(containers || {}).forEach(([key, container]) => {
+    if (!container) return;
     const count = options.skeletonCount || 3;
+    if (typeof (options.renderers && options.renderers[key]) === "function") {
+      container.setAttribute("aria-busy", "true");
+      return;
+    }
     if (key === "home_hero" && container.classList.contains("vibe-hero-photos")) {
       container.querySelectorAll("span").forEach(span => span.classList.add("is-slot-loading"));
       return;
