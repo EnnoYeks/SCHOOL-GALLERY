@@ -33,5 +33,12 @@ jobs:
         run: |
           node --input-type=module --check < js/media-slots.js
           node --input-type=module --check < js/admin-media-page.js
+          node --check js/storage.js
+          node --check js/hshs-upload.js
+          node --check js/photos.js
+          node --check js/videos.js
+          node --check js/pages/memories.js
+          node --check js/pages/buzz.js
+          node --check js/pages/gallery.js
       - name: Validate package manifest
         run: node -e "JSON.parse(require('fs').readFileSync('package.json','utf8'))"
