@@ -28,6 +28,13 @@ function imageSources(row, layout) {
   const key = row.media_key || row.mediaKey || "";
   const processed = row.processed_key || row.processedKey || "";
   const width = Number(row.width || 0);
+  if (processed && publicBase() && /^media\//.test(processed)) {
+    const thumb = publicUrl(processed + "/thumb.webp");
+    const medium = publicUrl(processed + "/medium.webp");
+    const large = publicUrl(processed + "/large.webp");
+    const src = layout === "carousel" ? large : layout === "strip" ? thumb : medium;
+    return { src, srcSet: [thumb + " 400w", medium + " 900w", large + " 1600w"].join(", ") };
+  }
   const wanted = layout === "carousel" ? 1440 : layout === "strip" ? 320 : 960;
   if (processed && publicBase()) {
     const available = [320, 640, 960, 1440].filter((w) => !width || w <= width);
@@ -42,49 +49,6 @@ function imageSources(row, layout) {
     if (fromKey) return { src: fromKey, srcSet: "" };
   }
   return { src: publicUrl(row.thumbnail_url || row.thumbnailUrl || row.image_url || row.imageUrl || row.image || ""), srcSet: "" };
-}onst { supabaseAdmin } = require("./_supabase");
-
-const TABLES = ["posts", "photos", "videos"];
-const PAGE_TABLES = {
-  home: TABLES,
-  videos: ["videos"],
-  photos: ["photos"],
-  memories: TABLES,
-  vibe: ["videos"],
-  gallery: TABLES,
-  trending: TABLES,
-  spotlight: ["posts", "photos"]
-};
-
-function publicBase() {
-  return String(process.env.R2_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
-}
-
-function publicUrl(value) {
-  const raw = String(value || "").trim();
-  if (!raw || /^(data:|blob:)/i.test(raw)) return "";
-  if (/^https?:\/\//i.test(raw)) return raw;
-  const base = publicBase();
-  return base ? base + "/" + raw.replace(/^\/+/, "") : "";
-}
-
-function imageSource(row, layout) {
-  const key = row.media_key || row.mediaKey || "";
-  const processed = row.processed_key || row.processedKey || "";
-  const width = Number(row.width || 0);
-  const wanted = layout === "carousel" ? 1440 : layout === "strip" ? 320 : 960;
-  if (processed && publicBase()) {
-    const available = [320, 640, 960, 1440].filter((w) => !width || w <= width);
-    if (available.length) {
-      const selected = available.filter((w) => w <= wanted).pop() || available[0];
-      return publicUrl(processed + "-" + selected + ".webp");
-    }
-  }
-  if (key) {
-    const fromKey = publicUrl(key);
-    if (fromKey) return fromKey;
-  }
-  return publicUrl(row.thumbnail_url || row.thumbnailUrl || row.image_url || row.imageUrl || row.image || "");
 }
 
 function normalize(row, table, slot, item) {
