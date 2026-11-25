@@ -213,6 +213,7 @@ function itemShape(item) {
     title: item.title || media.title || item.caption || "",
     description: item.description || media.description || "",
     author: item.author || media.author || "",
+    authorId: item.authorId || media.authorId || "",
     category: item.category || media.category || "",
     likes: item.likes == null ? null : Number(item.likes),
     views: item.views == null ? null : Number(item.views),
