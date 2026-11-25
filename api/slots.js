@@ -102,6 +102,7 @@ function normalize(row, table, slot, item) {
     caption: item?.caption || row.description || row.title || "",
     description: row.description || "",
     author: row.author || row.username || row.author_name || row.authorName || "",
+    authorId: row.author_id || row.authorId || row.user_id || row.uid || "",
     category: row.category || row.tag || "",
     mediaType: isVideo ? "video" : "photo",
     src,
