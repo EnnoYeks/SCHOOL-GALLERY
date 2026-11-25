@@ -46,6 +46,7 @@
 .hmm-card-title { min-width: 0; margin: 0; font-size: .95rem; line-height: 1.35; overflow-wrap: anywhere; }
 .hmm-status { flex: 0 0 auto; padding: 4px 7px; border-radius: 999px; color: #a8f0ce; background: rgba(34,197,94,.1); font-size: .65rem; font-weight: 800; }
 .hmm-status.draft { color: #fbd38d; background: rgba(245,158,11,.1); }
+.hmm-status.missing { color: #fca5a5; background: rgba(239,68,68,.12); }
 .hmm-meta { margin: 8px 0 12px; color: var(--hmm-muted); font-size: .76rem; line-height: 1.5; overflow-wrap: anywhere; }
 .hmm-card-actions { justify-content: flex-start; flex-wrap: wrap; }
 .hmm-card-actions .hmm-btn { flex: 1 1 auto; min-height: 35px; padding: 7px 9px; font-size: .75rem; }

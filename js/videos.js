@@ -51,6 +51,12 @@ class VideosPage {
             }
         }
     }
+    safeMedia(value) {
+        const ref = String(value || '').trim();
+        if (/^(blob:|data:)/i.test(ref)) return '';
+        if (/^https?:\/\//i.test(ref) || /^\/?assets\//i.test(ref)) return ref;
+        return '';
+    }
     apply() {
         let videos = [...this.videos];
         if (this.filter === "latest") videos.sort((a,b) => this.date(b.createdAt) - this.date(a.createdAt));
@@ -59,8 +65,10 @@ class VideosPage {
         if (this.search) videos = videos.filter(v => [v.title,v.description,v.category,v.author].join(" ").toLowerCase().includes(this.search));
         const seen = new Set();
         videos = videos.filter(video => {
-            const key = video.videoUrl || video.video_url || video.id;
+            const key = this.safeMedia(video.videoUrl || video.video_url);
             if (!key || seen.has(key)) return false;
+            video._safeVideoUrl = key;
+            video._safeThumbnailUrl = this.safeMedia(video.thumbnailUrl || video.thumbnail_url || video.thumbnail || video.posterUrl || '');
             seen.add(key);
             return true;
         });
@@ -102,14 +110,14 @@ class VideosPage {
     }
     featCard(v, index, first) {
         const title = String(v.title || '').trim();
-        const thumb = this.attr(v.thumbnailUrl || v.thumbnail_url || v.thumbnail || v.posterUrl || '');
+        const thumb = this.attr(this.safeMedia(v.thumbnailUrl || v.thumbnail_url || v.thumbnail || v.posterUrl || ''));
         const likes = v.likes == null ? '' : this.num(v.likes) + ' likes';
         const views = v.views == null ? '' : this.num(v.views) + ' views';
         const counts = [likes, views].filter(Boolean).join(' · ');
         const author = v.author || v.creator || v.username || '';
         const date = v.createdAt ? this.ago(v.createdAt) : '';
         const details = [author, date].filter(Boolean).join(' · ');
-        return `<article class="vibe-feat is-loading" role="button" tabindex="0" aria-label="Play ${this.escape(title || 'video')}" data-video-index="${index}" data-video-url="${this.attr(v.videoUrl || v.video_url || '')}">
+        return `<article class="vibe-feat is-loading" role="button" tabindex="0" aria-label="Play ${this.escape(title || 'video')}" data-video-index="${index}" data-video-url="${this.attr(this.safeMedia(v.videoUrl || v.video_url || ''))}">
             ${thumb ? `<img src="${thumb}" alt="${this.escape(title)}" loading="lazy" decoding="async">` : ''}
             <span class="vibe-type">Vibe</span>
             <span class="play"><i class="fas fa-play"></i></span>
@@ -214,11 +222,11 @@ class VideosPage {
     play(index){
         if (index < 0 || index >= this.filtered.length) return;
         const video = this.filtered[index], player = document.getElementById("videoPlayer"), modal = document.getElementById("videoPlayerModal");
-        const videoUrl = video.videoUrl || video.video_url;
+        const videoUrl = this.safeMedia(video._safeVideoUrl || video.videoUrl || video.video_url);
         if (!player || !modal || !videoUrl) return;
         this.index = index;
         player.src = videoUrl;
-        player.poster = video.thumbnailUrl || video.thumbnail_url || video.thumbnail || video.posterUrl || "";
+        player.poster = this.safeMedia(video._safeThumbnailUrl || video.thumbnailUrl || video.thumbnail_url || video.thumbnail || video.posterUrl || "");
         modal.classList.add("active");
         player.play().catch(()=>{});
         this.updateViews(video);

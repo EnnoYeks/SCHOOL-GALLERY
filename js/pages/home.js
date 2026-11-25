@@ -56,10 +56,13 @@
       if (fromStore) return fromStore;
     }
     var direct = post.image || post.imageUrl || post.image_url || post.thumbnailUrl || post.thumbnail_url || post.videoUrl || post.video_url || '';
+    if (/^(blob:|data:)/i.test(String(direct || ''))) return '';
     if (direct && /^https?:\/\//i.test(direct)) return direct;
+    if (direct && /^\/?assets\//i.test(direct)) return direct;
     var key = post.mediaKey || post.media_key || '';
-    if (key && global.HshsStorage && typeof global.HshsStorage.publicUrl === 'function') return global.HshsStorage.publicUrl(key);
-    return direct || '';
+    var provider = post.mediaProvider || post.media_provider;
+    if (key && (!provider || provider === 'cloudflare-r2') && global.HshsStorage && typeof global.HshsStorage.publicUrl === 'function') return global.HshsStorage.publicUrl(key);
+    return '';
   }
 
   function safeTitle(post) {

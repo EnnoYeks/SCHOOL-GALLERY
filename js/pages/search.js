@@ -43,7 +43,11 @@
     list.unshift(q);
     try { localStorage.setItem(KEY, JSON.stringify(list.slice(0, 8))); } catch (e) {}
   }
-  function mediaOf(p) { return p.imageUrl || p.thumbnailUrl || p.image || p.cover || ''; }
+  function mediaOf(p) {
+    if (g.HshsStorage && typeof g.HshsStorage.mediaUrl === 'function') return g.HshsStorage.mediaUrl(p) || '';
+    var src = p.imageUrl || p.image_url || p.thumbnailUrl || p.thumbnail_url || p.image || p.cover || '';
+    return /^(blob:|data:)/i.test(String(src || '')) ? '' : src;
+  }
   function isVideo(p) {
     return String(p.type || '').toLowerCase().indexOf('video') !== -1 || !!(p.videoUrl || p.video_url);
   }
@@ -64,6 +68,7 @@
     var name = u.name || u.fullName || 'Student';
     var user = String(u.username || '').replace(/^@/, '');
     var photo = u.photoURL || u.avatar || '';
+    if (/^(blob:|data:)/i.test(String(photo || ''))) photo = '';
     var av = photo
       ? '<img src="' + esc(photo) + '" alt="">'
       : esc(name.charAt(0).toUpperCase());

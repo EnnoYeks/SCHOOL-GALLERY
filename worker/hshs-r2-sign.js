@@ -45,11 +45,17 @@ export default {
     // Existing public routes
     if (url.pathname === "/list" && request.method === "GET") {
       if (!bucket) return json({ error: "No R2 binding" }, 500);
-      const limit = Math.min(100, Number(url.searchParams.get("limit") || 40));
+      const requestedLimit = Number(url.searchParams.get("limit") || 100);
+      const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(100, Math.floor(requestedLimit))) : 100;
       const prefix = url.searchParams.get("prefix") || undefined;
-      const listed = await bucket.list({ limit, prefix });
+      const cursor = url.searchParams.get("cursor") || undefined;
+      const listed = await bucket.list({ limit, prefix, cursor });
       const objects = (listed.objects || []).map(o => ({ key: o.key, size: o.size, uploaded: o.uploaded }));
-      return json({ objects });
+      return json({
+        objects,
+        truncated: !!listed.truncated,
+        cursor: listed.truncated ? (listed.cursor || null) : null
+      });
     }
 
     if ((url.pathname === "/sign" || url.pathname === "/sign/") && request.method === "POST") {
@@ -225,6 +231,15 @@ export default {
 };
 
 const ALLOWED = new Set(["posts", "photos", "videos"]);
+const PUBLIC_MEDIA_BASE = "https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev";
+
+function isAllowedMediaRef(value) {
+  const ref = String(value || "").trim();
+  if (!ref) return true;
+  if (/^(blob:|data:)/i.test(ref)) return false;
+  if (/^https?:\/\//i.test(ref)) return ref.startsWith(PUBLIC_MEDIA_BASE + "/");
+  return /^\/assets\/[a-z0-9._/-]+$/i.test(ref) && !ref.includes("..");
+}
 
 function isAdmin(uid, env) {
   const list = String(env.ADMIN_UIDS || "").split(",").map(s => s.trim()).filter(Boolean);
@@ -316,6 +331,12 @@ function contentPayload(body, target, uid, partial = false) {
   const video_url = String(body.video_url || "").slice(0, 1000);
   const thumbnail_url = String(body.thumbnail_url || image_url || "").slice(0, 1000);
   const media_key = String(body.media_key || body.mediaKey || "").slice(0, 500);
+  if (![image_url, thumbnail_url, video_url].every(isAllowedMediaRef)) {
+    return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
+  }
+  if (media_key && (/^(blob:|data:|https?:)/i.test(media_key) || media_key.startsWith("/") || media_key.includes(".."))) {
+    return { ok: false, error: "media_key must be a relative R2 object key." };
+  }
   const width = Number.isSafeInteger(Number(body.width)) && Number(body.width) > 0 ? Number(body.width) : null;
   const height = Number.isSafeInteger(Number(body.height)) && Number(body.height) > 0 ? Number(body.height) : null;
   if (!partial && target === "photos" && !image_url && !media_key) return { ok: false, error: "Photo requires media" };
@@ -356,6 +377,12 @@ function validatePost(body, partial = false) {
   const description = String(body.description || "").slice(0, 2000);
   const status = body.status || "draft";
   if (!["draft", "published"].includes(status)) return { ok: false, error: "Invalid status" };
+  if (![body.image_url, body.thumbnail_url].every(isAllowedMediaRef)) {
+    return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
+  }
+  if (body.media_key && (/^(blob:|data:|https?:)/i.test(String(body.media_key)) || String(body.media_key).startsWith("/") || String(body.media_key).includes(".."))) {
+    return { ok: false, error: "media_key must be a relative R2 object key." };
+  }
   if (!partial && !description && !body.media_key && !body.image_url) return { ok: false, error: "Description or media required" };
   if (title.length > 200) return { ok: false, error: "Title too long" };
   return {
