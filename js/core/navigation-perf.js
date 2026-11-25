@@ -6,7 +6,14 @@
   var cache = global.__hshsPageCache = global.__hshsPageCache || {};
   var pending = Object.create(null);
   var started = false;
-  var targets = ['gallery.html', 'buzz.html', 'photos.html', 'videos.html', 'trending.html', 'more.html', 'chat.html', 'profile.html', 'search.html', 'settings.html', 'memories.html', 'spotlight.html', 'polls.html', 'about.html', 'contact.html'];
+  function shouldSkipPrefetch() {
+    try {
+      var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (navigator.saveData) return true;
+      if (connection && (connection.saveData || /^(slow-2g|2g)$/.test(connection.effectiveType || ''))) return true;
+    } catch (e) {}
+    return false;
+  }
 
   function projectBase() {
     return '/';
@@ -41,6 +48,7 @@
   }
 
   function prefetch(url) {
+    if (shouldSkipPrefetch()) return Promise.resolve();
     var u = canonical(url);
     if (!u || u.origin !== location.origin) return Promise.resolve();
     var key = keyFor(u.href);
@@ -100,14 +108,8 @@
   function start() {
     if (started) return;
     started = true;
-    var run = function () {
-      targets.forEach(function (file) {
-        var u = canonical(file);
-        if (u) prefetch(u.href);
-      });
-    };
-    if ('requestIdleCallback' in global) global.requestIdleCallback(run, { timeout: 1800 });
-    else setTimeout(run, 900);
+    // Avoid background-prefetching every route. Fetch only when a visitor
+    // expresses navigation intent (hover/touch), and respect data-saving networks.
   }
 
   document.addEventListener('pointerover', function (e) {
