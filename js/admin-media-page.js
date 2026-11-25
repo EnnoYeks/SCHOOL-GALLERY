@@ -168,8 +168,8 @@ function wireItems() {
       action: "update-item", id: button.dataset.save,
       caption: value("caption").value,
       link_url: value("link_url").value,
-      starts_at: isoDate(value("starts_at").value),
-      ends_at: isoDate(value("ends_at").value),
+      starts_at: value("starts_at").value || null,
+      ends_at: value("ends_at").value || null,
       visible: value("visible").checked
     };
     actionState(button, async () => {
