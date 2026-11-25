@@ -19,7 +19,7 @@ function publicBase() {
 function publicUrl(value) {
   const raw = String(value || "").trim();
   if (!raw) return "";
-  if (/^https?:\/\//i.test(raw) || /^data:image\//i.test(raw) || /^blob:/i.test(raw)) return raw;
+  if (/^https?:\/\//i.test(raw)) return raw;
   const base = publicBase();
   return base ? base + "/" + raw.replace(/^\/+/, "") : "";
 }
@@ -45,7 +45,9 @@ function imageSource(row, layout) {
 
 function normalize(row, table, slot, item) {
   const isVideo = table === "videos" || String(row.type || row.media_type || "").toLowerCase() === "video";
-  const poster = publicUrl(row.poster_key || row.posterKey || row.thumbnail_url || row.image_url || row.image || row.media_key || "");
+  const poster = isVideo
+    ? publicUrl(row.poster_key || row.posterKey || row.thumbnail_url || row.image_url || row.image || "")
+    : publicUrl(row.poster_key || row.posterKey || row.thumbnail_url || row.image_url || row.image || "");
   const src = isVideo
     ? publicUrl(row.preview_key || row.previewKey || row.video_url || row.videoUrl || row.media_key || "")
     : imageSource(row, slot.layout);
