@@ -22,7 +22,8 @@ function validUrl(value) {
 function validDate(value) {
   if (value == null || value === "") return null;
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? false : date.toISOString();
+  if (Number.isNaN(date.getTime())) throw new Error("Invalid date value");
+  return date.toISOString();
 }
 function publicMedia(row) {
   if (!row) return null;
