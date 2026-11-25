@@ -29,14 +29,22 @@ function publicMedia(row) {
   if (!row) return null;
   const base = String(process.env.R2_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
   const key = row.media_key || row.mediaKey || "";
-  const direct = row.thumbnail_url || row.image_url || row.image || row.video_url || "";
-  const src = key && base ? base + "/" + String(key).replace(/^\/+/, "") : direct;
+  const direct = row.thumbnail_url || row.image_url || row.image || "";
+  const type = row.media_type || row.type || (row.video_url ? "video" : "photo");
+  const isVideo = String(type).toLowerCase().includes("video") || !!row.video_url;
+  const keyedUrl = key && base ? base + "/" + String(key).replace(/^\/+/, "") : "";
+  const posterKey = row.poster_key || row.posterKey || "";
+  const poster = posterKey && base ? base + "/" + String(posterKey).replace(/^\/+/, "") : (/^https?:\/\//i.test(String(direct)) ? direct : "");
+  const src = isVideo ? (poster || (/^https?:\/\//i.test(String(direct)) ? direct : "")) : (keyedUrl || (/^https?:\/\//i.test(String(direct)) ? direct : ""));
+  const videoUrl = isVideo ? (row.video_url || (keyedUrl || "")) : "";
   return {
     id: row.id,
     title: row.title || row.description || "Untitled media",
     description: row.description || "",
-    type: row.media_type || row.type || (row.video_url ? "video" : "photo"),
+    type: isVideo ? "video" : "photo",
     src,
+    poster,
+    videoUrl,
     media_key: key,
     created_at: row.created_at || null,
     likes: Number(row.likes ?? row.likes_count ?? 0),
