@@ -209,7 +209,16 @@ function itemShape(item) {
     focalX: Number(item.focal_x ?? item.focalX ?? media.focalX ?? 0.5),
     focalY: Number(item.focal_y ?? item.focalY ?? media.focalY ?? 0.5),
     linkUrl: safeLink(item.link_url || item.linkUrl || ""),
-    position: Number(item.position || 0)
+    position: Number(item.position || 0),
+    title: item.title || media.title || item.caption || "",
+    description: item.description || media.description || "",
+    author: item.author || media.author || "",
+    category: item.category || media.category || "",
+    likes: item.likes == null ? null : Number(item.likes),
+    views: item.views == null ? null : Number(item.views),
+    comments: item.comments == null ? null : Number(item.comments),
+    createdAt: item.createdAt || media.createdAt || null,
+    table: item.table || media.table || ""
   };
 }
 
@@ -217,6 +226,7 @@ export function renderSlot(key, container, suppliedSlot, options = {}) {
   if (!container) return 0;
   const slot = suppliedSlot || {};
   const items = (slot.items || []).map(itemShape).filter(item => item.src || item.poster);
+  if (typeof options.renderer === "function") return options.renderer(slot, items, container);
   const preview = options.preview === true;
   container.classList.add("hshs-media-slot");
   container.dataset.mediaSlotKey = key;
@@ -344,7 +354,9 @@ export async function loadSlots(keys, containers, options = {}) {
   if (!response.ok) throw new Error("Media slots could not be loaded (" + response.status + ")");
   const payload = await response.json();
   const byKey = new Map((payload.slots || []).map(slot => [slot.key, slot]));
-  Object.entries(containers || {}).forEach(([key, container]) => renderSlot(key, container, byKey.get(key) || null));
+  Object.entries(containers || {}).forEach(([key, container]) => renderSlot(key, container, byKey.get(key) || null, {
+    renderer: options.renderers && options.renderers[key]
+  }));
   return Object.fromEntries(byKey);
 }
 
