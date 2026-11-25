@@ -1,0 +1,14 @@
+{
+  "name": "hshs-world",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "set-admin": "node scripts/set-admin.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.119.2",
+    "firebase-admin": "14.5.1"
+  }
+}
