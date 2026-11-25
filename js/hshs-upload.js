@@ -51,6 +51,17 @@
     'https://cdn.jsdelivr.net/gh/EnnoYeks/SCHOOL-GALLERY@255cb6608129cf952fb2c8de957a7254ae830099/js/hshs-upload.js';
 
 
+  function ensureStudioCss() {
+    var link = document.getElementById('hshs-studio-css');
+    if (!link) {
+      link = document.createElement('link');
+      link.id = 'hshs-studio-css';
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    link.href = '/css/hshs-studio.css?v=261125purplecam1';
+  }
+
   function installCameraFallback() {
     if (window.__hshsCamFallbackInstalled) return;
     window.__hshsCamFallbackInstalled = true;
@@ -169,6 +180,7 @@
           close: window.__hshsCloseUpload
         };
       }
+      ensureStudioCss();
       installCameraFallback();
     };
     s.onerror = function () {
