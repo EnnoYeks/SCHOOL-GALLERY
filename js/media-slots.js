@@ -219,7 +219,8 @@ function itemShape(item) {
     views: item.views == null ? null : Number(item.views),
     comments: item.comments == null ? null : Number(item.comments),
     createdAt: item.createdAt || media.createdAt || null,
-    table: item.table || media.table || ""
+    table: item.table || media.table || "",
+    mediaKey: item.mediaKey || item.media_key || media.mediaKey || media.media_key || ""
   };
 }
 
