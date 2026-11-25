@@ -1,7 +1,17 @@
-import { auth } from "./config.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { renderSlot } from "./media-slots.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyCoFBtKrk7ZRvV1mZe5hN9tRCPKsuQBlgo",
+  authDomain: "school-gallery-62032.firebaseapp.com",
+  projectId: "school-gallery-62032",
+  messagingSenderId: "931689210926",
+  appId: "1:931689210926:web:fd2daf8495d6e6f3e42bbf",
+  measurementId: "G-5W89YVBV6J"
+};
+const firebaseApp = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
 const root = document.getElementById("media-admin-root");
 let currentUser = null;
 let state = { slots: [], items: [], library: [] };
