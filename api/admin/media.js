@@ -87,16 +87,26 @@ async function hydrateItems(sb, items) {
 async function readLibrary(sb, req) {
   const table = TABLES.has(req.query.table) ? req.query.table : null;
   const search = cleanText(req.query.search, 100).toLowerCase();
+  const offset = Math.max(0, Math.min(100000, Number(req.query.library_offset) || 0));
   const selected = table ? [table] : [...TABLES];
   const results = await Promise.all(selected.map(async (name) => {
-    let query = sb.from(name).select("*").order("created_at", { ascending: false }).limit(100);
+    let query = sb.from(name).select("*").order("created_at", { ascending: false }).range(offset, offset + 99);
     if (name === "posts") query = query.eq("status", "published");
     const { data, error } = await query;
     if (error) throw error;
-    return (data || []).map((row) => ({ table: name, ...publicMedia(row) }));
+    return data || [];
   }));
-  return results.flat().filter((item) => !search || [item.title, item.description, item.type].join(" ").toLowerCase().includes(search));
+  const items = results.flat().map((row, index) => {
+    const tableName = selected.find((name) => results[selected.indexOf(name)]?.includes(row)) || selected[0];
+    return { table: tableName, ...publicMedia(row) };
+  }).filter((item) => !search || [item.title, item.description, item.type, item.table].join(" ").toLowerCase().includes(search));
+  return {
+    items,
+    hasMore: results.some((rows) => rows.length === 100),
+    nextOffset: offset + 100
+  };
 }
+
 async function getSlot(sb, key) {
   const { data, error } = await sb.from("media_slots").select("key").eq("key", key).maybeSingle();
   if (error) throw error;
@@ -244,7 +254,7 @@ module.exports = async function adminMedia(req, res) {
   try {
     const sb = supabaseAdmin();
     if (req.method === "GET") {
-      const [slotsResult, itemsResult, library] = await Promise.all([
+      const [slotsResult, itemsResult, libraryPage] = await Promise.all([
         sb.from("media_slots").select("*").order("page").order("key"),
         sb.from("media_slot_items").select("*").order("slot_key").order("position"),
         readLibrary(sb, req)
@@ -255,7 +265,9 @@ module.exports = async function adminMedia(req, res) {
         admin: { uid: decoded.uid, email: decoded.email || null },
         slots: slotsResult.data || [],
         items: await hydrateItems(sb, itemsResult.data || []),
-        library
+        library: libraryPage.items,
+        libraryHasMore: libraryPage.hasMore,
+        libraryNextOffset: libraryPage.nextOffset
       });
     }
     const body = req.method === "DELETE" ? { action: "delete-item", id: req.query.id } : (req.body || {});
