@@ -78,3 +78,18 @@
 .photo-card .photo-caption .photo-short-caption{display:block;margin-top:4px;color:rgba(255,255,255,.86);font-size:12px;line-height:1.35}
 
 .vibe-feat.is-loading .meta,.vibe-feat.is-loading .vibe-type,.vibe-feat.is-loading .badge,.vibe-row.is-loading .copy{visibility:hidden}
+
+/* Central editorial media slots. Kept in the shared media stylesheet used by Home, Photos and Videos. */
+.hshs-media-slot{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px;min-width:0}
+.hshs-media-slot[data-media-slot-layout="strip"]{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px}
+.hshs-media-slot[data-media-slot-layout="carousel"]{display:flex;overflow:hidden;gap:0}
+.hshs-slot-card{position:relative;min-width:0;overflow:hidden;border-radius:inherit;background:#102044;color:inherit;scroll-snap-align:start}
+.hshs-slot-card__media{position:relative;width:100%;overflow:hidden;background:#0b1b3d;aspect-ratio:var(--hshs-slot-aspect,16/9)}
+.hshs-slot-card__media img,.hshs-slot-card__media video{display:block;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .28s ease}
+.hshs-slot-card__media img.is-loaded,.hshs-slot-card__media video.is-loaded{opacity:1}
+.hshs-slot-card__caption{padding:10px 12px;color:inherit;font-size:.88rem;line-height:1.4}
+.hshs-slot-card__link{display:block;min-width:0;color:inherit;text-decoration:none}
+.hshs-slot-skeleton{min-width:0;aspect-ratio:var(--hshs-slot-aspect,16/9);border-radius:inherit;background:linear-gradient(110deg,rgba(255,255,255,.035) 8%,rgba(255,255,255,.09) 18%,rgba(255,255,255,.035) 33%);background-size:200% 100%;animation:hshs-slot-shimmer 1.35s linear infinite}
+.hshs-slot-empty{padding:18px;border:1px dashed rgba(148,163,184,.25);border-radius:12px;color:#94a3b8;text-align:center;font-size:12px}
+@keyframes hshs-slot-shimmer{to{background-position-x:-200%}}
+@media(prefers-reduced-motion:reduce){.hshs-slot-card__media img,.hshs-slot-card__media video{transition:none}.hshs-slot-skeleton{animation:none}}
