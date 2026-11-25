@@ -289,7 +289,7 @@
   async function uploadObject(file, key, contentType) {
     var r2 = r2Config();
     var signTarget = r2.signUrl || "";
-    if (signTarget && !/\\/sign\\/?$/i.test(signTarget)) signTarget = signTarget.replace(/\\/$/, "") + "/sign";
+    if (signTarget && !/\/sign\/?$/i.test(signTarget)) signTarget = signTarget.replace(/\/$/, "") + "/sign";
     if (!signTarget) throw new Error("Cloudflare R2 is not configured. The file was not saved.");
     var signRes = await fetch(signTarget, {
       method: "POST",
@@ -385,7 +385,7 @@
     await uploadObject(file, key, contentType);
 
     var processedKey = "";
-    if (kind !== "video" && file && /^image\\//i.test(file.type || "")) {
+    if (kind !== "video" && file && /^image\//i.test(file.type || "")) {
       try {
         processedKey = await createImageVariants(file, variantId());
       } catch (variantError) {
