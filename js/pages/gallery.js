@@ -213,8 +213,10 @@
       media.className = 'gallery-media';
       media.src = p._media;
       media.alt = p._title || '';
-      media.loading = index < 4 ? 'eager' : 'lazy';
+      media.loading = index === 0 ? 'eager' : 'lazy';
       media.decoding = 'async';
+      if (p.srcSet) media.srcset = p.srcSet;
+      media.sizes = '(max-width: 640px) 50vw, (max-width: 1100px) 33vw, 25vw';
       media.referrerPolicy = 'no-referrer';
       media.onerror = function () {
         this.onerror = null;
@@ -261,9 +263,19 @@
     if (!list.length) {
       feed.innerHTML = '';
       feed.style.height = '0px';
+      if (!state.all.length) {
+        feed.hidden = true;
+        if (empty) empty.hidden = true;
+        if (label) label.textContent = '';
+      } else {
+        feed.hidden = false;
+        if (empty) empty.hidden = false;
+      }
       return;
     }
 
+    feed.hidden = false;
+    if (empty) empty.hidden = true;
     feed.style.height = '';
     feed.replaceChildren();
     for (var i = 0; i < state.items.length; i++) {
@@ -300,37 +312,65 @@
   async function loadAll() {
     state.loading = true;
     setLoading(true);
-    var posts = [], photos = [], videos = [], storePosts = [], r2 = [];
-    try { if (global.db && db.getPosts) posts = await db.getPosts(48, 0); } catch (e) {}
-    try { if (global.db && db.getPhotos) photos = await db.getPhotos(48, 0); } catch (e) {}
-    try { if (global.db && db.getVideos) videos = await db.getVideos(48, 0); } catch (e) {}
-    try { if (global.HshsStore && typeof HshsStore.listPosts === 'function') storePosts = HshsStore.listPosts(); } catch (e) {}
-    if (!(posts.length || photos.length || videos.length)) {
-      try { r2 = await loadFromR2(); } catch (e) { r2 = []; }
+    var feed = document.getElementById('galleryFeed');
+    try {
+      var mediaSlots = await import('/js/media-slots.js');
+      await mediaSlots.loadSlots(['gallery_feed'], { gallery_feed: feed }, {
+        renderers: {
+          gallery_feed: function (slot, items) {
+            var merged = (items || []).filter(function (item) {
+              return !!(item.video ? (item.videoUrl || item.src) : item.src);
+            }).map(function (item) {
+              return {
+                id: item.id,
+                title: item.title || '',
+                caption: item.caption || '',
+                description: item.description || '',
+                type: item.video ? 'video' : 'photo',
+                videoUrl: item.videoUrl || (item.video ? item.src : ''),
+                video_url: item.videoUrl || (item.video ? item.src : ''),
+                imageUrl: item.video ? (item.poster || '') : item.src,
+                image_url: item.video ? (item.poster || '') : item.src,
+                thumbnailUrl: item.poster || item.src,
+                thumbnail_url: item.poster || item.src,
+                srcSet: item.srcSet || '',
+                width: item.width || 0,
+                height: item.height || 0,
+                author: item.author || '',
+                author_id: item.authorId || '',
+                category: item.category || '',
+                createdAt: item.createdAt,
+                likes: Number(item.likes) > 0 ? Number(item.likes) : null,
+                comments: Number(item.comments) > 0 ? Number(item.comments) : null,
+                mediaKey: item.mediaKey || ''
+              };
+            });
+            var seen = {};
+            state.all = merged.map(function (row) { return normalize(row, row.type); }).filter(Boolean).filter(function (item) {
+              var key = mediaKeyOf(item);
+              if (seen[key]) return false;
+              seen[key] = 1;
+              return true;
+            }).sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+            state.offset = 0;
+            state.loading = false;
+            setLoading(false);
+            paint();
+            ensureResizeObserver();
+            return state.all.length;
+          }
+        }
+      });
+    } catch (error) {
+      console.error('[HSHS Gallery] Managed media slot failed:', error);
+      state.all = [];
+      state.offset = 0;
+      state.loading = false;
+      setLoading(false);
+      paint();
     }
-    var merged = [].concat(
-      (posts || []).map(function (p) { return normalize(p, p.type); }),
-      (photos || []).map(function (p) { return normalize(p, 'photo'); }),
-      (videos || []).map(function (p) { return normalize(p, 'video'); }),
-      (storePosts || []).map(function (p) { return normalize(p, p.type); }),
-      (r2 || []).map(function (p) { return normalize(p, p.type); })
-    ).filter(Boolean);
-    var seen = {};
-    state.all = merged.filter(function (p) {
-      var key = mediaKeyOf(p);
-      if (seen[key]) return false;
-      seen[key] = 1;
-      return true;
-    }).sort(function (a, b) {
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    });
-    state.offset = 0;
-    state.loading = false;
-    setLoading(false);
-    paint();
     var skel = document.querySelector('#hshs-page .hshs-load-skel');
     if (skel && skel.parentNode) skel.parentNode.removeChild(skel);
-    ensureResizeObserver();
     try {
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(function () { if (isPage()) paint(); });

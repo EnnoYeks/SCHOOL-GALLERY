@@ -24,7 +24,7 @@ function showSkeleton(container, layout, count) {
 
 function safeMediaSource(value) {
   const raw = String(value || "");
-  return /^https?:\\/\\//i.test(raw) ? raw : "";
+  return /^https?:\/\//i.test(raw) ? raw : "";
 }
 
 function cleanTitle(value) {
@@ -209,7 +209,18 @@ function itemShape(item) {
     focalX: Number(item.focal_x ?? item.focalX ?? media.focalX ?? 0.5),
     focalY: Number(item.focal_y ?? item.focalY ?? media.focalY ?? 0.5),
     linkUrl: safeLink(item.link_url || item.linkUrl || ""),
-    position: Number(item.position || 0)
+    position: Number(item.position || 0),
+    title: item.title || media.title || item.caption || "",
+    description: item.description || media.description || "",
+    author: item.author || media.author || "",
+    authorId: item.authorId || media.authorId || "",
+    category: item.category || media.category || "",
+    likes: item.likes == null ? null : Number(item.likes),
+    views: item.views == null ? null : Number(item.views),
+    comments: item.comments == null ? null : Number(item.comments),
+    createdAt: item.createdAt || media.createdAt || null,
+    table: item.table || media.table || "",
+    mediaKey: item.mediaKey || item.media_key || media.mediaKey || media.media_key || ""
   };
 }
 
@@ -217,6 +228,7 @@ export function renderSlot(key, container, suppliedSlot, options = {}) {
   if (!container) return 0;
   const slot = suppliedSlot || {};
   const items = (slot.items || []).map(itemShape).filter(item => item.src || item.poster);
+  if (typeof options.renderer === "function") return options.renderer(slot, items, container);
   const preview = options.preview === true;
   container.classList.add("hshs-media-slot");
   container.dataset.mediaSlotKey = key;
@@ -327,7 +339,12 @@ function hideIfEmpty(container, preview) {
 export async function loadSlots(keys, containers, options = {}) {
   const unique = [...new Set((keys || []).filter(Boolean))];
   Object.entries(containers || {}).forEach(([key, container]) => {
+    if (!container) return;
     const count = options.skeletonCount || 3;
+    if (typeof (options.renderers && options.renderers[key]) === "function") {
+      container.setAttribute("aria-busy", "true");
+      return;
+    }
     if (key === "home_hero" && container.classList.contains("vibe-hero-photos")) {
       container.querySelectorAll("span").forEach(span => span.classList.add("is-slot-loading"));
       return;
@@ -344,7 +361,9 @@ export async function loadSlots(keys, containers, options = {}) {
   if (!response.ok) throw new Error("Media slots could not be loaded (" + response.status + ")");
   const payload = await response.json();
   const byKey = new Map((payload.slots || []).map(slot => [slot.key, slot]));
-  Object.entries(containers || {}).forEach(([key, container]) => renderSlot(key, container, byKey.get(key) || null));
+  Object.entries(containers || {}).forEach(([key, container]) => renderSlot(key, container, byKey.get(key) || null, {
+    renderer: options.renderers && options.renderers[key]
+  }));
   return Object.fromEntries(byKey);
 }
 

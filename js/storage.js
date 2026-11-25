@@ -286,44 +286,123 @@
     }
   }
 
+  async function uploadObject(file, key, contentType) {
+    var r2 = r2Config();
+    var signTarget = r2.signUrl || "";
+    if (signTarget && !/\/sign\/?$/i.test(signTarget)) signTarget = signTarget.replace(/\/$/, "") + "/sign";
+    if (!signTarget) throw new Error("Cloudflare R2 is not configured. The file was not saved.");
+    var signRes = await fetch(signTarget, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: key, contentType: contentType, size: file && file.size })
+    });
+    if (!signRes.ok) throw new Error("Cloudflare R2 signing failed (" + signRes.status + ").");
+    var signed = await signRes.json();
+    var putUrl = signed.url || signed.putUrl;
+    if (!putUrl) throw new Error("Cloudflare R2 did not return an upload URL.");
+    var put = await fetch(putUrl, {
+      method: "PUT",
+      headers: { "Content-Type": contentType || "application/octet-stream" },
+      body: file
+    });
+    if (!put.ok) throw new Error("Cloudflare R2 upload failed (" + put.status + ").");
+    return { key: key, url: publicUrl(key) };
+  }
+
+  function variantId() {
+    try {
+      if (g.crypto && typeof g.crypto.randomUUID === "function") return g.crypto.randomUUID();
+    } catch (e) {}
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12);
+  }
+
+  function loadDrawable(file) {
+    if (typeof createImageBitmap === "function") {
+      return createImageBitmap(file).then(function (bitmap) {
+        return { image: bitmap, width: bitmap.width, height: bitmap.height, close: function () { if (bitmap.close) bitmap.close(); } };
+      });
+    }
+    return new Promise(function (resolve, reject) {
+      var objectUrl = URL.createObjectURL(file);
+      var image = new Image();
+      image.onload = function () {
+        resolve({
+          image: image, width: image.naturalWidth || image.width, height: image.naturalHeight || image.height,
+          close: function () { URL.revokeObjectURL(objectUrl); }
+        });
+      };
+      image.onerror = function () { URL.revokeObjectURL(objectUrl); reject(new Error("Could not decode image for size generation.")); };
+      image.src = objectUrl;
+    });
+  }
+
+  function canvasWebp(canvas) {
+    return new Promise(function (resolve, reject) {
+      canvas.toBlob(function (blob) {
+        if (!blob) return reject(new Error("This browser could not create a WebP image."));
+        resolve(blob);
+      }, "image/webp", 0.8);
+    });
+  }
+
+  async function createImageVariants(file, id) {
+    var drawable = await loadDrawable(file);
+    try {
+      var base = "media/" + id;
+      var targets = [
+        { name: "thumb", max: 400 },
+        { name: "medium", max: 900 },
+        { name: "large", max: 1600 }
+      ];
+      var blobs = await Promise.all(targets.map(async function (target) {
+        var scale = Math.min(1, target.max / Math.max(drawable.width, drawable.height));
+        var width = Math.max(1, Math.round(drawable.width * scale));
+        var height = Math.max(1, Math.round(drawable.height * scale));
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        var context = canvas.getContext("2d", { alpha: false });
+        if (!context) throw new Error("Canvas is unavailable for image size generation.");
+        context.drawImage(drawable.image, 0, 0, width, height);
+        return { key: base + "/" + target.name + ".webp", blob: await canvasWebp(canvas) };
+      }));
+      await Promise.all(blobs.map(function (variant) {
+        return uploadObject(variant.blob, variant.key, "image/webp");
+      }));
+      return base;
+    } finally {
+      drawable.close();
+    }
+  }
+
   async function upload(file, options) {
     options = options || {};
     var kind = options.kind || (file && file.type && file.type.indexOf("video") === 0 ? "video" : "photo");
     checkSize(file, kind);
     var dims = await mediaSize(file);
     var key = objectKey(kind, file);
-    var r2 = r2Config();
-    var signTarget = r2.signUrl || "";
-    if (signTarget && !/\/sign\/?$/i.test(signTarget)) {
-      signTarget = signTarget.replace(/\/$/, "") + "/sign";
+    var contentType = (file && file.type) || (kind === "video" ? "video/webm" : "image/jpeg");
+    await uploadObject(file, key, contentType);
+
+    var processedKey = "";
+    if (kind !== "video" && file && /^image\//i.test(file.type || "")) {
+      try {
+        processedKey = await createImageVariants(file, variantId());
+      } catch (variantError) {
+        // The original upload remains valid; slot rendering falls back to it until variants are available.
+        console.warn("[HshsStorage] Image variants could not be generated:", variantError && variantError.message);
+      }
     }
-    if (!signTarget) {
-      throw new Error("Cloudflare R2 is not configured. The file was not saved.");
-    }
-    var signRes = await fetch(signTarget, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        key: key,
-        contentType: (file && file.type) || (kind === "video" ? "video/webm" : "image/jpeg"),
-        size: file && file.size
-      })
-    });
-    if (!signRes.ok) throw new Error("Cloudflare R2 signing failed (" + signRes.status + "). The file was not saved.");
-    var signed = await signRes.json();
-    var putUrl = signed.url || signed.putUrl;
-    if (!putUrl) throw new Error("Cloudflare R2 did not return an upload URL.");
-    var put = await fetch(putUrl, {
-      method: "PUT",
-      headers: {
-        "Content-Type": (file && file.type) || (kind === "video" ? "video/webm" : "image/jpeg")
-      },
-      body: file
-    });
-    if (!put.ok) throw new Error("Cloudflare R2 upload failed (" + put.status + "). The file was not saved.");
+
     return {
       url: publicUrl(key),
       key: key,
+      processedKey: processedKey,
+      variantKeys: processedKey ? {
+        thumb: processedKey + "/thumb.webp",
+        medium: processedKey + "/medium.webp",
+        large: processedKey + "/large.webp"
+      } : null,
       provider: "cloudflare-r2",
       kind: kind,
       size: (file && file.size) || 0,
@@ -389,6 +468,7 @@
   g.HshsStorage = {
     upload: upload,
     uploadFromUrl: uploadFromUrl,
+    generateVariants: function (file) { return createImageVariants(file, variantId()); },
     uploadAdmin: uploadAdmin,
     list: list,
     objectKey: objectKey,

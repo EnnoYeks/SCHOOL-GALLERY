@@ -28,6 +28,22 @@ function imageSources(row, layout) {
   const key = row.media_key || row.mediaKey || "";
   const processed = row.processed_key || row.processedKey || "";
   const width = Number(row.width || 0);
+  if (processed && publicBase() && /^media\//.test(processed)) {
+    const variants = [
+      { name: "thumb", target: 400 },
+      { name: "medium", target: 900 },
+      { name: "large", target: 1600 }
+    ];
+    const byWidth = new Map();
+    variants.forEach((variant) => {
+      const descriptor = width > 0 ? Math.min(width, variant.target) : variant.target;
+      byWidth.set(descriptor, { url: publicUrl(processed + "/" + variant.name + ".webp"), width: descriptor });
+    });
+    const srcSet = [...byWidth.values()].sort((a, b) => a.width - b.width)
+      .map((variant) => variant.url + " " + variant.width + "w").join(", ");
+    const selectedName = layout === "carousel" ? "large" : layout === "strip" ? "thumb" : "medium";
+    return { src: publicUrl(processed + "/" + selectedName + ".webp"), srcSet };
+  }
   const wanted = layout === "carousel" ? 1440 : layout === "strip" ? 320 : 960;
   if (processed && publicBase()) {
     const available = [320, 640, 960, 1440].filter((w) => !width || w <= width);
@@ -42,49 +58,6 @@ function imageSources(row, layout) {
     if (fromKey) return { src: fromKey, srcSet: "" };
   }
   return { src: publicUrl(row.thumbnail_url || row.thumbnailUrl || row.image_url || row.imageUrl || row.image || ""), srcSet: "" };
-}onst { supabaseAdmin } = require("./_supabase");
-
-const TABLES = ["posts", "photos", "videos"];
-const PAGE_TABLES = {
-  home: TABLES,
-  videos: ["videos"],
-  photos: ["photos"],
-  memories: TABLES,
-  vibe: ["videos"],
-  gallery: TABLES,
-  trending: TABLES,
-  spotlight: ["posts", "photos"]
-};
-
-function publicBase() {
-  return String(process.env.R2_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
-}
-
-function publicUrl(value) {
-  const raw = String(value || "").trim();
-  if (!raw || /^(data:|blob:)/i.test(raw)) return "";
-  if (/^https?:\/\//i.test(raw)) return raw;
-  const base = publicBase();
-  return base ? base + "/" + raw.replace(/^\/+/, "") : "";
-}
-
-function imageSource(row, layout) {
-  const key = row.media_key || row.mediaKey || "";
-  const processed = row.processed_key || row.processedKey || "";
-  const width = Number(row.width || 0);
-  const wanted = layout === "carousel" ? 1440 : layout === "strip" ? 320 : 960;
-  if (processed && publicBase()) {
-    const available = [320, 640, 960, 1440].filter((w) => !width || w <= width);
-    if (available.length) {
-      const selected = available.filter((w) => w <= wanted).pop() || available[0];
-      return publicUrl(processed + "-" + selected + ".webp");
-    }
-  }
-  if (key) {
-    const fromKey = publicUrl(key);
-    if (fromKey) return fromKey;
-  }
-  return publicUrl(row.thumbnail_url || row.thumbnailUrl || row.image_url || row.imageUrl || row.image || "");
 }
 
 function normalize(row, table, slot, item) {
@@ -100,9 +73,15 @@ function normalize(row, table, slot, item) {
     table,
     title: item?.caption || row.title || row.description || "",
     caption: item?.caption || row.description || row.title || "",
+    description: row.description || "",
+    author: row.author || row.username || row.author_name || row.authorName || "",
+    authorId: row.author_id || row.authorId || row.user_id || row.uid || "",
+    category: row.category || row.tag || "",
     mediaType: isVideo ? "video" : "photo",
     src,
     srcSet: image.srcSet,
+    width: Number(row.width || 0) || null,
+    height: Number(row.height || 0) || null,
     poster,
     videoUrl: isVideo ? publicUrl(row.video_url || row.videoUrl || row.media_key || "") : "",
     createdAt: row.created_at || row.createdAt || null,
@@ -149,7 +128,10 @@ async function mostLikedMedia(sb, tables, limit) {
   });
   const candidates = await latestMedia(sb, tables, Math.max(limit * 8, 40));
   return candidates
-    .map((entry) => ({ ...entry, recentLikes: counts.get(entry.table + ":" + entry.row.id) || 0 }))
+    .map((entry) => {
+      const recentLikes = counts.get(entry.table + ":" + entry.row.id) || 0;
+      return { ...entry, recentLikes, row: { ...entry.row, likes: recentLikes } };
+    })
     .sort((a, b) => b.recentLikes - a.recentLikes || new Date(b.row.created_at || 0) - new Date(a.row.created_at || 0))
     .slice(0, limit);
 }
@@ -222,6 +204,7 @@ module.exports = async function slots(req, res) {
       key: slot.key,
       layout: slot.layout,
       aspectRatio: slot.aspect_ratio,
+      max_items: slot.max_items,
       visible: slot.visible,
       items: await getSlotItems(sb, slot)
     })));

@@ -29,13 +29,19 @@ function publicMedia(row) {
   if (!row) return null;
   const base = String(process.env.R2_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
   const key = row.media_key || row.mediaKey || "";
+  const processed = row.processed_key || row.processedKey || "";
   const direct = row.thumbnail_url || row.image_url || row.image || "";
   const type = row.media_type || row.type || (row.video_url ? "video" : "photo");
   const isVideo = String(type).toLowerCase().includes("video") || !!row.video_url;
   const keyedUrl = key && base ? base + "/" + String(key).replace(/^\/+/, "") : "";
   const posterKey = row.poster_key || row.posterKey || "";
   const poster = posterKey && base ? base + "/" + String(posterKey).replace(/^\/+/, "") : (/^https?:\/\//i.test(String(direct)) ? direct : "");
-  const src = isVideo ? (poster || (/^https?:\/\//i.test(String(direct)) ? direct : "")) : (keyedUrl || (/^https?:\/\//i.test(String(direct)) ? direct : ""));
+  const variants = processed && base && /^media\//.test(processed) ? {
+    thumb: base + "/" + processed + "/thumb.webp",
+    medium: base + "/" + processed + "/medium.webp",
+    large: base + "/" + processed + "/large.webp"
+  } : null;
+  const src = isVideo ? (poster || (/^https?:\/\//i.test(String(direct)) ? direct : "")) : (variants ? variants.medium : (keyedUrl || (/^https?:\/\//i.test(String(direct)) ? direct : "")));
   const videoUrl = isVideo ? (row.video_url || (keyedUrl || "")) : "";
   return {
     id: row.id,
@@ -45,6 +51,8 @@ function publicMedia(row) {
     src,
     poster,
     videoUrl,
+    srcSet: variants ? variants.thumb + " 400w, " + variants.medium + " 900w, " + variants.large + " 1600w" : "",
+    processedKey: processed,
     media_key: key,
     created_at: row.created_at || null,
     likes: Number(row.likes ?? row.likes_count ?? 0),
@@ -79,16 +87,26 @@ async function hydrateItems(sb, items) {
 async function readLibrary(sb, req) {
   const table = TABLES.has(req.query.table) ? req.query.table : null;
   const search = cleanText(req.query.search, 100).toLowerCase();
+  const offset = Math.max(0, Math.min(100000, Number(req.query.library_offset) || 0));
   const selected = table ? [table] : [...TABLES];
   const results = await Promise.all(selected.map(async (name) => {
-    let query = sb.from(name).select("*").order("created_at", { ascending: false }).limit(100);
+    let query = sb.from(name).select("*").order("created_at", { ascending: false }).range(offset, offset + 99);
     if (name === "posts") query = query.eq("status", "published");
     const { data, error } = await query;
     if (error) throw error;
-    return (data || []).map((row) => ({ table: name, ...publicMedia(row) }));
+    return data || [];
   }));
-  return results.flat().filter((item) => !search || [item.title, item.description, item.type].join(" ").toLowerCase().includes(search));
+  const items = results.flat().map((row, index) => {
+    const tableName = selected.find((name) => results[selected.indexOf(name)]?.includes(row)) || selected[0];
+    return { table: tableName, ...publicMedia(row) };
+  }).filter((item) => !search || [item.title, item.description, item.type, item.table].join(" ").toLowerCase().includes(search));
+  return {
+    items,
+    hasMore: results.some((rows) => rows.length === 100),
+    nextOffset: offset + 100
+  };
 }
+
 async function getSlot(sb, key) {
   const { data, error } = await sb.from("media_slots").select("key").eq("key", key).maybeSingle();
   if (error) throw error;
@@ -204,6 +222,16 @@ async function handlePost(sb, body) {
     if (error) throw error;
     return data;
   }
+  if (action === "save-processed-key") {
+    const table = String(body.media_table || "");
+    const id = String(body.media_id || "");
+    const processedKey = cleanText(body.processed_key, 160);
+    if (!["posts", "photos"].includes(table) || !UUID.test(id)) throw new Error("Invalid media record");
+    if (!/^media\/[a-z0-9-]{16,80}$/i.test(processedKey)) throw new Error("Invalid processed media key");
+    const { data, error } = await sb.from(table).update({ processed_key: processedKey }).eq("id", id).select("id,processed_key").single();
+    if (error) throw error;
+    return data;
+  }
   if (action === "reorder") return reorder(sb, body);
   if (action === "delete-item") {
     const id = String(body.id || "");
@@ -226,7 +254,7 @@ module.exports = async function adminMedia(req, res) {
   try {
     const sb = supabaseAdmin();
     if (req.method === "GET") {
-      const [slotsResult, itemsResult, library] = await Promise.all([
+      const [slotsResult, itemsResult, libraryPage] = await Promise.all([
         sb.from("media_slots").select("*").order("page").order("key"),
         sb.from("media_slot_items").select("*").order("slot_key").order("position"),
         readLibrary(sb, req)
@@ -237,7 +265,9 @@ module.exports = async function adminMedia(req, res) {
         admin: { uid: decoded.uid, email: decoded.email || null },
         slots: slotsResult.data || [],
         items: await hydrateItems(sb, itemsResult.data || []),
-        library
+        library: libraryPage.items,
+        libraryHasMore: libraryPage.hasMore,
+        libraryNextOffset: libraryPage.nextOffset
       });
     }
     const body = req.method === "DELETE" ? { action: "delete-item", id: req.query.id } : (req.body || {});
