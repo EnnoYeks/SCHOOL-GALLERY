@@ -31,10 +31,10 @@ body.has-mobile-shell .navbar, .navbar.hshs-flat-top, html.hshs-nav-scrolled .na
 }
 .vibe-hero-photos, .vibe-hero-photos span { position: absolute; inset: 0; }
 .vibe-hero-photos span { background-size: cover; background-position: center; mix-blend-mode: overlay; opacity: 0; animation: vibeCross 20s ease-in-out infinite; }
-.vibe-hero-photos span:nth-child(1) { background-image: url("https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=60"); }
-.vibe-hero-photos span:nth-child(2) { background-image: url("https://images.unsplash.com/photo-1541339906-3e147b925338?auto=format&fit=crop&w=1200&q=60"); animation-delay: 5s; }
-.vibe-hero-photos span:nth-child(3) { background-image: url("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=60"); animation-delay: 10s; }
-.vibe-hero-photos span:nth-child(4) { background-image: url("https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1200&q=60"); animation-delay: 15s; }
+.vibe-hero-photos span:nth-child(1) { background-image: none; }
+.vibe-hero-photos span:nth-child(2) { background-image: none; animation-delay: 5s; }
+.vibe-hero-photos span:nth-child(3) { background-image: none; animation-delay: 10s; }
+.vibe-hero-photos span:nth-child(4) { background-image: none; animation-delay: 15s; }
 @keyframes vibeCross { 0%{opacity:0;} 8%{opacity:.42;} 25%{opacity:.42;} 33%{opacity:0;} 100%{opacity:0;} }
 .vibe-hero-crest {
   position: absolute; right: -18px; top: 18px; width: 210px; height: 210px;
@@ -109,3 +109,14 @@ body.has-mobile-shell .navbar, .navbar.hshs-flat-top, html.hshs-nav-scrolled .na
   .vibe-hero-photos span.is-campus, .home-feature-media.is-live { animation: none !important; }
   .vibe-hero-photos span.is-campus:first-child { opacity: .45; }
 }
+
+/* Managed home media keeps the existing card geometry while using responsive image files. */
+.vibe-hero-photos span img{display:block;width:100%;height:100%;object-fit:cover;opacity:1;mix-blend-mode:overlay}
+.vibe-hero-photos span.is-slot-loading{background:none!important}
+.vibe-hero-card:has(.vibe-hero-photos[hidden]) .vibe-hero-photos{display:none}
+.vibe-hero-photos span{animation-play-state:running}
+.home-feature-media img{display:block;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .28s ease}
+.home-feature-media img.is-loaded{opacity:1}
+.home-trend-thumb{display:block;overflow:hidden}
+.home-trend-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+@media(prefers-reduced-motion:reduce){.vibe-hero-photos span{animation:none!important}.vibe-hero-photos span:first-child{opacity:.5}}
