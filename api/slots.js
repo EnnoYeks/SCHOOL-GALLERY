@@ -29,11 +29,20 @@ function imageSources(row, layout) {
   const processed = row.processed_key || row.processedKey || "";
   const width = Number(row.width || 0);
   if (processed && publicBase() && /^media\//.test(processed)) {
-    const thumb = publicUrl(processed + "/thumb.webp");
-    const medium = publicUrl(processed + "/medium.webp");
-    const large = publicUrl(processed + "/large.webp");
-    const src = layout === "carousel" ? large : layout === "strip" ? thumb : medium;
-    return { src, srcSet: [thumb + " 400w", medium + " 900w", large + " 1600w"].join(", ") };
+    const variants = [
+      { name: "thumb", target: 400 },
+      { name: "medium", target: 900 },
+      { name: "large", target: 1600 }
+    ];
+    const byWidth = new Map();
+    variants.forEach((variant) => {
+      const descriptor = width > 0 ? Math.min(width, variant.target) : variant.target;
+      byWidth.set(descriptor, { url: publicUrl(processed + "/" + variant.name + ".webp"), width: descriptor });
+    });
+    const srcSet = [...byWidth.values()].sort((a, b) => a.width - b.width)
+      .map((variant) => variant.url + " " + variant.width + "w").join(", ");
+    const selectedName = layout === "carousel" ? "large" : layout === "strip" ? "thumb" : "medium";
+    return { src: publicUrl(processed + "/" + selectedName + ".webp"), srcSet };
   }
   const wanted = layout === "carousel" ? 1440 : layout === "strip" ? 320 : 960;
   if (processed && publicBase()) {
