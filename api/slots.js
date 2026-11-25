@@ -103,10 +103,11 @@ function normalize(row, table, slot, item) {
     description: row.description || "",
     author: row.author || row.username || row.author_name || row.authorName || "",
     category: row.category || row.tag || "",
-    table,
     mediaType: isVideo ? "video" : "photo",
     src,
     srcSet: image.srcSet,
+    width: Number(row.width || 0) || null,
+    height: Number(row.height || 0) || null,
     poster,
     videoUrl: isVideo ? publicUrl(row.video_url || row.videoUrl || row.media_key || "") : "",
     createdAt: row.created_at || row.createdAt || null,
@@ -153,7 +154,10 @@ async function mostLikedMedia(sb, tables, limit) {
   });
   const candidates = await latestMedia(sb, tables, Math.max(limit * 8, 40));
   return candidates
-    .map((entry) => ({ ...entry, recentLikes: counts.get(entry.table + ":" + entry.row.id) || 0 }))
+    .map((entry) => {
+      const recentLikes = counts.get(entry.table + ":" + entry.row.id) || 0;
+      return { ...entry, recentLikes, row: { ...entry.row, likes: recentLikes } };
+    })
     .sort((a, b) => b.recentLikes - a.recentLikes || new Date(b.row.created_at || 0) - new Date(a.row.created_at || 0))
     .slice(0, limit);
 }
@@ -226,6 +230,7 @@ module.exports = async function slots(req, res) {
       key: slot.key,
       layout: slot.layout,
       aspectRatio: slot.aspect_ratio,
+      max_items: slot.max_items,
       visible: slot.visible,
       items: await getSlotItems(sb, slot)
     })));
