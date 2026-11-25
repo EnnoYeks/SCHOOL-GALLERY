@@ -28,8 +28,9 @@ function itemShape(item) {
   return {
     id: item.id || media.id || "",
     src: media.src || media.videoUrl || item.src || "",
-    poster: media.poster || media.src || item.poster || "",
-    videoUrl: media.videoUrl || item.videoUrl || media.src || "",
+    srcSet: media.srcSet || item.srcSet || "",
+    poster: media.poster || item.poster || (video ? "" : media.src) || "",
+    videoUrl: media.videoUrl || item.videoUrl || (video ? media.src : "") || "",
     video,
     caption: item.caption || media.caption || media.title || "",
     focalX: Number(item.focal_x ?? item.focalX ?? media.focalX ?? 0.5),
@@ -48,7 +49,7 @@ export function renderSlot(key, container, suppliedSlot, options = {}) {
   container.dataset.mediaSlotKey = key;
   container.dataset.mediaSlotLayout = slot.layout || "grid";
   container.style.setProperty("--hshs-slot-aspect", slot.aspect_ratio || slot.aspectRatio || "16/9");
-  container.style.aspectRatio = slot.layout === "card" ? (slot.aspect_ratio || "16/9") : "";
+  container.style.aspectRatio = slot.aspect_ratio || slot.aspectRatio || "16/9";
   container.setAttribute("aria-busy", "false");
   container.innerHTML = "";
 
@@ -97,6 +98,8 @@ export function renderSlot(key, container, suppliedSlot, options = {}) {
     } else {
       const img = document.createElement("img");
       img.src = item.src;
+      if (item.srcSet) img.srcset = item.srcSet;
+      img.sizes = key === "home_hero" ? "100vw" : slot.layout === "strip" ? "320px" : "(max-width: 640px) 50vw, (max-width: 1100px) 33vw, 25vw";
       img.alt = item.caption || "HSHS World media";
       img.loading = key === "home_hero" && index === 0 ? "eager" : "lazy";
       img.decoding = "async";
@@ -153,7 +156,7 @@ export async function loadSlots(keys, containers, options = {}) {
   const unique = [...new Set((keys || []).filter(Boolean))];
   Object.entries(containers || {}).forEach(([key, container]) => {
     const count = options.skeletonCount || 3;
-    showSkeleton(container, "grid", count);
+    showSkeleton(container, container.dataset.mediaSlotLayout || "grid", count);
   });
   if (!unique.length) return {};
   const url = PUBLIC_API + "?keys=" + encodeURIComponent(unique.join(","));
