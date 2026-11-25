@@ -36,7 +36,10 @@ function imageSource(row, layout) {
       return publicUrl(processed + "-" + selected + ".webp");
     }
   }
-  if (key) return publicUrl(key);
+  if (key) {
+    const fromKey = publicUrl(key);
+    if (fromKey) return fromKey;
+  }
   return publicUrl(row.thumbnail_url || row.thumbnailUrl || row.image_url || row.imageUrl || row.image || "");
 }
 
