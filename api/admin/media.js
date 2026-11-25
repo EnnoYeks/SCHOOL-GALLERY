@@ -212,6 +212,16 @@ async function handlePost(sb, body) {
     if (error) throw error;
     return data;
   }
+  if (action === "save-processed-key") {
+    const table = String(body.media_table || "");
+    const id = String(body.media_id || "");
+    const processedKey = cleanText(body.processed_key, 160);
+    if (!["posts", "photos"].includes(table) || !UUID.test(id)) throw new Error("Invalid media record");
+    if (!/^media\/[a-z0-9-]{16,80}$/i.test(processedKey)) throw new Error("Invalid processed media key");
+    const { data, error } = await sb.from(table).update({ processed_key: processedKey }).eq("id", id).select("id,processed_key").single();
+    if (error) throw error;
+    return data;
+  }
   if (action === "reorder") return reorder(sb, body);
   if (action === "delete-item") {
     const id = String(body.id || "");
