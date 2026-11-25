@@ -51,7 +51,7 @@
                 seenMedia[image] = true;
                 return {
                   id: item.id,
-                  title: item.title || item.caption || '',
+                  title: /^(campus moment|hshs moment|campus photo|campus video)$/i.test(String(item.title || item.caption || '').trim()) ? '' : (item.title || item.caption || ''),
                   description: item.description || item.caption || '',
                   image: image,
                   imageUrl: image,
