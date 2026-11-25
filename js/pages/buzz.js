@@ -80,8 +80,8 @@
       '<div class="buzz-shade"></div>' +
       '<button class="buzz-sound" type="button" data-buzz-action="sound" aria-label="' + (state.muted ? 'Turn sound on' : 'Mute videos') + '"><i class="fas ' + (state.muted ? 'fa-volume-xmark' : 'fa-volume-high') + '"></i></button>' +
       '<div class="buzz-rail">' +
-        '<button class="buzz-action' + (liked ? ' liked' : '') + '" type="button" data-buzz-action="like" aria-pressed="' + (liked ? 'true' : 'false') + '"><i class="fas fa-heart"></i><span>' + compact(likes) + '</span></button>' +
-        '<button class="buzz-action" type="button" data-buzz-action="comments"><i class="fas fa-comment"></i><span>' + compact(comments) + '</span></button>' +
+        '<button class="buzz-action' + (liked ? ' liked' : '') + '" type="button" data-buzz-action="like" aria-pressed="' + (liked ? 'true' : 'false') + '"><i class="fas fa-heart"></i><span>' + (likes > 0 ? compact(likes) : '') + '</span></button>' +
+        '<button class="buzz-action" type="button" data-buzz-action="comments"><i class="fas fa-comment"></i><span>' + (comments > 0 ? compact(comments) : '') + '</span></button>' +
         '<button class="buzz-action" type="button" data-buzz-action="share"><i class="fas fa-share"></i><span>Share</span></button>' +
       '</div>' +
       '<div class="buzz-info"><div class="buzz-author-row"><div class="buzz-author">@' + esc(who) + '</div>' +
@@ -99,14 +99,19 @@
       tab.setAttribute('aria-selected', active ? 'true' : 'false');
     });
     if (!state.items.length) {
+      if (state.feed !== 'following' && !state.all.length) {
+        feed.hidden = true;
+        feed.innerHTML = '';
+        attachObserver();
+        return;
+      }
+      feed.hidden = false;
       var following = state.feed === 'following';
-      feed.innerHTML = '<div class="buzz-state buzz-empty"><i class="far fa-circle-play"></i><strong>' +
-        (following ? 'Your Following feed is quiet' : 'No Vibe clips yet') + '</strong><small>' +
-        (following ? 'Follow creators to see their new campus moments here.' : 'Clips from sports, clubs and school life will appear here.') +
-        '</small>' + (following ? '<button type="button" data-buzz-action="feed" data-feed="discover">Explore Discover</button>' : '') + '</div>';
+      feed.innerHTML = '<div class="buzz-state buzz-empty"><strong>Your Following feed is quiet</strong><small>Follow creators to see their new campus moments here.</small><button type="button" data-buzz-action="feed" data-feed="discover">Explore Discover</button></div>';
       attachObserver();
       return;
     }
+    feed.hidden = false;
     feed.innerHTML = state.items.map(cardMarkup).join('') +
       (state.hasMore && state.feed === 'discover' ? '<div class="buzz-load-sentinel" id="buzzLoadMoreSentinel" aria-hidden="true"></div>' : '');
     feed.querySelectorAll('video').forEach(function (video) { video.muted = state.muted; });
@@ -167,31 +172,54 @@
   }
 
   async function loadVideos(reset) {
-    var api = db(), feed = document.getElementById('buzzFeed');
-    if (!api || !api.getVideos) {
-      if (feed) feed.innerHTML = '<div class="buzz-state"><strong>Vibe is unavailable</strong><small>The media service is not ready yet.</small></div>';
-      if (global.HshsRoute) global.HshsRoute.reveal();
-      return;
-    }
-    if (state.loading) return;
+    var feed = document.getElementById('buzzFeed');
+    if (!feed || state.loading) return;
     if (reset) {
-      state.all = []; state.offset = 0; state.hasMore = true;
+      state.all = []; state.offset = 0; state.hasMore = false;
       state.liked.clear(); state.follows.clear(); state.likeCounts = {}; state.commentCounts = {};
     }
     state.loading = true;
     if (feed && !state.all.length) feed.innerHTML = '<article class="hshs-sk-buzz" aria-hidden="true"><div class="hshs-sk-buzz-media"></div><div class="hshs-sk-buzz-cap"><b></b><em></em></div></article>';
     try {
-      var rows = await api.getVideos(PAGE_SIZE, state.offset);
-      rows = rows || [];
-      state.offset += rows.length;
-      state.hasMore = rows.length === PAGE_SIZE;
-      var videos = rows.filter(function (item) { return !!mediaUrl(item); });
-      state.all = state.all.concat(videos);
-      render();
-      refreshSocial(videos).then(render);
+      var mediaSlots = await import('/js/media-slots.js');
+      await mediaSlots.loadSlots(['vibe_feed'], { vibe_feed: feed }, {
+        renderers: {
+          vibe_feed: function (slot, items) {
+            var videos = (items || []).filter(function (item) { return item.video && !!(item.videoUrl || item.src); }).map(function (item) {
+              var rawTitle = String(item.title || item.caption || '').trim();
+              if (/^(campus moment|hshs moment|campus video)$/i.test(rawTitle)) rawTitle = '';
+              return {
+                id: item.id,
+                type: 'video',
+                video_url: item.videoUrl || item.src,
+                videoUrl: item.videoUrl || item.src,
+                thumbnail_url: item.poster || '',
+                thumbnailUrl: item.poster || '',
+                title: rawTitle,
+                description: item.description || item.caption || '',
+                author: item.author || '',
+                author_id: item.authorId || '',
+                likes: Number(item.likes) > 0 ? Number(item.likes) : null,
+                comments: Number(item.comments) > 0 ? Number(item.comments) : null,
+                created_at: item.createdAt,
+                createdAt: item.createdAt
+              };
+            });
+            state.all = videos;
+            state.offset = videos.length;
+            state.hasMore = false;
+            render();
+            refreshSocial(videos).then(render);
+            return videos.length;
+          }
+        }
+      });
     } catch (error) {
-      console.error('[HSHS Vibe] load failed:', error);
-      if (feed && !state.all.length) feed.innerHTML = '<div class="buzz-state buzz-empty"><strong>Could not load Vibe</strong><small>Check your connection and try again.</small><button type="button" data-buzz-action="retry">Retry</button></div>';
+      console.error('[HSHS Vibe] managed slot load failed:', error);
+      if (feed && !state.all.length) {
+        feed.hidden = false;
+        feed.innerHTML = '<div class="buzz-state buzz-empty"><strong>Could not load Vibe</strong><small>Check your connection and try again.</small><button type="button" data-buzz-action="retry">Retry</button></div>';
+      }
     } finally {
       state.loading = false;
       if (global.HshsRoute) global.HshsRoute.reveal();
