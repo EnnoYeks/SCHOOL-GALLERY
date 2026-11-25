@@ -44,7 +44,11 @@
         function withVariantKey(payload) {
           var meta = window.__hshsLastUploadMeta;
           if (!meta || !meta.processedKey || !meta.key || keyOf(payload) !== String(meta.key)) return payload;
-          return Object.assign({}, payload, { processedKey: meta.processedKey });
+          return Object.assign({}, payload, {
+            processedKey: meta.processedKey,
+            width: Number(meta.width) > 0 ? Number(meta.width) : payload.width,
+            height: Number(meta.height) > 0 ? Number(meta.height) : payload.height
+          });
         }
         ['createPost', 'createPhoto', 'createVideo'].forEach(function (fn) {
           if (typeof db[fn] !== 'function') return;
