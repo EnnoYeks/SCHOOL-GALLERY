@@ -1,13 +1,10 @@
 /**
- * HSHS Upload Studio — restore camera + compose from known-good build.
- * Full UI (snap photo, record video, filters, gallery pick) lives at 255cb66.
- * Context lock still applied by hshs-upload-context.js.
+ * HSHS Upload Studio — loader.
+ * Full studio lives in /js/hshs-studio.js.
  */
 (function () {
   if (window.__hshsUpload && window.__hshsUpload.__studioLoaded) return;
 
-  // One record per upload. Photo -> photos table, video -> videos table.
-  // Gallery and Home already merge posts + photos + videos.
   function installOneRecordGuard() {
     function captureUploadMetadata() {
       var storage = window.HshsStorage;
@@ -73,9 +70,6 @@
   }
   installOneRecordGuard();
 
-  var CDN = '/js/hshs-upload-studio.js?v=261125r2gate1';
-
-
   function ensureStudioCss() {
     var link = document.getElementById('hshs-studio-css');
     if (!link) {
@@ -87,154 +81,23 @@
     link.href = '/css/hshs-studio.css?v=261125purplecam1';
   }
 
-  function installCameraFallback() {
-    if (window.__hshsCamFallbackInstalled) return;
-    window.__hshsCamFallbackInstalled = true;
-
-    var media = navigator.mediaDevices;
-    if (media && typeof media.getUserMedia === 'function') {
-      var nativeGetUserMedia = media.getUserMedia.bind(media);
-      try {
-        media.getUserMedia = function (constraints) {
-          return nativeGetUserMedia(constraints).then(function (result) {
-            window.__hshsLastCameraError = null;
-            hideCamFallback();
-            return result;
-          }, function (err) {
-            window.__hshsLastCameraError = err || null;
-            throw err;
-          });
-        };
-      } catch (err) {
-        console.warn('[HSHS] Could not observe camera permission errors', err);
-      }
-    }
-
-    function hideCamFallback() {
-      var root = document.getElementById('hshsStudio');
-      if (!root) return;
-      var card = root.querySelector('#camFallback');
-      if (card) card.remove();
-      var rail = root.querySelector('.hshs-cam-rail');
-      if (rail) rail.classList.remove('cam-disabled');
-      var shutter = root.querySelector('.hshs-cam-shutter');
-      if (shutter) shutter.style.removeProperty('display');
-      var effects = root.querySelector('.hshs-cam-bottom .hshs-cam-effects-btn');
-      if (effects) effects.style.removeProperty('display');
-    }
-
-    function showCamFallback(err) {
-      var root = document.getElementById('hshsStudio');
-      var stage = root && root.querySelector('.hshs-cam-stage');
-      if (!stage) return;
-      var messages = {
-        NotAllowedError: ['Camera is blocked', 'Allow camera access in your browser settings, then tap Try again.'],
-        NotFoundError: ['No camera found', "This device doesn't seem to have a camera."],
-        NotReadableError: ['Camera is busy', 'Close other apps using the camera, then tap Try again.']
-      };
-      var pair = messages[err && err.name] || ['Camera unavailable', 'You can still pick a photo or video from your gallery.'];
-      var oldMessage = stage.querySelector('.hshs-cam-msg');
-      if (oldMessage) oldMessage.remove();
-
-      var card = stage.querySelector('#camFallback');
-      if (!card) {
-        card = document.createElement('div');
-        card.className = 'cam-fallback';
-        card.id = 'camFallback';
-        card.hidden = true;
-        card.innerHTML =
-          '<div class="cam-fallback__icon" aria-hidden="true">📷</div>' +
-          '<h2 id="camTitle">Camera unavailable</h2>' +
-          '<p id="camHelp">You can still pick a photo from your gallery.</p>' +
-          '<button type="button" class="cam-fallback__primary" id="pickBtn">Choose from gallery</button>' +
-          '<button type="button" class="cam-fallback__ghost" id="retryBtn">Try camera again</button>';
-        stage.appendChild(card);
-        card.querySelector('#pickBtn').addEventListener('click', function () {
-          var input = root.querySelector('#hshsUploadFile');
-          if (input) input.click();
-        });
-        card.querySelector('#retryBtn').addEventListener('click', function () {
-          var active = root.querySelector('.hshs-cam-modes [data-mode].is-on');
-          var mode = active ? active.getAttribute('data-mode') : 'photo';
-          if (typeof window.__hshsOpenUpload === 'function') {
-            window.__hshsOpenUpload({ mode: mode });
-          }
-        });
-      }
-      card.querySelector('#camTitle').textContent = pair[0];
-      card.querySelector('#camHelp').textContent = pair[1];
-      card.hidden = false;
-
-      var rail = root.querySelector('.hshs-cam-rail');
-      if (rail) rail.classList.add('cam-disabled');
-      var shutter = root.querySelector('.hshs-cam-shutter');
-      if (shutter) shutter.style.display = 'none';
-      var effects = root.querySelector('.hshs-cam-bottom .hshs-cam-effects-btn');
-      if (effects) effects.style.display = 'none';
-    }
-
-    if (typeof MutationObserver !== 'undefined' && document.body) {
-      var observer = new MutationObserver(function () {
-        var root = document.getElementById('hshsStudio');
-        var message = root && root.querySelector('.hshs-cam-msg');
-        if (message && /camera unavailable/i.test(message.textContent || '')) {
-          showCamFallback(window.__hshsLastCameraError);
-        }
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
-      window.__hshsCameraFallbackObserver = observer;
-    }
-    window.__hshsShowCameraFallback = showCamFallback;
-    window.__hshsHideCameraFallback = hideCamFallback;
-  }
-
-  function loadStudio(src, onFail) {
+  function loadStudio() {
     var s = document.createElement('script');
-    s.src = src;
+    s.src = '/js/hshs-studio.js?v=261125r2gate2';
     s.async = false;
-    s.crossOrigin = 'anonymous';
     s.onload = function () {
-      window.__hshsUpload = window.__hshsUpload || {};
-      if (typeof window.__hshsUpload === 'boolean') {
-        /* older build sets __hshsUpload = true; open/close are globals */
-      }
-      if (typeof window.__hshsOpenUpload === 'function') {
-        window.__hshsUpload = {
-          __studioLoaded: true,
-          open: window.__hshsOpenUpload,
-          close: window.__hshsCloseUpload
-        };
-      }
+      window.__hshsUpload = {
+        __studioLoaded: true,
+        open: window.__hshsOpenUpload,
+        close: window.__hshsCloseUpload
+      };
       ensureStudioCss();
-      installCameraFallback();
     };
     s.onerror = function () {
-      console.error('[HSHS] camera Studio failed to load from', src);
-      if (typeof onFail === 'function') onFail();
+      console.error('[HSHS] Studio failed to load from local /js/hshs-studio.js');
     };
     document.head.appendChild(s);
   }
 
-  function fileOnlyFallback() {
-    console.warn('[HSHS] Using file-only upload fallback');
-    if (window.__hshsUpload && window.__hshsUpload.compose) return;
-    /* minimal: open file picker so uploads still work if CDN is blocked */
-    window.__hshsOpenUpload = function () {
-      var input = document.getElementById('hshsUploadFallback');
-      if (!input) {
-        input = document.createElement('input');
-        input.type = 'file'; input.accept = 'image/*,video/*'; input.id = 'hshsUploadFallback'; input.hidden = true;
-        document.body.appendChild(input);
-        input.addEventListener('change', function () {
-          if (!input.files || !input.files[0]) return;
-          alert('Camera Studio is offline. Choose a file from the full app once Studio reloads, or hard-refresh.');
-        });
-      }
-      input.click();
-    };
-    window.__hshsCloseUpload = function () {};
-    window.__hshsUpload = { compose: true, open: window.__hshsOpenUpload, close: window.__hshsCloseUpload };
-  }
-
-  loadStudio(CDN, fileOnlyFallback);
+  loadStudio();
 })();

@@ -26,6 +26,10 @@ async function requireAdmin(req, res) {
       res.status(403).json({ error: "Not admin" });
       return null;
     }
+    if (decoded.email_verified !== true) {
+      res.status(403).json({ error: "Email not verified" });
+      return null;
+    }
     return decoded;
   } catch (error) {
     res.status(401).json({ error: "Bad token" });
