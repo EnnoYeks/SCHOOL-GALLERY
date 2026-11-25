@@ -44,6 +44,7 @@ function renderHomeHero(container, items) {
     span.style.backgroundImage = "none";
     span.style.animationDuration = duration + "s";
     span.style.animationDelay = (index * 4.5) + "s";
+    span.style.animationPlayState = document.hidden ? "paused" : "running";
     const img = document.createElement("img");
     img.src = safeMediaSource(item.poster || item.src);
     if (item.srcSet) img.srcset = item.srcSet;
@@ -221,7 +222,7 @@ export function renderSlot(key, container, suppliedSlot, options = {}) {
   container.dataset.mediaSlotKey = key;
   container.dataset.mediaSlotLayout = slot.layout || "grid";
   container.style.setProperty("--hshs-slot-aspect", slot.aspect_ratio || slot.aspectRatio || "16/9");
-  container.style.aspectRatio = slot.aspect_ratio || slot.aspectRatio || "16/9";
+  if (key !== "home_hero") container.style.aspectRatio = slot.aspect_ratio || slot.aspectRatio || "16/9";
   container.setAttribute("aria-busy", "false");
   if (key === "home_hero" && container.classList.contains("vibe-hero-photos")) return renderHomeHero(container, items);
   if (key === "home_featured" && container.id === "featuredGrid") return renderHomeFeatured(container, slot, items);
@@ -250,9 +251,13 @@ export function renderSlot(key, container, suppliedSlot, options = {}) {
   const fragment = document.createDocumentFragment();
 
   items.forEach((item, index) => {
-    const card = document.createElement("article");
+    const card = document.createElement(item.linkUrl ? "a" : "article");
     card.className = "hshs-slot-card";
     card.dataset.mediaSlotItem = item.id;
+    if (item.linkUrl) {
+      card.href = item.linkUrl;
+      card.setAttribute("aria-label", item.caption || "Open media");
+    }
     const mediaBox = document.createElement("div");
     mediaBox.className = "hshs-slot-card__media";
     mediaBox.style.aspectRatio = slot.aspect_ratio || slot.aspectRatio || "16/9";
@@ -297,16 +302,7 @@ export function renderSlot(key, container, suppliedSlot, options = {}) {
       card.appendChild(caption);
     }
 
-    if (item.linkUrl) {
-      const link = document.createElement("a");
-      link.className = "hshs-slot-card__link";
-      link.href = item.linkUrl;
-      link.setAttribute("aria-label", item.caption || "Open media");
-      link.appendChild(card.cloneNode(true));
-      fragment.appendChild(link);
-    } else {
-      fragment.appendChild(card);
-    }
+    fragment.appendChild(card);
   });
 
   container.appendChild(fragment);
@@ -334,6 +330,10 @@ export async function loadSlots(keys, containers, options = {}) {
     const count = options.skeletonCount || 3;
     if (key === "home_hero" && container.classList.contains("vibe-hero-photos")) {
       container.querySelectorAll("span").forEach(span => span.classList.add("is-slot-loading"));
+      return;
+    }
+    if (container.children.length) {
+      container.setAttribute("aria-busy", "true");
       return;
     }
     showSkeleton(container, container.dataset.mediaSlotLayout || "grid", count);
