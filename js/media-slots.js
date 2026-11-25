@@ -41,9 +41,22 @@ function renderHomeHero(container, items) {
   photos.slice(0, 6).forEach((item, index) => {
     const span = document.createElement("span");
     span.className = "is-campus";
-    span.style.backgroundImage = 'url("' + safeMediaSource(item.poster || item.src).replace(/"/g, "%22") + '")';
+    span.style.backgroundImage = "none";
     span.style.animationDuration = duration + "s";
     span.style.animationDelay = (index * 4.5) + "s";
+    const img = document.createElement("img");
+    img.src = safeMediaSource(item.poster || item.src);
+    if (item.srcSet) img.srcset = item.srcSet;
+    img.sizes = "100vw";
+    img.alt = "";
+    img.loading = index === 0 ? "eager" : "lazy";
+    img.decoding = "async";
+    if (index === 0) img.fetchPriority = "high";
+    img.addEventListener("error", () => {
+      span.hidden = true;
+      if (![...container.children].some(node => !node.hidden)) container.hidden = true;
+    }, { once: true });
+    span.appendChild(img);
     container.appendChild(span);
   });
   if (!window.__hshsHeroVisibilityBound) {
@@ -76,7 +89,23 @@ function renderHomeFeatured(container, slot, items) {
     media.className = "home-feature-media";
     media.setAttribute("role", "img");
     media.setAttribute("aria-label", item.caption || "HSHS World media");
-    media.style.backgroundImage = 'url("' + safeMediaSource(item.video ? item.poster : item.src).replace(/"/g, "%22") + '")';
+    const img = document.createElement("img");
+    img.src = safeMediaSource(item.video ? item.poster : item.src);
+    if (item.srcSet) img.srcset = item.srcSet;
+    img.sizes = "(max-width: 640px) 72vw, 220px";
+    img.alt = item.caption || "HSHS World media";
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.addEventListener("load", () => img.classList.add("is-loaded"), { once: true });
+    img.addEventListener("error", () => {
+      card.hidden = true;
+      if (![...container.children].some(node => !node.hidden)) {
+        container.hidden = true;
+        const section = container.closest("[data-media-slot-section]");
+        if (section) section.hidden = true;
+      }
+    }, { once: true });
+    media.appendChild(img);
     media.style.animationDelay = (index * 1.2) + "s";
     const overlay = document.createElement("div");
     overlay.className = "home-feature-overlay";
@@ -120,7 +149,22 @@ function renderHomeTrend(container, item, rank) {
   link.href = safeLink(item.linkUrl) || "/trending/";
   const thumb = document.createElement("span");
   thumb.className = "home-trend-thumb";
-  thumb.style.backgroundImage = 'url("' + source.replace(/"/g, "%22") + '")';
+  const image = document.createElement("img");
+  image.src = source;
+  if (item.srcSet) image.srcset = item.srcSet;
+  image.sizes = "56px";
+  image.alt = "";
+  image.loading = "lazy";
+  image.decoding = "async";
+  image.addEventListener("error", () => {
+    container.hidden = true;
+    const section = container.closest(".home-section");
+    if (section && ["homeTrendA", "homeTrendB"].every(id => {
+      const el = document.getElementById(id);
+      return !el || el.hidden;
+    })) section.hidden = true;
+  }, { once: true });
+  thumb.appendChild(image);
   const copy = document.createElement("span");
   copy.className = "home-trend-copy";
   const label = document.createElement("small");
