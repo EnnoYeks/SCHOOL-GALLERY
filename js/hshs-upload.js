@@ -73,8 +73,7 @@
   }
   installOneRecordGuard();
 
-  var CDN =
-    'https://cdn.jsdelivr.net/gh/EnnoYeks/SCHOOL-GALLERY@255cb6608129cf952fb2c8de957a7254ae830099/js/hshs-upload.js';
+  var CDN = '/js/hshs-upload-studio.js?v=261125r2gate1';
 
 
   function ensureStudioCss() {

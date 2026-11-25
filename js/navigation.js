@@ -2,7 +2,7 @@
 // NAVIGATION & UI INTERACTIONS
 // ============================================
 
-var HSHS_ASSET_VER = '261124card1';
+var HSHS_ASSET_VER = '261125r2gate1';
 window.__hshsAssetVer = HSHS_ASSET_VER;
 
 (function () {

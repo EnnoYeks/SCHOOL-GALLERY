@@ -172,9 +172,24 @@ class Database {
         }
     }
 
+    requireStoredMedia(data, required) {
+        const url = String((data && (data.imageUrl || data.image || data.videoUrl || data.thumbnailUrl)) || "");
+        const key = String((data && (data.mediaKey || data.media_key)) || "");
+        const provider = String((data && (data.mediaProvider || data.media_provider)) || "");
+        const hasMedia = !!(url || key);
+        if (!required && !hasMedia) return;
+        if (url.indexOf("data:") === 0 || url.indexOf("blob:") === 0) {
+            throw new Error("Refusing to save a local file. R2 must accept it first.");
+        }
+        if (provider !== "cloudflare-r2" || !key) {
+            throw new Error("Refusing to save until Cloudflare R2 accepts the file.");
+        }
+    }
+
     async createPost(data) {
         validateMediaInput(data);
         try {
+            this.requireStoredMedia(data, false);
             const meta = await this.getAuthorMeta();
             const payload = {
                 type: data.type || "photo",
@@ -215,6 +230,7 @@ class Database {
     async createPhoto(data) {
         validateMediaInput(data);
         try {
+            this.requireStoredMedia(data, true);
             const meta = await this.getAuthorMeta();
             const payload = {
                 title: String(data.title || "Photo").slice(0, 200),
@@ -247,6 +263,7 @@ class Database {
     async createVideo(videoData) {
         validateMediaInput(videoData);
         try {
+            this.requireStoredMedia(videoData, true);
             const meta = await this.getAuthorMeta();
             const payload = {
                 title: String(videoData.title || "Video").slice(0, 200),

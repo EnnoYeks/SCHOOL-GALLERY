@@ -415,19 +415,13 @@
     options = options || {};
     var kind = options.kind || "photo";
     if (!src) throw new Error("No media source");
-    if (/^https?:\/\//i.test(src)) {
-      return { url: src, key: objectKey(kind, null), provider: "remote", kind: kind, size: 0 };
-    }
-    try {
-      var res = await fetch(src);
-      var blob = await res.blob();
-      var file = new File([blob], "capture." + (kind === "video" ? "webm" : "jpg"), {
-        type: blob.type || (kind === "video" ? "video/webm" : "image/jpeg")
-      });
-      return upload(file, { kind: kind });
-    } catch (e) {
-      return { url: src, key: objectKey(kind, null), provider: "passthrough", kind: kind, size: 0 };
-    }
+    var res = await fetch(src);
+    if (!res.ok) throw new Error("Could not read the file for upload");
+    var blob = await res.blob();
+    var file = new File([blob], "capture." + (kind === "video" ? "webm" : "jpg"), {
+      type: blob.type || (kind === "video" ? "video/webm" : "image/jpeg")
+    });
+    return upload(file, { kind: kind });
   }
 
   async function uploadAdmin(file) {
