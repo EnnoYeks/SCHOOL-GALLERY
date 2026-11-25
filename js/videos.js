@@ -1,5 +1,3 @@
-import { db } from "./db.js";
-
 class VideosPage {
     constructor() {
         this.videos = [];
@@ -27,26 +25,53 @@ class VideosPage {
         await this.load(false);
     }
     async load(append = false) {
-        if (this.loading || (!this.hasMore && append)) return;
+        if (this.loading || (append && !this.hasMore)) return;
         const container = document.getElementById("videosContainer");
         if (!container) return;
         this.loading = true;
         if (!append) container.innerHTML = this.skeletons();
         try {
-            const batch = await db.getVideos(this.pageSize, this.videos.length) || [];
-            this.videos = append ? [...this.videos, ...batch] : batch;
-            this.hasMore = batch.length === this.pageSize;
-            this.apply();
+            const mediaSlots = await import("/js/media-slots.js");
+            await mediaSlots.loadSlots(["videos_page"], { videos_page: container }, {
+                renderers: {
+                    videos_page: (slot, items) => {
+                        this.videos = (items || []).filter(item => item.video).map((item, index) => {
+                            const rawTitle = String(item.title || item.caption || "").trim();
+                            const title = /^(campus moment|hshs moment|campus video)$/i.test(rawTitle) ? "" : rawTitle;
+                            return {
+                                id: item.id,
+                                title,
+                                description: item.description || item.caption || "",
+                                type: "video",
+                                videoUrl: item.videoUrl || item.src,
+                                video_url: item.videoUrl || item.src,
+                                thumbnailUrl: item.poster || "",
+                                thumbnail_url: item.poster || "",
+                                likes: Number(item.likes) > 0 ? Number(item.likes) : null,
+                                views: Number(item.views) > 0 ? Number(item.views) : null,
+                                comments: Number(item.comments) > 0 ? Number(item.comments) : null,
+                                createdAt: item.createdAt,
+                                author: item.author || "",
+                                category: item.category || "",
+                                featured: index < 2
+                            };
+                        });
+                        this.hasMore = false;
+                        this.apply();
+                        return this.videos.length;
+                    }
+                }
+            });
         } catch (error) {
-            console.error("Videos load failed:", error);
-            this.videos = append ? this.videos : [];
+            console.error("Managed videos slot failed:", error);
+            this.videos = [];
             this.hasMore = false;
             this.apply();
         } finally {
             this.loading = false;
             const loadMore = document.getElementById("loadMoreVideos");
             if (loadMore) {
-                loadMore.hidden = !this.hasMore || !this.filtered.length;
+                loadMore.hidden = true;
                 loadMore.disabled = false;
             }
         }
@@ -83,11 +108,17 @@ class VideosPage {
         if (!container) return;
         if (!this.filtered.length) {
             if (hero) hero.innerHTML = "";
-            if (section) section.hidden = true;
-            container.innerHTML = `<div class="library-empty"><i class="fas fa-video"></i><h3>No videos yet</h3><p>School videos will appear here when they are uploaded.</p></div>`;
+            if (section) section.hidden = !this.videos.length;
+            const librarySection = container.closest(".video-library-section");
+            if (librarySection) librarySection.hidden = !this.videos.length;
+            container.hidden = !this.videos.length;
+            container.innerHTML = this.videos.length ? '<div class="library-empty">No videos match this filter.</div>' : "";
             if (title) title.textContent = this.filter === "all" ? "Latest Videos" : this.label(this.filter) + " Videos";
             return;
         }
+        container.hidden = false;
+        const librarySection = container.closest(".video-library-section");
+        if (librarySection) librarySection.hidden = false;
         if (section) section.hidden = false;
         const featured = this.filtered.filter(v => v.featured).slice(0, 2);
         const featuredIds = new Set(featured.map(v => v.id));
