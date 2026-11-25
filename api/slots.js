@@ -18,7 +18,51 @@ function publicBase() {
 
 function publicUrl(value) {
   const raw = String(value || "").trim();
-  if (!raw) return "";
+  if (!raw || /^(data:|blob:)/i.test(raw)) return "";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  const base = publicBase();
+  return base ? base + "/" + raw.replace(/^\/+/, "") : "";
+}
+
+function imageSources(row, layout) {
+  const key = row.media_key || row.mediaKey || "";
+  const processed = row.processed_key || row.processedKey || "";
+  const width = Number(row.width || 0);
+  const wanted = layout === "carousel" ? 1440 : layout === "strip" ? 320 : 960;
+  if (processed && publicBase()) {
+    const available = [320, 640, 960, 1440].filter((w) => !width || w <= width);
+    if (available.length) {
+      const srcSet = available.map((w) => publicUrl(processed + "-" + w + ".webp") + " " + w + "w").join(", ");
+      const selected = available.filter((w) => w <= wanted).pop() || available[0];
+      return { src: publicUrl(processed + "-" + selected + ".webp"), srcSet };
+    }
+  }
+  if (key) {
+    const fromKey = publicUrl(key);
+    if (fromKey) return { src: fromKey, srcSet: "" };
+  }
+  return { src: publicUrl(row.thumbnail_url || row.thumbnailUrl || row.image_url || row.imageUrl || row.image || ""), srcSet: "" };
+}onst { supabaseAdmin } = require("./_supabase");
+
+const TABLES = ["posts", "photos", "videos"];
+const PAGE_TABLES = {
+  home: TABLES,
+  videos: ["videos"],
+  photos: ["photos"],
+  memories: TABLES,
+  vibe: ["videos"],
+  gallery: TABLES,
+  trending: TABLES,
+  spotlight: ["posts", "photos"]
+};
+
+function publicBase() {
+  return String(process.env.R2_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
+}
+
+function publicUrl(value) {
+  const raw = String(value || "").trim();
+  if (!raw || /^(data:|blob:)/i.test(raw)) return "";
   if (/^https?:\/\//i.test(raw)) return raw;
   const base = publicBase();
   return base ? base + "/" + raw.replace(/^\/+/, "") : "";
@@ -45,12 +89,11 @@ function imageSource(row, layout) {
 
 function normalize(row, table, slot, item) {
   const isVideo = table === "videos" || String(row.type || row.media_type || "").toLowerCase() === "video";
-  const poster = isVideo
-    ? publicUrl(row.poster_key || row.posterKey || row.thumbnail_url || row.image_url || row.image || "")
-    : publicUrl(row.poster_key || row.posterKey || row.thumbnail_url || row.image_url || row.image || "");
-  const src = isVideo
-    ? publicUrl(row.preview_key || row.previewKey || row.video_url || row.videoUrl || row.media_key || "")
-    : imageSource(row, slot.layout);
+  const poster = publicUrl(row.poster_key || row.posterKey || row.thumbnail_url || row.image_url || row.image || "");
+  const image = isVideo
+    ? { src: publicUrl(row.preview_key || row.previewKey || row.video_url || row.videoUrl || row.media_key || ""), srcSet: "" }
+    : imageSources(row, slot.layout);
+  const src = image.src;
   if (!src && !poster) return null;
   return {
     id: row.id,
@@ -59,6 +102,7 @@ function normalize(row, table, slot, item) {
     caption: item?.caption || row.description || row.title || "",
     mediaType: isVideo ? "video" : "photo",
     src,
+    srcSet: image.srcSet,
     poster,
     videoUrl: isVideo ? publicUrl(row.video_url || row.videoUrl || row.media_key || "") : "",
     createdAt: row.created_at || row.createdAt || null,
