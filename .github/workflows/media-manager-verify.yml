@@ -3,7 +3,7 @@ name: Media Manager Verification
 on:
   push:
     branches:
-      - feat/central-media-manager
+      - "**"
   pull_request:
     paths:
       - "api/**"
