@@ -1,0 +1,37 @@
+name: Media Manager Verification
+
+on:
+  push:
+    branches:
+      - feat/central-media-manager
+  pull_request:
+    paths:
+      - "api/**"
+      - "js/media-slots.js"
+      - "js/admin-media-page.js"
+      - "admin/media/**"
+      - "package.json"
+      - "scripts/set-admin.js"
+      - ".github/workflows/media-manager-verify.yml"
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check CommonJS server files
+        run: |
+          node --check api/_auth.js
+          node --check api/_supabase.js
+          node --check api/slots.js
+          node --check api/admin/media.js
+          node --check scripts/set-admin.js
+      - name: Check browser ES modules
+        run: |
+          node --input-type=module --check < js/media-slots.js
+          node --input-type=module --check < js/admin-media-page.js
+      - name: Validate package manifest
+        run: node -e "JSON.parse(require('fs').readFileSync('package.json','utf8'))"
