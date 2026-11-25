@@ -35,33 +35,50 @@
       });
     }
     async loadPhotos() {
-      var photos = [];
+      var grid = document.getElementById('masonryGrid');
+      if (!grid) return;
       try {
-        photos = await (window.db && db.getPhotos ? db.getPhotos(48, 0) : []);
-      } catch (e) { photos = []; }
-      photos = Array.isArray(photos) ? photos.filter(Boolean) : [];
-
-      if (!photos.length && window.HshsStorage && typeof window.HshsStorage.list === 'function') {
-        try {
-          photos = await window.HshsStorage.list({ limit: 48, prefix: 'photos/' }) || [];
-        } catch (e) { photos = []; }
+        var mediaSlots = await import('/js/media-slots.js');
+        await mediaSlots.loadSlots(['photos_page'], { photos_page: grid }, {
+          renderers: {
+            photos_page: (slot, items) => {
+              var seenMedia = Object.create(null);
+              this.photos = (items || []).filter(function (item) {
+                return !item.video && !!item.src;
+              }).map(function (item) {
+                var image = item.src;
+                if (!image || seenMedia[image]) return null;
+                seenMedia[image] = true;
+                return {
+                  id: item.id,
+                  title: item.title || item.caption || '',
+                  description: item.description || item.caption || '',
+                  image: image,
+                  imageUrl: image,
+                  thumbnailUrl: image,
+                  srcSet: item.srcSet || '',
+                  width: item.width || 0,
+                  height: item.height || 0,
+                  focalX: item.focalX,
+                  focalY: item.focalY,
+                  likes: Number(item.likes) > 0 ? Number(item.likes) : null,
+                  views: Number(item.views) > 0 ? Number(item.views) : null,
+                  comments: Number(item.comments) > 0 ? Number(item.comments) : null,
+                  createdAt: item.createdAt,
+                  author: item.author || '',
+                  category: item.category || ''
+                };
+              }).filter(Boolean);
+              this.render();
+              return this.photos.length;
+            }
+          }
+        });
+      } catch (error) {
+        console.error('[HSHS] Managed photos slot failed:', error);
+        this.photos = [];
+        this.render();
       }
-
-      var seenMedia = Object.create(null);
-      photos = photos.map(function (p) {
-        var url = mediaOf(p);
-        p.image = p.image || url;
-        p.imageUrl = p.imageUrl || url;
-        p.thumbnailUrl = p.thumbnailUrl || url;
-        return p;
-      }).filter(function (p) {
-        if (!p.image || seenMedia[p.image]) return false;
-        seenMedia[p.image] = true;
-        return true;
-      });
-
-      this.photos = photos;
-      this.render();
     }
     filtered() {
       var list = this.photos.slice();
@@ -85,9 +102,16 @@
       if (!grid) return;
       var list = this.filtered();
       if (!list.length) {
-        grid.innerHTML = '<div class="photos-empty">No photos yet.</div>';
+        if (!this.photos.length) {
+          grid.hidden = true;
+          grid.innerHTML = '';
+        } else {
+          grid.hidden = false;
+          grid.innerHTML = '<div class="photos-empty">No photos match this filter.</div>';
+        }
         return;
       }
+      grid.hidden = false;
       if (window.HshsMediaCards && window.HshsMediaCards.keyedPhotoUpdate) {
         window.HshsMediaCards.keyedPhotoUpdate(grid, list, this.createPhotoCard.bind(this));
       } else {
@@ -114,11 +138,16 @@
       img.decoding = 'async';
       if (photo.width) img.width = Number(photo.width);
       if (photo.height) img.height = Number(photo.height);
+      if (photo.focalX != null && photo.focalY != null) img.style.objectPosition = (Number(photo.focalX) * 100) + '% ' + (Number(photo.focalY) * 100) + '%';
       var processedBase = photo.processedKey || photo.processed_key || '';
       var availableWidths = [320, 640, 960, 1440].filter(function (width) { return Number(photo.width) >= width; });
       var processedUrl = processedBase && Number(photo.width) >= 320 && window.HshsStorage && window.HshsStorage.publicUrl
         ? window.HshsStorage.publicUrl(processedBase) : '';
-      if (processedUrl && availableWidths.length) {
+      if (photo.srcSet) {
+        img.srcset = photo.srcSet;
+        img.sizes = '(max-width: 639px) 50vw, (max-width: 1023px) 33vw, (max-width: 1439px) 25vw, 20vw';
+        img.src = photo.image || '';
+      } else if (processedUrl && availableWidths.length) {
         img.srcset = availableWidths.map(function (width) {
           return window.HshsStorage.publicUrl(processedBase + '-' + width + '.webp') + ' ' + width + 'w';
         }).join(', ');
@@ -134,6 +163,8 @@
       if (img.complete && !imageFailed) markImageLoaded();
       img.addEventListener('error', function () {
         card.remove();
+        var grid = document.getElementById('masonryGrid');
+        if (grid && !grid.querySelector('.photo-card')) grid.hidden = true;
       }, { once: true });
       var cap = document.createElement('div');
       cap.className = 'photo-caption';
