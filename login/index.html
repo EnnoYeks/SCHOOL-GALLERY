@@ -12,10 +12,106 @@
   <link rel="stylesheet" href="/css/hshs-skeleton.css?v=261104slim1">
 </head>
 <body class="hshs-auth-page hshs-auth-body">
-  <div class="hshs-auth-shell" id="hshsAuthRoot">
-    <!-- original auth form content would go here; paths fixed -->
+  <main class="hshs-auth-shell" id="hshsAuthRoot">
+    <header class="hshs-auth-brand">
+      <img src="/assets/images/hshs-logo.png" alt="Hawthorne Scribner High School" onerror="this.hidden=true">
+      <h1>Welcome to HSHS World</h1>
+      <p>Connect, share and stay part of campus life.</p>
+    </header>
+
+    <section class="hshs-auth-card" aria-label="Account access">
+      <nav class="hshs-auth-tabs" aria-label="Account options">
+        <button type="button" data-auth-mode="login" class="is-on">Sign in</button>
+        <button type="button" data-auth-mode="signup">Create account</button>
+      </nav>
+
+      <p id="authMsg" class="hshs-auth-msg" role="status" aria-live="polite"></p>
+
+      <form id="authLoginForm" class="hshs-auth-panel" novalidate>
+        <label class="hshs-field" for="loginId">
+          <span>Email or username</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-user lead" aria-hidden="true"></i>
+            <input id="loginId" name="identifier" type="text" autocomplete="username" placeholder="Your email or username" required>
+          </span>
+        </label>
+        <label class="hshs-field" for="loginPassword">
+          <span>Password</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-lock lead" aria-hidden="true"></i>
+            <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Your password" required>
+            <button class="toggle-pw" type="button" data-toggle-password="loginPassword" aria-label="Show password"><i class="fas fa-eye" aria-hidden="true"></i></button>
+          </span>
+        </label>
+        <div class="hshs-auth-row">
+          <span>Welcome back.</span>
+          <a href="#reset" id="openReset">Forgot password?</a>
+        </div>
+        <button class="hshs-auth-submit" type="submit">Sign in</button>
+        <div class="hshs-auth-footer">or</div>
+        <button id="googleSignIn" class="hshs-auth-submit" type="button" style="margin-top:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)">
+          <i class="fab fa-google" aria-hidden="true"></i> Continue with Google
+        </button>
+      </form>
+
+      <form id="authSignupForm" class="hshs-auth-panel" hidden novalidate>
+        <label class="hshs-field" for="suFullName">
+          <span>Full name</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-id-card lead" aria-hidden="true"></i>
+            <input id="suFullName" name="fullName" type="text" autocomplete="name" placeholder="Your full name" required>
+          </span>
+        </label>
+        <label class="hshs-field" for="suUsername">
+          <span>Username</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-at lead" aria-hidden="true"></i>
+            <input id="suUsername" name="username" type="text" autocomplete="username" minlength="3" maxlength="24" placeholder="Choose a username" required>
+          </span>
+        </label>
+        <label class="hshs-field" for="suEmail">
+          <span>Email address</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-envelope lead" aria-hidden="true"></i>
+            <input id="suEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </span>
+        </label>
+        <label class="hshs-field" for="suPassword">
+          <span>Password</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-lock lead" aria-hidden="true"></i>
+            <input id="suPassword" name="password" type="password" autocomplete="new-password" minlength="6" placeholder="At least 6 characters" required>
+            <button class="toggle-pw" type="button" data-toggle-password="suPassword" aria-label="Show password"><i class="fas fa-eye" aria-hidden="true"></i></button>
+          </span>
+        </label>
+        <label class="hshs-field" for="suPassword2">
+          <span>Confirm password</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-lock lead" aria-hidden="true"></i>
+            <input id="suPassword2" name="confirmPassword" type="password" autocomplete="new-password" minlength="6" placeholder="Enter your password again" required>
+            <button class="toggle-pw" type="button" data-toggle-password="suPassword2" aria-label="Show password"><i class="fas fa-eye" aria-hidden="true"></i></button>
+          </span>
+        </label>
+        <button class="hshs-auth-submit" type="submit">Create account</button>
+      </form>
+
+      <form id="authResetForm" class="hshs-auth-panel" hidden novalidate>
+        <p style="color:var(--auth-muted);font-size:.9rem;margin:0 0 16px">Enter the email address linked to your account and we'll send you a password reset link.</p>
+        <label class="hshs-field" for="resetEmail">
+          <span>Email address</span>
+          <span class="hshs-field-input">
+            <i class="fas fa-envelope lead" aria-hidden="true"></i>
+            <input id="resetEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          </span>
+        </label>
+        <button class="hshs-auth-submit" type="submit">Send reset link</button>
+        <div class="hshs-auth-footer"><a href="#login" id="backToLogin">Back to sign in</a></div>
+      </form>
+    </section>
+
     <a class="hshs-auth-skip" href="/">Continue as guest</a>
-  </div>
+  </main>
+
   <script type="module" src="/js/config.js?v=261004sign2"></script>
   <script type="module" src="/js/hshs-auth-api.js?v=261004sign2"></script>
   <script defer src="/js/hshs-auth.js?v=261004sign2"></script>
