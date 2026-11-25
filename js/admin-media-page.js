@@ -145,6 +145,7 @@ function renderEditor() {
   document.getElementById("mm-mode").value = slot.mode;
   document.getElementById("mm-save-slot").addEventListener("click", saveSlot);
   document.getElementById("mm-add").addEventListener("click", openLibrary);
+  document.getElementById("mm-generate-sizes").addEventListener("click", generateOldSizes);
   document.getElementById("mm-close-library").addEventListener("click", closeLibrary);
   document.getElementById("mm-library-search").addEventListener("input", renderLibrary);
   wireItems();
@@ -276,6 +277,67 @@ async function saveSlot(event) {
     const result = await request("POST", payload);
     state.slots = state.slots.map(item => item.key === slot.key ? result.data : item);
     renderNavigation(); renderPreviewOnly();
+  });
+}
+
+async function ensureStorageTools() {
+  if (window.HshsStorage && window.HshsStorage.generateVariants) return;
+  window.__R2 = window.__R2 || {
+    signUrl: "https://hshs-r2-sign.ennoyeks.workers.dev/sign",
+    publicBaseUrl: "https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev"
+  };
+  await new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "/js/storage.js?v=261125variants1";
+    script.onload = resolve;
+    script.onerror = () => reject(new Error("Could not load the R2 upload helper"));
+    document.head.appendChild(script);
+  });
+  if (!window.HshsStorage || !window.HshsStorage.generateVariants) throw new Error("R2 image-size generation is unavailable");
+}
+
+async function generateOldSizes(event) {
+  const button = event.currentTarget;
+  actionState(button, async () => {
+    await ensureStorageTools();
+    const candidates = state.library.filter(item =>
+      ["posts", "photos"].includes(item.table) &&
+      item.media_key && !item.processedKey &&
+      item.src && !String(item.type || "").toLowerCase().includes("video")
+    );
+    if (!candidates.length) {
+      button.textContent = "All listed images have sizes";
+      throw new Error("No unprocessed images were found in the current library list.");
+    }
+    const base = "https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev";
+    const failures = [];
+    let completed = 0;
+    for (const item of candidates) {
+      try {
+        const response = await fetch(item.src, { mode: "cors", cache: "no-store" });
+        if (!response.ok) throw new Error("Original image could not be fetched (" + response.status + ")");
+        const blob = await response.blob();
+        if (!/^image\//i.test(blob.type || "")) throw new Error("Stored media is not an image");
+        const file = new File([blob], "legacy-" + item.id + ".jpg", { type: blob.type });
+        const processedKey = await window.HshsStorage.generateVariants(file);
+        await request("POST", {
+          action: "save-processed-key",
+          media_table: item.table,
+          media_id: item.id,
+          processed_key: processedKey
+        });
+        item.processedKey = processedKey;
+        item.src = base + "/" + processedKey + "/medium.webp";
+        item.srcSet = base + "/" + processedKey + "/thumb.webp 400w, " + item.src + " 900w, " + base + "/" + processedKey + "/large.webp 1600w";
+        completed += 1;
+        button.textContent = "Generating " + completed + "/" + candidates.length + "…";
+      } catch (error) {
+        failures.push(item.id + ": " + error.message);
+      }
+    }
+    renderLibrary();
+    renderEditor();
+    if (failures.length) throw new Error(completed + " images updated; " + failures.length + " could not be processed. Retry after checking R2 CORS and original URLs.");
   });
 }
 
