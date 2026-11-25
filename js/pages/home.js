@@ -261,49 +261,65 @@
     grid.innerHTML = '<div class="home-empty home-feature-empty"><i class="fas fa-layer-group"></i><strong>Nothing featured yet</strong><p style="opacity:.75;margin:6px 0 0;font-size:.85rem">Share a photo to get started.</p></div>';
   }
 
+  async function loadHomeStats() {
+    var stats = { totalPhotos: 0, totalVideos: 0, totalStudents: 0, totalLikes: 0 };
+    try {
+      var db = global.db;
+      if (db && typeof db.getAnalytics === 'function') {
+        var result = await db.getAnalytics();
+        stats.totalPhotos = Number(result && result.totalPhotos) || 0;
+        stats.totalVideos = Number(result && result.totalVideos) || 0;
+        stats.totalStudents = Number(result && result.totalStudents) || 0;
+        stats.totalLikes = Number(result && result.totalLikes) || 0;
+      }
+    } catch (error) {
+      console.warn('[HSHS] Home analytics unavailable:', error && error.message || error);
+    }
+    return stats;
+  }
+
+  function paintStats(stats) {
+    ['totalPhotos', 'totalVideos', 'totalStudents', 'totalLikes'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('data-count', String(Number(stats[id] || 0)));
+      el.textContent = formatCount(Number(stats[id] || 0));
+    });
+    animateCounts();
+  }
+
   async function renderData() {
     var token = ++renderToken;
-    var loaded;
+    var containers = {
+      home_hero: document.querySelector('.vibe-hero-photos'),
+      home_featured: document.getElementById('featuredGrid'),
+      home_trending_left: document.getElementById('homeTrendA'),
+      home_trending_right: document.getElementById('homeTrendB')
+    };
     try {
-      loaded = await loadReal();
-    } catch (err) {
+      var results = await Promise.all([
+        import('/js/media-slots.js').then(function (mediaSlots) {
+          return mediaSlots.loadSlots(Object.keys(containers), containers, { skeletonCount: 3 });
+        }),
+        loadHomeStats()
+      ]);
       if (token !== renderToken) return;
-      if (lastGood) { paintLoaded(lastGood); return; }
+      paintStats(results[1] || {});
+      var trendSection = document.getElementById('homeTrendA') && document.getElementById('homeTrendA').closest('.home-section');
+      var trendA = document.getElementById('homeTrendA');
+      var trendB = document.getElementById('homeTrendB');
+      if (trendSection) trendSection.hidden = (!trendA || trendA.hidden) && (!trendB || trendB.hidden);
+    } catch (error) {
+      if (token !== renderToken) return;
+      console.error('[HSHS] Managed home media failed:', error && error.message || error);
       var grid = document.getElementById('featuredGrid');
       if (grid && global.HshsPaint) {
         global.HshsPaint.section(grid, 'error', {
           onRetry: renderData,
-          error: '<div class="hshs-section-state hshs-error"><strong>Could not load the feed</strong><button type="button" data-hshs-retry>Retry</button></div>'
+          error: '<div class="hshs-section-state hshs-error"><strong>Could not load featured media</strong><button type="button" data-hshs-retry>Retry</button></div>'
         });
       }
-      return;
     }
-    if (token !== renderToken) return;
-    if (loaded && loaded.error && !(loaded.posts && loaded.posts.length)) {
-      if (lastGood) { paintLoaded(lastGood); return; }
-      var errGrid = document.getElementById('featuredGrid');
-      if (errGrid && global.HshsPaint) {
-        global.HshsPaint.section(errGrid, 'error', {
-          onRetry: renderData,
-          error: '<div class="hshs-section-state hshs-error"><strong>Could not load the feed</strong><button type="button" data-hshs-retry>Retry</button></div>'
-        });
-      }
-      return;
-    }
-    var candidates = withMedia(loaded.posts || []);
-    var checks = await Promise.all(candidates.map(previewReady));
-    if (token !== renderToken) return;
-    var mediaPosts = checks.filter(Boolean);
-    if (!mediaPosts.length) {
-      if (lastGood && !(loaded && loaded.error)) {
-        paintLoaded(lastGood);
-        return;
-      }
-      showEmpty(document.getElementById('featuredGrid'));
-      return;
-    }
-    lastGood = { posts: mediaPosts, stats: loaded.stats };
-    paintLoaded(lastGood);
   }
 
   function animateCounts() {
