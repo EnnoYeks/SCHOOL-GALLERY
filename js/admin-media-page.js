@@ -14,7 +14,7 @@ const firebaseApp = getApps().length ? getApps()[0] : initializeApp(firebaseConf
 const auth = getAuth(firebaseApp);
 const root = document.getElementById("media-admin-root");
 let currentUser = null;
-let state = { slots: [], items: [], library: [] };
+let state = { slots: [], items: [], library: [], libraryHasMore: false, libraryNextOffset: 100 };
 let selectedKey = "";
 let draggedId = "";
 
@@ -56,7 +56,7 @@ async function loadAdmin() {
   root.innerHTML = '<div class="mm-loading"><span class="mm-spinner"></span><p>Checking administrator access…</p></div>';
   try {
     const data = await request("GET");
-    state = { slots: data.slots || [], items: data.items || [], library: data.library || [] };
+    state = { slots: data.slots || [], items: data.items || [], library: data.library || [], libraryHasMore: !!data.libraryHasMore, libraryNextOffset: Number(data.libraryNextOffset) || 100 };
     selectedKey = selectedKey && state.slots.some(slot => slot.key === selectedKey) ? selectedKey : (state.slots[0]?.key || "");
     renderApp();
   } catch (error) {
@@ -140,7 +140,7 @@ function renderEditor() {
     '<section class="mm-content-section"><div class="mm-section-heading"><div><p class="mm-kicker">ASSIGNED MEDIA</p><h2>Items in this slot</h2><p>Reorder, edit captions, set focal points and schedule visibility.</p></div><button class="mm-primary" id="mm-add">＋ Add from library</button></div>' +
     '<div class="mm-items" id="mm-items">' + (items.length ? items.map(renderItem).join("") : '<div class="mm-empty"><strong>No media assigned</strong><span>Add items from the library or switch to an automatic mode.</span></div>') + '</div></section>' +
     '<section class="mm-preview-section"><div class="mm-section-heading"><div><p class="mm-kicker">LIVE PREVIEW</p><h2>Public appearance</h2><p>Uses the same renderer as public media placements.</p></div></div><div class="mm-preview-frame"><div id="mm-preview"></div></div></section>' +
-    '<div id="mm-library-modal" class="mm-modal" hidden><div class="mm-modal-card"><div class="mm-modal-head"><div><p class="mm-kicker">MEDIA LIBRARY</p><h2>Add media to ' + esc(slot.label) + '</h2></div><button id="mm-close-library" class="mm-icon-btn" aria-label="Close">×</button></div><input id="mm-library-search" class="mm-search" placeholder="Search titles and captions…"><div id="mm-library-grid" class="mm-library-grid"></div></div></div>';
+    '<div id="mm-library-modal" class="mm-modal" hidden><div class="mm-modal-card"><div class="mm-modal-head"><div><p class="mm-kicker">MEDIA LIBRARY</p><h2>Add media to ' + esc(slot.label) + '</h2></div><button id="mm-close-library" class="mm-icon-btn" aria-label="Close">×</button></div><input id="mm-library-search" class="mm-search" placeholder="Search titles and captions…"><div id="mm-library-grid" class="mm-library-grid"></div><button id="mm-library-more" class="mm-secondary mm-library-more">Load more media</button></div></div>';
   document.getElementById("mm-layout").value = slot.layout;
   document.getElementById("mm-mode").value = slot.mode;
   document.getElementById("mm-save-slot").addEventListener("click", saveSlot);
@@ -148,6 +148,7 @@ function renderEditor() {
   document.getElementById("mm-generate-sizes").addEventListener("click", generateOldSizes);
   document.getElementById("mm-close-library").addEventListener("click", closeLibrary);
   document.getElementById("mm-library-search").addEventListener("input", renderLibrary);
+  document.getElementById("mm-library-more").addEventListener("click", loadMoreLibrary);
   wireItems();
   const preview = document.getElementById("mm-preview");
   renderSlot(slot.key, preview, { ...slot, items }, { preview: true });
@@ -300,6 +301,18 @@ async function generateOldSizes(event) {
   const button = event.currentTarget;
   actionState(button, async () => {
     await ensureStorageTools();
+    let allMedia = [...state.library];
+    let offset = state.libraryNextOffset;
+    let hasMore = state.libraryHasMore;
+    while (hasMore) {
+      const page = await request("GET", null, "?library_offset=" + offset);
+      allMedia = allMedia.concat(page.library || []);
+      hasMore = !!page.libraryHasMore;
+      offset = Number(page.libraryNextOffset) || (offset + 100);
+    }
+    state.library = allMedia;
+    state.libraryHasMore = false;
+    state.libraryNextOffset = offset;
     const candidates = state.library.filter(item =>
       ["posts", "photos"].includes(item.table) &&
       item.media_key && !item.processedKey &&
@@ -307,7 +320,7 @@ async function generateOldSizes(event) {
     );
     if (!candidates.length) {
       button.textContent = "All listed images have sizes";
-      throw new Error("No unprocessed images were found in the current library list.");
+      return;
     }
     const base = "https://pub-cf880c90c5ff4ca697baac59284a6024.r2.dev";
     const failures = [];
@@ -335,8 +348,8 @@ async function generateOldSizes(event) {
         failures.push(item.id + ": " + error.message);
       }
     }
-    renderLibrary();
-    renderEditor();
+    if (!document.getElementById("mm-library-modal")?.hidden) renderLibrary();
+    renderPreviewOnly();
     if (failures.length) throw new Error(completed + " images updated; " + failures.length + " could not be processed. Retry after checking R2 CORS and original URLs.");
   });
 }
@@ -348,6 +361,29 @@ function openLibrary() {
 function closeLibrary() {
   document.getElementById("mm-library-modal").hidden = true;
 }
+async function loadMoreLibrary(event) {
+  const button = event.currentTarget;
+  if (!state.libraryHasMore) return;
+  button.disabled = true;
+  button.textContent = "Loading…";
+  try {
+    const page = await request("GET", null, "?library_offset=" + state.libraryNextOffset);
+    const seen = new Set(state.library.map(item => item.table + ":" + item.id));
+    (page.library || []).forEach(item => {
+      const key = item.table + ":" + item.id;
+      if (!seen.has(key)) state.library.push(item);
+    });
+    state.libraryHasMore = !!page.libraryHasMore;
+    state.libraryNextOffset = Number(page.libraryNextOffset) || state.libraryNextOffset + 100;
+    renderLibrary();
+  } catch (error) {
+    button.textContent = "Retry loading";
+    button.title = error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function renderLibrary() {
   const query = document.getElementById("mm-library-search").value.trim().toLowerCase();
   const list = state.library.filter(item => !query || [item.title, item.description, item.type, item.table].join(" ").toLowerCase().includes(query));
@@ -357,6 +393,8 @@ function renderLibrary() {
     (item.src ? '<img src="' + esc(item.src) + '" alt="" loading="lazy">' : '<span class="mm-library-placeholder">No preview</span>') +
     '<strong>' + esc(item.title) + '</strong><small>' + esc(item.table) + '</small></button>'
   ).join("") || '<p class="mm-library-empty">No matching media found.</p>';
+  const more = document.getElementById("mm-library-more");
+  if (more) more.hidden = !state.libraryHasMore;
   grid.querySelectorAll("[data-library-id]").forEach(button => button.addEventListener("click", async () => {
     button.disabled = true;
     try {
