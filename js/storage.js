@@ -468,6 +468,7 @@
   g.HshsStorage = {
     upload: upload,
     uploadFromUrl: uploadFromUrl,
+    generateVariants: function (file) { return createImageVariants(file, variantId()); },
     uploadAdmin: uploadAdmin,
     list: list,
     objectKey: objectKey,
