@@ -49,6 +49,18 @@ async function getPosts(root){
   }catch(error){console.error('[HSHS] Managed memories slot failed',error);posts=[];render(root,posts)}
   return posts;
 }
+function wireMediaFailures(root){
+  root.querySelectorAll('.memories-media img,.memories-timeline-thumb img').forEach(function(img){
+    if(img.dataset.failureWired==='1')return;
+    img.dataset.failureWired='1';
+    img.addEventListener('error',function(){
+      var card=img.closest('article');
+      if(card)card.hidden=true;
+      var section=img.closest('.memories-section');
+      if(section&&!section.querySelector('article:not([hidden])'))section.hidden=true;
+    },{once:true});
+  });
+}
 function wireTabs(){var tabs=document.querySelectorAll('.memories-tabs a');tabs.forEach(function(a){a.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('is-active')});a.classList.add('is-active')})})}
 function wireFilters(){document.querySelectorAll('[data-memory-filter]').forEach(function(btn){btn.addEventListener('click',function(){document.querySelectorAll('[data-memory-filter]').forEach(function(x){x.classList.remove('is-active')});btn.classList.add('is-active');var f=btn.dataset.memoryFilter;document.querySelectorAll('.memories-reel-card').forEach(function(card){var ok=f==='all'||(f!=='mine'&&card.dataset.memoryType===f);card.hidden=!ok})})})}
 function render(root,posts){posts=(posts||[]).filter(function(p){return dateOf(p)&&mediaOf(p)}).sort(function(a,b){return dateOf(b)-dateOf(a)});var now=new Date(),month=now.getMonth(),day=now.getDate();document.documentElement.setAttribute('data-hshs-page',PAGE);var mediaSections=['onThisDay','reel','timeline','years'];mediaSections.forEach(function(id){var section=root.querySelector('#'+id);if(section)section.hidden=!posts.length});
@@ -60,7 +72,7 @@ var byYear={};posts.forEach(function(p){var y=dateOf(p).getFullYear();byYear[y]=
 var archive=root.querySelector('#yearArchiveContent');function showYear(y){if(!archive)return;var chosen=posts.filter(function(p){return String(dateOf(p).getFullYear())===String(y)});archive.innerHTML=chosen.length?chosen.slice(0,6).map(memoryCard).join(''):'<div class="memories-empty">No memories found for '+esc(y)+'.</div>';if(yearsEl)yearsEl.querySelectorAll('.memories-year').forEach(function(b){b.classList.toggle('active',b.dataset.year===String(y))})}if(yearsEl)yearsEl.querySelectorAll('.memories-year').forEach(function(b){b.addEventListener('click',function(){showYear(b.dataset.year)})});if(years.length)showYear(years[0]);
 var people={};posts.forEach(function(p){var a=authorOf(p);people[a]=(people[a]||0)+1});var peopleNames=Object.keys(people).sort(function(a,b){return people[b]-people[a]}),peopleEl=root.querySelector('#memoryPeople');if(peopleEl)peopleEl.innerHTML=peopleNames.length?peopleNames.slice(0,5).map(function(a){return personCard(a,people[a])}).join(''):'<div class="memories-empty">People will appear as the archive grows.</div>';
 var birthdays=root.querySelector('#memoryBirthdays');if(birthdays)birthdays.innerHTML='<div class="memories-empty">Birthday highlights will appear when profile birthday dates are available.</div>';
-wireTabs();wireFilters();if(global.HshsRoute)global.HshsRoute.reveal();}
+wireTabs();wireFilters();wireMediaFailures(root);if(global.HshsRoute)global.HshsRoute.reveal();}
 async function mount(){if(!isPage()||!global.HshsRender)return;loadCss();var root=document.getElementById('hshs-page');if(!root){root=document.createElement('div');root.id='hshs-page';document.body.appendChild(root)}var tpl=global.HshsTemplates&&global.HshsTemplates[PAGE];if(tpl&&!root.querySelector('#memoryReel')){if(global.HshsRender.mountHTML)global.HshsRender.mountHTML(root,tpl);else root.innerHTML=tpl}await getPosts(root)}
 function boot(){function go(){if(isPage())mount()}if(global.HshsApp&&typeof global.HshsApp.whenReady==='function')global.HshsApp.whenReady(go);else document.addEventListener('hshs:foundation-ready',go,{once:true});document.addEventListener('hshs:page',function(e){if(e.detail&&e.detail.page===PAGE)mount()});go();setTimeout(go,500)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot()})(typeof window!=='undefined'?window:this);
