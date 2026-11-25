@@ -18,15 +18,14 @@
     punch: 'contrast(1.28) saturate(1.45) brightness(1.03)',
     night: 'brightness(0.78) contrast(1.22) saturate(0.7) hue-rotate(-12deg)',
     campus: 'contrast(1.1) saturate(1.15) brightness(1.04) sepia(0.08)',
-    gold: 'sepia(0.45) saturate(1.35) contrast(1.08) brightness(1.06)',
     sky: 'hue-rotate(-25deg) saturate(1.2) contrast(1.08) brightness(1.05)',
     vivid: 'saturate(1.6) contrast(1.18) brightness(1.02)'
   };
 
-  var ORDER = ['original','film','cool','warm','mono','fade','punch','night','campus','gold','sky','vivid'];
+  var ORDER = ['original','film','cool','warm','mono','fade','punch','night','campus','sky','vivid'];
   var LABELS = {
     original:'Original', film:'Film', cool:'Cool', warm:'Warm', mono:'Mono', fade:'Fade',
-    punch:'Punch', night:'Night', campus:'Campus', gold:'Gold', sky:'Sky', vivid:'Vivid'
+    punch:'Punch', night:'Night', campus:'Campus', sky:'Sky', vivid:'Vivid'
   };
 
   var state = {
