@@ -9,33 +9,56 @@
   // One record per upload. Photo -> photos table, video -> videos table.
   // Gallery and Home already merge posts + photos + videos.
   function installOneRecordGuard() {
-    function wrap() {
-      var db = window.db;
-      if (!db || db.__oneRecord) return !!db;
-      db.__oneRecord = true;
-      var last = { key: '', at: 0 };
-      function keyOf(payload) {
-        return String((payload && (payload.mediaKey || payload.media_key || payload.imageUrl || payload.image)) || '');
-      }
-      function shouldSkip(payload) {
-        var k = keyOf(payload);
-        var now = Date.now();
-        if (k && k === last.key && (now - last.at) < 8000) return true;
-        last = { key: k, at: now };
-        return false;
-      }
-      ['createPost', 'createPhoto', 'createVideo'].forEach(function (fn) {
-        if (typeof db[fn] !== 'function') return;
-        var orig = db[fn].bind(db);
-        db[fn] = function (payload) {
-          if (shouldSkip(payload)) {
-            console.warn('[HSHS] Skipped duplicate ' + fn + ' for same media');
-            return Promise.resolve(null);
-          }
-          return orig(payload);
-        };
-      });
+    function captureUploadMetadata() {
+      var storage = window.HshsStorage;
+      if (!storage || typeof storage.uploadFromUrl !== 'function') return false;
+      if (storage.__variantCapture) return true;
+      var originalUpload = storage.uploadFromUrl.bind(storage);
+      storage.uploadFromUrl = async function (src, options) {
+        window.__hshsLastUploadMeta = null;
+        var result = await originalUpload(src, options);
+        window.__hshsLastUploadMeta = result || null;
+        return result;
+      };
+      storage.__variantCapture = true;
       return true;
+    }
+
+    function wrap() {
+      var storageReady = captureUploadMetadata();
+      var db = window.db;
+      if (!db) return false;
+      if (!db.__oneRecord) {
+        db.__oneRecord = true;
+        var last = { key: '', at: 0 };
+        function keyOf(payload) {
+          return String((payload && (payload.mediaKey || payload.media_key || payload.imageUrl || payload.image)) || '');
+        }
+        function shouldSkip(payload) {
+          var k = keyOf(payload);
+          var now = Date.now();
+          if (k && k === last.key && (now - last.at) < 8000) return true;
+          last = { key: k, at: now };
+          return false;
+        }
+        function withVariantKey(payload) {
+          var meta = window.__hshsLastUploadMeta;
+          if (!meta || !meta.processedKey || !meta.key || keyOf(payload) !== String(meta.key)) return payload;
+          return Object.assign({}, payload, { processedKey: meta.processedKey });
+        }
+        ['createPost', 'createPhoto', 'createVideo'].forEach(function (fn) {
+          if (typeof db[fn] !== 'function') return;
+          var original = db[fn].bind(db);
+          db[fn] = function (payload) {
+            if (shouldSkip(payload)) {
+              console.warn('[HSHS] Skipped duplicate ' + fn + ' for same media');
+              return Promise.resolve(null);
+            }
+            return original(withVariantKey(payload));
+          };
+        });
+      }
+      return !!db.__oneRecord && storageReady;
     }
     if (!wrap()) {
       var n = 0;
@@ -45,7 +68,6 @@
     }
   }
   installOneRecordGuard();
-
 
   var CDN =
     'https://cdn.jsdelivr.net/gh/EnnoYeks/SCHOOL-GALLERY@255cb6608129cf952fb2c8de957a7254ae830099/js/hshs-upload.js';
