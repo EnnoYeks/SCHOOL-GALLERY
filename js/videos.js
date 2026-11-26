@@ -29,6 +29,8 @@ class VideosPage {
         const container = document.getElementById("videosContainer");
         if (!container) return;
         this.loading = true;
+        var moreBtn = document.getElementById("loadMoreVideos");
+        var inline = (append && moreBtn && window.HshsLoading && HshsLoading.inline) ? HshsLoading.inline(moreBtn, 'sm') : null;
         if (!append) container.innerHTML = this.skeletons();
         try {
             const mediaSlots = await import("/js/media-slots.js");
@@ -68,6 +70,7 @@ class VideosPage {
             this.hasMore = false;
             this.apply();
         } finally {
+            if (inline) inline.hide();
             this.loading = false;
             const loadMore = document.getElementById("loadMoreVideos");
             if (loadMore) {
