@@ -337,6 +337,7 @@
     var api = db(), submit = form.querySelector('button[type="submit"]');
     if (!api || !api.addVideoComment) return;
     if (submit) submit.disabled = true;
+    var inline = window.HshsLoading && HshsLoading.inline ? HshsLoading.inline(submit, 'sm') : null;
     try {
       var result = await api.addVideoComment(state.commentsVideoId, text);
       if (!result || !result.ok) throw new Error((result && result.error) || 'Comment failed');
@@ -350,7 +351,10 @@
     } catch (error) {
       console.warn('[HSHS Vibe] comment submit failed:', error);
       toast('Comment could not be posted. Check account setup and try again.');
-    } finally { if (submit) submit.disabled = false; }
+    } finally {
+      if (inline) inline.hide();
+      if (submit) submit.disabled = false;
+    }
   }
 
   async function shareVideo(id) {
