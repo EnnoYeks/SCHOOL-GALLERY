@@ -1,6 +1,6 @@
 /**
- * HSHS Upload Studio — loader.
- * Full studio lives in /js/hshs-studio.js.
+ * HSHS Upload Studio loader.
+ * Full camera UI lives in js/hshs-studio.js. Context lock is hshs-upload-context.js.
  */
 (function () {
   if (window.__hshsUpload && window.__hshsUpload.__studioLoaded) return;
@@ -8,8 +8,7 @@
   function installOneRecordGuard() {
     function captureUploadMetadata() {
       var storage = window.HshsStorage;
-      if (!storage || typeof storage.uploadFromUrl !== 'function') return false;
-      if (storage.__variantCapture) return true;
+      if (!storage || typeof storage.uploadFromUrl !== 'function' || storage.__variantCapture) return !!storage;
       var originalUpload = storage.uploadFromUrl.bind(storage);
       storage.uploadFromUrl = async function (src, options) {
         window.__hshsLastUploadMeta = null;
@@ -78,23 +77,26 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    link.href = '/css/hshs-studio.css?v=261125purplecam1';
+    link.href = '/css/hshs-studio.css?v=261126progress1';
   }
 
   function loadStudio() {
+    ensureStudioCss();
     var s = document.createElement('script');
-    s.src = '/js/hshs-studio.js?v=261125r2gate2';
+    s.src = '/js/hshs-studio.js?v=261126progress1';
     s.async = false;
     s.onload = function () {
-      window.__hshsUpload = {
-        __studioLoaded: true,
-        open: window.__hshsOpenUpload,
-        close: window.__hshsCloseUpload
-      };
-      ensureStudioCss();
+      window.__hshsUpload = window.__hshsUpload || {};
+      if (typeof window.__hshsOpenUpload === 'function') {
+        window.__hshsUpload = {
+          __studioLoaded: true,
+          open: window.__hshsOpenUpload,
+          close: window.__hshsCloseUpload
+        };
+      }
     };
     s.onerror = function () {
-      console.error('[HSHS] Studio failed to load from local /js/hshs-studio.js');
+      console.error('[HSHS] camera studio failed to load');
     };
     document.head.appendChild(s);
   }

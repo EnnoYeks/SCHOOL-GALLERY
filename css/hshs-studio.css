@@ -298,8 +298,20 @@ body.studio-open .navbar{opacity:0;pointer-events:none}
 }
 .hshs-studio-spinner{
   width:36px;height:36px;border-radius:50%;
-  border:3px solid rgba(255,255,255,.15);border-top-color:#e60023;
+  border:3px solid rgba(255,255,255,.15);border-top-color:#a855f7;
   animation:hshsSpin .7s linear infinite;
+}
+.hshs-up-track{
+  width:min(240px,70vw);height:6px;border-radius:999px;
+  background:rgba(255,255,255,.12);overflow:hidden;
+}
+.hshs-up-track i{
+  display:block;height:100%;width:0;border-radius:999px;
+  background:linear-gradient(90deg,#c4b5fd,#a855f7);
+  transition:width .2s ease;
+}
+.hshs-studio-progress-card b{
+  font-size:13px;font-weight:800;color:#c4b5fd;
 }
 @keyframes hshsSpin{to{transform:rotate(360deg)}}
 

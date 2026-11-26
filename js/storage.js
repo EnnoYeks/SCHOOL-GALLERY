@@ -286,7 +286,44 @@
     }
   }
 
-  async function uploadObject(file, key, contentType) {
+  function emitProgress(options, info) {
+    if (!options || typeof options.onProgress !== "function") return;
+    try { options.onProgress(info); } catch (e) {}
+  }
+
+  function putWithProgress(putUrl, file, contentType, onByte) {
+    return new Promise(function (resolve, reject) {
+      if (typeof XMLHttpRequest !== "function") {
+        fetch(putUrl, {
+          method: "PUT",
+          headers: { "Content-Type": contentType || "application/octet-stream" },
+          body: file
+        }).then(function (put) {
+          if (!put.ok) reject(new Error("Cloudflare R2 upload failed (" + put.status + ")."));
+          else resolve();
+        }).catch(function () { reject(new Error("Cloudflare R2 upload failed.")); });
+        return;
+      }
+      var xhr = new XMLHttpRequest();
+      xhr.open("PUT", putUrl);
+      xhr.setRequestHeader("Content-Type", contentType || "application/octet-stream");
+      if (xhr.upload && onByte) {
+        xhr.upload.onprogress = function (ev) {
+          var total = ev.lengthComputable && ev.total ? ev.total : ((file && file.size) || 0);
+          var ratio = total ? (ev.loaded / total) : 0;
+          onByte({ loaded: ev.loaded || 0, total: total, ratio: Math.max(0, Math.min(1, ratio)) });
+        };
+      }
+      xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) resolve();
+        else reject(new Error("Cloudflare R2 upload failed (" + xhr.status + ")."));
+      };
+      xhr.onerror = function () { reject(new Error("Cloudflare R2 upload failed.")); };
+      xhr.send(file);
+    });
+  }
+
+  async function uploadObject(file, key, contentType, onByte) {
     var r2 = r2Config();
     var signTarget = r2.signUrl || "";
     if (signTarget && !/\/sign\/?$/i.test(signTarget)) signTarget = signTarget.replace(/\/$/, "") + "/sign";
@@ -300,12 +337,7 @@
     var signed = await signRes.json();
     var putUrl = signed.url || signed.putUrl;
     if (!putUrl) throw new Error("Cloudflare R2 did not return an upload URL.");
-    var put = await fetch(putUrl, {
-      method: "PUT",
-      headers: { "Content-Type": contentType || "application/octet-stream" },
-      body: file
-    });
-    if (!put.ok) throw new Error("Cloudflare R2 upload failed (" + put.status + ").");
+    await putWithProgress(putUrl, file, contentType, onByte);
     return { key: key, url: publicUrl(key) };
   }
 
@@ -345,7 +377,7 @@
     });
   }
 
-  async function createImageVariants(file, id) {
+  async function createImageVariants(file, id, onVariant) {
     var drawable = await loadDrawable(file);
     try {
       var base = "media/" + id;
@@ -366,8 +398,10 @@
         context.drawImage(drawable.image, 0, 0, width, height);
         return { key: base + "/" + target.name + ".webp", blob: await canvasWebp(canvas) };
       }));
-      await Promise.all(blobs.map(function (variant) {
-        return uploadObject(variant.blob, variant.key, "image/webp");
+      await Promise.all(blobs.map(function (variant, index) {
+        return uploadObject(variant.blob, variant.key, "image/webp", function () {
+          if (typeof onVariant === "function") onVariant(index + 1, blobs.length);
+        });
       }));
       return base;
     } finally {
@@ -378,22 +412,32 @@
   async function upload(file, options) {
     options = options || {};
     var kind = options.kind || (file && file.type && file.type.indexOf("video") === 0 ? "video" : "photo");
+    emitProgress(options, { stage: "checking", percent: 8 });
     checkSize(file, kind);
+    emitProgress(options, { stage: "measuring", percent: 12 });
     var dims = await mediaSize(file);
     var key = objectKey(kind, file);
     var contentType = (file && file.type) || (kind === "video" ? "video/webm" : "image/jpeg");
-    await uploadObject(file, key, contentType);
+    emitProgress(options, { stage: "signing", percent: 16, total: (file && file.size) || 0, loaded: 0 });
+    await uploadObject(file, key, contentType, function (ev) {
+      var percent = 16 + Math.round((ev.ratio || 0) * 62);
+      emitProgress(options, { stage: "uploading", percent: percent, loaded: ev.loaded, total: ev.total });
+    });
 
     var processedKey = "";
     if (kind !== "video" && file && /^image\//i.test(file.type || "")) {
+      emitProgress(options, { stage: "sizes", percent: 80 });
       try {
-        processedKey = await createImageVariants(file, variantId());
+        processedKey = await createImageVariants(file, variantId(), function (done, total) {
+          var percent = 80 + Math.round((done / total) * 14);
+          emitProgress(options, { stage: "sizes", percent: percent, done: done, totalSizes: total });
+        });
       } catch (variantError) {
-        // The original upload remains valid; slot rendering falls back to it until variants are available.
         console.warn("[HshsStorage] Image variants could not be generated:", variantError && variantError.message);
       }
     }
 
+    emitProgress(options, { stage: "uploaded", percent: 96 });
     return {
       url: publicUrl(key),
       key: key,
@@ -415,13 +459,14 @@
     options = options || {};
     var kind = options.kind || "photo";
     if (!src) throw new Error("No media source");
+    emitProgress(options, { stage: "reading", percent: 4 });
     var res = await fetch(src);
     if (!res.ok) throw new Error("Could not read the file for upload");
     var blob = await res.blob();
     var file = new File([blob], "capture." + (kind === "video" ? "webm" : "jpg"), {
       type: blob.type || (kind === "video" ? "video/webm" : "image/jpeg")
     });
-    return upload(file, { kind: kind });
+    return upload(file, options);
   }
 
   async function uploadAdmin(file) {
