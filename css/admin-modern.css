@@ -24,3 +24,9 @@
 @media(max-width:760px){#adminDesk{margin-top:56px!important;padding:12px!important}#adminPanels>.admin-welcome{padding:17px;border-radius:18px}.admin-control-nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}.admin-control-nav button{flex:0 0 auto;min-height:44px}#adminUploadForm .admin-form-row:first-child{grid-template-columns:1fr}#adminPanels .hmm-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:8px;gap:8px}#adminPanels .hmm-card-body{padding:10px}#adminPanels .hmm-card-actions .hmm-btn{flex-basis:100%}}
 @media(max-width:440px){.admin-stat-grid{gap:8px}.admin-stat{padding:12px;border-radius:15px}.admin-stat p{margin-bottom:7px}#adminPanels .hmm-grid{grid-template-columns:1fr}#adminPanels .hmm-thumb{aspect-ratio:16/10}}
 @media(prefers-reduced-motion:reduce){.admin-btn,.admin-control-nav button,.hmm-card{transition:none!important}}
+
+/* Selected upload preview */
+.admin-file-preview{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px;margin:10px 0 2px;padding:12px;border:1px solid rgba(145,174,222,.16);border-radius:14px;background:rgba(5,13,30,.42)}
+.admin-file-preview:empty{display:none}
+.admin-file-preview img,.admin-file-preview video{display:block;width:min(100%,420px);max-height:280px;object-fit:contain;border-radius:12px;background:#050b18}
+.admin-file-meta{flex:1 1 180px;margin:0;color:#9db4d5;font-size:.8rem;overflow-wrap:anywhere}
