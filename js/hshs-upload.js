@@ -77,7 +77,7 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    link.href = '/css/hshs-studio.css?v=261126cancel1';
+    link.href = '/css/hshs-studio.css?v=261126stale1';
   }
 
   function loadScript(src) {
@@ -95,10 +95,10 @@
     ensureStudioCss();
     var ready = window.HshsLoading && window.HshsLoading.pyramid
       ? Promise.resolve()
-      : loadScript('/js/components/loading.js?v=261126cancel1');
+      : loadScript('/js/components/loading.js?v=261126stale1');
     ready.then(function () {
       var s = document.createElement('script');
-      s.src = '/js/hshs-studio.js?v=261126cancel1';
+      s.src = '/js/hshs-studio.js?v=261126stale1';
       s.async = false;
       s.onload = function () {
         window.__hshsUpload = window.__hshsUpload || {};

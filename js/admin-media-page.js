@@ -289,7 +289,7 @@ async function ensureStorageTools() {
   };
   await new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = "/js/storage.js?v=261126progress1";
+    script.src = "/js/storage.js?v=261126stale1";
     script.onload = resolve;
     script.onerror = () => reject(new Error("Could not load the R2 upload helper"));
     document.head.appendChild(script);

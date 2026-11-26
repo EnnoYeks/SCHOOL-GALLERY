@@ -111,6 +111,10 @@
     }
     var controller = {
       set: function (percent, label) { paint(percent, label || stageWord(label)); },
+      lockCancel: function () {
+        var c = el.querySelector('#hshsPyramidCancel');
+        if (c) c.hidden = true;
+      },
       done: function (label) { paint(100, label || 'Done'); },
       fail: function (message, onRetry) {
         if (errEl) {
