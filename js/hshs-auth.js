@@ -125,7 +125,8 @@
     var password = ($('#loginPassword') || {}).value || '';
     if (!password || password.length < 6) return msg(box, 'Password must be at least 6 characters.');
     if (submit) submit.disabled = true;
-    msg(box, 'Signing in…', true);
+    var inline = window.HshsLoading && HshsLoading.inline ? HshsLoading.inline(submit.parentNode || form, 'sm') : null;
+    msg(box, '', true);
     try {
       var email = await resolveEmail(identifier);
       var api = await ensureApi();
@@ -136,6 +137,7 @@
     } catch (err) {
       msg(box, friendlyError(err));
     } finally {
+      if (inline) inline.hide();
       if (submit) submit.disabled = false;
     }
   }
@@ -155,7 +157,8 @@
     if (password.length < 6) return msg(box, 'Password must be at least 6 characters.');
     if (password !== confirm) return msg(box, 'Passwords do not match.');
     if (submit) submit.disabled = true;
-    msg(box, 'Checking username…', true);
+    var inline = window.HshsLoading && HshsLoading.inline ? HshsLoading.inline(submit.parentNode || e.target, 'sm') : null;
+    msg(box, '', true);
     window.__hshsSigningUp = true;
     try {
       var api = await ensureApi();
@@ -170,6 +173,7 @@
     } catch (err) {
       msg(box, friendlyError(err));
     } finally {
+      if (inline) inline.hide();
       window.__hshsSigningUp = false;
       if (submit) submit.disabled = false;
     }
@@ -182,7 +186,8 @@
     var email = (($('#resetEmail') || {}).value || '').trim().toLowerCase();
     if (!email || email.indexOf('@') === -1) return msg(box, 'Enter the email on your account.');
     if (submit) submit.disabled = true;
-    msg(box, 'Sending reset link…', true);
+    var inline = window.HshsLoading && HshsLoading.inline ? HshsLoading.inline(submit.parentNode || e.target, 'sm') : null;
+    msg(box, '', true);
     try {
       var api = await ensureApi();
       await api.sendPasswordReset(email);
@@ -190,6 +195,7 @@
     } catch (err) {
       msg(box, friendlyError(err));
     } finally {
+      if (inline) inline.hide();
       if (submit) submit.disabled = false;
     }
   }
