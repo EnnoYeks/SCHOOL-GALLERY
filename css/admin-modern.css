@@ -1,0 +1,26 @@
+/* HSHS World · Admin modernization, additive/scoped */
+#adminDesk{max-width:1540px!important;padding:clamp(12px,2vw,26px)!important}
+#adminPanels{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+#adminPanels>.admin-welcome{margin:0;padding:22px 24px;border:1px solid rgba(130,170,235,.18);border-radius:24px;background:linear-gradient(115deg,rgba(15,32,68,.96),rgba(13,26,53,.88))}
+.admin-welcome h1{font-size:clamp(1.55rem,2.7vw,2.15rem)}
+.admin-stat-grid{gap:12px;margin:0}
+.admin-stat{position:relative;overflow:hidden;padding:17px 19px;border-radius:18px;background:linear-gradient(145deg,rgba(20,40,81,.94),rgba(8,20,44,.97))}
+.admin-stat:after{content:"";position:absolute;inset:auto -35px -45px auto;width:120px;height:120px;border-radius:50%;background:rgba(59,130,246,.1);pointer-events:none}
+.admin-stat p{font-size:.78rem;letter-spacing:.035em}.admin-stat strong{font-size:clamp(1.7rem,2.2vw,2.2rem);font-variant-numeric:tabular-nums}.admin-stat small{display:block;margin-top:5px;color:#7f9bc3;font-size:.74rem}
+.admin-work-grid{gap:14px}.admin-panel{border-radius:20px;padding:clamp(15px,1.8vw,22px);background:linear-gradient(150deg,rgba(15,31,66,.96),rgba(8,19,42,.97))}.admin-panel-head{margin-bottom:15px}.admin-panel-head h2{font-size:1.2rem}
+.admin-btn{min-height:42px;border-radius:12px;transition:transform .16s ease,background .16s ease}.admin-btn:hover{transform:translateY(-1px)}.admin-btn-primary{background:linear-gradient(110deg,#6366f1,#38bdf8);color:#07152d;box-shadow:0 8px 20px rgba(59,130,246,.18)}.admin-btn-quiet{background:rgba(255,255,255,.045);border-color:rgba(148,180,235,.17)}
+.admin-event-form{gap:11px}.admin-event-form label{color:#a9bddb;font-size:.76rem}
+.admin-event-form input,.admin-inline-form input,.admin-inline-form select,#adminUploadForm input:not([type=checkbox]),#adminUploadForm select,#adminUploadForm textarea{width:100%;min-height:43px;box-sizing:border-box;padding:11px 12px;border:1px solid rgba(145,174,222,.2);border-radius:12px;color:#edf4ff;background:rgba(4,12,29,.42);font:inherit;font-size:.88rem}
+#adminUploadForm textarea{min-height:105px;resize:vertical}#adminUploadForm label{color:#a9bddb;font-size:.78rem;font-weight:750}#adminUploadForm input[type=file]{padding:9px;border-style:dashed;background:rgba(7,18,40,.38)}#adminUploadForm input[type=checkbox]{accent-color:#60a5fa;width:18px;height:18px}
+#adminUploadForm .admin-form-row:first-child{grid-template-columns:repeat(3,minmax(0,1fr))}#adminUploadForm>label{display:block}#adminUploadForm>label>input,#adminUploadForm>label>textarea{margin-top:7px}#adminUploadForm .admin-form-row:last-of-type{display:flex;flex-wrap:wrap;gap:9px}#adminUploadForm .admin-form-row:last-of-type .admin-btn{flex:1 1 150px}
+.admin-form-row{gap:10px}.admin-item-row,.admin-event-row{padding:12px 0}.admin-item-copy strong,.admin-event-copy strong{font-size:.9rem}.admin-manual-pin{margin-top:15px}.admin-manual-pin summary{min-height:38px;display:flex;align-items:center}.admin-icon-btn{width:40px;height:40px}
+#adminPanels>section:has(#officialList){margin:0!important}#adminPanels>.hshs-media-manager{margin:0;padding:0}
+#adminPanels .hmm-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:12px}#adminPanels .hmm-card{border-radius:16px;transition:transform .18s ease,border-color .18s ease}#adminPanels .hmm-card:hover{transform:translateY(-2px);border-color:rgba(91,157,255,.38)}#adminPanels .hmm-thumb{aspect-ratio:4/3}#adminPanels .hmm-toolbar{gap:10px}#adminPanels .hmm-select{min-height:42px}#adminPanels .hmm-card-actions .hmm-btn{min-height:40px}
+.admin-control-nav{display:flex;flex-wrap:wrap;gap:7px;padding:8px;border:1px solid rgba(135,166,222,.14);border-radius:16px;background:rgba(5,13,30,.58)}
+.admin-control-nav button{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:9px 14px;border:1px solid transparent;border-radius:11px;color:#a9bddb;background:transparent;font:inherit;font-size:.82rem;font-weight:800;cursor:pointer}
+.admin-control-nav button:hover{background:rgba(96,165,250,.08);color:#eaf3ff}.admin-control-nav button[aria-selected=true]{color:#eaf3ff;background:linear-gradient(110deg,rgba(99,102,241,.18),rgba(56,189,248,.13));border-color:rgba(96,165,250,.24)}
+[data-admin-section][hidden]{display:none!important}
+@media(max-width:1100px){#adminPanels .hmm-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){#adminDesk{margin-top:56px!important;padding:12px!important}#adminPanels>.admin-welcome{padding:17px;border-radius:18px}.admin-control-nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}.admin-control-nav button{flex:0 0 auto;min-height:44px}#adminUploadForm .admin-form-row:first-child{grid-template-columns:1fr}#adminPanels .hmm-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:8px;gap:8px}#adminPanels .hmm-card-body{padding:10px}#adminPanels .hmm-card-actions .hmm-btn{flex-basis:100%}}
+@media(max-width:440px){.admin-stat-grid{gap:8px}.admin-stat{padding:12px;border-radius:15px}.admin-stat p{margin-bottom:7px}#adminPanels .hmm-grid{grid-template-columns:1fr}#adminPanels .hmm-thumb{aspect-ratio:16/10}}
+@media(prefers-reduced-motion:reduce){.admin-btn,.admin-control-nav button,.hmm-card{transition:none!important}}
