@@ -174,7 +174,9 @@
       setTimeout(function () { location.href = (window.HshsPaths ? HshsPaths.href('login') : '/login/') + '?next=' + encodeURIComponent(location.pathname + location.search); }, 900);
       return false;
     }
-    setBusy(true); msg('Saving…');
+    setBusy(true); msg('');
+    var btn = document.querySelector('[data-ep-save]');
+    var inline = window.HshsLoading && HshsLoading.inline ? HshsLoading.inline(btn || document.body, 'sm') : null;
     try {
       if (window.HshsAuthApi && window.HshsAuthApi.lookupUserField) {
         if (data.username) {
@@ -197,7 +199,10 @@
       console.error(err);
       msg((err && err.message) || 'Could not save. Check your connection and try again.');
       return false;
-    } finally { setBusy(false); }
+    } finally {
+      if (inline) inline.hide();
+      setBusy(false);
+    }
   }
 
   async function loadFromCloud() {
