@@ -19,7 +19,7 @@
 .admin-control-nav{display:flex;flex-wrap:wrap;gap:7px;padding:8px;border:1px solid rgba(135,166,222,.14);border-radius:16px;background:rgba(5,13,30,.58)}
 .admin-control-nav button{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:9px 14px;border:1px solid transparent;border-radius:11px;color:#a9bddb;background:transparent;font:inherit;font-size:.82rem;font-weight:800;cursor:pointer}
 .admin-control-nav button:hover{background:rgba(96,165,250,.08);color:#eaf3ff}.admin-control-nav button[aria-selected=true]{color:#eaf3ff;background:linear-gradient(110deg,rgba(99,102,241,.18),rgba(56,189,248,.13));border-color:rgba(96,165,250,.24)}
-[data-admin-section][hidden]{display:none!important}
+#adminPanels [hidden],[data-admin-section][hidden]{display:none!important}
 @media(max-width:1100px){#adminPanels .hmm-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){#adminDesk{margin-top:56px!important;padding:12px!important}#adminPanels>.admin-welcome{padding:17px;border-radius:18px}.admin-control-nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}.admin-control-nav button{flex:0 0 auto;min-height:44px}#adminUploadForm .admin-form-row:first-child{grid-template-columns:1fr}#adminPanels .hmm-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:8px;gap:8px}#adminPanels .hmm-card-body{padding:10px}#adminPanels .hmm-card-actions .hmm-btn{flex-basis:100%}}
 @media(max-width:440px){.admin-stat-grid{gap:8px}.admin-stat{padding:12px;border-radius:15px}.admin-stat p{margin-bottom:7px}#adminPanels .hmm-grid{grid-template-columns:1fr}#adminPanels .hmm-thumb{aspect-ratio:16/10}}
