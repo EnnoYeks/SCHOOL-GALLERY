@@ -199,7 +199,9 @@
     var bio = (($('setBio') || {}).value || '').trim();
     if (name.length < 2) return status('setAccountMsg', 'Enter your full name.', false);
     if (username.length < 3) return status('setAccountMsg', 'Username needs at least 3 letters.', false);
-    status('setAccountMsg', 'Saving…', true);
+    var btn = $('setSaveAccount');
+    var inline = window.HshsLoading && HshsLoading.inline ? HshsLoading.inline(btn || document.body, 'sm') : null;
+    status('setAccountMsg', '', true);
     try {
       var api = await waitApi();
       await api.saveProfile(user, {
@@ -215,6 +217,8 @@
       setTimeout(function () { status('setAccountMsg', ''); }, 1600);
     } catch (err) {
       status('setAccountMsg', friendlyError(err), false);
+    } finally {
+      if (inline) inline.hide();
     }
   }
 
