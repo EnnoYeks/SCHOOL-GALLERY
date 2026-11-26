@@ -212,30 +212,45 @@
     return data;
   }
 
+  function uploadPicked(file, target, fields, okText) {
+    var host = document.getElementById(target);
+    var inline = window.HshsLoading && HshsLoading.inline ? HshsLoading.inline(host, 'sm') : null;
+    var run = window.HshsStorage && window.HshsStorage.upload
+      ? window.HshsStorage.upload(file, {
+          kind: 'photo',
+          onProgress: function (info) {
+            if (inline) inline.set(info && info.percent, window.HshsLoading.stageWord(info && info.stage));
+          }
+        }).then(function (res) {
+          if (!res || !/^https?:\/\//i.test(res.url || '')) throw new Error('The photo was not uploaded.');
+          return res.url;
+        })
+      : fileToDataUrl(file, target === 'pfCover' ? 1400 : 800);
+    return run.then(function (url) {
+      if (inline) inline.done();
+      if (target === 'pfCover') applyCover(url);
+      else applyAvatar(url, (cloudProfile() || {}).fullName);
+      return savePhotoFields(fields(url));
+    }).then(function (saved) {
+      if (saved) { applyProfile(toUserShape(saved)); toast(okText); }
+    }).catch(function (err) {
+      if (inline) inline.fail();
+      toast(err.message || 'Could not save photo');
+    });
+  }
+
   function onAvatarPicked(e) {
     var f = e.target.files && e.target.files[0];
     e.target.value = '';
     if (!f) return;
-    toast('Updating photo…');
-    fileToDataUrl(f, 800).then(function (url) {
-      applyAvatar(url, (cloudProfile() || {}).fullName);
-      return savePhotoFields({ photoURL: url, avatar: url });
-    }).then(function (saved) {
-      if (saved) { applyProfile(toUserShape(saved)); toast('Profile photo saved'); }
-    }).catch(function (err) { toast(err.message || 'Could not save photo'); });
+    uploadPicked(f, 'pfAva', function (url) { return { photoURL: url, avatar: url }; }, 'Profile photo saved');
   }
 
   function onCoverPicked(e) {
     var f = e.target.files && e.target.files[0];
     e.target.value = '';
     if (!f) return;
-    toast('Updating cover…');
-    fileToDataUrl(f, 1400).then(function (url) {
-      applyCover(url);
-      return savePhotoFields({ coverURL: url, cover: url });
-    }).then(function (saved) {
-      if (saved) { applyProfile(toUserShape(saved)); toast('Cover photo saved'); }
-    }).catch(function (err) { toast(err.message || 'Could not save cover'); });
+    uploadPicked(f, 'pfCover', function (url) { return { coverURL: url, cover: url }; }, 'Cover photo saved');
   }
 
   async function hydrate() {

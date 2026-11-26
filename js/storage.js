@@ -291,20 +291,41 @@
     try { options.onProgress(info); } catch (e) {}
   }
 
-  function putWithProgress(putUrl, file, contentType, onByte) {
+  function putWithProgress(putUrl, file, contentType, onByte, signal) {
     return new Promise(function (resolve, reject) {
+      if (signal && signal.aborted) {
+        reject(Object.assign(new Error("Upload cancelled"), { name: "AbortError" }));
+        return;
+      }
       if (typeof XMLHttpRequest !== "function") {
         fetch(putUrl, {
           method: "PUT",
           headers: { "Content-Type": contentType || "application/octet-stream" },
-          body: file
+          body: file,
+          signal: signal
         }).then(function (put) {
           if (!put.ok) reject(new Error("Cloudflare R2 upload failed (" + put.status + ")."));
           else resolve();
-        }).catch(function () { reject(new Error("Cloudflare R2 upload failed.")); });
+        }).catch(function (err) {
+          if (err && err.name === "AbortError") reject(Object.assign(new Error("Upload cancelled"), { name: "AbortError" }));
+          else reject(new Error("Cloudflare R2 upload failed."));
+        });
         return;
       }
       var xhr = new XMLHttpRequest();
+      var settled = false;
+      function finish(err) {
+        if (settled) return;
+        settled = true;
+        if (signal) signal.removeEventListener("abort", onAbort);
+        if (err) reject(err);
+        else resolve();
+      }
+      function onAbort() {
+        try { xhr.abort(); } catch (e) {}
+        finish(Object.assign(new Error("Upload cancelled"), { name: "AbortError" }));
+      }
+      if (signal) signal.addEventListener("abort", onAbort);
       xhr.open("PUT", putUrl);
       xhr.setRequestHeader("Content-Type", contentType || "application/octet-stream");
       if (xhr.upload && onByte) {
@@ -315,15 +336,16 @@
         };
       }
       xhr.onload = function () {
-        if (xhr.status >= 200 && xhr.status < 300) resolve();
-        else reject(new Error("Cloudflare R2 upload failed (" + xhr.status + ")."));
+        if (xhr.status >= 200 && xhr.status < 300) finish();
+        else finish(new Error("Cloudflare R2 upload failed (" + xhr.status + ")."));
       };
-      xhr.onerror = function () { reject(new Error("Cloudflare R2 upload failed.")); };
+      xhr.onerror = function () { finish(new Error("Cloudflare R2 upload failed.")); };
+      xhr.onabort = function () { finish(Object.assign(new Error("Upload cancelled"), { name: "AbortError" })); };
       xhr.send(file);
     });
   }
 
-  async function uploadObject(file, key, contentType, onByte) {
+  async function uploadObject(file, key, contentType, onByte, signal) {
     var r2 = r2Config();
     var signTarget = r2.signUrl || "";
     if (signTarget && !/\/sign\/?$/i.test(signTarget)) signTarget = signTarget.replace(/\/$/, "") + "/sign";
@@ -331,13 +353,14 @@
     var signRes = await fetch(signTarget, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key: key, contentType: contentType, size: file && file.size })
+      body: JSON.stringify({ key: key, contentType: contentType, size: file && file.size }),
+      signal: signal
     });
     if (!signRes.ok) throw new Error("Cloudflare R2 signing failed (" + signRes.status + ").");
     var signed = await signRes.json();
     var putUrl = signed.url || signed.putUrl;
     if (!putUrl) throw new Error("Cloudflare R2 did not return an upload URL.");
-    await putWithProgress(putUrl, file, contentType, onByte);
+    await putWithProgress(putUrl, file, contentType, onByte, signal);
     return { key: key, url: publicUrl(key) };
   }
 
@@ -422,7 +445,7 @@
     await uploadObject(file, key, contentType, function (ev) {
       var percent = 16 + Math.round((ev.ratio || 0) * 62);
       emitProgress(options, { stage: "uploading", percent: percent, loaded: ev.loaded, total: ev.total });
-    });
+    }, options.signal);
 
     var processedKey = "";
     if (kind !== "video" && file && /^image\//i.test(file.type || "")) {
@@ -469,7 +492,8 @@
     return upload(file, options);
   }
 
-  async function uploadAdmin(file) {
+  async function uploadAdmin(file, options) {
+    options = options || {};
     if (!file) throw new Error("No file");
     var kind = (file.type && file.type.indexOf("video") === 0) ? "video" : "photo";
     checkSize(file, kind);
@@ -478,21 +502,34 @@
     if (allowed.indexOf(file.type) === -1) throw new Error("Unsupported file type");
     var token = await (g.auth && g.auth.currentUser ? g.auth.currentUser.getIdToken() : Promise.reject(new Error("Not signed in")));
     var base = workerBase();
-    var res = await fetch(base + "/admin/upload", {
-      method: "PUT",
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": file.type,
-        "Content-Length": String(file.size)
-      },
-      body: file
+    emitProgress(options, { stage: "signing", percent: 8 });
+    var data = await new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("PUT", base + "/admin/upload");
+      xhr.setRequestHeader("Authorization", "Bearer " + token);
+      xhr.setRequestHeader("Content-Type", file.type);
+      if (options.signal) {
+        if (options.signal.aborted) { reject(Object.assign(new Error("Upload cancelled"), { name: "AbortError" })); return; }
+        options.signal.addEventListener("abort", function () { try { xhr.abort(); } catch (e) {} });
+      }
+      if (xhr.upload) {
+        xhr.upload.onprogress = function (ev) {
+          var total = ev.lengthComputable && ev.total ? ev.total : (file.size || 0);
+          var ratio = total ? ev.loaded / total : 0;
+          emitProgress(options, { stage: "uploading", percent: 8 + Math.round(ratio * 88), loaded: ev.loaded, total: total });
+        };
+      }
+      xhr.onload = function () {
+        var body = {};
+        try { body = JSON.parse(xhr.responseText || "{}"); } catch (e) {}
+        if (xhr.status >= 200 && xhr.status < 300) resolve(body);
+        else reject(new Error(body.error || "Upload failed"));
+      };
+      xhr.onerror = function () { reject(new Error("Upload failed")); };
+      xhr.onabort = function () { reject(Object.assign(new Error("Upload cancelled"), { name: "AbortError" })); };
+      xhr.send(file);
     });
-    if (!res.ok) {
-      var msg = "Upload failed";
-      try { var j = await res.json(); msg = j.error || msg; } catch (e) {}
-      throw new Error(msg);
-    }
-    var data = await res.json();
+    emitProgress(options, { stage: "uploaded", percent: 96 });
     return {
       url: publicUrl(data.key),
       key: data.key,

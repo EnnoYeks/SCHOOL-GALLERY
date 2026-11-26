@@ -53,6 +53,9 @@
         closeFn();
       }
     } catch (e) {}
+    try {
+      if (typeof window.__hshsAbortUpload === 'function') window.__hshsAbortUpload();
+    } catch (e) {}
     stopMedia();
     removeStudio();
     unlockPage();

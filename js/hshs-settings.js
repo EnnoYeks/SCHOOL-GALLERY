@@ -331,12 +331,22 @@
       });
     }
     if (window.HshsStorage && window.HshsStorage.upload) {
-      window.HshsStorage.upload(file, { kind: 'photo' }).then(function (res) {
+      var pic = $('setHeroPic');
+      var host = pic && pic.parentElement ? pic.parentElement : pic;
+      var inline = window.HshsLoading && HshsLoading.inline ? HshsLoading.inline(host, 'sm') : null;
+      window.HshsStorage.upload(file, {
+        kind: 'photo',
+        onProgress: function (info) {
+          if (inline) inline.set(info && info.percent, window.HshsLoading.stageWord(info && info.stage));
+        }
+      }).then(function (res) {
+        if (inline) inline.done();
         if (!res || res.provider !== 'cloudflare-r2' || !/^https:\/\//i.test(res.url || '')) {
           throw new Error('The photo was not uploaded to Cloudflare R2.');
         }
         applyUrl(res.url);
       }).catch(function (err) {
+        if (inline) inline.fail();
         status('setAccountMsg', (err && err.message) || 'Photo upload failed. Please try again.', false);
       });
       return;

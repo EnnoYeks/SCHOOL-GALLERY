@@ -276,19 +276,30 @@
         }).catch(function () {});
     }
 
-    function showProgress() {
+    function showProgress(onCancel) {
+        if (window.HshsLoading && typeof window.HshsLoading.show === 'function') {
+            return window.HshsLoading.show({
+                size: 'md',
+                message: 'Preparing',
+                percent: 0,
+                cancelable: true,
+                onCancel: onCancel
+            });
+        }
         var el = document.createElement('div');
         el.className = 'hshs-studio-progress';
-        el.setAttribute('role', 'status');
-        el.setAttribute('aria-live', 'polite');
-        el.innerHTML = '<div class="hshs-studio-progress-card"><div class="hshs-studio-spinner"></div><div class="hshs-up-track" aria-hidden="true"><i id="hshsUpBar"></i></div></div>';
         document.body.appendChild(el);
-        el.set = function (percent) {
-            var p = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
-            var bar = el.querySelector('#hshsUpBar');
-            if (bar) bar.style.width = p + '%';
-        };
+        el.set = function () {};
+        el.done = function () { try { el.remove(); } catch (e) {} };
+        el.fail = function () { try { el.remove(); } catch (e) {} };
+        el.hide = el.done;
         return el;
+    }
+
+    function uploadLabel(info) {
+        var stage = window.HshsLoading && HshsLoading.stageWord ? HshsLoading.stageWord(info && info.stage) : 'Uploading';
+        if (info && info.fileCount > 1) return 'File ' + info.fileIndex + ' of ' + info.fileCount + ' - ' + Math.round(info.percent || 0) + '%';
+        return stage;
     }
 
     function pageMap() {
@@ -301,8 +312,9 @@
         if (!draft.src || !draft.destinations.length) return;
         var title = (draft.title || draft.caption || '').trim();
         var desc = (draft.description || draft.caption || '').trim();
-        var progress = showProgress();
-        progress.set(2);
+        var ac = new AbortController();
+        window.__hshsAbortUpload = function () { try { ac.abort(); } catch (e) {} };
+        var progress = showProgress(function () { ac.abort(); });
         var mediaUrl = '';
         var mediaKey = '';
         var mediaProvider = '';
@@ -312,8 +324,9 @@
             }
             var up = await window.HshsStorage.uploadFromUrl(draft.src, {
                 kind: draft.kind,
+                signal: ac.signal,
                 onProgress: function (info) {
-                    progress.set(info && info.percent);
+                    progress.set(info && info.percent, uploadLabel(info));
                 }
             });
             if (!up || !up.url || !/^https?:\/\//i.test(up.url)) throw new Error('No public URL');
@@ -321,9 +334,14 @@
             mediaKey = up.key || '';
             mediaProvider = up.provider || 'cloudflare-r2';
         } catch (e) {
+            window.__hshsAbortUpload = null;
+            if (e && e.name === 'AbortError') {
+                try { progress.hide(); } catch (err) {}
+                return;
+            }
             console.warn('[studio] upload failed', e);
-            try { progress.remove(); } catch (err) {}
             draft.uploadError = 'Upload failed, tap to retry';
+            progress.fail('Upload failed, tap to retry', function () { publish(); });
             render();
             return;
         }
@@ -347,7 +365,7 @@
         };
 
         var saved = false;
-        progress.set(97);
+        progress.set(97, 'Saving');
         try {
             if (window.db) {
                 var dests = draft.destinations;
@@ -366,14 +384,15 @@
             }
         } catch (e) { console.warn('[studio] record failed', e); }
         if (!saved) {
-            try { progress.remove(); } catch (err) {}
             draft.uploadError = 'Upload failed, tap to retry';
+            progress.fail('Upload failed, tap to retry', function () { publish(); });
             render();
             return;
         }
         draft.uploadError = '';
-
-        try { progress.remove(); } catch (e) {}
+        progress.done('Done');
+        window.__hshsAbortUpload = null;
+        progress.hide();
         close();
         var first = draft.destinations[0];
         var page = pageMap()[first] || 'gallery.html';

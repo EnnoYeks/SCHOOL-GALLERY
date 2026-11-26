@@ -53,7 +53,7 @@ function showError(message) {
 }
 
 async function loadAdmin() {
-  root.innerHTML = '<div class="mm-loading"><span class="mm-spinner"></span><p>Checking administrator access…</p></div>';
+  root.innerHTML = '<div class="mm-loading">' + (window.HshsLoading && HshsLoading.pyramid ? HshsLoading.pyramid('md') : '<span class="mm-spinner"></span>') + '<p>Checking administrator access…</p></div>';
   try {
     const data = await request("GET");
     state = { slots: data.slots || [], items: data.items || [], library: data.library || [], libraryHasMore: !!data.libraryHasMore, libraryNextOffset: Number(data.libraryNextOffset) || 100 };

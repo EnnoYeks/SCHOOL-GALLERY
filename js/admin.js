@@ -157,26 +157,41 @@
       if (target === 'videos' && !file) { this.setFeedback('upFeedback', 'Video requires mp4 or webm', false); return; }
       if (target === 'posts' && !description && !file) { this.setFeedback('upFeedback', 'Add text or media', false); return; }
       if (this.busy) return;
-      this.busy = true; this.setFeedback('upFeedback', 'Uploading…'); this.setProgress(10);
+      this.busy = true; this.setFeedback('upFeedback', 'Uploading…');
+      var files = [file, poster].filter(Boolean);
+      var fileCount = Math.max(1, files.length);
+      var progress = window.HshsLoading && HshsLoading.show
+        ? HshsLoading.show({ size: 'md', message: 'Preparing', percent: 0, cancelable: false })
+        : { set: function (p) { this.setProgress && this.setProgress(p); }.bind(this), done: function () {}, fail: function () {}, hide: function () {} };
       try {
         let media_key = '', image_url = '', video_url = '', thumbnail_url = '', poster_key = '';
         let width = null, height = null;
+        var fileIndex = 0;
+        function onFileProgress(info, index) {
+          var local = Number(info && info.percent) || 0;
+          var overall = Math.round(((index - 1) + (local / 100)) / fileCount * 96);
+          var label = fileCount > 1
+            ? 'File ' + index + ' of ' + fileCount + ' - ' + local + '%'
+            : (window.HshsLoading && HshsLoading.stageWord ? HshsLoading.stageWord(info && info.stage) : 'Uploading');
+          progress.set(overall, label);
+          this.setProgress(overall);
+        }
         if (file && window.HshsStorage) {
-          this.setProgress(30);
+          fileIndex += 1;
           const up = window.HshsStorage.uploadAdmin
-            ? await window.HshsStorage.uploadAdmin(file)
-            : await window.HshsStorage.upload(file, { kind: file.type.indexOf('video/') === 0 ? 'video' : 'photo' });
+            ? await window.HshsStorage.uploadAdmin(file, { onProgress: function (info) { onFileProgress.call(this, info, fileIndex); }.bind(this) })
+            : await window.HshsStorage.upload(file, { kind: file.type.indexOf('video/') === 0 ? 'video' : 'photo', onProgress: function (info) { onFileProgress.call(this, info, fileIndex); }.bind(this) });
           media_key = up.key || '';
           width = Number(up.width) > 0 ? Number(up.width) : null;
           height = Number(up.height) > 0 ? Number(up.height) : null;
           if (file.type.indexOf('video/') === 0) video_url = up.url; else { image_url = up.url; thumbnail_url = up.url; }
-          this.setProgress(60);
         }
         if (poster && window.HshsStorage) {
+          fileIndex += 1;
           const up2 = window.HshsStorage.uploadAdmin
-            ? await window.HshsStorage.uploadAdmin(poster)
-            : await window.HshsStorage.upload(poster, { kind: 'photo' });
-          poster_key = up2.key || ''; thumbnail_url = up2.url; this.setProgress(75);
+            ? await window.HshsStorage.uploadAdmin(poster, { onProgress: function (info) { onFileProgress.call(this, info, fileIndex); }.bind(this) })
+            : await window.HshsStorage.upload(poster, { kind: 'photo', onProgress: function (info) { onFileProgress.call(this, info, fileIndex); }.bind(this) });
+          poster_key = up2.key || ''; thumbnail_url = up2.url;
         }
         const payload = {
           target, title: title || (target === 'posts' ? 'Untitled' : target === 'photos' ? 'Photo' : 'Video'),
@@ -184,7 +199,8 @@
           status: target === 'posts' ? status : 'published',
           type: file && file.type.indexOf('video/') === 0 ? 'video' : 'photo'
         };
-        this.setProgress(90);
+        this.setProgress(97);
+        progress.set(97, 'Saving');
         let saved = null;
         try {
           if (window.adminApi && window.adminApi.createContent) {
@@ -221,6 +237,8 @@
         }
         if (!saved) throw new Error('Could not save content');
         this.setProgress(100);
+        progress.done('Done');
+        progress.hide();
         if ($('upTitle')) $('upTitle').value = ''; if ($('upDesc')) $('upDesc').value = '';
         if ($('upFile')) $('upFile').value = ''; if ($('upPoster')) $('upPoster').value = '';
         if ($('upFeature')) $('upFeature').checked = false;
@@ -228,8 +246,9 @@
         await Promise.all([this.loadRecentItems(), this.loadOfficialPosts()]);
       } catch (e) {
         this.setFeedback('upFeedback', e.message || 'Could not save', false);
+        if (progress && progress.fail) progress.fail(e.message || 'Could not save');
       } finally {
-        this.busy = false; setTimeout(() => this.setProgress(null), 600);
+        this.busy = false; this.setProgress(null);
       }
     }
 

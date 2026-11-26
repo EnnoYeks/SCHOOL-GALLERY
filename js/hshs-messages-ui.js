@@ -512,13 +512,24 @@
       push(kind === 'file' ? '' : localUrl, { localOnly: true, mediaProvider: 'local' });
       return;
     }
-    push(localUrl, { localOnly: true, mediaProvider: 'local' });
-    toastSoon('Uploading...');
-    Promise.resolve(g.HshsStorage.upload(f, { kind: kind === 'video' ? 'video' : 'photo' })).then(function (res) {
+    push(localUrl, { localOnly: true, mediaProvider: 'local', clientId: clientId });
+    var bubble = document.querySelector('[data-mid="' + clientId + '"]');
+    var inline = window.HshsLoading && HshsLoading.inline && bubble ? HshsLoading.inline(bubble, 'sm') : null;
+    Promise.resolve(g.HshsStorage.upload(f, {
+      kind: kind === 'video' ? 'video' : 'photo',
+      onProgress: function (info) {
+        if (inline) inline.set(info && info.percent, window.HshsLoading.stageWord(info && info.stage));
+      }
+    })).then(function (res) {
+      if (inline) inline.done();
       var remote = res && res.url && /^https?:\/\//i.test(res.url) && res.provider === 'cloudflare-r2';
       if (!remote) { toastSoon('Attachment stays on this device'); return; }
       publishLive(f.name, { kind: kind, fileName: f.name, fileMeta: meta, src: res.url, mediaKey: res.key, mediaProvider: res.provider, clientId: clientId, chatId: threadId(active) });
-    }).catch(function () { toastSoon('Attachment stays on this device'); });
+    }).catch(function () {
+      if (inline) inline.fail();
+      if (bubble && bubble.parentNode) bubble.parentNode.removeChild(bubble);
+      toastSoon('Attachment stays on this device');
+    });
   }
   function pickNamed(id) { var el = $(id); if (el) el.click(); }
   function wire() {
