@@ -19,7 +19,6 @@
     </a>
     <div class="hshs-me-actions">
       <span id="morePageStatus" class="hshs-session-badge is-guest"><i class="fas fa-user"></i> Guest</span>
-      <a class="hshs-signin-cta" id="moreSignIn" href="/login/"><i class="fas fa-right-to-bracket"></i> Sign in</a>
       <a class="hshs-me-go" href="/profile/">Profile <i class="fas fa-arrow-right"></i></a>
     </div>
   </section>
@@ -39,6 +38,7 @@
   <p class="hshs-menu-kicker">Your account</p>
   <section class="hshs-more-menu" aria-label="Account pages">
     <a class="hshs-menu-item" href="/profile/"><i class="fas fa-user"></i><span><b>Profile</b><small>Your posts and campus profile</small></span><i class="fas fa-chevron-right"></i></a>
+    <a class="hshs-menu-item hshs-account-signin" id="moreSignIn" href="/login/"><i class="fas fa-right-to-bracket"></i><span><b>Sign in or create account</b><small>Unlock your personal HSHS World profile</small></span><i class="fas fa-chevron-right"></i></a>
     <a class="hshs-menu-item" href="/saved/"><i class="fas fa-bookmark"></i><span><b>Saved</b><small>Posts you've saved</small></span><i class="fas fa-chevron-right"></i></a>
     <a class="hshs-menu-item" href="/notifications/"><i class="fas fa-bell"></i><span><b>Notifications</b><small>Your activity updates</small></span><i class="fas fa-chevron-right"></i></a>
     <a class="hshs-menu-item" href="/settings/"><i class="fas fa-gear"></i><span><b>Settings</b><small>Account and preferences</small></span><i class="fas fa-chevron-right"></i></a>
