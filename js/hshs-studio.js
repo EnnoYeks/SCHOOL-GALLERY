@@ -112,7 +112,7 @@
             var s = document.querySelector('script[src*="hshs-upload"]');
             if (s && s.src) base = s.src.replace(/js\/hshs-upload\.js.*$/, '');
         } catch (e) {}
-        link.href = (base || '') + 'css/hshs-studio.css?v=261126progress2';
+        link.href = (base || '') + 'css/hshs-studio.css?v=261126progress3';
         document.head.appendChild(link);
     }
 
@@ -281,14 +281,12 @@
         el.className = 'hshs-studio-progress';
         el.setAttribute('role', 'status');
         el.setAttribute('aria-live', 'polite');
-        el.innerHTML = '<div class="hshs-studio-progress-card"><div class="hshs-studio-spinner"></div><strong>Sharing to campus…</strong><div class="hshs-up-track" aria-hidden="true"><i id="hshsUpBar"></i></div><b id="hshsUpPct">0%</b></div>';
+        el.innerHTML = '<div class="hshs-studio-progress-card"><div class="hshs-studio-spinner"></div><div class="hshs-up-track" aria-hidden="true"><i id="hshsUpBar"></i></div></div>';
         document.body.appendChild(el);
         el.set = function (percent) {
             var p = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
             var bar = el.querySelector('#hshsUpBar');
-            var pct = el.querySelector('#hshsUpPct');
             if (bar) bar.style.width = p + '%';
-            if (pct) pct.textContent = p + '%';
         };
         return el;
     }

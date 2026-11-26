@@ -77,13 +77,13 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    link.href = '/css/hshs-studio.css?v=261126progress2';
+    link.href = '/css/hshs-studio.css?v=261126progress3';
   }
 
   function loadStudio() {
     ensureStudioCss();
     var s = document.createElement('script');
-    s.src = '/js/hshs-studio.js?v=261126progress2';
+    s.src = '/js/hshs-studio.js?v=261126progress3';
     s.async = false;
     s.onload = function () {
       window.__hshsUpload = window.__hshsUpload || {};
