@@ -14,7 +14,7 @@
     var b = basePath();
     return R().el('nav', { className: 'navbar' }, [
       R().el('div', { className: 'navbar-container' }, [
-        R().el('div', { className: 'logo' }, [R().icon('fa-graduation-cap'), R().el('div', { className: 'brand-lockup' }, [R().el('span', { className: 'brand-school', text: 'Hawthorne Scribner High School' }), R().el('span', { className: 'brand-mark', text: 'HSHS World' })])]),
+        R().el('div', { className: 'logo' }, [R().el('span', { className: 'brand-mark' }, [R().el('img', { src: 'https://hawthorne-scribner.ac.ug/wp-content/uploads/2024/12/Hawthorne-Scribner-Badge-png-768x771.png', alt: 'Hawthorne Scribner High School badge', width: 44, height: 44 })]), R().el('div', { className: 'brand-lockup' }, [R().el('span', { className: 'brand-school', text: 'Hawthorne Scribner High School' }), R().el('span', { className: 'brand-mark', text: 'HSHS World' })])]),
         R().el('div', { className: 'search-container' }, [
           R().icon('fa-search'),
           R().el('input', { type: 'text', className: 'search-input', id: 'searchInput', placeholder: 'Search posts, students, events...' }),
