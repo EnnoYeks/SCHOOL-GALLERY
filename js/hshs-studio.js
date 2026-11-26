@@ -322,14 +322,23 @@
             if (!window.HshsStorage || typeof window.HshsStorage.uploadFromUrl !== 'function') {
                 throw new Error('Upload storage is not ready');
             }
-            var up = await window.HshsStorage.uploadFromUrl(draft.src, {
-                kind: draft.kind,
-                signal: ac.signal,
-                onProgress: function (info) {
-                    progress.set(info && info.percent, uploadLabel(info));
-                }
-            });
-            if (!up || !up.url || !/^https?:\/\//i.test(up.url)) throw new Error('No public URL');
+            var up = draft.uploaded;
+            if (!up || !up.url) {
+                up = await window.HshsStorage.uploadFromUrl(draft.src, {
+                    kind: draft.kind,
+                    signal: ac.signal,
+                    onProgress: function (info) {
+                        progress.set(info && info.percent, uploadLabel(info));
+                    }
+                });
+                if (!up || !up.url || !/^https?:\/\//i.test(up.url)) throw new Error('No public URL');
+                draft.uploaded = up;
+            }
+            if (ac.signal.aborted) {
+                try { progress.hide(); } catch (err) {}
+                window.__hshsAbortUpload = null;
+                return;
+            }
             mediaUrl = up.url;
             mediaKey = up.key || '';
             mediaProvider = up.provider || 'cloudflare-r2';
@@ -390,6 +399,7 @@
             return;
         }
         draft.uploadError = '';
+        draft.uploaded = null;
         progress.done('Done');
         window.__hshsAbortUpload = null;
         progress.hide();

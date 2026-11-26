@@ -400,7 +400,7 @@
     });
   }
 
-  async function createImageVariants(file, id, onVariant) {
+  async function createImageVariants(file, id, onVariant, signal) {
     var drawable = await loadDrawable(file);
     try {
       var base = "media/" + id;
@@ -421,9 +421,11 @@
         context.drawImage(drawable.image, 0, 0, width, height);
         return { key: base + "/" + target.name + ".webp", blob: await canvasWebp(canvas) };
       }));
-      await Promise.all(blobs.map(function (variant, index) {
-        return uploadObject(variant.blob, variant.key, "image/webp", function () {
-          if (typeof onVariant === "function") onVariant(index + 1, blobs.length);
+      var completed = 0;
+      await Promise.all(blobs.map(function (variant) {
+        return uploadObject(variant.blob, variant.key, "image/webp", null, signal).then(function () {
+          completed++;
+          if (typeof onVariant === "function") onVariant(completed, blobs.length);
         });
       }));
       return base;
@@ -454,7 +456,7 @@
         processedKey = await createImageVariants(file, variantId(), function (done, total) {
           var percent = 80 + Math.round((done / total) * 14);
           emitProgress(options, { stage: "sizes", percent: percent, done: done, totalSizes: total });
-        });
+        }, options.signal);
       } catch (variantError) {
         console.warn("[HshsStorage] Image variants could not be generated:", variantError && variantError.message);
       }
