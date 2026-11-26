@@ -112,7 +112,7 @@
             var s = document.querySelector('script[src*="hshs-upload"]');
             if (s && s.src) base = s.src.replace(/js\/hshs-upload\.js.*$/, '');
         } catch (e) {}
-        link.href = (base || '') + 'css/hshs-studio.css?v=261126progress1';
+        link.href = (base || '') + 'css/hshs-studio.css?v=261126progress2';
         document.head.appendChild(link);
     }
 
@@ -281,41 +281,16 @@
         el.className = 'hshs-studio-progress';
         el.setAttribute('role', 'status');
         el.setAttribute('aria-live', 'polite');
-        el.innerHTML = '<div class="hshs-studio-progress-card"><div class="hshs-studio-spinner"></div><strong>Sharing to campus…</strong><small id="hshsUpStage">Getting ready</small><div class="hshs-up-track" aria-hidden="true"><i id="hshsUpBar"></i></div><b id="hshsUpPct">0%</b></div>';
+        el.innerHTML = '<div class="hshs-studio-progress-card"><div class="hshs-studio-spinner"></div><strong>Sharing to campus…</strong><div class="hshs-up-track" aria-hidden="true"><i id="hshsUpBar"></i></div><b id="hshsUpPct">0%</b></div>';
         document.body.appendChild(el);
-        el.set = function (percent, stage) {
+        el.set = function (percent) {
             var p = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
             var bar = el.querySelector('#hshsUpBar');
             var pct = el.querySelector('#hshsUpPct');
-            var label = el.querySelector('#hshsUpStage');
             if (bar) bar.style.width = p + '%';
             if (pct) pct.textContent = p + '%';
-            if (label && stage) label.textContent = stage;
         };
         return el;
-    }
-
-    function progressLabel(info) {
-        var stage = info && info.stage;
-        if (stage === 'reading') return 'Reading your file…';
-        if (stage === 'checking') return 'Checking the file…';
-        if (stage === 'measuring') return 'Checking the picture size…';
-        if (stage === 'signing') return 'Getting an upload link…';
-        if (stage === 'uploading') {
-            if (info.total) return 'Uploading ' + prettyBytes(info.loaded) + ' of ' + prettyBytes(info.total);
-            return 'Uploading to Cloudflare…';
-        }
-        if (stage === 'sizes') return 'Making thumb, medium and large…';
-        if (stage === 'uploaded') return 'Upload finished';
-        if (stage === 'saving') return 'Saving the campus record…';
-        return 'Sharing to campus…';
-    }
-
-    function prettyBytes(n) {
-        n = Number(n) || 0;
-        if (n < 1024) return n + ' B';
-        if (n < 1048576) return (n / 1024).toFixed(n < 10240 ? 1 : 0) + ' KB';
-        return (n / 1048576).toFixed(1) + ' MB';
     }
 
     function pageMap() {
@@ -329,7 +304,7 @@
         var title = (draft.title || draft.caption || '').trim();
         var desc = (draft.description || draft.caption || '').trim();
         var progress = showProgress();
-        progress.set(2, 'Reading your file…');
+        progress.set(2);
         var mediaUrl = '';
         var mediaKey = '';
         var mediaProvider = '';
@@ -340,7 +315,7 @@
             var up = await window.HshsStorage.uploadFromUrl(draft.src, {
                 kind: draft.kind,
                 onProgress: function (info) {
-                    progress.set(info && info.percent, progressLabel(info));
+                    progress.set(info && info.percent);
                 }
             });
             if (!up || !up.url || !/^https?:\/\//i.test(up.url)) throw new Error('No public URL');
@@ -374,7 +349,7 @@
         };
 
         var saved = false;
-        progress.set(97, 'Saving the campus record…');
+        progress.set(97);
         try {
             if (window.db) {
                 var dests = draft.destinations;

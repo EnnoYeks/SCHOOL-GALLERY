@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   try { document.documentElement.classList.add('hshs-js-booting'); } catch (e) {}
-  var BOOT_VER = '261126progress1';
+  var BOOT_VER = '261126progress2';
   var TEMPLATE_NAMES = ['home','gallery','photos','videos','about','trending','more','search','spotlight','settings','chat','admin','profile','notifications','saved','buzz','contact','polls','memories'];
   var PAGE_ALIAS = { '': 'home', index: 'home', vibe: 'buzz', studio: 'videos', clips: 'buzz', shorts: 'buzz', contat: 'contact' };
   var PAGE_CSS = { home:['home.css','hshs-home-polish.css','hshs-vibe-home.css','hshs-youth.css'],gallery:['gallery.css','hshs-wave.css','hshs-youth.css'],photos:['photos.css','photos-campus.css','hshs-youth.css'],videos:['videos.css','vibe.css','hshs-hub.css','hshs-youth.css'],buzz:['buzz.css','hshs-wave.css','hshs-youth.css'],chat:['hshs-chat-ui.css','hshs-chat-desktop.css','hshs-chat.css','hshs-youth.css'],about:['hshs-about.css','hshs-youth.css'],contact:['hshs-contact.css','hshs-youth.css'],admin:['admin.css','hshs-youth.css'],trending:['trending.css','hshs-hub.css','hshs-youth.css'],polls:['polls.css','hshs-hub.css','hshs-youth.css'],memories:['memories.css','hshs-youth.css'],more:['hshs-more.css','hshs-hub.css','hshs-youth.css'],search:['hshs-search.css','hshs-account.css','hshs-youth.css'],spotlight:['spotlight.css','hshs-youth.css'],settings:['hshs-settings.css','hshs-youth.css'],profile:['hshs-profile.css','hshs-profile-photo.css','hshs-youth.css'],notifications:['hshs-account.css','hshs-hub.css','hshs-youth.css'],saved:['hshs-account.css','hshs-youth.css'] };
