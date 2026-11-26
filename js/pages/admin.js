@@ -12,9 +12,9 @@
       s.onload = function () { res(); }; s.onerror = function () { res(); }; document.head.appendChild(s);
     });
   }
-  function loadCss(href) {
+  function loadCss(href, version) {
     if (document.querySelector('link[data-hshs-css="' + href + '"]')) return;
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=261029live2';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base() + href + '?v=' + version;
     l.setAttribute('data-hshs-css', href); document.head.appendChild(l);
   }
   async function mount() {
@@ -26,10 +26,12 @@
     document.documentElement.setAttribute('data-hshs-page', PAGE);
     var tpl = global.HshsTemplates && global.HshsTemplates[PAGE];
     if (tpl) { if (global.HshsRender.mountHTML) global.HshsRender.mountHTML(root, tpl); else root.innerHTML = tpl; }
-    loadCss('css/admin.css');
-    loadCss('css/admin-media-manager.css');
+    loadCss('css/admin.css', '261029live2');
+    loadCss('css/admin-media-manager.css', '261029live2');
+    loadCss('css/admin-modern.css', '261126admin1');
     await loadOnce(base() + 'js/admin.js?v=261029live2', 'hshs-leg-admin');
     await loadOnce(base() + 'js/admin-media-manager.js?v=261029live2', 'hshs-admin-media-manager');
+    await loadOnce(base() + 'js/admin-modernize.js?v=261126admin1', 'hshs-admin-modernize');
     global['__hshs' + PAGE + 'Mounted'] = true;
     if (global.HshsRoute) global.HshsRoute.reveal();
   }
