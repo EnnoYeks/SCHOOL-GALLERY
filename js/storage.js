@@ -458,6 +458,7 @@
           emitProgress(options, { stage: "sizes", percent: percent, done: done, totalSizes: total });
         }, options.signal);
       } catch (variantError) {
+        if (variantError && variantError.name === "AbortError") throw variantError;
         console.warn("[HshsStorage] Image variants could not be generated:", variantError && variantError.message);
       }
     }

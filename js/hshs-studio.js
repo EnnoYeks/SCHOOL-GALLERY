@@ -173,6 +173,8 @@
         draft.kind = 'photo';
         draft.mode = 'photo';
         draft.destinations = suggested('photo');
+        draft.uploaded = null;
+        draft.uploadedSrc = null;
         stopCam();
         step = 'compose';
         render();
@@ -205,6 +207,8 @@
             draft.kind = 'video';
             if (draft.mode === 'photo') draft.mode = 'vibe';
             draft.destinations = suggested('video');
+            draft.uploaded = null;
+            draft.uploadedSrc = null;
             stopCam();
             step = 'compose';
             render();
@@ -263,6 +267,8 @@
         fileToDataUrl(f).then(function (data) {
             draft.kind = data.kind;
             draft.src = data.src;
+            draft.uploaded = null;
+            draft.uploadedSrc = null;
             if (data.kind === 'video') {
                 if (draft.mode === 'photo') draft.mode = 'vibe';
             } else {
@@ -292,6 +298,7 @@
         el.set = function () {};
         el.done = function () { try { el.remove(); } catch (e) {} };
         el.fail = function () { try { el.remove(); } catch (e) {} };
+        el.lockCancel = function () {};
         el.hide = el.done;
         return el;
     }
@@ -322,7 +329,7 @@
             if (!window.HshsStorage || typeof window.HshsStorage.uploadFromUrl !== 'function') {
                 throw new Error('Upload storage is not ready');
             }
-            var up = draft.uploaded;
+            var up = (draft.uploaded && draft.uploadedSrc === draft.src) ? draft.uploaded : null;
             if (!up || !up.url) {
                 up = await window.HshsStorage.uploadFromUrl(draft.src, {
                     kind: draft.kind,
@@ -332,13 +339,14 @@
                     }
                 });
                 if (!up || !up.url || !/^https?:\/\//i.test(up.url)) throw new Error('No public URL');
-                draft.uploaded = up;
             }
             if (ac.signal.aborted) {
                 try { progress.hide(); } catch (err) {}
                 window.__hshsAbortUpload = null;
                 return;
             }
+            draft.uploaded = up;
+            draft.uploadedSrc = draft.src;
             mediaUrl = up.url;
             mediaKey = up.key || '';
             mediaProvider = up.provider || 'cloudflare-r2';
@@ -375,6 +383,7 @@
 
         var saved = false;
         progress.set(97, 'Saving');
+        if (typeof progress.lockCancel === 'function') progress.lockCancel();
         try {
             if (window.db) {
                 var dests = draft.destinations;
@@ -400,6 +409,7 @@
         }
         draft.uploadError = '';
         draft.uploaded = null;
+        draft.uploadedSrc = null;
         progress.done('Done');
         window.__hshsAbortUpload = null;
         progress.hide();
@@ -680,6 +690,8 @@
                 }
                 if (act === 'back-cam') {
                     draft.src = '';
+                    draft.uploaded = null;
+                    draft.uploadedSrc = null;
                     step = 'camera';
                     startCam().then(function () { render(); });
                     render();
