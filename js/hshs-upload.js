@@ -77,28 +77,44 @@
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
-    link.href = '/css/hshs-studio.css?v=261126progress3';
+    link.href = '/css/hshs-studio.css?v=261126pyramid1';
+  }
+
+  function loadScript(src) {
+    return new Promise(function (resolve) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = false;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { resolve(); };
+      document.head.appendChild(s);
+    });
   }
 
   function loadStudio() {
     ensureStudioCss();
-    var s = document.createElement('script');
-    s.src = '/js/hshs-studio.js?v=261126progress3';
-    s.async = false;
-    s.onload = function () {
-      window.__hshsUpload = window.__hshsUpload || {};
-      if (typeof window.__hshsOpenUpload === 'function') {
-        window.__hshsUpload = {
-          __studioLoaded: true,
-          open: window.__hshsOpenUpload,
-          close: window.__hshsCloseUpload
-        };
-      }
-    };
-    s.onerror = function () {
-      console.error('[HSHS] camera studio failed to load');
-    };
-    document.head.appendChild(s);
+    var ready = window.HshsLoading && window.HshsLoading.pyramid
+      ? Promise.resolve()
+      : loadScript('/js/components/loading.js?v=261126pyramid1');
+    ready.then(function () {
+      var s = document.createElement('script');
+      s.src = '/js/hshs-studio.js?v=261126pyramid1';
+      s.async = false;
+      s.onload = function () {
+        window.__hshsUpload = window.__hshsUpload || {};
+        if (typeof window.__hshsOpenUpload === 'function') {
+          window.__hshsUpload = {
+            __studioLoaded: true,
+            open: window.__hshsOpenUpload,
+            close: window.__hshsCloseUpload
+          };
+        }
+      };
+      s.onerror = function () {
+        console.error('[HSHS] camera studio failed to load');
+      };
+      document.head.appendChild(s);
+    });
   }
 
   loadStudio();

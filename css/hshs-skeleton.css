@@ -244,3 +244,85 @@ html.hshs-device-mobile .skel-profile-stats{gap:6px}
 @keyframes homeShimmer {
   to { background-position: -220% 0; }
 }
+
+/* From Uiverse.io by andrew-demchenk0 - https://uiverse.io/andrew-demchenk0/orange-monkey-2
+   MIT License, Copyright (c) andrew-demchenk0 (A) */
+.hshs-pyramid-slot{
+  position:relative;
+  display:grid;
+  place-items:center;
+  overflow:visible;
+  flex:0 0 auto;
+  pointer-events:none;
+}
+.hshs-pyramid-slot.is-sm{width:56px;height:56px}
+.hshs-pyramid-slot.is-md{width:120px;height:120px}
+.hshs-pyramid-slot.is-lg{width:300px;height:300px}
+.hshs-pyramid-loader{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:300px;
+  height:300px;
+  margin:-150px 0 0 -150px;
+  display:block;
+  transform-style:preserve-3d;
+  transform:rotateX(-20deg);
+  pointer-events:none;
+}
+.hshs-pyramid-slot.is-sm .hshs-pyramid-loader{transform:rotateX(-20deg) scale(.19)}
+.hshs-pyramid-slot.is-md .hshs-pyramid-loader{transform:rotateX(-20deg) scale(.4)}
+.hshs-pyramid-slot.is-lg .hshs-pyramid-loader{transform:rotateX(-20deg) scale(1)}
+.hshs-pyramid-wrapper{
+  position:relative;
+  width:100%;
+  height:100%;
+  transform-style:preserve-3d;
+  animation:hshs-pyramid-spin 4s linear infinite;
+}
+.hshs-pyramid-slot.is-on .hshs-pyramid-wrapper{will-change:transform}
+@keyframes hshs-pyramid-spin{100%{transform:rotateY(360deg)}}
+.hshs-pyramid-loader .hshs-pyramid-wrapper .hshs-pyramid-side{
+  width:70px;
+  height:70px;
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  margin:auto;
+  transform-origin:center top;
+  clip-path:polygon(50% 0%, 0% 100%, 100% 100%);
+}
+.hshs-pyramid-side1{transform:rotateZ(-30deg) rotateY(90deg);background:conic-gradient(#2BDEAC,#F028FD,#D8CCE6,#2F2585)}
+.hshs-pyramid-side2{transform:rotateZ(30deg) rotateY(90deg);background:conic-gradient(#2F2585,#D8CCE6,#F028FD,#2BDEAC)}
+.hshs-pyramid-side3{transform:rotateX(30deg);background:conic-gradient(#2F2585,#D8CCE6,#F028FD,#2BDEAC)}
+.hshs-pyramid-side4{transform:rotateX(-30deg);background:conic-gradient(#2BDEAC,#F028FD,#D8CCE6,#2F2585)}
+.hshs-pyramid-shadow{
+  width:60px;height:60px;
+  background:#8B5AD5;
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  margin:auto;
+  transform:rotateX(90deg) translateZ(-40px);
+  filter:blur(12px);
+}
+.hshs-pyramid-overlay{
+  position:fixed;inset:0;z-index:100200;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.72);
+}
+.hshs-pyramid-card{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:#fff;text-align:center;pointer-events:auto;
+}
+.hshs-pyramid-pct{
+  font-size:28px;font-weight:800;line-height:1;color:#fff;min-height:1em;
+}
+.hshs-pyramid-label{font-size:13px;font-weight:700;color:#d8c8f5;min-height:1.2em}
+.hshs-pyramid-cancel,.hshs-pyramid-retry{
+  pointer-events:auto;margin-top:6px;min-height:40px;padding:8px 16px;
+  border:0;border-radius:999px;background:#a855f7;color:#fff;font-weight:800;cursor:pointer;
+}
+.hshs-pyramid-error{max-width:28ch;margin:0;color:#f5d0fe;font-size:14px}
+body.hshs-pyramid-overlay-open .hshs-pyramid-inline{visibility:hidden}
+@media (prefers-reduced-motion:reduce){
+  .hshs-pyramid-wrapper{animation-duration:12s}
+}
