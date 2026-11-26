@@ -326,3 +326,17 @@ body.hshs-pyramid-overlay-open .hshs-pyramid-inline{visibility:hidden}
 @media (prefers-reduced-motion:reduce){
   .hshs-pyramid-wrapper{animation-duration:12s}
 }
+
+.hshs-sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+.hshs-pyramid-inline{
+  display:inline-flex;align-items:center;gap:8px;vertical-align:middle;
+}
+.hshs-pyramid-inline .hshs-pyramid-slot.is-sm{
+  width:24px;height:24px;
+}
+.hshs-pyramid-inline .hshs-pyramid-slot.is-sm .hshs-pyramid-loader{
+  transform:rotateX(-20deg) scale(.08);
+}

@@ -56,6 +56,9 @@
     try {
       if (typeof window.__hshsAbortUpload === 'function') window.__hshsAbortUpload();
     } catch (e) {}
+    try {
+      if (window.HshsLoading && typeof window.HshsLoading.hide === 'function') window.HshsLoading.hide();
+    } catch (e) {}
     stopMedia();
     removeStudio();
     unlockPage();

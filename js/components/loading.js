@@ -69,11 +69,12 @@
     el.id = OVERLAY_ID;
     el.className = 'hshs-studio-progress hshs-pyramid-overlay';
     el.setAttribute('role', 'status');
-    el.setAttribute('aria-live', 'polite');
+    el.setAttribute('aria-live', 'off');
     var size = opts.size === 'sm' || opts.size === 'lg' ? opts.size : 'md';
     el.innerHTML = '<div class="hshs-pyramid-card">' + pyramid(size) +
       '<strong class="hshs-pyramid-pct" id="hshsPyramidPct" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">0%</strong>' +
       '<small class="hshs-pyramid-label" id="hshsPyramidLabel">Preparing</small>' +
+      '<div class="hshs-sr-only" id="hshsPyramidLive" aria-live="polite" aria-atomic="true"></div>' +
       '<button type="button" class="hshs-pyramid-cancel" id="hshsPyramidCancel"' + (opts.cancelable ? '' : ' hidden') + '>Cancel</button>' +
       '<p class="hshs-pyramid-error" id="hshsPyramidError" hidden></p>' +
       '<button type="button" class="hshs-pyramid-retry" id="hshsPyramidRetry" hidden>Retry</button>' +
@@ -104,7 +105,8 @@
       var bucket = Math.floor(p / 10);
       if (bucket !== lastBucket) {
         lastBucket = bucket;
-        el.setAttribute('aria-label', (label || 'Loading') + ' ' + p + ' percent');
+        var live = el.querySelector('#hshsPyramidLive');
+        if (live) live.textContent = (label || 'Loading') + ' ' + p + ' percent';
       }
     }
     var controller = {
