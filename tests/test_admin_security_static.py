@@ -72,3 +72,8 @@ def test_worker_firebase_issued_at_syntax_and_check():
     source = read("worker/hshs-r2-sign.js")
     assert "payload.iat > now)" in source
     assert "ADMIN_UIDS" not in source
+
+def test_lockdown_trigger_null_checks_do_not_block_default_nulls():
+    sql = read("supabase-migration-admin-lockdown.sql")
+    assert "coalesce(new_values -> 'featured_at', 'null'::jsonb) <> 'null'::jsonb" in sql
+    assert "not in ('null'::jsonb, '\"user\"'::jsonb)" in sql
