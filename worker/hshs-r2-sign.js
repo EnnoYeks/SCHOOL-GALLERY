@@ -172,12 +172,13 @@ export default {
         const contentLength = Number(request.headers.get("content-length") || 0);
         const kind = contentType.startsWith("video/") ? "video" : "photo";
         const max = kind === "video" ? 104857600 : 52428800;
-        if (contentLength > max) return reply({ error: "File too large" }, 413, true);
+        if (!request.headers.get("content-length") || !/^\\d+$/.test(request.headers.get("content-length"))) return reply({ error: "Content-Length required" }, 411, true);
+        if (contentLength <= 0 || contentLength > max) return reply({ error: "File too large or invalid size" }, 413, true);
         const allowed = kind === "video" ? ["video/mp4", "video/webm"] : ["image/jpeg", "image/png", "image/webp"];
         if (!allowed.includes(contentType)) return reply({ error: "Unsupported type" }, 415, true);
         const ext = contentType.split("/")[1] || "bin";
         const key = "admin/" + uid + "/" + crypto.randomUUID() + "." + ext;
-        await bucket.put(key, request.body, { httpMetadata: { contentType } });
+        await bucket.put(key, request.body, { httpMetadata: { contentType }, customMetadata: { uid } });
         return reply({ key }, 200, true);
       }
 
