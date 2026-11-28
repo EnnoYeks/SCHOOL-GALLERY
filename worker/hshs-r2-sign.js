@@ -208,10 +208,6 @@ export default {
         if (!row.ok) return json({ error: row.error }, 400, true);
         const { data, error } = await sb.from(target).insert(row.data).select().single();
         if (error) return json({ error: error.message || "Insert failed" }, 500, true);
-        if (body.feature && data && data.id) {
-          const patch = { featured: true, featured_at: new Date().toISOString() };
-          await sb.from(target).update(patch).eq("id", data.id).single().catch(() => {});
-        }
         return json(data, 201, true);
       }
 
@@ -234,7 +230,8 @@ export default {
         const target = contentMatch[1];
         const id = contentMatch[2];
         if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
-        const { data: row, error: readError } = await sb.from(target).select("media_key,poster_key").eq("id", id).single();
+        const selectColumns = target === "videos" ? "media_key,poster_key" : "media_key";
+        const { data: row, error: readError } = await sb.from(target).select(selectColumns).eq("id", id).single();
         if (readError) return json({ error: readError.message || "Lookup failed" }, 500, true);
         if (row && bucket) {
           for (const key of [row.media_key, row.poster_key].filter(Boolean)) {
@@ -404,7 +401,7 @@ function contentPayload(body, target, uid, partial = false) {
   const data = { title: title || (target === "photos" ? "Photo" : target === "videos" ? "Video" : "Untitled"), description, category, class_tag, image: image_url, image_url, thumbnail_url, media_key, media_provider: media_key ? "cloudflare-r2" : null, width, height, author: body.author || "HSHS Admin", author_id: uid, updated_at: new Date().toISOString() };
   if (target === "posts") { data.type = type; data.status = ["draft", "published"].includes(body.status) ? body.status : "published"; data.is_official = true; data.author_role = "admin"; }
   if (target === "videos") { data.video_url = video_url; data.type = "video"; }
-  if (body.feature) data.featured = true;
+  if (body.feature) { data.featured = true; data.featured_at = new Date().toISOString(); }
   return { ok: true, data };
 }
 
