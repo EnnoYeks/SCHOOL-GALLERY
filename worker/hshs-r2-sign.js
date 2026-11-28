@@ -281,7 +281,7 @@ function supabaseClient(env) {
           return {
             eq(col, val) { this._eq = { col, val }; return this; },
             order(col, opts) { this._order = { col, opts }; return this; },
-            single() { return this; },
+            single() { this._single = true; return this; },
             async then(resolve) {
               const q = new URL(url + "/rest/v1/" + table);
               q.searchParams.set("select", cols || "*");
@@ -291,7 +291,8 @@ function supabaseClient(env) {
                 headers: { apikey: key, Authorization: "Bearer " + key, "Content-Type": "application/json" }
               });
               const data = await res.json();
-              resolve({ data, error: res.ok ? null : data });
+              const normalized = this._single ? (Array.isArray(data) ? (data[0] || null) : data) : data;
+              resolve({ data: normalized, error: res.ok ? null : data });
             }
           };
         },
