@@ -109,25 +109,25 @@ export default {
       const verified = await verifyFirebaseToken(request);
       if (!verified.ok) return reply({ error: verified.error }, verified.status, true);
       const uid = verified.uid;
-      if (!isAdmin(verified, env)) return json({ error: "Forbidden" }, 403, true);
+      if (!isAdmin(verified, env)) return reply({ error: "Forbidden" }, 403, true);
 
       const sb = supabaseClient(env);
 
       if (url.pathname === "/admin/me" && request.method === "GET") {
-        return json({ uid, email: verified.email, admin: true }, 200, true);
+        return reply({ uid, email: verified.email, admin: true }, 200, true);
       }
 
       if (url.pathname === "/admin/posts" && request.method === "GET") {
         const { data, error } = await sb.from("posts").select("*").eq("is_official", true).order("created_at", { ascending: false });
-        if (error) return json({ error: error.message }, 500, true);
-        return json({ posts: data || [] }, 200, true);
+        if (error) return reply({ error: error.message }, 500, true);
+        return reply({ posts: data || [] }, 200, true);
       }
 
       if (url.pathname === "/admin/posts" && request.method === "POST") {
         let body = {};
         try { body = await request.json(); } catch (e) {}
         const validation = validatePost(body);
-        if (!validation.ok) return json({ error: validation.error }, 400, true);
+        if (!validation.ok) return reply({ error: validation.error }, 400, true);
         const payload = {
           ...validation.data,
           author_id: uid,
@@ -136,8 +136,8 @@ export default {
           updated_at: new Date().toISOString()
         };
         const { data, error } = await sb.from("posts").insert(payload).select().single();
-        if (error) return json({ error: error.message }, 500, true);
-        return json(data, 201, true);
+        if (error) return reply({ error: error.message }, 500, true);
+        return reply(data, 201, true);
       }
 
       const postIdMatch = url.pathname.match(/^\/admin\/posts\/([^/]+)$/);
@@ -146,13 +146,13 @@ export default {
         let body = {};
         try { body = await request.json(); } catch (e) {}
         const validation = validatePost(body, true);
-        if (!validation.ok) return json({ error: validation.error }, 400, true);
+        if (!validation.ok) return reply({ error: validation.error }, 400, true);
         const patch = { ...validation.data, updated_at: new Date().toISOString() };
         delete patch.author_id; delete patch.author_role; delete patch.is_official;
         const { data, error } = await sb.from("posts").update(patch).eq("id", id).eq("is_official", true).select().single();
-        if (error) return json({ error: error.message }, 500, true);
-        if (!data) return json({ error: "Post not found" }, 404, true);
-        return json(data, 200, true);
+        if (error) return reply({ error: error.message }, 500, true);
+        if (!data) return reply({ error: "Post not found" }, 404, true);
+        return reply(data, 200, true);
       }
 
       if (postIdMatch && request.method === "DELETE") {
@@ -162,51 +162,51 @@ export default {
           try { await bucket.delete(row.media_key); } catch (e) {}
         }
         const { error } = await sb.from("posts").delete().eq("id", id).eq("is_official", true);
-        if (error) return json({ error: error.message }, 500, true);
+        if (error) return reply({ error: error.message }, 500, true);
         return new Response(null, { status: 204, headers: cors(true, origin, env) });
       }
 
       if (url.pathname === "/admin/upload" && request.method === "PUT") {
-        if (!bucket) return json({ error: "No R2 binding" }, 500, true);
+        if (!bucket) return reply({ error: "No R2 binding" }, 500, true);
         const contentType = request.headers.get("content-type") || "";
         const contentLength = Number(request.headers.get("content-length") || 0);
         const kind = contentType.startsWith("video/") ? "video" : "photo";
         const max = kind === "video" ? 104857600 : 52428800;
-        if (contentLength > max) return json({ error: "File too large" }, 413, true);
+        if (contentLength > max) return reply({ error: "File too large" }, 413, true);
         const allowed = kind === "video" ? ["video/mp4", "video/webm"] : ["image/jpeg", "image/png", "image/webp"];
-        if (!allowed.includes(contentType)) return json({ error: "Unsupported type" }, 415, true);
+        if (!allowed.includes(contentType)) return reply({ error: "Unsupported type" }, 415, true);
         const ext = contentType.split("/")[1] || "bin";
         const key = "admin/" + uid + "/" + crypto.randomUUID() + "." + ext;
         await bucket.put(key, request.body, { httpMetadata: { contentType } });
-        return json({ key }, 200, true);
+        return reply({ key }, 200, true);
       }
 
       if (url.pathname === "/admin/feature" && request.method === "POST") {
         let body = {};
         try { body = await request.json(); } catch (e) {}
         const { id, featured, col } = body;
-        if (!id || !ALLOWED.has(col)) return json({ error: "Invalid feature request" }, 400, true);
+        if (!id || !ALLOWED.has(col)) return reply({ error: "Invalid feature request" }, 400, true);
         const patch = featured ? { featured: true, featured_at: new Date().toISOString() } : { featured: false, featured_at: null };
         const { error } = await sb.from(col).update(patch).eq("id", id);
-        if (error) return json({ error: error.message }, 500, true);
-        return json({ ok: true }, 200, true);
+        if (error) return reply({ error: error.message }, 500, true);
+        return reply({ ok: true }, 200, true);
       }
 
       if (url.pathname === "/admin/events" && request.method === "POST") {
         let body = {};
         try { body = await request.json(); } catch (e) {}
-        if (!body.title || !body.date) return json({ error: "Title and date required" }, 400, true);
+        if (!body.title || !body.date) return reply({ error: "Title and date required" }, 400, true);
         const { data, error } = await sb.from("events").insert({ title: body.title, date: body.date, location: body.location || "" }).select().single();
-        if (error) return json({ error: error.message }, 500, true);
-        return json(data, 201, true);
+        if (error) return reply({ error: error.message }, 500, true);
+        return reply(data, 201, true);
       }
 
       const eventIdMatch = url.pathname.match(/^\/admin\/events\/([^/]+)$/);
       if (eventIdMatch && request.method === "DELETE") {
         const id = eventIdMatch[1];
         const { error } = await sb.from("events").delete().eq("id", id);
-        if (error) return json({ error: error.message }, 500, true);
-        return new Response(null, { status: 204, headers: cors(true) });
+        if (error) return reply({ error: error.message }, 500, true);
+        return new Response(null, { status: 204, headers: cors(true, origin, env) });
       }
 
       // Unified content routes used by admin-api.js (posts | photos | videos)
@@ -214,49 +214,49 @@ export default {
         let body = {};
         try { body = await request.json(); } catch (e) {}
         const target = String(body.target || "posts");
-        if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
+        if (!ALLOWED.has(target)) return reply({ error: "Invalid target" }, 400, true);
         const row = contentPayload(body, target, uid);
-        if (!row.ok) return json({ error: row.error }, 400, true);
+        if (!row.ok) return reply({ error: row.error }, 400, true);
         const { data, error } = await sb.from(target).insert(row.data).select().single();
-        if (error) return json({ error: error.message || "Insert failed" }, 500, true);
-        return json(data, 201, true);
+        if (error) return reply({ error: error.message || "Insert failed" }, 500, true);
+        return reply(data, 201, true);
       }
 
       const contentMatch = url.pathname.match(/^\/admin\/content\/([^/]+)\/([^/]+)$/);
       if (contentMatch && request.method === "PATCH") {
         const target = contentMatch[1];
         const id = contentMatch[2];
-        if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
+        if (!ALLOWED.has(target)) return reply({ error: "Invalid target" }, 400, true);
         let body = {};
         try { body = await request.json(); } catch (e) {}
         const row = contentPayload(body, target, uid, true);
-        if (!row.ok) return json({ error: row.error }, 400, true);
+        if (!row.ok) return reply({ error: row.error }, 400, true);
         const { data, error } = await sb.from(target).update(row.data).eq("id", id).single();
-        if (error) return json({ error: error.message || "Update failed" }, 500, true);
-        if (!data) return json({ error: "Content not found" }, 404, true);
-        return json(data, 200, true);
+        if (error) return reply({ error: error.message || "Update failed" }, 500, true);
+        if (!data) return reply({ error: "Content not found" }, 404, true);
+        return reply(data, 200, true);
       }
 
       if (contentMatch && request.method === "DELETE") {
         const target = contentMatch[1];
         const id = contentMatch[2];
-        if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
+        if (!ALLOWED.has(target)) return reply({ error: "Invalid target" }, 400, true);
         const { data: row, error: readError } = await sb.from(target).select("*").eq("id", id).single();
-        if (readError) return json({ error: readError.message || "Lookup failed" }, 500, true);
+        if (readError) return reply({ error: readError.message || "Lookup failed" }, 500, true);
         if (row && bucket) {
           for (const key of [row.media_key, row.poster_key].filter(Boolean)) {
             try { await bucket.delete(key); } catch (deleteError) { console.warn("R2 cleanup failed", deleteError && deleteError.message); }
           }
         }
         const { error } = await sb.from(target).delete().eq("id", id);
-        if (error) return json({ error: error.message || "Delete failed" }, 500, true);
-        return new Response(null, { status: 204, headers: cors(true) });
+        if (error) return reply({ error: error.message || "Delete failed" }, 500, true);
+        return new Response(null, { status: 204, headers: cors(true, origin, env) });
       }
 
-      return json({ error: "Not found" }, 404, true);
+      return reply({ error: "Not found" }, 404, true);
     }
 
-    return json({ error: "Not found" }, 404);
+    return reply({ error: "Not found" }, 404);
   }
 };
 
