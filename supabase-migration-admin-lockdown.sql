@@ -70,9 +70,9 @@ begin
   if current_user not in ('service_role', 'postgres', 'supabase_admin') and (
     (tg_op = 'INSERT' and (
       new_values -> 'featured' = 'true'::jsonb
-      or new_values -> 'featured_at' is not null
+      or coalesce(new_values -> 'featured_at', 'null'::jsonb) <> 'null'::jsonb
       or new_values -> 'is_official' = 'true'::jsonb
-      or (new_values -> 'author_role' is not null and new_values -> 'author_role' <> '"user"'::jsonb)
+      or coalesce(new_values -> 'author_role', 'null'::jsonb) not in ('null'::jsonb, '"user"'::jsonb)
     ))
     or (tg_op = 'UPDATE' and (
       new_values -> 'featured' is distinct from old_values -> 'featured'
