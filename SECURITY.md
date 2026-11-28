@@ -20,3 +20,5 @@ Also in Firebase console:
 - Authentication → Abuse protection: enable
 - App Check: enable for the web app
 - Restrict the browser API key to hshsgallery.vercel.app
+
+Worker CORS is allow-list based. Configure `ALLOWED_ORIGINS` only for verified production domains. `/list` is admin-only. Public `/sign` and `/put` require Firebase authentication and enforce object ownership metadata.
