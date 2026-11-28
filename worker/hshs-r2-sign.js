@@ -1,11 +1,11 @@
 /**
  * HSHS World — R2 + Admin Worker
  * Binding: MEDIA_BUCKET (hshs-world-media)
- * Vars: ADMIN_EMAILS (comma list), SUPABASE_URL
+ * Vars: ADMIN_EMAILS (comma list), SUPABASE_URL, ALLOWED_ORIGINS (optional comma list)
  * Secret: SUPABASE_SERVICE_ROLE_KEY
  *
  * Existing routes kept working:
- *   POST /sign, PUT /put, GET /list, GET /
+ *   POST /sign (Firebase auth), PUT /put (Firebase auth + object ownership), GET /list (admin only), GET /
  *
  * New admin routes (require verified Firebase ID token + verified email in ADMIN_EMAILS):
  *   GET    /admin/me
