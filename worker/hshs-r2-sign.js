@@ -283,6 +283,7 @@ function supabaseClient(env) {
           return {
             eq(col, val) { this._eq = { col, val }; return this; },
             order(col, opts) { this._order = { col, opts }; return this; },
+            single() { return this; },
             async then(resolve) {
               const q = new URL(url + "/rest/v1/" + table);
               q.searchParams.set("select", cols || "*");
@@ -494,7 +495,7 @@ async function getGoogleCerts(force = false) {
   const json = await res.json();
   const keys = Array.isArray(json.keys) ? json.keys : [];
   const cacheControl = res.headers.get("Cache-Control") || "";
-  const maxAgeMatch = cacheControl.match(/max-age=(\\d+)/i);
+  const maxAgeMatch = cacheControl.match(/max-age=(\d+)/i);
   const maxAge = maxAgeMatch ? Number(maxAgeMatch[1]) : 3600;
   certsCache = { keys, expires: Date.now() + Math.max(60, maxAge) * 1000 };
   return keys;
