@@ -6,6 +6,7 @@ on:
       - "**"
   pull_request:
     paths:
+      - "worker/hshs-r2-sign.js"
       - "api/**"
       - "js/media-slots.js"
       - "js/admin-media-page.js"
@@ -22,6 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Check Cloudflare Worker syntax
+        run: node --input-type=module --check < worker/hshs-r2-sign.js
       - name: Check CommonJS server files
         run: |
           node --check api/_auth.js
