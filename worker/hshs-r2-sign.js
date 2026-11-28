@@ -65,7 +65,7 @@ export default {
       if (!verified.ok) return reply({ error: verified.error }, verified.status);
       let body = {};
       try { body = await request.json(); } catch (e) { return reply({ error: "Invalid JSON" }, 400); }
-      const key = String(body.key || "").replace(/^\\/+/, "");
+      const key = String(body.key || "").replace(/^\/+/, "");
       const contentType = String(body.contentType || "");
       const size = Number(body.size);
       if (!key || key.includes("..") || key.startsWith("admin/") || !isUserMediaKey(key)) return reply({ error: "Invalid key" }, 400);
@@ -91,7 +91,7 @@ export default {
       const isPhoto = ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(contentType);
       if (!isVideo && !isPhoto) return reply({ error: "Unsupported media type" }, 415);
       const lengthHeader = request.headers.get("content-length");
-      if (!lengthHeader || !/^\\d+$/.test(lengthHeader)) return reply({ error: "Content-Length required" }, 411);
+      if (!lengthHeader || !/^\d+$/.test(lengthHeader)) return reply({ error: "Content-Length required" }, 411);
       const declaredLen = Number(lengthHeader);
       const expectedSize = Number(url.searchParams.get("size"));
       const expectedType = url.searchParams.get("contentType") || "";
@@ -278,7 +278,7 @@ function isAdmin(token, env) {
   return !!(token && token.emailVerified === true && email && allowEmails.includes(email));
 }
 function isUserMediaKey(key) {
-  return /^(photos|videos|profiles|thumbnails|media)\\/[a-zA-Z0-9._/-]+$/.test(String(key || "")) && !String(key).includes("..");
+  return /^(photos|videos|profiles|thumbnails|media)\/[a-zA-Z0-9._/-]+$/.test(String(key || "")) && !String(key).includes("..");
 }
 async function assertCanWrite(bucket, uid, key) {
   try {
