@@ -38,7 +38,7 @@ def test_worker_partial_updates_are_whitelisted_and_preserve_fields():
     source = read("worker/hshs-r2-sign.js")
     assert "const fields = [\"title\", \"description\", \"category\", \"class_tag\", \"image_url\", \"thumbnail_url\", \"video_url\", \"media_key\", \"width\", \"height\", \"featured\"]" in source
     assert "if (target === \"posts\" && Object.prototype.hasOwnProperty.call(body, \"status\"))" in source
-    assert 'if (!data) return json({ error: "Content not found" }, 404, true);' in source
+    assert 'if (!data) return reply({ error: "Content not found" }, 404, true);' in source
 
 
 def test_worker_delete_cleans_media_and_feature_toggle_is_partial():
@@ -54,3 +54,21 @@ def test_migration_locks_events_and_admin_fields_without_dropping_user_policies(
     assert "hshs_block_browser_admin_column_changes" in sql
     assert "drop policy" in sql.lower()
     assert "NOT applied to production" in sql
+
+
+def test_public_worker_upload_routes_require_auth_and_ownership():
+    source = read("worker/hshs-r2-sign.js")
+    assert 'if (url.pathname === "/list" && request.method === "GET")' in source
+    assert 'const verified = await verifyFirebaseToken(request);' in source
+    assert 'if (!isAdmin(verified, env)) return reply({ error: "Forbidden" }, 403);' in source
+    assert "async function assertCanWrite(bucket, uid, key)" in source
+    assert "customMetadata: { uid: verified.uid }" in source
+    assert "Content-Length required" in source
+    assert "Access-Control-Allow-Origin: \"*\"" not in source
+    assert "env.ALLOWED_ORIGINS" in source
+
+
+def test_worker_firebase_issued_at_syntax_and_check():
+    source = read("worker/hshs-r2-sign.js")
+    assert "payload.iat > now)" in source
+    assert "ADMIN_UIDS" not in source
