@@ -382,8 +382,8 @@
                 return;
             }
             console.warn('[studio] upload failed', e);
-            draft.uploadError = 'Upload failed, tap to retry';
-            progress.fail('Upload failed, tap to retry', function () { publish(); });
+            draft.uploadError = recordError ? ('Save failed: ' + recordError) : 'Upload failed, tap to retry';
+            progress.fail(recordError ? ('Save failed: ' + recordError) : 'Upload failed, tap to retry', function () { publish(); });
             render();
             return;
         }
@@ -425,7 +425,10 @@
                     saved = !!(await window.db.createVideo(payload)) || saved;
                 }
             }
-        } catch (e) { console.warn('[studio] record failed', e); }
+        } catch (e) {
+            console.warn('[studio] record failed', e);
+            var recordError = e && e.message ? e.message : 'Database error';
+        }
         if (!saved) {
             draft.uploadError = 'Upload failed, tap to retry';
             progress.fail('Upload failed, tap to retry', function () { publish(); });
