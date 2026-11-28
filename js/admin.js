@@ -15,7 +15,7 @@
 
   class AdminDashboard {
     constructor() {
-      this.busy = false; this.items = []; this.official = []; this.isAdmin = false; this.uploadTarget = 'posts';
+      this.busy = false; this.items = []; this.official = []; this.isAdmin = false; this.authListenerBound = false; this.uploadTarget = 'posts';
       this.init();
     }
 
@@ -122,14 +122,17 @@
     }
 
     bind() {
-      document.addEventListener('hshs:auth', () => {
-        if (!window.hshsAuthUser) {
-          this.isAdmin = false;
-          this.showLock('Sign in required', 'Please sign in to access the control room.', '/login/');
-          return;
-        }
-        this.init();
-      });
+      if (!this.authListenerBound) {
+        this.authListenerBound = true;
+        document.addEventListener('hshs:auth', () => {
+          if (!window.hshsAuthUser) {
+            this.isAdmin = false;
+            this.showLock('Sign in required', 'Please sign in to access the control room.', '/login/');
+            return;
+          }
+          this.init();
+        });
+      }
       $('adminRefresh') && $('adminRefresh').addEventListener('click', () => this.init());
       $('pinBtn') && $('pinBtn').addEventListener('click', () => this.pinItem(true));
       $('unpinBtn') && $('unpinBtn').addEventListener('click', () => this.pinItem(false));
