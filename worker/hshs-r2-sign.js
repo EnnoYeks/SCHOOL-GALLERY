@@ -150,7 +150,7 @@ export default {
         const patch = { ...validation.data, updated_at: new Date().toISOString() };
         delete patch.author_id; delete patch.author_role; delete patch.is_official;
         const { data, error } = await sb.from("posts").update(patch).eq("id", id).eq("is_official", true).select().single();
-        if (error) return reply({ error: error.message }, 500, true);
+        if (error) return reply({ error: error.message }, error.code === "PGRST116" ? 404 : 500, true);
         if (!data) return reply({ error: "Post not found" }, 404, true);
         return reply(data, 200, true);
       }
@@ -233,7 +233,7 @@ export default {
         const row = contentPayload(body, target, uid, true);
         if (!row.ok) return reply({ error: row.error }, 400, true);
         const { data, error } = await sb.from(target).update(row.data).eq("id", id).single();
-        if (error) return reply({ error: error.message || "Update failed" }, 500, true);
+        if (error) return reply({ error: error.message || "Update failed" }, error.code === "PGRST116" ? 404 : 500, true);
         if (!data) return reply({ error: "Content not found" }, 404, true);
         return reply(data, 200, true);
       }
