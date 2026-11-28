@@ -393,6 +393,8 @@ function contentPayload(body, target, uid, partial = false) {
   const video_url = String(body.video_url || "").slice(0, 1000);
   const thumbnail_url = String(body.thumbnail_url || image_url || "").slice(0, 1000);
   const media_key = String(body.media_key || body.mediaKey || "").slice(0, 500);
+  const poster_key = String(body.poster_key || "").slice(0, 500);
+  if (poster_key && (/^(blob:|data:|https?:)/i.test(poster_key) || poster_key.startsWith("/") || poster_key.includes(".."))) return { ok: false, error: "poster_key must be a relative R2 object key." };
   if (![image_url, thumbnail_url, video_url].every(isAllowedMediaRef)) return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
   if (media_key && (/^(blob:|data:|https?:)/i.test(media_key) || media_key.startsWith("/") || media_key.includes(".."))) return { ok: false, error: "media_key must be a relative R2 object key." };
   const width = Number.isSafeInteger(Number(body.width)) && Number(body.width) > 0 ? Number(body.width) : null;
@@ -401,6 +403,7 @@ function contentPayload(body, target, uid, partial = false) {
   if (target === "videos" && !video_url && !media_key) return { ok: false, error: "Video requires media" };
   if (target === "posts" && !description && !image_url && !media_key) return { ok: false, error: "Description or media required" };
   const data = { title: title || (target === "photos" ? "Photo" : target === "videos" ? "Video" : "Untitled"), description, category, class_tag, image: image_url, image_url, thumbnail_url, media_key, media_provider: media_key ? "cloudflare-r2" : null, width, height, author: body.author || "HSHS Admin", author_id: uid, updated_at: new Date().toISOString() };
+  if (poster_key) data.poster_key = poster_key;
   if (target === "posts") { data.type = type; data.status = ["draft", "published"].includes(body.status) ? body.status : "published"; data.is_official = true; data.author_role = "admin"; }
   if (target === "videos") { data.video_url = video_url; data.type = "video"; }
   if (body.feature) { data.featured = true; data.featured_at = new Date().toISOString(); }
