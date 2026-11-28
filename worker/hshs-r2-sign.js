@@ -141,6 +141,7 @@ export default {
         delete patch.author_id; delete patch.author_role; delete patch.is_official;
         const { data, error } = await sb.from("posts").update(patch).eq("id", id).eq("is_official", true).select().single();
         if (error) return json({ error: error.message }, 500, true);
+        if (!data) return json({ error: "Post not found" }, 404, true);
         return json(data, 200, true);
       }
 
