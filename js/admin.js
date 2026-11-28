@@ -204,7 +204,6 @@
         if (!window.adminApi || typeof window.adminApi.createContent !== 'function') throw new Error('Admin API unavailable');
         const saved = await window.adminApi.createContent(payload);
         if (!saved) throw new Error('Worker did not return the saved record');
-        if (feature && saved.id) await window.adminApi.feature(saved.id, true, target);
         this.setProgress(100);
         progress.done('Done');
         progress.hide();
