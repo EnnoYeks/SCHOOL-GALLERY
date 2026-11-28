@@ -334,10 +334,13 @@
                     saved = !!(await window.db.createVideo(payload)) || saved;
                 }
             }
-        } catch (e) { console.warn('[studio] record failed', e); }
+        } catch (e) {
+            console.warn('[studio] record failed', e);
+            var recordError = e && e.message ? e.message : 'Database error';
+        }
         if (!saved) {
             try { progress.remove(); } catch (err) {}
-            alert('Cloudflare has the file, but the campus record was not saved. Try again.');
+            alert('Cloudflare has the file, but the campus record was not saved.' + (recordError ? '\\n\\n' + recordError : '') + '\\nTry again.');
             return;
         }
 
