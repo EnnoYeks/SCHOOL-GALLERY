@@ -21,19 +21,160 @@
 
     async init() {
       const ready = await this.waitForAuth();
-      if (!ready) {
-        this.showLock('Sign in required', 'Please sign in to access the control room.', '/login/');
-        return;
-      }
+      if (!ready) { this.showLock('Sign in required', 'Please sign in to access the control room.', '/login/'); return; }
+      await this.waitForAdminApi();
       this.isAdmin = false;
       try {
+        if (!window.adminApi || typeof window.adminApi.me !== 'function') throw new Error('Admin verification service unavailable');
+        const me = await window.adminApi.me();
+        this.isAdmin = !!(me && me.admin === true);
+      } catch (e) { this.isAdmin = false; }
+      if (!this.isAdmin) { this.showLock('You do not have permission', 'This area is for admins only.', null); return; }
+      this.render(); this.bind();
+      await Promise.all([this.loadRecentItems(), this.loadEventsList(), this.loadOfficialPosts()]);
+    }
+
+    waitForAdminApi() {
+      return new Promise((resolve) => {
+        const started = Date.now();
+        (function check() {
+          if (window.adminApi && typeof window.adminApi.me === 'function') return resolve(true);
+          if (Date.now() - started >= 3000) return resolve(false);
+          setTimeout(check, 50);
+        })();
+      });
+    }
+
+    waitForAuth() {
+      return new Promise((resolve) => {
+        if (window.hshsAuthState && window.hshsAuthState !== 'loading') return resolve(!!window.hshsAuthUser);
+        document.addEventListener('hshs:auth', () => resolve(!!window.hshsAuthUser), { once: true });
+        setTimeout(() => resolve(!!window.hshsAuthUser), 3000);
+      });
+    }
+
+    showLock(title, msg, link) {
+      const lock = $('adminLock'); const panels = $('adminPanels');
+      if (panels) panels.style.display = 'none';
+      if (lock) {
+        lock.style.display = 'grid';
+        lock.innerHTML = '<div class="admin-lock-card"><div class="admin-lock-icon"><i class="fa-solid fa-lock"></i></div><h1>' + esc(title) + '</h1><p class="admin-muted">' + esc(msg) + '</p>' + (link ? '<a class="admin-back-link" href="' + link + '">Go to sign in</a>' : '') + '</div>';
+      }
+    }
+
+    catOptions() { return CATEGORIES.map(c => '<option value="' + c.id + '">' + esc(c.label) + '</option>').join(''); }
+    classOptions() { return CLASSES.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join(''); }
+
+    render() {
+      const panels = $('adminPanels'); if (!panels) return;
+      panels.innerHTML = [
+        '<header class="admin-welcome"><div><p class="admin-eyebrow">HSHS WORLD · CONTROL ROOM</p><h1>Home & content control</h1><p class="admin-muted">Upload to Gallery, pin Featured Today, and manage events.</p></div>',
+        '<button class="admin-btn admin-btn-quiet" id="adminRefresh" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button></header>',
+        '<section class="admin-stat-grid">',
+        '<article class="admin-stat"><p>Posts</p><strong id="adminPostCount">0</strong><small>Latest</small></article>',
+        '<article class="admin-stat"><p>Photos</p><strong id="adminPhotoCount">0</strong><small>Gallery</small></article>',
+        '<article class="admin-stat"><p>Videos</p><strong id="adminVideoCount">0</strong><small>Videos</small></article>',
+        '<article class="admin-stat"><p>Events</p><strong id="adminEventCount">0</strong><small>Calendar</small></article></section>',
+        '<section class="admin-panel" style="margin-bottom:18px"><div class="admin-panel-head"><div><p class="admin-eyebrow">UPLOAD</p><h2>Post · Photo · Video</h2>',
+        '<p class="admin-muted">Check Feature on Home to pin Featured Today in the same write.</p></div></div>',
+        '<form class="admin-event-form" id="adminUploadForm">',
+        '<div class="admin-form-row" style="gap:8px;flex-wrap:wrap">',
+        '<label>Destination<select id="upTarget"><option value="posts">Post</option><option value="photos">Photo</option><option value="videos">Video</option></select></label>',
+        '<label>Category<select id="upCategory">' + this.catOptions() + '</select></label>',
+        '<label>Class<select id="upClass">' + this.classOptions() + '</select></label></div>',
+        '<label>Title<input id="upTitle" placeholder="Title" maxlength="200"></label>',
+        '<label>Description<textarea id="upDesc" placeholder="Caption or announcement" rows="3" maxlength="2000"></textarea></label>',
+        '<label>File<input id="upFile" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"></label>',
+        '<label id="upPosterWrap" style="display:none">Poster (optional)<input id="upPoster" type="file" accept="image/jpeg,image/png,image/webp"></label>',
+        '<label style="display:flex;align-items:center;gap:8px;margin:8px 0"><input type="checkbox" id="upFeature"> Feature on Home</label>',
+        '<div id="upProgress" style="display:none;height:6px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin:8px 0"><div id="upProgressBar" style="height:100%;width:0%;background:#2563eb"></div></div>',
+        '<div class="admin-form-row"><button type="button" id="upDraftBtn" class="admin-btn admin-btn-quiet">Save draft</button>',
+        '<button type="button" id="upPublishBtn" class="admin-btn admin-btn-primary">Publish</button></div>',
+        '<p id="upFeedback" class="admin-feedback"></p></form></section>',
+        '<div class="admin-work-grid"><section class="admin-panel"><div class="admin-panel-head"><div><p class="admin-eyebrow">HOMEPAGE</p><h2>Featured Today</h2><p class="admin-muted">Pin, edit, or remove what shows on Home.</p></div></div>',
+        '<div id="recentItems" class="admin-item-list"><div class="admin-empty">Loading…</div></div>',
+        '<details class="admin-manual-pin"><summary>Pin by item ID</summary><div class="admin-inline-form">',
+        '<input id="pinId" placeholder="Item ID"><select id="pinCol"><option value="posts">posts</option><option value="photos">photos</option><option value="videos">videos</option></select>',
+        '<button id="pinBtn" class="admin-btn admin-btn-primary" type="button">Pin</button><button id="unpinBtn" class="admin-btn admin-btn-quiet" type="button">Unpin</button></div></details></section>',
+        '<section class="admin-panel"><div class="admin-panel-head"><div><p class="admin-eyebrow">CALENDAR</p><h2>Upcoming Events</h2></div></div>',
+        '<form class="admin-event-form" id="adminEventForm"><label>Event name<input id="evTitle" required></label>',
+        '<div class="admin-form-row"><label>Date<input id="evDate" type="date" required></label><label>Location<input id="evPlace"></label></div>',
+        '<button class="admin-btn admin-btn-primary" type="submit">Add event</button><p id="adminFeedback" class="admin-feedback"></p></form>',
+        '<div id="eventsList" class="admin-event-list"><div class="admin-empty">Loading…</div></div></section></div>',
+        '<section class="admin-panel" style="margin-top:18px"><div class="admin-panel-head"><div><p class="admin-eyebrow">OFFICIAL</p><h2>Official posts</h2></div></div>',
+        '<div id="officialList" class="admin-item-list"><div class="admin-empty">Loading…</div></div></section>'
+      ].join('');
+      this.syncUploadUi();
+    }
+
+    syncUploadUi() {
+      const target = ($('upTarget') && $('upTarget').value) || 'posts';
+      this.uploadTarget = target;
+      const draft = $('upDraftBtn'); if (draft) draft.style.display = target === 'posts' ? '' : 'none';
+      const poster = $('upPosterWrap'); if (poster) poster.style.display = target === 'videos' ? '' : 'none';
+      const file = $('upFile');
+      if (file) {
+        if (target === 'photos') file.accept = 'image/jpeg,image/png,image/webp';
+        else if (target === 'videos') file.accept = 'video/mp4,video/webm';
+        else file.accept = 'image/jpeg,image/png,image/webp,video/mp4,video/webm';
+      }
+      const pub = $('upPublishBtn'); if (pub) pub.textContent = target === 'posts' ? 'Publish' : 'Upload';
+    }
+
+    bind() {
+      $('adminRefresh') && $('adminRefresh').addEventListener('click', () => this.init());
+      $('pinBtn') && $('pinBtn').addEventListener('click', () => this.pinItem(true));
+      $('unpinBtn') && $('unpinBtn').addEventListener('click', () => this.pinItem(false));
+      $('adminEventForm') && $('adminEventForm').addEventListener('submit', (e) => { e.preventDefault(); this.addEvent(); });
+      $('upTarget') && $('upTarget').addEventListener('change', () => this.syncUploadUi());
+      $('upDraftBtn') && $('upDraftBtn').addEventListener('click', () => this.submitUpload('draft'));
+      $('upPublishBtn') && $('upPublishBtn').addEventListener('click', () => this.submitUpload('published'));
+    }
+
+    setFeedback(id, msg, ok) {
+      const el = $(id); if (!el) return;
+      el.textContent = msg || '';
+      el.className = 'admin-feedback' + (ok === true ? ' is-success' : ok === false ? ' is-error' : '');
+    }
+
+    setProgress(pct) {
+      const wrap = $('upProgress'); const bar = $('upProgressBar');
+      if (!wrap || !bar) return;
+      if (pct == null) { wrap.style.display = 'none'; bar.style.width = '0%'; return; }
+      wrap.style.display = 'block'; bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    }
+
+    async submitUpload(status) {
+      const target = ($('upTarget') && $('upTarget').value) || 'posts';
+      const title = (($('upTitle') && $('upTitle').value) || '').trim();
+      const description = (($('upDesc') && $('upDesc').value) || '').trim();
+      const category = ($('upCategory') && $('upCategory').value) || 'events';
+      const class_tag = ($('upClass') && $('upClass').value) || 'Campus';
+      const file = $('upFile') && $('upFile').files && $('upFile').files[0];
+      const poster = $('upPoster') && $('upPoster').files && $('upPoster').files[0];
+      if (target === 'photos' && !file) { this.setFeedback('upFeedback', 'Photo requires an image (jpeg, png, webp)', false); return; }
+      if (target === 'videos' && !file) { this.setFeedback('upFeedback', 'Video requires mp4 or webm', false); return; }
+      if (this.busy) return;
+      this.busy = true; const progress = window.HshsUploadProgress;
+      try {
+        let media_key = '', image_url = '', video_url = '', thumbnail_url = '', poster_key = '', width = null, height = null;
+        if (file) {
+          if (!window.HshsStorage || !window.HshsStorage.upload) throw new Error('Cloudflare upload service unavailable');
+          const up = await window.HshsStorage.upload(file, { kind: file.type.indexOf('video/') === 0 ? 'video' : 'photo', onProgress: (info) => this.onFileProgress(info, 0) });
+          media_key = up.key || ''; width = Number(up.width) > 0 ? Number(up.width) : null; height = Number(up.height) > 0 ? Number(up.height) : null;
+          if (file.type.indexOf('video/') === 0) video_url = up.url; else { image_url = up.url; thumbnail_url = up.url; }
+        }
+        if (poster && window.HshsStorage) {
+          const up2 = window.HshsStorage.uploadAdmin ? await window.HshsStorage.uploadAdmin(poster, { onProgress: (info) => this.onFileProgress(info, 1) }) : await window.HshsStorage.upload(poster, { kind: 'photo', onProgress: (info) => this.onFileProgress(info, 1) });
+          poster_key = up2.key || ''; thumbnail_url = up2.url;
+        }
+        const feature = !!($('upFeature') && $('upFeature').checked);
+        const payload = { target, title: title || (target === 'posts' ? 'Untitled' : target === 'photos' ? 'Photo' : 'Video'), description, category, class_tag, media_key, image_url, video_url, thumbnail_url, poster_key, width, height, feature, status: target === 'posts' ? status : 'published', type: file && file.type.indexOf('video/') === 0 ? 'video' : 'photo' };
+        this.setProgress(97); if (progress) progress.set(97, 'Saving');
         if (!window.adminApi || typeof window.adminApi.createContent !== 'function') throw new Error('Admin API unavailable');
         const saved = await window.adminApi.createContent(payload);
         if (!saved) throw new Error('Worker did not return the saved record');
-        if (feature && saved.id) await window.adminApi.feature(saved.id, true, target);
-        this.setProgress(100);
-        progress.done('Done');
-        progress.hide();
+        this.setProgress(100); if (progress) { progress.done('Done'); progress.hide(); }
         if ($('upTitle')) $('upTitle').value = ''; if ($('upDesc')) $('upDesc').value = '';
         if ($('upFile')) $('upFile').value = ''; if ($('upPoster')) $('upPoster').value = '';
         if ($('upFeature')) $('upFeature').checked = false;
@@ -42,9 +183,7 @@
       } catch (e) {
         this.setFeedback('upFeedback', e.message || 'Could not save', false);
         if (progress && progress.fail) progress.fail(e.message || 'Could not save');
-      } finally {
-        this.busy = false; this.setProgress(null);
-      }
+      } finally { this.busy = false; this.setProgress(null); }
     }
 
     async loadRecentItems() {
