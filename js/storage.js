@@ -350,9 +350,17 @@
     var signTarget = r2.signUrl || "";
     if (signTarget && !/\/sign\/?$/i.test(signTarget)) signTarget = signTarget.replace(/\/$/, "") + "/sign";
     if (!signTarget) throw new Error("Cloudflare R2 is not configured. The file was not saved.");
+    var currentUser = g.auth && g.auth.currentUser;
+    if (!currentUser || currentUser.isAnonymous) {
+      throw new Error("Sign in with your school account before uploading.");
+    }
+    var idToken = await currentUser.getIdToken();
     var signRes = await fetch(signTarget, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + idToken
+      },
       body: JSON.stringify({ key: key, contentType: contentType, size: file && file.size }),
       signal: signal
     });
