@@ -43,7 +43,7 @@ def test_worker_partial_updates_are_whitelisted_and_preserve_fields():
 
 def test_worker_delete_cleans_media_and_feature_toggle_is_partial():
     source = read("worker/hshs-r2-sign.js")
-    assert "selectColumns = target === \"videos\" ? \"media_key,poster_key\" : \"media_key\"" in source
+    assert 'select("*").eq("id", id).single()' in source
     assert "bucket.delete(key)" in source
     assert 'await window.adminApi.updateContent' not in source
 
