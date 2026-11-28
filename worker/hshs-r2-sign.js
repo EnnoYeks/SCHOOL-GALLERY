@@ -33,71 +33,81 @@ export default {
     const url = new URL(request.url);
     const bucket = env.MEDIA_BUCKET || env.MEDIA || env.BUCKET || env.hshs_world_media;
     const isAdminRoute = url.pathname.startsWith("/admin/");
+    const origin = request.headers.get("Origin") || "";
+    const reply = (data, status = 200, admin = isAdminRoute) => json(data, status, admin, origin, env);
 
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers: cors(isAdminRoute) });
+      return new Response(null, { headers: cors(isAdminRoute, origin, env) });
     }
 
     if (url.pathname === "/" || url.pathname === "") {
-      return json({ ok: true, service: "hshs-r2-sign" }, 200, isAdminRoute);
+      return reply({ ok: true, service: "hshs-r2-sign" }, 200, isAdminRoute);
     }
 
     // Existing public routes
     if (url.pathname === "/list" && request.method === "GET") {
-      if (!bucket) return json({ error: "No R2 binding" }, 500);
+      const verified = await verifyFirebaseToken(request);
+      if (!verified.ok) return reply({ error: verified.error }, verified.status);
+      if (!isAdmin(verified, env)) return reply({ error: "Forbidden" }, 403);
+      if (!bucket) return reply({ error: "No R2 binding" }, 500);
       const requestedLimit = Number(url.searchParams.get("limit") || 100);
       const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(100, Math.floor(requestedLimit))) : 100;
       const prefix = url.searchParams.get("prefix") || undefined;
       const cursor = url.searchParams.get("cursor") || undefined;
       const listed = await bucket.list({ limit, prefix, cursor });
       const objects = (listed.objects || []).map(o => ({ key: o.key, size: o.size, uploaded: o.uploaded }));
-      return json({
-        objects,
-        truncated: !!listed.truncated,
-        cursor: listed.truncated ? (listed.cursor || null) : null
-      });
+      return reply({ objects, truncated: !!listed.truncated, cursor: listed.truncated ? (listed.cursor || null) : null });
     }
 
     if ((url.pathname === "/sign" || url.pathname === "/sign/") && request.method === "POST") {
-      if (!bucket) return json({ error: "No R2 binding" }, 500);
+      if (!bucket) return reply({ error: "No R2 binding" }, 500);
       const verified = await verifyFirebaseToken(request);
-      if (!verified.ok) return json({ error: verified.error }, verified.status);
+      if (!verified.ok) return reply({ error: verified.error }, verified.status);
       let body = {};
-      try { body = await request.json(); } catch (e) { return json({ error: "Invalid JSON" }, 400); }
-      const key = String(body.key || "").replace(/^\/+/, "");
+      try { body = await request.json(); } catch (e) { return reply({ error: "Invalid JSON" }, 400); }
+      const key = String(body.key || "").replace(/^\\/+/, "");
       const contentType = String(body.contentType || "");
       const size = Number(body.size);
-      if (!key || key.includes("..") || key.startsWith("admin/")) return json({ error: "Invalid key" }, 400);
+      if (!key || key.includes("..") || key.startsWith("admin/") || !isUserMediaKey(key)) return reply({ error: "Invalid key" }, 400);
       const isVideo = contentType === "video/mp4" || contentType === "video/webm";
       const isPhoto = ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(contentType);
-      if (!isVideo && !isPhoto) return json({ error: "Unsupported media type" }, 415);
+      if (!isVideo && !isPhoto) return reply({ error: "Unsupported media type" }, 415);
       const max = isVideo ? 104857600 : 52428800;
-      if (!Number.isFinite(size) || size <= 0 || size > max) return json({ error: "Invalid or oversized upload" }, 413);
-      const putUrl = url.origin + "/put?key=" + encodeURIComponent(key);
-      return json({ url: putUrl, putUrl, key });
+      if (!Number.isSafeInteger(size) || size <= 0 || size > max) return reply({ error: "Invalid or oversized upload" }, 413);
+      const canWrite = await assertCanWrite(bucket, verified.uid, key);
+      if (!canWrite.ok) return reply({ error: canWrite.error }, canWrite.status);
+      const putUrl = url.origin + "/put?key=" + encodeURIComponent(key) + "&size=" + encodeURIComponent(size) + "&contentType=" + encodeURIComponent(contentType);
+      return reply({ url: putUrl, putUrl, key });
     }
 
     if (url.pathname === "/put" && request.method === "PUT") {
-      if (!bucket) return json({ error: "No R2 binding" }, 500);
+      if (!bucket) return reply({ error: "No R2 binding" }, 500);
       const verified = await verifyFirebaseToken(request);
-      if (!verified.ok) return json({ error: verified.error }, verified.status);
-      const key = url.searchParams.get("key");
-      if (!key || key.includes("..") || key.startsWith("admin/")) return json({ error: "Invalid key" }, 400);
+      if (!verified.ok) return reply({ error: verified.error }, verified.status);
+      const key = url.searchParams.get("key") || "";
+      if (!key || key.includes("..") || key.startsWith("admin/") || !isUserMediaKey(key)) return reply({ error: "Invalid key" }, 400);
       const contentType = request.headers.get("content-type") || "application/octet-stream";
       const isVideo = contentType === "video/mp4" || contentType === "video/webm";
       const isPhoto = ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(contentType);
-      if (!isVideo && !isPhoto) return json({ error: "Unsupported media type" }, 415);
-      const declaredLen = Number(request.headers.get("content-length") || 0);
+      if (!isVideo && !isPhoto) return reply({ error: "Unsupported media type" }, 415);
+      const lengthHeader = request.headers.get("content-length");
+      if (!lengthHeader || !/^\\d+$/.test(lengthHeader)) return reply({ error: "Content-Length required" }, 411);
+      const declaredLen = Number(lengthHeader);
+      const expectedSize = Number(url.searchParams.get("size"));
+      const expectedType = url.searchParams.get("contentType") || "";
       const max = isVideo ? 104857600 : 52428800;
-      if (declaredLen > max) return json({ error: "File too large" }, 413);
-      await bucket.put(key, request.body, { httpMetadata: { contentType } });
-      return new Response(null, { status: 200, headers: cors(false) });
+      if (!Number.isSafeInteger(declaredLen) || declaredLen <= 0 || declaredLen > max) return reply({ error: "Invalid or oversized upload" }, 413);
+      if (declaredLen !== expectedSize || contentType !== expectedType) return reply({ error: "Upload does not match signed request" }, 400);
+      const canWrite = await assertCanWrite(bucket, verified.uid, key);
+      if (!canWrite.ok) return reply({ error: canWrite.error }, canWrite.status);
+      await bucket.put(key, request.body, { httpMetadata: { contentType }, customMetadata: { uid: verified.uid } });
+      return new Response(null, { status: 200, headers: cors(false, origin, env) });
     }
 
     // Admin routes
     if (isAdminRoute) {
       const verified = await verifyFirebaseToken(request);
-      if (!verified.ok) return json({ error: verified.error }, verified.status, true);
+      if (!verified.ok) return reply({ error: verified.error }, verified.status, true);
       const uid = verified.uid;
       if (!isAdmin(verified, env)) return json({ error: "Forbidden" }, 403, true);
 
@@ -153,7 +163,7 @@ export default {
         }
         const { error } = await sb.from("posts").delete().eq("id", id).eq("is_official", true);
         if (error) return json({ error: error.message }, 500, true);
-        return new Response(null, { status: 204, headers: cors(true) });
+        return new Response(null, { status: 204, headers: cors(true, origin, env) });
       }
 
       if (url.pathname === "/admin/upload" && request.method === "PUT") {
@@ -264,9 +274,20 @@ function isAllowedMediaRef(value) {
 function isAdmin(token, env) {
   const email = String(token && token.email || "").trim().toLowerCase();
   const allowEmails = String(env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-  if (token && token.emailVerified === true && email && allowEmails.includes(email)) return true;
-  const legacyUids = String(env.ADMIN_UIDS || "").split(",").map(s => s.trim()).filter(Boolean);
-  return !!(token && token.uid && legacyUids.includes(token.uid));
+  return !!(token && token.emailVerified === true && email && allowEmails.includes(email));
+}
+function isUserMediaKey(key) {
+  return /^(photos|videos|profiles|thumbnails|media)\\/[a-zA-Z0-9._/-]+$/.test(String(key || "")) && !String(key).includes("..");
+}
+async function assertCanWrite(bucket, uid, key) {
+  try {
+    const existing = await bucket.head(key);
+    if (existing && existing.customMetadata && existing.customMetadata.uid !== uid) return { ok: false, status: 403, error: "You do not own this media object." };
+    if (existing && (!existing.customMetadata || !existing.customMetadata.uid)) return { ok: false, status: 403, error: "Existing media ownership is unverified; overwrite blocked." };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, status: 503, error: "Unable to verify media ownership." };
+  }
 }
 
 function supabaseClient(env) {
@@ -474,7 +495,7 @@ async function verifyFirebaseToken(request) {
     if (header.alg !== "RS256") return { ok: false, status: 401, error: "Unsupported token algorithm" };
     if (payload.iss !== ISSUER || payload.aud !== PROJECT_ID) return { ok: false, status: 401, error: "Bad iss/aud" };
     if (!Number.isFinite(payload.exp) || payload.exp <= now) return { ok: false, status: 401, error: "Expired" };
-    if (!Number.isFinite(payload.iat) || payload.iat > now return { ok: false, status: 401, error: "Invalid issued-at time" };
+    if (!Number.isFinite(payload.iat) || payload.iat > now) return { ok: false, status: 401, error: "Invalid issued-at time" };
     if (!payload.sub || typeof payload.sub !== "string") return { ok: false, status: 401, error: "No sub" };
     if (payload.firebase && payload.firebase.sign_in_provider === "anonymous") return { ok: false, status: 401, error: "Anonymous not allowed" };
     let keys = await getGoogleCerts();
@@ -502,19 +523,22 @@ async function getGoogleCerts(force = false) {
   return keys;
 }
 
-function cors(admin = false) {
-  return {
-    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+function cors(admin = false, origin = "", env = {}) {
+  const configured = String(env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
+  const allowed = [ALLOWED_ORIGIN, ...configured];
+  const headers = {
     "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,Authorization",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
   };
+  if (origin && allowed.includes(origin)) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
 }
 
-function json(data, status = 200, admin = false) {
+function json(data, status = 200, admin = false, origin = "", env = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: Object.assign({ "Content-Type": "application/json" }, cors(admin))
+    headers: Object.assign({ "Content-Type": "application/json" }, cors(admin, origin, env))
   });
 }
