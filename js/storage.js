@@ -291,7 +291,7 @@
     try { options.onProgress(info); } catch (e) {}
   }
 
-  function putWithProgress(putUrl, file, contentType, onByte, signal) {
+  function putWithProgress(putUrl, file, contentType, onByte, signal, idToken) {
     return new Promise(function (resolve, reject) {
       if (signal && signal.aborted) {
         reject(Object.assign(new Error("Upload cancelled"), { name: "AbortError" }));
@@ -300,7 +300,7 @@
       if (typeof XMLHttpRequest !== "function") {
         fetch(putUrl, {
           method: "PUT",
-          headers: { "Content-Type": contentType || "application/octet-stream" },
+          headers: { "Content-Type": contentType || "application/octet-stream", "Authorization": "Bearer " + idToken },
           body: file,
           signal: signal
         }).then(function (put) {
@@ -328,6 +328,7 @@
       if (signal) signal.addEventListener("abort", onAbort);
       xhr.open("PUT", putUrl);
       xhr.setRequestHeader("Content-Type", contentType || "application/octet-stream");
+      xhr.setRequestHeader("Authorization", "Bearer " + idToken);
       if (xhr.upload && onByte) {
         xhr.upload.onprogress = function (ev) {
           var total = ev.lengthComputable && ev.total ? ev.total : ((file && file.size) || 0);
@@ -368,7 +369,7 @@
     var signed = await signRes.json();
     var putUrl = signed.url || signed.putUrl;
     if (!putUrl) throw new Error("Cloudflare R2 did not return an upload URL.");
-    await putWithProgress(putUrl, file, contentType, onByte, signal);
+    await putWithProgress(putUrl, file, contentType, onByte, signal, idToken);
     return { key: key, url: publicUrl(key) };
   }
 
