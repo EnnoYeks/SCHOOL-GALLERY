@@ -29,9 +29,9 @@
     loadCss('css/admin.css', '261029live2');
     loadCss('css/admin-media-manager.css', '261029live2');
     loadCss('css/admin-modern.css', '261126admin1');
-    await loadOnce(base() + 'js/admin.js?v=261029live2', 'hshs-leg-admin');
-    await loadOnce(base() + 'js/admin-media-manager.js?v=261029live2', 'hshs-admin-media-manager');
-    await loadOnce(base() + 'js/admin-modernize.js?v=261126admin1', 'hshs-admin-modernize');
+    await loadOnce(base() + 'js/admin.js?v=261128adminsecure1', 'hshs-leg-admin');
+    await loadOnce(base() + 'js/admin-media-manager.js?v=261128medsecure1', 'hshs-admin-media-manager');
+    await loadOnce(base() + 'js/admin-modernize.js?v=261128modernsecure1', 'hshs-admin-modernize');
     global['__hshs' + PAGE + 'Mounted'] = true;
     if (global.HshsRoute) global.HshsRoute.reveal();
   }
