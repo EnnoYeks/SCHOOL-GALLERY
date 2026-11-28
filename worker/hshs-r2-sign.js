@@ -456,10 +456,10 @@ function validatePost(body, partial = false) {
 function decodeBase64Url(input) {
   let s = String(input).replace(/-/g, "+").replace(/_/g, "/");
   s += "=".repeat((4 - (s.length % 4)) % 4);
-  return atob(s);
+  return Uint8Array.from(atob(s), c => c.charCodeAt(0));
 }
 function decodeJwtJson(segment) {
-  return JSON.parse(decodeBase64Url(segment));
+  return JSON.parse(new TextDecoder().decode(decodeBase64Url(segment)));
 }
 async function verifyFirebaseToken(request) {
   const auth = request.headers.get("Authorization") || "";
@@ -474,7 +474,7 @@ async function verifyFirebaseToken(request) {
     if (header.alg !== "RS256") return { ok: false, status: 401, error: "Unsupported token algorithm" };
     if (payload.iss !== ISSUER || payload.aud !== PROJECT_ID) return { ok: false, status: 401, error: "Bad iss/aud" };
     if (!Number.isFinite(payload.exp) || payload.exp <= now) return { ok: false, status: 401, error: "Expired" };
-    if (!Number.isFinite(payload.iat) || payload.iat > now + 60) return { ok: false, status: 401, error: "Invalid issued-at time" };
+    if (!Number.isFinite(payload.iat) || payload.iat > now return { ok: false, status: 401, error: "Invalid issued-at time" };
     if (!payload.sub || typeof payload.sub !== "string") return { ok: false, status: 401, error: "No sub" };
     if (payload.firebase && payload.firebase.sign_in_provider === "anonymous") return { ok: false, status: 401, error: "Anonymous not allowed" };
     let keys = await getGoogleCerts();
@@ -482,7 +482,7 @@ async function verifyFirebaseToken(request) {
     if (!jwk) { keys = await getGoogleCerts(true); jwk = keys.find(k => k.kid === header.kid); }
     if (!jwk) return { ok: false, status: 401, error: "Unknown kid" };
     const signingInput = new TextEncoder().encode(parts[0] + "." + parts[1]);
-    const signature = Uint8Array.from(decodeBase64Url(parts[2]), c => c.charCodeAt(0));
+    const signature = decodeBase64Url(parts[2]);
     const cryptoKey = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
     const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", cryptoKey, signature, signingInput);
     if (!valid) return { ok: false, status: 401, error: "Bad signature" };
@@ -498,7 +498,7 @@ async function getGoogleCerts(force = false) {
   const cacheControl = res.headers.get("Cache-Control") || "";
   const maxAgeMatch = cacheControl.match(/max-age=(\d+)/i);
   const maxAge = maxAgeMatch ? Number(maxAgeMatch[1]) : 3600;
-  certsCache = { keys, expires: Date.now() + Math.max(60, maxAge) * 1000 };
+  certsCache = { keys, expires: Date.now() + Math.max(0, maxAge) * 1000 };
   return keys;
 }
 
