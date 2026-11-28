@@ -223,7 +223,7 @@ class Database {
             return this.normalizeItem(row);
         } catch (error) {
             console.error("createPost failed:", error);
-            return null;
+            throw error;
         }
     }
 
@@ -256,7 +256,7 @@ class Database {
             return this.normalizeItem(row);
         } catch (error) {
             console.error("createPhoto failed:", error);
-            return null;
+            throw error;
         }
     }
 
@@ -292,7 +292,7 @@ class Database {
             return this.normalizeItem(row);
         } catch (error) {
             console.error("createVideo failed:", error);
-            return null;
+            throw error;
         }
     }
 

@@ -60,21 +60,36 @@ export default {
 
     if ((url.pathname === "/sign" || url.pathname === "/sign/") && request.method === "POST") {
       if (!bucket) return json({ error: "No R2 binding" }, 500);
+      const verified = await verifyFirebaseToken(request);
+      if (!verified.ok) return json({ error: verified.error }, verified.status);
       let body = {};
-      try { body = await request.json(); } catch (e) {}
+      try { body = await request.json(); } catch (e) { return json({ error: "Invalid JSON" }, 400); }
       const key = String(body.key || "").replace(/^\/+/, "");
-      if (!key) return json({ error: "Missing key" }, 400);
-      if (key.startsWith("admin/")) return json({ error: "Admin keys not allowed on /sign" }, 403);
+      const contentType = String(body.contentType || "");
+      const size = Number(body.size);
+      if (!key || key.includes("..") || key.startsWith("admin/")) return json({ error: "Invalid key" }, 400);
+      const isVideo = contentType === "video/mp4" || contentType === "video/webm";
+      const isPhoto = ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(contentType);
+      if (!isVideo && !isPhoto) return json({ error: "Unsupported media type" }, 415);
+      const max = isVideo ? 104857600 : 52428800;
+      if (!Number.isFinite(size) || size <= 0 || size > max) return json({ error: "Invalid or oversized upload" }, 413);
       const putUrl = url.origin + "/put?key=" + encodeURIComponent(key);
       return json({ url: putUrl, putUrl, key });
     }
 
     if (url.pathname === "/put" && request.method === "PUT") {
       if (!bucket) return json({ error: "No R2 binding" }, 500);
+      const verified = await verifyFirebaseToken(request);
+      if (!verified.ok) return json({ error: verified.error }, verified.status);
       const key = url.searchParams.get("key");
-      if (!key) return json({ error: "Missing key" }, 400);
-      if (key.startsWith("admin/")) return json({ error: "Admin keys not allowed on /put" }, 403);
+      if (!key || key.includes("..") || key.startsWith("admin/")) return json({ error: "Invalid key" }, 400);
       const contentType = request.headers.get("content-type") || "application/octet-stream";
+      const isVideo = contentType === "video/mp4" || contentType === "video/webm";
+      const isPhoto = ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(contentType);
+      if (!isVideo && !isPhoto) return json({ error: "Unsupported media type" }, 415);
+      const declaredLen = Number(request.headers.get("content-length") || 0);
+      const max = isVideo ? 104857600 : 52428800;
+      if (declaredLen > max) return json({ error: "File too large" }, 413);
       await bucket.put(key, request.body, { httpMetadata: { contentType } });
       return new Response(null, { status: 200, headers: cors(false) });
     }
@@ -438,12 +453,12 @@ async function getGoogleCerts() {
 }
 
 function cors(admin = false) {
-  const origin = admin ? ALLOWED_ORIGIN : "*";
   return {
-    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-    "Access-Control-Allow-Headers": admin ? "Content-Type,Authorization" : "Content-Type",
-    "Access-Control-Max-Age": "86400"
+    "Access-Control-Allow-Headers": "Content-Type,Authorization",
+    "Access-Control-Max-Age": "86400",
+    "Vary": "Origin"
   };
 }
 
