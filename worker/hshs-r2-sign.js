@@ -64,7 +64,7 @@ export default {
       if (!verified.ok) return json({ error: verified.error }, verified.status);
       let body = {};
       try { body = await request.json(); } catch (e) { return json({ error: "Invalid JSON" }, 400); }
-      const key = String(body.key || "").replace(/^\\/+/, "");
+      const key = String(body.key || "").replace(/^\/+/, "");
       const contentType = String(body.contentType || "");
       const size = Number(body.size);
       if (!key || key.includes("..") || key.startsWith("admin/")) return json({ error: "Invalid key" }, 400);
