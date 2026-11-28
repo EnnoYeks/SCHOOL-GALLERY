@@ -430,8 +430,8 @@
             var recordError = e && e.message ? e.message : 'Database error';
         }
         if (!saved) {
-            draft.uploadError = 'Upload failed, tap to retry';
-            progress.fail('Upload failed, tap to retry', function () { publish(); });
+            draft.uploadError = recordError ? ('Save failed: ' + recordError) : 'Upload failed, tap to retry';
+            progress.fail(recordError ? ('Save failed: ' + recordError) : 'Upload failed, tap to retry', function () { publish(); });
             render();
             return;
         }
