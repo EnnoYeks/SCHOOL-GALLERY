@@ -1,13 +1,13 @@
 /**
  * HSHS World — R2 + Admin Worker
  * Binding: MEDIA_BUCKET (hshs-world-media)
- * Vars: ADMIN_UIDS (comma list), SUPABASE_URL
+ * Vars: ADMIN_EMAILS (comma list), SUPABASE_URL, ALLOWED_ORIGINS (optional comma list)
  * Secret: SUPABASE_SERVICE_ROLE_KEY
  *
  * Existing routes kept working:
- *   POST /sign, PUT /put, GET /list, GET /
+ *   POST /sign (Firebase auth), PUT /put (Firebase auth + object ownership), GET /list (admin only), GET /
  *
- * New admin routes (require verified Firebase ID token + uid in ADMIN_UIDS):
+ * New admin routes (require verified Firebase ID token + verified email in ADMIN_EMAILS):
  *   GET    /admin/me
  *   GET    /admin/posts
  *   POST   /admin/posts
@@ -33,91 +33,101 @@ export default {
     const url = new URL(request.url);
     const bucket = env.MEDIA_BUCKET || env.MEDIA || env.BUCKET || env.hshs_world_media;
     const isAdminRoute = url.pathname.startsWith("/admin/");
+    const origin = request.headers.get("Origin") || "";
+    const reply = (data, status = 200, admin = isAdminRoute) => json(data, status, admin, origin, env);
 
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers: cors(isAdminRoute) });
+      return new Response(null, { headers: cors(isAdminRoute, origin, env) });
     }
 
     if (url.pathname === "/" || url.pathname === "") {
-      return json({ ok: true, service: "hshs-r2-sign" }, 200, isAdminRoute);
+      return reply({ ok: true, service: "hshs-r2-sign" }, 200, isAdminRoute);
     }
 
     // Existing public routes
     if (url.pathname === "/list" && request.method === "GET") {
-      if (!bucket) return json({ error: "No R2 binding" }, 500);
+      const verified = await verifyFirebaseToken(request);
+      if (!verified.ok) return reply({ error: verified.error }, verified.status);
+      if (!isAdmin(verified, env)) return reply({ error: "Forbidden" }, 403);
+      if (!bucket) return reply({ error: "No R2 binding" }, 500);
       const requestedLimit = Number(url.searchParams.get("limit") || 100);
       const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(100, Math.floor(requestedLimit))) : 100;
       const prefix = url.searchParams.get("prefix") || undefined;
       const cursor = url.searchParams.get("cursor") || undefined;
       const listed = await bucket.list({ limit, prefix, cursor });
       const objects = (listed.objects || []).map(o => ({ key: o.key, size: o.size, uploaded: o.uploaded }));
-      return json({
-        objects,
-        truncated: !!listed.truncated,
-        cursor: listed.truncated ? (listed.cursor || null) : null
-      });
+      return reply({ objects, truncated: !!listed.truncated, cursor: listed.truncated ? (listed.cursor || null) : null });
     }
 
     if ((url.pathname === "/sign" || url.pathname === "/sign/") && request.method === "POST") {
-      if (!bucket) return json({ error: "No R2 binding" }, 500);
+      if (!bucket) return reply({ error: "No R2 binding" }, 500);
       const verified = await verifyFirebaseToken(request);
-      if (!verified.ok) return json({ error: verified.error }, verified.status);
+      if (!verified.ok) return reply({ error: verified.error }, verified.status);
       let body = {};
-      try { body = await request.json(); } catch (e) { return json({ error: "Invalid JSON" }, 400); }
+      try { body = await request.json(); } catch (e) { return reply({ error: "Invalid JSON" }, 400); }
       const key = String(body.key || "").replace(/^\/+/, "");
       const contentType = String(body.contentType || "");
       const size = Number(body.size);
-      if (!key || key.includes("..") || key.startsWith("admin/")) return json({ error: "Invalid key" }, 400);
+      if (!key || key.includes("..") || key.startsWith("admin/") || !isUserMediaKey(key)) return reply({ error: "Invalid key" }, 400);
       const isVideo = contentType === "video/mp4" || contentType === "video/webm";
       const isPhoto = ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(contentType);
-      if (!isVideo && !isPhoto) return json({ error: "Unsupported media type" }, 415);
+      if (!isVideo && !isPhoto) return reply({ error: "Unsupported media type" }, 415);
       const max = isVideo ? 104857600 : 52428800;
-      if (!Number.isFinite(size) || size <= 0 || size > max) return json({ error: "Invalid or oversized upload" }, 413);
-      const putUrl = url.origin + "/put?key=" + encodeURIComponent(key);
-      return json({ url: putUrl, putUrl, key });
+      if (!Number.isSafeInteger(size) || size <= 0 || size > max) return reply({ error: "Invalid or oversized upload" }, 413);
+      const canWrite = await assertCanWrite(bucket, verified.uid, key);
+      if (!canWrite.ok) return reply({ error: canWrite.error }, canWrite.status);
+      const putUrl = url.origin + "/put?key=" + encodeURIComponent(key) + "&size=" + encodeURIComponent(size) + "&contentType=" + encodeURIComponent(contentType);
+      return reply({ url: putUrl, putUrl, key });
     }
 
     if (url.pathname === "/put" && request.method === "PUT") {
-      if (!bucket) return json({ error: "No R2 binding" }, 500);
+      if (!bucket) return reply({ error: "No R2 binding" }, 500);
       const verified = await verifyFirebaseToken(request);
-      if (!verified.ok) return json({ error: verified.error }, verified.status);
-      const key = url.searchParams.get("key");
-      if (!key || key.includes("..") || key.startsWith("admin/")) return json({ error: "Invalid key" }, 400);
+      if (!verified.ok) return reply({ error: verified.error }, verified.status);
+      const key = url.searchParams.get("key") || "";
+      if (!key || key.includes("..") || key.startsWith("admin/") || !isUserMediaKey(key)) return reply({ error: "Invalid key" }, 400);
       const contentType = request.headers.get("content-type") || "application/octet-stream";
       const isVideo = contentType === "video/mp4" || contentType === "video/webm";
       const isPhoto = ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(contentType);
-      if (!isVideo && !isPhoto) return json({ error: "Unsupported media type" }, 415);
-      const declaredLen = Number(request.headers.get("content-length") || 0);
+      if (!isVideo && !isPhoto) return reply({ error: "Unsupported media type" }, 415);
+      const lengthHeader = request.headers.get("content-length");
+      if (!lengthHeader || !/^\d+$/.test(lengthHeader)) return reply({ error: "Content-Length required" }, 411);
+      const declaredLen = Number(lengthHeader);
+      const expectedSize = Number(url.searchParams.get("size"));
+      const expectedType = url.searchParams.get("contentType") || "";
       const max = isVideo ? 104857600 : 52428800;
-      if (declaredLen > max) return json({ error: "File too large" }, 413);
-      await bucket.put(key, request.body, { httpMetadata: { contentType } });
-      return new Response(null, { status: 200, headers: cors(false) });
+      if (!Number.isSafeInteger(declaredLen) || declaredLen <= 0 || declaredLen > max) return reply({ error: "Invalid or oversized upload" }, 413);
+      if (declaredLen !== expectedSize || contentType !== expectedType) return reply({ error: "Upload does not match signed request" }, 400);
+      const canWrite = await assertCanWrite(bucket, verified.uid, key);
+      if (!canWrite.ok) return reply({ error: canWrite.error }, canWrite.status);
+      await bucket.put(key, request.body, { httpMetadata: { contentType }, customMetadata: { uid: verified.uid } });
+      return new Response(null, { status: 200, headers: cors(false, origin, env) });
     }
 
     // Admin routes
     if (isAdminRoute) {
       const verified = await verifyFirebaseToken(request);
-      if (!verified.ok) return json({ error: verified.error }, verified.status, true);
+      if (!verified.ok) return reply({ error: verified.error }, verified.status, true);
       const uid = verified.uid;
-      if (!isAdmin(uid, env)) return json({ error: "Forbidden" }, 403, true);
+      if (!isAdmin(verified, env)) return reply({ error: "Forbidden" }, 403, true);
 
       const sb = supabaseClient(env);
 
       if (url.pathname === "/admin/me" && request.method === "GET") {
-        return json({ uid, admin: true }, 200, true);
+        return reply({ uid, email: verified.email, admin: true }, 200, true);
       }
 
       if (url.pathname === "/admin/posts" && request.method === "GET") {
         const { data, error } = await sb.from("posts").select("*").eq("is_official", true).order("created_at", { ascending: false });
-        if (error) return json({ error: error.message }, 500, true);
-        return json({ posts: data || [] }, 200, true);
+        if (error) return reply({ error: error.message }, 500, true);
+        return reply({ posts: data || [] }, 200, true);
       }
 
       if (url.pathname === "/admin/posts" && request.method === "POST") {
         let body = {};
         try { body = await request.json(); } catch (e) {}
         const validation = validatePost(body);
-        if (!validation.ok) return json({ error: validation.error }, 400, true);
+        if (!validation.ok) return reply({ error: validation.error }, 400, true);
         const payload = {
           ...validation.data,
           author_id: uid,
@@ -126,8 +136,8 @@ export default {
           updated_at: new Date().toISOString()
         };
         const { data, error } = await sb.from("posts").insert(payload).select().single();
-        if (error) return json({ error: error.message }, 500, true);
-        return json(data, 201, true);
+        if (error) return reply({ error: error.message }, 500, true);
+        return reply(data, 201, true);
       }
 
       const postIdMatch = url.pathname.match(/^\/admin\/posts\/([^/]+)$/);
@@ -136,12 +146,13 @@ export default {
         let body = {};
         try { body = await request.json(); } catch (e) {}
         const validation = validatePost(body, true);
-        if (!validation.ok) return json({ error: validation.error }, 400, true);
+        if (!validation.ok) return reply({ error: validation.error }, 400, true);
         const patch = { ...validation.data, updated_at: new Date().toISOString() };
         delete patch.author_id; delete patch.author_role; delete patch.is_official;
         const { data, error } = await sb.from("posts").update(patch).eq("id", id).eq("is_official", true).select().single();
-        if (error) return json({ error: error.message }, 500, true);
-        return json(data, 200, true);
+        if (error) return reply({ error: error.message }, error.code === "PGRST116" ? 404 : 500, true);
+        if (!data) return reply({ error: "Post not found" }, 404, true);
+        return reply(data, 200, true);
       }
 
       if (postIdMatch && request.method === "DELETE") {
@@ -151,51 +162,52 @@ export default {
           try { await bucket.delete(row.media_key); } catch (e) {}
         }
         const { error } = await sb.from("posts").delete().eq("id", id).eq("is_official", true);
-        if (error) return json({ error: error.message }, 500, true);
-        return new Response(null, { status: 204, headers: cors(true) });
+        if (error) return reply({ error: error.message }, 500, true);
+        return new Response(null, { status: 204, headers: cors(true, origin, env) });
       }
 
       if (url.pathname === "/admin/upload" && request.method === "PUT") {
-        if (!bucket) return json({ error: "No R2 binding" }, 500, true);
+        if (!bucket) return reply({ error: "No R2 binding" }, 500, true);
         const contentType = request.headers.get("content-type") || "";
         const contentLength = Number(request.headers.get("content-length") || 0);
         const kind = contentType.startsWith("video/") ? "video" : "photo";
         const max = kind === "video" ? 104857600 : 52428800;
-        if (contentLength > max) return json({ error: "File too large" }, 413, true);
+        if (!request.headers.get("content-length") || !/^\\d+$/.test(request.headers.get("content-length"))) return reply({ error: "Content-Length required" }, 411, true);
+        if (contentLength <= 0 || contentLength > max) return reply({ error: "File too large or invalid size" }, 413, true);
         const allowed = kind === "video" ? ["video/mp4", "video/webm"] : ["image/jpeg", "image/png", "image/webp"];
-        if (!allowed.includes(contentType)) return json({ error: "Unsupported type" }, 415, true);
+        if (!allowed.includes(contentType)) return reply({ error: "Unsupported type" }, 415, true);
         const ext = contentType.split("/")[1] || "bin";
         const key = "admin/" + uid + "/" + crypto.randomUUID() + "." + ext;
-        await bucket.put(key, request.body, { httpMetadata: { contentType } });
-        return json({ key }, 200, true);
+        await bucket.put(key, request.body, { httpMetadata: { contentType }, customMetadata: { uid } });
+        return reply({ key }, 200, true);
       }
 
       if (url.pathname === "/admin/feature" && request.method === "POST") {
         let body = {};
         try { body = await request.json(); } catch (e) {}
         const { id, featured, col } = body;
-        if (!id || !ALLOWED.has(col)) return json({ error: "Invalid feature request" }, 400, true);
+        if (!id || !ALLOWED.has(col)) return reply({ error: "Invalid feature request" }, 400, true);
         const patch = featured ? { featured: true, featured_at: new Date().toISOString() } : { featured: false, featured_at: null };
         const { error } = await sb.from(col).update(patch).eq("id", id);
-        if (error) return json({ error: error.message }, 500, true);
-        return json({ ok: true }, 200, true);
+        if (error) return reply({ error: error.message }, 500, true);
+        return reply({ ok: true }, 200, true);
       }
 
       if (url.pathname === "/admin/events" && request.method === "POST") {
         let body = {};
         try { body = await request.json(); } catch (e) {}
-        if (!body.title || !body.date) return json({ error: "Title and date required" }, 400, true);
+        if (!body.title || !body.date) return reply({ error: "Title and date required" }, 400, true);
         const { data, error } = await sb.from("events").insert({ title: body.title, date: body.date, location: body.location || "" }).select().single();
-        if (error) return json({ error: error.message }, 500, true);
-        return json(data, 201, true);
+        if (error) return reply({ error: error.message }, 500, true);
+        return reply(data, 201, true);
       }
 
       const eventIdMatch = url.pathname.match(/^\/admin\/events\/([^/]+)$/);
       if (eventIdMatch && request.method === "DELETE") {
         const id = eventIdMatch[1];
         const { error } = await sb.from("events").delete().eq("id", id);
-        if (error) return json({ error: error.message }, 500, true);
-        return new Response(null, { status: 204, headers: cors(true) });
+        if (error) return reply({ error: error.message }, 500, true);
+        return new Response(null, { status: 204, headers: cors(true, origin, env) });
       }
 
       // Unified content routes used by admin-api.js (posts | photos | videos)
@@ -203,45 +215,49 @@ export default {
         let body = {};
         try { body = await request.json(); } catch (e) {}
         const target = String(body.target || "posts");
-        if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
+        if (!ALLOWED.has(target)) return reply({ error: "Invalid target" }, 400, true);
         const row = contentPayload(body, target, uid);
-        if (!row.ok) return json({ error: row.error }, 400, true);
+        if (!row.ok) return reply({ error: row.error }, 400, true);
         const { data, error } = await sb.from(target).insert(row.data).select().single();
-        if (error) return json({ error: error.message || "Insert failed" }, 500, true);
-        if (body.feature && data && data.id) {
-          const patch = { featured: true, featured_at: new Date().toISOString() };
-          await sb.from(target).update(patch).eq("id", data.id).single().catch(() => {});
-        }
-        return json(data, 201, true);
+        if (error) return reply({ error: error.message || "Insert failed" }, 500, true);
+        return reply(data, 201, true);
       }
 
       const contentMatch = url.pathname.match(/^\/admin\/content\/([^/]+)\/([^/]+)$/);
       if (contentMatch && request.method === "PATCH") {
         const target = contentMatch[1];
         const id = contentMatch[2];
-        if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
+        if (!ALLOWED.has(target)) return reply({ error: "Invalid target" }, 400, true);
         let body = {};
         try { body = await request.json(); } catch (e) {}
         const row = contentPayload(body, target, uid, true);
-        if (!row.ok) return json({ error: row.error }, 400, true);
+        if (!row.ok) return reply({ error: row.error }, 400, true);
         const { data, error } = await sb.from(target).update(row.data).eq("id", id).single();
-        if (error) return json({ error: error.message || "Update failed" }, 500, true);
-        return json(data, 200, true);
+        if (error) return reply({ error: error.message || "Update failed" }, error.code === "PGRST116" ? 404 : 500, true);
+        if (!data) return reply({ error: "Content not found" }, 404, true);
+        return reply(data, 200, true);
       }
 
       if (contentMatch && request.method === "DELETE") {
         const target = contentMatch[1];
         const id = contentMatch[2];
-        if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
+        if (!ALLOWED.has(target)) return reply({ error: "Invalid target" }, 400, true);
+        const { data: row, error: readError } = await sb.from(target).select("*").eq("id", id).single();
+        if (readError) return reply({ error: readError.message || "Lookup failed" }, 500, true);
+        if (row && bucket) {
+          for (const key of [row.media_key, row.poster_key].filter(Boolean)) {
+            try { await bucket.delete(key); } catch (deleteError) { console.warn("R2 cleanup failed", deleteError && deleteError.message); }
+          }
+        }
         const { error } = await sb.from(target).delete().eq("id", id);
-        if (error) return json({ error: error.message || "Delete failed" }, 500, true);
-        return new Response(null, { status: 204, headers: cors(true) });
+        if (error) return reply({ error: error.message || "Delete failed" }, 500, true);
+        return new Response(null, { status: 204, headers: cors(true, origin, env) });
       }
 
-      return json({ error: "Not found" }, 404, true);
+      return reply({ error: "Not found" }, 404, true);
     }
 
-    return json({ error: "Not found" }, 404);
+    return reply({ error: "Not found" }, 404);
   }
 };
 
@@ -256,9 +272,23 @@ function isAllowedMediaRef(value) {
   return /^\/assets\/[a-z0-9._/-]+$/i.test(ref) && !ref.includes("..");
 }
 
-function isAdmin(uid, env) {
-  const list = String(env.ADMIN_UIDS || "").split(",").map(s => s.trim()).filter(Boolean);
-  return list.includes(uid);
+function isAdmin(token, env) {
+  const email = String(token && token.email || "").trim().toLowerCase();
+  const allowEmails = String(env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+  return !!(token && token.emailVerified === true && email && allowEmails.includes(email));
+}
+function isUserMediaKey(key) {
+  return /^(photos|videos|profiles|thumbnails|media)\/[a-zA-Z0-9._/-]+$/.test(String(key || "")) && !String(key).includes("..");
+}
+async function assertCanWrite(bucket, uid, key) {
+  try {
+    const existing = await bucket.head(key);
+    if (existing && existing.customMetadata && existing.customMetadata.uid !== uid) return { ok: false, status: 403, error: "You do not own this media object." };
+    if (existing && (!existing.customMetadata || !existing.customMetadata.uid)) return { ok: false, status: 403, error: "Existing media ownership is unverified; overwrite blocked." };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, status: 503, error: "Unable to verify media ownership." };
+  }
 }
 
 function supabaseClient(env) {
@@ -272,6 +302,7 @@ function supabaseClient(env) {
           return {
             eq(col, val) { this._eq = { col, val }; return this; },
             order(col, opts) { this._order = { col, opts }; return this; },
+            single() { this._single = true; return this; },
             async then(resolve) {
               const q = new URL(url + "/rest/v1/" + table);
               q.searchParams.set("select", cols || "*");
@@ -281,7 +312,8 @@ function supabaseClient(env) {
                 headers: { apikey: key, Authorization: "Bearer " + key, "Content-Type": "application/json" }
               });
               const data = await res.json();
-              resolve({ data, error: res.ok ? null : data });
+              const normalized = this._single ? (Array.isArray(data) ? (data[0] || null) : data) : data;
+              resolve({ data: normalized, error: res.ok ? null : data });
             }
           };
         },
@@ -337,6 +369,42 @@ function supabaseClient(env) {
 
 
 function contentPayload(body, target, uid, partial = false) {
+  if (partial) {
+    const data = {};
+    const fields = ["title", "description", "category", "class_tag", "image_url", "thumbnail_url", "video_url", "media_key", "width", "height", "featured"];
+    for (const field of fields) {
+      if (!Object.prototype.hasOwnProperty.call(body, field)) continue;
+      if (field === "title") data.title = String(body.title ?? "").slice(0, 200);
+      else if (field === "description") data.description = String(body.description ?? "").slice(0, 2000);
+      else if (field === "category") data.category = String(body.category ?? "").slice(0, 40);
+      else if (field === "class_tag") data.class_tag = String(body.class_tag ?? "").slice(0, 40);
+      else if (field === "image_url" || field === "thumbnail_url" || field === "video_url") {
+        const ref = String(body[field] ?? "").slice(0, 1000);
+        if (!isAllowedMediaRef(ref)) return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
+        data[field] = ref;
+        if (field === "image_url") data.image = ref;
+      } else if (field === "media_key") {
+        const key = String(body.media_key ?? "").slice(0, 500);
+        if (key && (/^(blob:|data:|https?:)/i.test(key) || key.startsWith("/") || key.includes(".."))) return { ok: false, error: "media_key must be a relative R2 object key." };
+        data.media_key = key;
+        if (key) data.media_provider = "cloudflare-r2";
+      } else if (field === "width" || field === "height") {
+        const n = Number(body[field]);
+        if (!Number.isSafeInteger(n) || n <= 0) return { ok: false, error: "Invalid media dimensions" };
+        data[field] = n;
+      } else if (field === "featured") {
+        if (typeof body.featured !== "boolean") return { ok: false, error: "featured must be boolean" };
+        data.featured = body.featured;
+      }
+    }
+    if (target === "posts" && Object.prototype.hasOwnProperty.call(body, "status")) {
+      if (!["draft", "published"].includes(body.status)) return { ok: false, error: "Invalid status" };
+      data.status = body.status;
+    }
+    data.updated_at = new Date().toISOString();
+    return { ok: true, data };
+  }
+
   const title = String(body.title || "").slice(0, 200);
   const description = String(body.description || "").slice(0, 2000);
   const category = String(body.category || "events").slice(0, 40);
@@ -346,76 +414,75 @@ function contentPayload(body, target, uid, partial = false) {
   const video_url = String(body.video_url || "").slice(0, 1000);
   const thumbnail_url = String(body.thumbnail_url || image_url || "").slice(0, 1000);
   const media_key = String(body.media_key || body.mediaKey || "").slice(0, 500);
-  if (![image_url, thumbnail_url, video_url].every(isAllowedMediaRef)) {
-    return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
-  }
-  if (media_key && (/^(blob:|data:|https?:)/i.test(media_key) || media_key.startsWith("/") || media_key.includes(".."))) {
-    return { ok: false, error: "media_key must be a relative R2 object key." };
-  }
+  const poster_key = String(body.poster_key || "").slice(0, 500);
+  if (poster_key && (/^(blob:|data:|https?:)/i.test(poster_key) || poster_key.startsWith("/") || poster_key.includes(".."))) return { ok: false, error: "poster_key must be a relative R2 object key." };
+  if (![image_url, thumbnail_url, video_url].every(isAllowedMediaRef)) return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
+  if (media_key && (/^(blob:|data:|https?:)/i.test(media_key) || media_key.startsWith("/") || media_key.includes(".."))) return { ok: false, error: "media_key must be a relative R2 object key." };
   const width = Number.isSafeInteger(Number(body.width)) && Number(body.width) > 0 ? Number(body.width) : null;
   const height = Number.isSafeInteger(Number(body.height)) && Number(body.height) > 0 ? Number(body.height) : null;
-  if (!partial && target === "photos" && !image_url && !media_key) return { ok: false, error: "Photo requires media" };
-  if (!partial && target === "videos" && !video_url && !media_key) return { ok: false, error: "Video requires media" };
-  if (!partial && target === "posts" && !description && !image_url && !media_key) return { ok: false, error: "Description or media required" };
-  const data = {
-    title: title || (target === "photos" ? "Photo" : target === "videos" ? "Video" : "Untitled"),
-    description,
-    category,
-    class_tag,
-    image: image_url,
-    image_url,
-    thumbnail_url,
-    media_key,
-    media_provider: media_key ? "cloudflare-r2" : null,
-    width,
-    height,
-    author: body.author || "HSHS Admin",
-    author_id: uid,
-    updated_at: new Date().toISOString()
-  };
-  if (target === "posts") {
-    data.type = type;
-    data.status = ["draft", "published"].includes(body.status) ? body.status : "published";
-    data.is_official = true;
-    data.author_role = "admin";
-  }
-  if (target === "videos") {
-    data.video_url = video_url;
-    data.type = "video";
-  }
-  if (body.feature) data.featured = true;
+  if (target === "photos" && !image_url && !media_key) return { ok: false, error: "Photo requires media" };
+  if (target === "videos" && !video_url && !media_key) return { ok: false, error: "Video requires media" };
+  if (target === "posts" && !description && !image_url && !media_key) return { ok: false, error: "Description or media required" };
+  const data = { title: title || (target === "photos" ? "Photo" : target === "videos" ? "Video" : "Untitled"), description, category, class_tag, image: image_url, image_url, thumbnail_url, media_key, media_provider: media_key ? "cloudflare-r2" : null, width, height, author: body.author || "HSHS Admin", author_id: uid, updated_at: new Date().toISOString() };
+  if (poster_key) data.poster_key = poster_key;
+  if (target === "posts") { data.type = type; data.status = ["draft", "published"].includes(body.status) ? body.status : "published"; data.is_official = true; data.author_role = "admin"; }
+  if (target === "videos") { data.video_url = video_url; data.type = "video"; }
+  if (body.feature) { data.featured = true; data.featured_at = new Date().toISOString(); }
   return { ok: true, data };
 }
 
 function validatePost(body, partial = false) {
+  if (partial) {
+    const data = {};
+    const fields = ["title", "description", "category", "class_tag", "status", "image_url", "thumbnail_url", "video_url", "media_key", "width", "height", "featured"];
+    for (const field of fields) {
+      if (!Object.prototype.hasOwnProperty.call(body, field)) continue;
+      if (field === "status") {
+        if (!["draft", "published"].includes(body.status)) return { ok: false, error: "Invalid status" };
+        data.status = body.status;
+      } else if (field === "title") data.title = String(body.title ?? "").slice(0, 200);
+      else if (field === "description") data.description = String(body.description ?? "").slice(0, 2000);
+      else if (field === "category") data.category = String(body.category ?? "").slice(0, 40);
+      else if (field === "class_tag") data.class_tag = String(body.class_tag ?? "").slice(0, 40);
+      else if (["image_url", "thumbnail_url", "video_url"].includes(field)) {
+        const ref = String(body[field] ?? "").slice(0, 1000);
+        if (!isAllowedMediaRef(ref)) return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
+        data[field] = ref;
+      } else if (field === "media_key") {
+        const key = String(body.media_key ?? "").slice(0, 500);
+        if (key && (/^(blob:|data:|https?:)/i.test(key) || key.startsWith("/") || key.includes(".."))) return { ok: false, error: "media_key must be a relative R2 object key." };
+        data.media_key = key;
+        if (key) data.media_provider = "cloudflare-r2";
+      } else if (field === "width" || field === "height") {
+        const n = Number(body[field]);
+        if (!Number.isSafeInteger(n) || n <= 0) return { ok: false, error: "Invalid media dimensions" };
+        data[field] = n;
+      } else if (field === "featured") {
+        if (typeof body.featured !== "boolean") return { ok: false, error: "featured must be boolean" };
+        data.featured = body.featured;
+      }
+    }
+    data.updated_at = new Date().toISOString();
+    return { ok: true, data };
+  }
   const title = String(body.title || "").slice(0, 200);
   const description = String(body.description || "").slice(0, 2000);
   const status = body.status || "draft";
   if (!["draft", "published"].includes(status)) return { ok: false, error: "Invalid status" };
-  if (![body.image_url, body.thumbnail_url].every(isAllowedMediaRef)) {
-    return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
-  }
-  if (body.media_key && (/^(blob:|data:|https?:)/i.test(String(body.media_key)) || String(body.media_key).startsWith("/") || String(body.media_key).includes(".."))) {
-    return { ok: false, error: "media_key must be a relative R2 object key." };
-  }
-  if (!partial && !description && !body.media_key && !body.image_url) return { ok: false, error: "Description or media required" };
-  if (title.length > 200) return { ok: false, error: "Title too long" };
-  return {
-    ok: true,
-    data: {
-      title: title || "Untitled",
-      description,
-      type: body.type || "photo",
-      image_url: body.image_url || "",
-      thumbnail_url: body.thumbnail_url || body.image_url || "",
-      media_key: body.media_key || "",
-      media_provider: body.media_key ? "cloudflare-r2" : null,
-      status,
-      author: body.author || "HSHS Admin"
-    }
-  };
+  if (![body.image_url, body.thumbnail_url].every(isAllowedMediaRef)) return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
+  if (body.media_key && (/^(blob:|data:|https?:)/i.test(String(body.media_key)) || String(body.media_key).startsWith("/") || String(body.media_key).includes(".."))) return { ok: false, error: "media_key must be a relative R2 object key." };
+  if (!description && !body.media_key && !body.image_url) return { ok: false, error: "Description or media required" };
+  return { ok: true, data: { title: title || "Untitled", description, type: body.type || "photo", image_url: body.image_url || "", thumbnail_url: body.thumbnail_url || body.image_url || "", media_key: body.media_key || "", media_provider: body.media_key ? "cloudflare-r2" : null, status, author: body.author || "HSHS Admin" } };
 }
 
+function decodeBase64Url(input) {
+  let s = String(input).replace(/-/g, "+").replace(/_/g, "/");
+  s += "=".repeat((4 - (s.length % 4)) % 4);
+  return Uint8Array.from(atob(s), c => c.charCodeAt(0));
+}
+function decodeJwtJson(segment) {
+  return JSON.parse(new TextDecoder().decode(decodeBase64Url(segment)));
+}
 async function verifyFirebaseToken(request) {
   const auth = request.headers.get("Authorization") || "";
   if (!auth.startsWith("Bearer ")) return { ok: false, status: 401, error: "Missing token" };
@@ -423,48 +490,56 @@ async function verifyFirebaseToken(request) {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return { ok: false, status: 401, error: "Invalid token" };
-    const header = JSON.parse(atob(parts[0].replace(/-/g, "+").replace(/_/g, "/")));
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    const header = decodeJwtJson(parts[0]);
+    const payload = decodeJwtJson(parts[1]);
+    const now = Math.floor(Date.now() / 1000);
+    if (header.alg !== "RS256") return { ok: false, status: 401, error: "Unsupported token algorithm" };
     if (payload.iss !== ISSUER || payload.aud !== PROJECT_ID) return { ok: false, status: 401, error: "Bad iss/aud" };
-    if (payload.exp * 1000 < Date.now()) return { ok: false, status: 401, error: "Expired" };
-    if (!payload.sub) return { ok: false, status: 401, error: "No sub" };
+    if (!Number.isFinite(payload.exp) || payload.exp <= now) return { ok: false, status: 401, error: "Expired" };
+    if (!Number.isFinite(payload.iat) || payload.iat > now) return { ok: false, status: 401, error: "Invalid issued-at time" };
+    if (!payload.sub || typeof payload.sub !== "string") return { ok: false, status: 401, error: "No sub" };
     if (payload.firebase && payload.firebase.sign_in_provider === "anonymous") return { ok: false, status: 401, error: "Anonymous not allowed" };
-    // Signature verification with Google certs
-    const keys = await getGoogleCerts();
-    const key = keys[header.kid];
-    if (!key) return { ok: false, status: 401, error: "Unknown kid" };
-    const data = new TextEncoder().encode(parts[0] + "." + parts[1]);
-    const sig = Uint8Array.from(atob(parts[2].replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
-    const cryptoKey = await crypto.subtle.importKey("jwk", key, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
-    const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", cryptoKey, sig, data);
+    let keys = await getGoogleCerts();
+    let jwk = keys.find(k => k.kid === header.kid);
+    if (!jwk) { keys = await getGoogleCerts(true); jwk = keys.find(k => k.kid === header.kid); }
+    if (!jwk) return { ok: false, status: 401, error: "Unknown kid" };
+    const signingInput = new TextEncoder().encode(parts[0] + "." + parts[1]);
+    const signature = decodeBase64Url(parts[2]);
+    const cryptoKey = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+    const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", cryptoKey, signature, signingInput);
     if (!valid) return { ok: false, status: 401, error: "Bad signature" };
-    return { ok: true, uid: payload.sub };
-  } catch (e) {
-    return { ok: false, status: 401, error: "Token verify failed" };
-  }
+    return { ok: true, uid: payload.sub, email: payload.email || "", emailVerified: payload.email_verified === true };
+  } catch (e) { return { ok: false, status: 401, error: "Token verify failed" }; }
 }
-
-async function getGoogleCerts() {
-  if (certsCache.keys && Date.now() < certsCache.expires) return certsCache.keys;
-  const res = await fetch("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com");
-  const keys = await res.json();
-  certsCache = { keys, expires: Date.now() + 3600000 };
+async function getGoogleCerts(force = false) {
+  if (!force && certsCache.keys && Date.now() < certsCache.expires) return certsCache.keys;
+  const res = await fetch("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com");
+  if (!res.ok) throw new Error("Google JWK fetch failed");
+  const json = await res.json();
+  const keys = Array.isArray(json.keys) ? json.keys : [];
+  const cacheControl = res.headers.get("Cache-Control") || "";
+  const maxAgeMatch = cacheControl.match(/max-age=(\d+)/i);
+  const maxAge = maxAgeMatch ? Number(maxAgeMatch[1]) : 3600;
+  certsCache = { keys, expires: Date.now() + Math.max(0, maxAge) * 1000 };
   return keys;
 }
 
-function cors(admin = false) {
-  return {
-    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+function cors(admin = false, origin = "", env = {}) {
+  const configured = String(env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
+  const allowed = [ALLOWED_ORIGIN, ...configured];
+  const headers = {
     "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,Authorization",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
   };
+  if (origin && allowed.includes(origin)) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
 }
 
-function json(data, status = 200, admin = false) {
+function json(data, status = 200, admin = false, origin = "", env = {}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: Object.assign({ "Content-Type": "application/json" }, cors(admin))
+    headers: Object.assign({ "Content-Type": "application/json" }, cors(admin, origin, env))
   });
 }

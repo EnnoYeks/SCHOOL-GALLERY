@@ -232,7 +232,12 @@
         var url = base + "/list?limit=" + encodeURIComponent(limit);
         if (prefix) url += "&prefix=" + encodeURIComponent(prefix);
         if (cursor) url += "&cursor=" + encodeURIComponent(cursor);
-        var res = await fetch(url, { method: "GET" });
+        var headers = {};
+        var listUser = g.auth && g.auth.currentUser;
+        if (listUser && !listUser.isAnonymous) {
+          try { headers.Authorization = "Bearer " + await listUser.getIdToken(); } catch (e) {}
+        }
+        var res = await fetch(url, { method: "GET", headers: headers });
         if (!res.ok) throw new Error("List failed " + res.status);
         var data = await res.json();
         var raw = Array.isArray(data) ? data : (data.objects || data.items || []);

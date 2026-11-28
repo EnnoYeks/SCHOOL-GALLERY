@@ -219,6 +219,7 @@
   }
   function mount() {
     var panels = document.getElementById('adminPanels');
+    if (!global.adminDashboard || global.adminDashboard.isAdmin !== true) return false;
     if (!panels || !panels.querySelector('.admin-welcome')) return false;
     if (document.getElementById('hshsMediaManager')) return true;
     panels.insertAdjacentHTML('beforeend', rootMarkup());

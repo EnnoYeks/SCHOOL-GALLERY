@@ -1,6 +1,6 @@
 /* HSHS World · Admin workspace tabs + selected-file preview */
 (function(){'use strict';if(window.__hshsAdminWorkspace)return;window.__hshsAdminWorkspace=true;
-function boot(){const p=document.getElementById('adminPanels');if(!p||!document.getElementById('adminUploadForm')||p.querySelector('.admin-control-nav'))return false;
+function boot(){const p=document.getElementById('adminPanels');if(!window.adminDashboard||window.adminDashboard.isAdmin!==true)return false;if(!p||!document.getElementById('adminUploadForm')||p.querySelector('.admin-control-nav'))return false;
 const upload=document.getElementById('adminUploadForm').closest('section'),work=p.querySelector('.admin-work-grid'),featured=work&&Array.from(work.children).find(x=>x.querySelector('#recentItems')),events=work&&Array.from(work.children).find(x=>x.querySelector('#adminEventForm')),official=document.getElementById('officialList')?.closest('section'),library=document.getElementById('hshsMediaManager'),stats=p.querySelector('.admin-stat-grid');
 if(!upload||!featured||!events||!official||!library)return false;
 const nav=document.createElement('nav');nav.className='admin-control-nav';nav.setAttribute('aria-label','Admin workspaces');nav.innerHTML=[['overview','▦','Overview'],['create','＋','Create'],['featured','★','Featured'],['events','▦','Calendar'],['library','▧','Media library'],['official','✦','Official']].map(([id,icon,label])=>'<button type="button" data-admin-tab="'+id+'" aria-selected="false"><span aria-hidden="true">'+icon+'</span>'+label+'</button>').join('');

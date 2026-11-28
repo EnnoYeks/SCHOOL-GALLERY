@@ -1,5 +1,4 @@
 // HSHS World — Admin control room
-// TEMP: OPEN_ACCESS so home content can be managed while roles are wired.
 
 (function () {
   'use strict';
@@ -11,38 +10,39 @@
   ];
   const CLASSES = ['Campus', 'S1', 'S2', 'S3', 'S4', 'S5', 'S6'];
   const $ = (id) => document.getElementById(id);
-  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'})[c]);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  const safeMediaUrl = (v) => { const s = String(v || '').trim(); if (/^https:\/\/pub-cf880c90c5ff4ca697baac59284a6024\.r2\.dev\/[\w./-]+$/i.test(s) && !s.includes('..')) return s; if (/^\/assets\/[\w./-]+$/i.test(s) && !s.includes('..')) return s; return ''; };
 
   class AdminDashboard {
     constructor() {
-      this.busy = false; this.items = []; this.official = []; this.isAdmin = false; this.openAccess = false; this.uploadTarget = 'posts';
+      this.busy = false; this.items = []; this.official = []; this.isAdmin = false; this.authListenerBound = false; this.uploadTarget = 'posts';
       this.init();
     }
 
     async init() {
-      const OPEN_ACCESS = true;
       const ready = await this.waitForAuth();
-      if (!ready && !OPEN_ACCESS) {
-        this.showLock('Sign in required', 'Please sign in to access the control room.', '/login/');
-        return;
-      }
+      if (!ready) { this.showLock('Sign in required', 'Please sign in to access the control room.', '/login/'); return; }
+      await this.waitForAdminApi();
       this.isAdmin = false;
       try {
-        if (window.adminApi && window.adminApi.me) {
-          const me = await window.adminApi.me();
-          this.isAdmin = !!(me && me.admin);
-        }
+        if (!window.adminApi || typeof window.adminApi.me !== 'function') throw new Error('Admin verification service unavailable');
+        const me = await window.adminApi.me();
+        this.isAdmin = !!(me && me.admin === true);
       } catch (e) { this.isAdmin = false; }
-      if (OPEN_ACCESS) {
-        this.isAdmin = true;
-        this.openAccess = true;
-      }
-      if (!this.isAdmin) {
-        this.showLock('You do not have permission', 'This area is for admins only.', null);
-        return;
-      }
+      if (!this.isAdmin) { this.showLock('You do not have permission', 'This area is for admins only.', null); return; }
       this.render(); this.bind();
       await Promise.all([this.loadRecentItems(), this.loadEventsList(), this.loadOfficialPosts()]);
+    }
+
+    waitForAdminApi() {
+      return new Promise((resolve) => {
+        const started = Date.now();
+        (function check() {
+          if (window.adminApi && typeof window.adminApi.me === 'function') return resolve(true);
+          if (Date.now() - started >= 3000) return resolve(false);
+          setTimeout(check, 50);
+        })();
+      });
     }
 
     waitForAuth() {
@@ -68,7 +68,7 @@
     render() {
       const panels = $('adminPanels'); if (!panels) return;
       panels.innerHTML = [
-        '<header class="admin-welcome"><div><p class="admin-eyebrow">HSHS WORLD · CONTROL ROOM</p><h1>Home & content control</h1><p class="admin-muted">Upload to Gallery, pin Featured Today, and manage events. ' + (this.openAccess ? '<span style="color:#fbbf24">Open access is on for now.</span>' : '') + '</p></div>',
+        '<header class="admin-welcome"><div><p class="admin-eyebrow">HSHS WORLD · CONTROL ROOM</p><h1>Home & content control</h1><p class="admin-muted">Upload to Gallery, pin Featured Today, and manage events.</p></div>',
         '<button class="admin-btn admin-btn-quiet" id="adminRefresh" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button></header>',
         '<section class="admin-stat-grid">',
         '<article class="admin-stat"><p>Posts</p><strong id="adminPostCount">0</strong><small>Latest</small></article>',
@@ -122,6 +122,17 @@
     }
 
     bind() {
+      if (!this.authListenerBound) {
+        this.authListenerBound = true;
+        document.addEventListener('hshs:auth', () => {
+          if (!window.hshsAuthUser) {
+            this.isAdmin = false;
+            this.showLock('Sign in required', 'Please sign in to access the control room.', '/login/');
+            return;
+          }
+          this.init();
+        });
+      }
       $('adminRefresh') && $('adminRefresh').addEventListener('click', () => this.init());
       $('pinBtn') && $('pinBtn').addEventListener('click', () => this.pinItem(true));
       $('unpinBtn') && $('unpinBtn').addEventListener('click', () => this.pinItem(false));
@@ -201,41 +212,9 @@
         };
         this.setProgress(97);
         progress.set(97, 'Saving');
-        let saved = null;
-        try {
-          if (window.adminApi && window.adminApi.createContent) {
-            saved = await window.adminApi.createContent(payload);
-          }
-        } catch (apiErr) {
-          console.warn('[admin] Worker createContent failed, local path', apiErr);
-        }
-        if (!saved && window.db) {
-          const common = {
-            title: payload.title,
-            description: payload.description,
-            category: payload.category,
-            classTag: payload.class_tag,
-            image: payload.image_url || '',
-            imageUrl: payload.image_url || '',
-            thumbnailUrl: payload.thumbnail_url || payload.image_url || '',
-            videoUrl: payload.video_url || '',
-            mediaKey: payload.media_key || '',
-            mediaProvider: 'cloudflare-r2',
-            width: payload.width,
-            height: payload.height,
-            type: payload.type
-          };
-          if (target === 'photos') saved = await window.db.createPhoto(common);
-          else if (target === 'videos') saved = await window.db.createVideo(common);
-          else saved = await window.db.createPost(Object.assign({}, common, { status: payload.status }));
-          if (feature && saved && saved.id) {
-            try {
-              if (window.adminApi && window.adminApi.feature) await window.adminApi.feature(saved.id, true, target);
-              else if (window.supabase) await window.supabase.from(target).update({ featured: true, featured_at: new Date().toISOString() }).eq('id', saved.id);
-            } catch (fe) {}
-          }
-        }
-        if (!saved) throw new Error('Could not save content');
+        if (!window.adminApi || typeof window.adminApi.createContent !== 'function') throw new Error('Admin API unavailable');
+        const saved = await window.adminApi.createContent(payload);
+        if (!saved) throw new Error('Worker did not return the saved record');
         this.setProgress(100);
         progress.done('Done');
         progress.hide();
@@ -272,7 +251,7 @@
         if (!this.items.length) { box.innerHTML = '<div class="admin-empty">No content yet.</div>'; return; }
         box.innerHTML = this.items.map(it => {
           const pinned = !!it.featured;
-          const media = it.image_url || it.imageUrl || it.thumbnail_url || it.image || '';
+          const media = safeMediaUrl(it.image_url || it.imageUrl || it.thumbnail_url || it.image || '');
           return '<article class="admin-item-row" data-id="' + esc(it.id) + '" data-col="' + it._col + '">' +
             (media ? '<span class="admin-type-icon" style="background-image:url(\'' + esc(media) + '\');background-size:cover"></span>' :
               '<span class="admin-type-icon"><i class="fa-solid ' + (it._col === 'videos' ? 'fa-film' : 'fa-image') + '"></i></span>') +
@@ -299,22 +278,8 @@
       if (!id || !ALLOWED.has(col) || this.busy) return;
       this.busy = true;
       try {
-        let ok = false;
-        try {
-          if (window.adminApi && window.adminApi.feature) {
-            await window.adminApi.feature(id, featured, col);
-            ok = true;
-          }
-        } catch (e1) {}
-        if (!ok && window.supabase) {
-          const patch = featured
-            ? { featured: true, featured_at: new Date().toISOString() }
-            : { featured: false, featured_at: null };
-          const { error } = await window.supabase.from(col).update(patch).eq('id', id);
-          if (error) throw error;
-          ok = true;
-        }
-        if (!ok) throw new Error('Could not pin — sign in and try again');
+        if (!window.adminApi || typeof window.adminApi.feature !== 'function') throw new Error('Admin API unavailable');
+        await window.adminApi.feature(id, featured, col);
         await this.loadRecentItems();
         this.setFeedback('adminFeedback', featured ? 'Pinned on Home' : 'Removed from Home', true);
       } catch (e) { this.setFeedback('adminFeedback', e.message || 'Could not update', false); }
@@ -328,12 +293,8 @@
       const description = prompt('Description / caption', (it && (it.description || it.caption)) || '');
       if (description == null) return;
       try {
-        if (window.adminApi && window.adminApi.updateContent) {
-          await window.adminApi.updateContent(col, id, { title: title.trim().slice(0, 200), description: description.trim().slice(0, 2000) });
-        } else if (window.supabase) {
-          const { error } = await window.supabase.from(col).update({ title: title.trim().slice(0, 200), description: description.trim().slice(0, 2000) }).eq('id', id);
-          if (error) throw error;
-        }
+        if (!window.adminApi || typeof window.adminApi.updateContent !== 'function') throw new Error('Admin API unavailable');
+        await window.adminApi.updateContent(col, id, { title: title.trim().slice(0, 200), description: description.trim().slice(0, 2000) });
         await this.loadRecentItems();
         this.setFeedback('upFeedback', 'Updated for home', true);
       } catch (e) {
@@ -344,12 +305,8 @@
     async deleteItem(id, col) {
       if (!confirm('Delete this item from the site?')) return;
       try {
-        if (window.adminApi && window.adminApi.deleteContent) {
-          await window.adminApi.deleteContent(col, id);
-        } else if (window.supabase) {
-          const { error } = await window.supabase.from(col).delete().eq('id', id);
-          if (error) throw error;
-        }
+        if (!window.adminApi || typeof window.adminApi.deleteContent !== 'function') throw new Error('Admin API unavailable');
+        await window.adminApi.deleteContent(col, id);
         await this.loadRecentItems();
         this.setFeedback('upFeedback', 'Deleted', true);
       } catch (e) {
@@ -364,12 +321,8 @@
       if (!title || !date || this.busy) return;
       this.busy = true;
       try {
-        if (window.adminApi && window.adminApi.createEvent) {
-          await window.adminApi.createEvent({ title, date, location: place });
-        } else if (window.supabase) {
-          const { error } = await window.supabase.from('events').insert({ title, date, location: place });
-          if (error) throw error;
-        }
+        if (!window.adminApi || typeof window.adminApi.createEvent !== 'function') throw new Error('Admin API unavailable');
+        await window.adminApi.createEvent({ title, date, location: place });
         if ($('evTitle')) $('evTitle').value = ''; if ($('evDate')) $('evDate').value = ''; if ($('evPlace')) $('evPlace').value = '';
         await this.loadEventsList(); this.setFeedback('adminFeedback', 'Event added', true);
       } catch (e) { this.setFeedback('adminFeedback', e.message || 'Could not add event', false); }
@@ -389,10 +342,10 @@
           btn.addEventListener('click', async () => {
             if (!confirm('Delete this event?')) return;
             try {
-              if (window.adminApi && window.adminApi.deleteEvent) await window.adminApi.deleteEvent(btn.dataset.id);
-              else if (window.supabase) await window.supabase.from('events').delete().eq('id', btn.dataset.id);
+              if (!window.adminApi || typeof window.adminApi.deleteEvent !== 'function') throw new Error('Admin API unavailable');
+              await window.adminApi.deleteEvent(btn.dataset.id);
               await this.loadEventsList();
-            } catch (e) {}
+            } catch (e) { this.setFeedback('adminFeedback', e.message || 'Could not delete event', false); }
           });
         });
       } catch (e) { box.innerHTML = '<div class="admin-empty">Could not load events.</div>'; }

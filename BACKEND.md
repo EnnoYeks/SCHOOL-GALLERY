@@ -118,7 +118,13 @@ firebase deploy --only firestore
 
 ---
 
-## 2. Security model
+## 2. Admin Worker security
+
+Admin access is decided exclusively by the Cloudflare Worker after Firebase ID-token signature verification. Set the Worker variable `ADMIN_EMAILS` to a comma-separated list of verified admin email addresses (trimmed, case-insensitive). The Worker requires `email_verified=true`. `ADMIN_UIDS` is not supported; authorization requires a verified email listed in `ADMIN_EMAILS`. Required Worker config: `ADMIN_EMAILS`, `SUPABASE_URL`, optional comma-separated `ALLOWED_ORIGINS`, secret `SUPABASE_SERVICE_ROLE_KEY`, and R2 binding `MEDIA_BUCKET`. Never place admin addresses or service-role secrets in client code.
+
+All admin writes to posts/photos/videos/events must go through Worker `/admin/*` endpoints. The browser must not fall back to direct Supabase writes. Apply `supabase-migration-admin-lockdown.sql` only after reviewing current RLS policies; it has not been run against production.
+
+## 3. Security model
 
 `firestore.rules` uses `request.auth.uid` as identity.
 
@@ -131,7 +137,7 @@ firebase deploy --only firestore
 
 ---
 
-## 3. Quick verification
+## 4. Quick verification
 
 - [ ] Email and Google sign-in enabled in Firebase
 - [ ] Rules + indexes deployed
