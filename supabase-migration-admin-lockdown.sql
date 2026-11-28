@@ -8,6 +8,8 @@ alter table public.photos enable row level security;
 alter table public.videos enable row level security;
 alter table public.events enable row level security;
 
+grant select on public.posts, public.photos, public.videos, public.events to anon, authenticated;
+
 drop policy if exists "HSHS public posts read" on public.posts;
 create policy "HSHS public posts read"
   on public.posts for select to anon, authenticated
@@ -31,26 +33,40 @@ create policy "HSHS public events read"
 -- Events are read-only to browser roles. Admin event writes are Worker/service-role only.
 revoke insert, update, delete on public.events from anon, authenticated;
 
--- Column-level revokes are defense-in-depth. The trigger below also protects these
--- fields even if a role already has table-level UPDATE privileges.
-revoke update (featured, featured_at, is_official, author_role)
-  on public.posts from anon, authenticated;
-revoke update (featured, featured_at, is_official, author_role)
-  on public.photos from anon, authenticated;
-revoke update (featured, featured_at, is_official, author_role)
-  on public.videos from anon, authenticated;
+-- Column revokes are dynamic because deployments may not have every admin field
+-- on each media table. The trigger below remains the enforcement backstop.
+do $$
+declare
+  tbl text;
+  cols text;
+begin
+  foreach tbl in array array['posts','photos','videos'] loop
+    select string_agg(quote_ident(column_name), ', ')
+      into cols
+      from information_schema.columns
+      where table_schema = 'public'
+        and table_name = tbl
+        and column_name in ('featured','featured_at','is_official','author_role');
+    if cols is not null then
+      execute format('revoke update (%s) on public.%I from anon, authenticated', cols, tbl);
+    end if;
+  end loop;
+end $$;
 
 create or replace function public.hshs_block_browser_admin_column_changes()
 returns trigger
 language plpgsql
 set search_path = pg_catalog, public
 as $$
+declare
+  old_values jsonb := to_jsonb(old);
+  new_values jsonb := to_jsonb(new);
 begin
   if current_user not in ('service_role', 'postgres', 'supabase_admin') and (
-    new.featured is distinct from old.featured
-    or new.featured_at is distinct from old.featured_at
-    or new.is_official is distinct from old.is_official
-    or new.author_role is distinct from old.author_role
+    new_values -> 'featured' is distinct from old_values -> 'featured'
+    or new_values -> 'featured_at' is distinct from old_values -> 'featured_at'
+    or new_values -> 'is_official' is distinct from old_values -> 'is_official'
+    or new_values -> 'author_role' is distinct from old_values -> 'author_role'
   ) then
     raise exception 'Admin-only content fields cannot be changed by browser roles'
       using errcode = '42501';
