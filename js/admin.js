@@ -150,31 +150,64 @@
       const description = (($('upDesc') && $('upDesc').value) || '').trim();
       const category = ($('upCategory') && $('upCategory').value) || 'events';
       const class_tag = ($('upClass') && $('upClass').value) || 'Campus';
+      const feature = !!($('upFeature') && $('upFeature').checked);
       const file = $('upFile') && $('upFile').files && $('upFile').files[0];
       const poster = $('upPoster') && $('upPoster').files && $('upPoster').files[0];
       if (target === 'photos' && !file) { this.setFeedback('upFeedback', 'Photo requires an image (jpeg, png, webp)', false); return; }
       if (target === 'videos' && !file) { this.setFeedback('upFeedback', 'Video requires mp4 or webm', false); return; }
+      if (target === 'posts' && !description && !file) { this.setFeedback('upFeedback', 'Add text or media', false); return; }
       if (this.busy) return;
-      this.busy = true; const progress = window.HshsUploadProgress;
+      this.busy = true; this.setFeedback('upFeedback', 'Uploading…');
+      var files = [file, poster].filter(Boolean);
+      var fileCount = Math.max(1, files.length);
+      var progress = window.HshsLoading && HshsLoading.show
+        ? HshsLoading.show({ size: 'md', message: 'Preparing', percent: 0, cancelable: false })
+        : { set: function (p) { this.setProgress && this.setProgress(p); }.bind(this), done: function () {}, fail: function () {}, hide: function () {} };
       try {
-        let media_key = '', image_url = '', video_url = '', thumbnail_url = '', poster_key = '', width = null, height = null;
-        if (file) {
-          if (!window.HshsStorage || !window.HshsStorage.upload) throw new Error('Cloudflare upload service unavailable');
-          const up = await window.HshsStorage.upload(file, { kind: file.type.indexOf('video/') === 0 ? 'video' : 'photo', onProgress: (info) => this.onFileProgress(info, 0) });
-          media_key = up.key || ''; width = Number(up.width) > 0 ? Number(up.width) : null; height = Number(up.height) > 0 ? Number(up.height) : null;
+        let media_key = '', image_url = '', video_url = '', thumbnail_url = '', poster_key = '';
+        let width = null, height = null;
+        var fileIndex = 0;
+        function onFileProgress(info, index) {
+          var local = Number(info && info.percent) || 0;
+          var overall = Math.round(((index - 1) + (local / 100)) / fileCount * 96);
+          var label = fileCount > 1
+            ? 'File ' + index + ' of ' + fileCount + ' - ' + local + '%'
+            : (window.HshsLoading && HshsLoading.stageWord ? HshsLoading.stageWord(info && info.stage) : 'Uploading');
+          progress.set(overall, label);
+          this.setProgress(overall);
+        }
+        if (file && window.HshsStorage) {
+          fileIndex += 1;
+          const up = window.HshsStorage.uploadAdmin
+            ? await window.HshsStorage.uploadAdmin(file, { onProgress: function (info) { onFileProgress.call(this, info, fileIndex); }.bind(this) })
+            : await window.HshsStorage.upload(file, { kind: file.type.indexOf('video/') === 0 ? 'video' : 'photo', onProgress: function (info) { onFileProgress.call(this, info, fileIndex); }.bind(this) });
+          media_key = up.key || '';
+          width = Number(up.width) > 0 ? Number(up.width) : null;
+          height = Number(up.height) > 0 ? Number(up.height) : null;
           if (file.type.indexOf('video/') === 0) video_url = up.url; else { image_url = up.url; thumbnail_url = up.url; }
         }
         if (poster && window.HshsStorage) {
-          const up2 = window.HshsStorage.uploadAdmin ? await window.HshsStorage.uploadAdmin(poster, { onProgress: (info) => this.onFileProgress(info, 1) }) : await window.HshsStorage.upload(poster, { kind: 'photo', onProgress: (info) => this.onFileProgress(info, 1) });
+          fileIndex += 1;
+          const up2 = window.HshsStorage.uploadAdmin
+            ? await window.HshsStorage.uploadAdmin(poster, { onProgress: function (info) { onFileProgress.call(this, info, fileIndex); }.bind(this) })
+            : await window.HshsStorage.upload(poster, { kind: 'photo', onProgress: function (info) { onFileProgress.call(this, info, fileIndex); }.bind(this) });
           poster_key = up2.key || ''; thumbnail_url = up2.url;
         }
-        const feature = !!($('upFeature') && $('upFeature').checked);
-        const payload = { target, title: title || (target === 'posts' ? 'Untitled' : target === 'photos' ? 'Photo' : 'Video'), description, category, class_tag, media_key, image_url, video_url, thumbnail_url, poster_key, width, height, feature, status: target === 'posts' ? status : 'published', type: file && file.type.indexOf('video/') === 0 ? 'video' : 'photo' };
-        this.setProgress(97); if (progress) progress.set(97, 'Saving');
+        const payload = {
+          target, title: title || (target === 'posts' ? 'Untitled' : target === 'photos' ? 'Photo' : 'Video'),
+          description, category, class_tag, media_key, image_url, video_url, thumbnail_url, poster_key, width, height, feature,
+          status: target === 'posts' ? status : 'published',
+          type: file && file.type.indexOf('video/') === 0 ? 'video' : 'photo'
+        };
+        this.setProgress(97);
+        progress.set(97, 'Saving');
         if (!window.adminApi || typeof window.adminApi.createContent !== 'function') throw new Error('Admin API unavailable');
         const saved = await window.adminApi.createContent(payload);
         if (!saved) throw new Error('Worker did not return the saved record');
-        this.setProgress(100); if (progress) { progress.done('Done'); progress.hide(); }
+        if (feature && saved.id) await window.adminApi.feature(saved.id, true, target);
+        this.setProgress(100);
+        progress.done('Done');
+        progress.hide();
         if ($('upTitle')) $('upTitle').value = ''; if ($('upDesc')) $('upDesc').value = '';
         if ($('upFile')) $('upFile').value = ''; if ($('upPoster')) $('upPoster').value = '';
         if ($('upFeature')) $('upFeature').checked = false;
@@ -183,7 +216,9 @@
       } catch (e) {
         this.setFeedback('upFeedback', e.message || 'Could not save', false);
         if (progress && progress.fail) progress.fail(e.message || 'Could not save');
-      } finally { this.busy = false; this.setProgress(null); }
+      } finally {
+        this.busy = false; this.setProgress(null);
+      }
     }
 
     async loadRecentItems() {
