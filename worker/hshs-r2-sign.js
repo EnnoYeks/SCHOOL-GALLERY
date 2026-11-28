@@ -231,8 +231,7 @@ export default {
         const target = contentMatch[1];
         const id = contentMatch[2];
         if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
-        const selectColumns = target === "videos" ? "media_key,poster_key" : "media_key";
-        const { data: row, error: readError } = await sb.from(target).select(selectColumns).eq("id", id).single();
+        const { data: row, error: readError } = await sb.from(target).select("*").eq("id", id).single();
         if (readError) return json({ error: readError.message || "Lookup failed" }, 500, true);
         if (row && bucket) {
           for (const key of [row.media_key, row.poster_key].filter(Boolean)) {
