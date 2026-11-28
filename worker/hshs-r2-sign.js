@@ -1,13 +1,13 @@
 /**
  * HSHS World — R2 + Admin Worker
  * Binding: MEDIA_BUCKET (hshs-world-media)
- * Vars: ADMIN_UIDS (comma list), SUPABASE_URL
+ * Vars: ADMIN_EMAILS (comma list), SUPABASE_URL
  * Secret: SUPABASE_SERVICE_ROLE_KEY
  *
  * Existing routes kept working:
  *   POST /sign, PUT /put, GET /list, GET /
  *
- * New admin routes (require verified Firebase ID token + uid in ADMIN_UIDS):
+ * New admin routes (require verified Firebase ID token + verified email in ADMIN_EMAILS):
  *   GET    /admin/me
  *   GET    /admin/posts
  *   POST   /admin/posts
@@ -99,12 +99,12 @@ export default {
       const verified = await verifyFirebaseToken(request);
       if (!verified.ok) return json({ error: verified.error }, verified.status, true);
       const uid = verified.uid;
-      if (!isAdmin(uid, env)) return json({ error: "Forbidden" }, 403, true);
+      if (!isAdmin(verified, env)) return json({ error: "Forbidden" }, 403, true);
 
       const sb = supabaseClient(env);
 
       if (url.pathname === "/admin/me" && request.method === "GET") {
-        return json({ uid, admin: true }, 200, true);
+        return json({ uid, email: verified.email, admin: true }, 200, true);
       }
 
       if (url.pathname === "/admin/posts" && request.method === "GET") {
@@ -226,6 +226,7 @@ export default {
         if (!row.ok) return json({ error: row.error }, 400, true);
         const { data, error } = await sb.from(target).update(row.data).eq("id", id).single();
         if (error) return json({ error: error.message || "Update failed" }, 500, true);
+        if (!data) return json({ error: "Content not found" }, 404, true);
         return json(data, 200, true);
       }
 
@@ -233,6 +234,13 @@ export default {
         const target = contentMatch[1];
         const id = contentMatch[2];
         if (!ALLOWED.has(target)) return json({ error: "Invalid target" }, 400, true);
+        const { data: row, error: readError } = await sb.from(target).select("media_key,poster_key").eq("id", id).single();
+        if (readError) return json({ error: readError.message || "Lookup failed" }, 500, true);
+        if (row && bucket) {
+          for (const key of [row.media_key, row.poster_key].filter(Boolean)) {
+            try { await bucket.delete(key); } catch (deleteError) { console.warn("R2 cleanup failed", deleteError && deleteError.message); }
+          }
+        }
         const { error } = await sb.from(target).delete().eq("id", id);
         if (error) return json({ error: error.message || "Delete failed" }, 500, true);
         return new Response(null, { status: 204, headers: cors(true) });
@@ -256,9 +264,12 @@ function isAllowedMediaRef(value) {
   return /^\/assets\/[a-z0-9._/-]+$/i.test(ref) && !ref.includes("..");
 }
 
-function isAdmin(uid, env) {
-  const list = String(env.ADMIN_UIDS || "").split(",").map(s => s.trim()).filter(Boolean);
-  return list.includes(uid);
+function isAdmin(token, env) {
+  const email = String(token && token.email || "").trim().toLowerCase();
+  const allowEmails = String(env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+  if (token && token.emailVerified === true && email && allowEmails.includes(email)) return true;
+  const legacyUids = String(env.ADMIN_UIDS || "").split(",").map(s => s.trim()).filter(Boolean);
+  return !!(token && token.uid && legacyUids.includes(token.uid));
 }
 
 function supabaseClient(env) {
@@ -337,6 +348,42 @@ function supabaseClient(env) {
 
 
 function contentPayload(body, target, uid, partial = false) {
+  if (partial) {
+    const data = {};
+    const fields = ["title", "description", "category", "class_tag", "image_url", "thumbnail_url", "video_url", "media_key", "width", "height", "featured"];
+    for (const field of fields) {
+      if (!Object.prototype.hasOwnProperty.call(body, field)) continue;
+      if (field === "title") data.title = String(body.title ?? "").slice(0, 200);
+      else if (field === "description") data.description = String(body.description ?? "").slice(0, 2000);
+      else if (field === "category") data.category = String(body.category ?? "").slice(0, 40);
+      else if (field === "class_tag") data.class_tag = String(body.class_tag ?? "").slice(0, 40);
+      else if (field === "image_url" || field === "thumbnail_url" || field === "video_url") {
+        const ref = String(body[field] ?? "").slice(0, 1000);
+        if (!isAllowedMediaRef(ref)) return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
+        data[field] = ref;
+        if (field === "image_url") data.image = ref;
+      } else if (field === "media_key") {
+        const key = String(body.media_key ?? "").slice(0, 500);
+        if (key && (/^(blob:|data:|https?:)/i.test(key) || key.startsWith("/") || key.includes(".."))) return { ok: false, error: "media_key must be a relative R2 object key." };
+        data.media_key = key;
+        if (key) data.media_provider = "cloudflare-r2";
+      } else if (field === "width" || field === "height") {
+        const n = Number(body[field]);
+        if (!Number.isSafeInteger(n) || n <= 0) return { ok: false, error: "Invalid media dimensions" };
+        data[field] = n;
+      } else if (field === "featured") {
+        if (typeof body.featured !== "boolean") return { ok: false, error: "featured must be boolean" };
+        data.featured = body.featured;
+      }
+    }
+    if (target === "posts" && Object.prototype.hasOwnProperty.call(body, "status")) {
+      if (!["draft", "published"].includes(body.status)) return { ok: false, error: "Invalid status" };
+      data.status = body.status;
+    }
+    data.updated_at = new Date().toISOString();
+    return { ok: true, data };
+  }
+
   const title = String(body.title || "").slice(0, 200);
   const description = String(body.description || "").slice(0, 2000);
   const category = String(body.category || "events").slice(0, 40);
@@ -346,76 +393,72 @@ function contentPayload(body, target, uid, partial = false) {
   const video_url = String(body.video_url || "").slice(0, 1000);
   const thumbnail_url = String(body.thumbnail_url || image_url || "").slice(0, 1000);
   const media_key = String(body.media_key || body.mediaKey || "").slice(0, 500);
-  if (![image_url, thumbnail_url, video_url].every(isAllowedMediaRef)) {
-    return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
-  }
-  if (media_key && (/^(blob:|data:|https?:)/i.test(media_key) || media_key.startsWith("/") || media_key.includes(".."))) {
-    return { ok: false, error: "media_key must be a relative R2 object key." };
-  }
+  if (![image_url, thumbnail_url, video_url].every(isAllowedMediaRef)) return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
+  if (media_key && (/^(blob:|data:|https?:)/i.test(media_key) || media_key.startsWith("/") || media_key.includes(".."))) return { ok: false, error: "media_key must be a relative R2 object key." };
   const width = Number.isSafeInteger(Number(body.width)) && Number(body.width) > 0 ? Number(body.width) : null;
   const height = Number.isSafeInteger(Number(body.height)) && Number(body.height) > 0 ? Number(body.height) : null;
-  if (!partial && target === "photos" && !image_url && !media_key) return { ok: false, error: "Photo requires media" };
-  if (!partial && target === "videos" && !video_url && !media_key) return { ok: false, error: "Video requires media" };
-  if (!partial && target === "posts" && !description && !image_url && !media_key) return { ok: false, error: "Description or media required" };
-  const data = {
-    title: title || (target === "photos" ? "Photo" : target === "videos" ? "Video" : "Untitled"),
-    description,
-    category,
-    class_tag,
-    image: image_url,
-    image_url,
-    thumbnail_url,
-    media_key,
-    media_provider: media_key ? "cloudflare-r2" : null,
-    width,
-    height,
-    author: body.author || "HSHS Admin",
-    author_id: uid,
-    updated_at: new Date().toISOString()
-  };
-  if (target === "posts") {
-    data.type = type;
-    data.status = ["draft", "published"].includes(body.status) ? body.status : "published";
-    data.is_official = true;
-    data.author_role = "admin";
-  }
-  if (target === "videos") {
-    data.video_url = video_url;
-    data.type = "video";
-  }
+  if (target === "photos" && !image_url && !media_key) return { ok: false, error: "Photo requires media" };
+  if (target === "videos" && !video_url && !media_key) return { ok: false, error: "Video requires media" };
+  if (target === "posts" && !description && !image_url && !media_key) return { ok: false, error: "Description or media required" };
+  const data = { title: title || (target === "photos" ? "Photo" : target === "videos" ? "Video" : "Untitled"), description, category, class_tag, image: image_url, image_url, thumbnail_url, media_key, media_provider: media_key ? "cloudflare-r2" : null, width, height, author: body.author || "HSHS Admin", author_id: uid, updated_at: new Date().toISOString() };
+  if (target === "posts") { data.type = type; data.status = ["draft", "published"].includes(body.status) ? body.status : "published"; data.is_official = true; data.author_role = "admin"; }
+  if (target === "videos") { data.video_url = video_url; data.type = "video"; }
   if (body.feature) data.featured = true;
   return { ok: true, data };
 }
 
 function validatePost(body, partial = false) {
+  if (partial) {
+    const data = {};
+    const fields = ["title", "description", "category", "class_tag", "status", "image_url", "thumbnail_url", "video_url", "media_key", "width", "height", "featured"];
+    for (const field of fields) {
+      if (!Object.prototype.hasOwnProperty.call(body, field)) continue;
+      if (field === "status") {
+        if (!["draft", "published"].includes(body.status)) return { ok: false, error: "Invalid status" };
+        data.status = body.status;
+      } else if (field === "title") data.title = String(body.title ?? "").slice(0, 200);
+      else if (field === "description") data.description = String(body.description ?? "").slice(0, 2000);
+      else if (field === "category") data.category = String(body.category ?? "").slice(0, 40);
+      else if (field === "class_tag") data.class_tag = String(body.class_tag ?? "").slice(0, 40);
+      else if (["image_url", "thumbnail_url", "video_url"].includes(field)) {
+        const ref = String(body[field] ?? "").slice(0, 1000);
+        if (!isAllowedMediaRef(ref)) return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
+        data[field] = ref;
+      } else if (field === "media_key") {
+        const key = String(body.media_key ?? "").slice(0, 500);
+        if (key && (/^(blob:|data:|https?:)/i.test(key) || key.startsWith("/") || key.includes(".."))) return { ok: false, error: "media_key must be a relative R2 object key." };
+        data.media_key = key;
+        if (key) data.media_provider = "cloudflare-r2";
+      } else if (field === "width" || field === "height") {
+        const n = Number(body[field]);
+        if (!Number.isSafeInteger(n) || n <= 0) return { ok: false, error: "Invalid media dimensions" };
+        data[field] = n;
+      } else if (field === "featured") {
+        if (typeof body.featured !== "boolean") return { ok: false, error: "featured must be boolean" };
+        data.featured = body.featured;
+      }
+    }
+    data.updated_at = new Date().toISOString();
+    return { ok: true, data };
+  }
   const title = String(body.title || "").slice(0, 200);
   const description = String(body.description || "").slice(0, 2000);
   const status = body.status || "draft";
   if (!["draft", "published"].includes(status)) return { ok: false, error: "Invalid status" };
-  if (![body.image_url, body.thumbnail_url].every(isAllowedMediaRef)) {
-    return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
-  }
-  if (body.media_key && (/^(blob:|data:|https?:)/i.test(String(body.media_key)) || String(body.media_key).startsWith("/") || String(body.media_key).includes(".."))) {
-    return { ok: false, error: "media_key must be a relative R2 object key." };
-  }
-  if (!partial && !description && !body.media_key && !body.image_url) return { ok: false, error: "Description or media required" };
-  if (title.length > 200) return { ok: false, error: "Title too long" };
-  return {
-    ok: true,
-    data: {
-      title: title || "Untitled",
-      description,
-      type: body.type || "photo",
-      image_url: body.image_url || "",
-      thumbnail_url: body.thumbnail_url || body.image_url || "",
-      media_key: body.media_key || "",
-      media_provider: body.media_key ? "cloudflare-r2" : null,
-      status,
-      author: body.author || "HSHS Admin"
-    }
-  };
+  if (![body.image_url, body.thumbnail_url].every(isAllowedMediaRef)) return { ok: false, error: "Media must be uploaded to HSHS Cloudflare R2 or use a local /assets/ path." };
+  if (body.media_key && (/^(blob:|data:|https?:)/i.test(String(body.media_key)) || String(body.media_key).startsWith("/") || String(body.media_key).includes(".."))) return { ok: false, error: "media_key must be a relative R2 object key." };
+  if (!description && !body.media_key && !body.image_url) return { ok: false, error: "Description or media required" };
+  return { ok: true, data: { title: title || "Untitled", description, type: body.type || "photo", image_url: body.image_url || "", thumbnail_url: body.thumbnail_url || body.image_url || "", media_key: body.media_key || "", media_provider: body.media_key ? "cloudflare-r2" : null, status, author: body.author || "HSHS Admin" } };
 }
 
+function decodeBase64Url(input) {
+  let s = String(input).replace(/-/g, "+").replace(/_/g, "/");
+  s += "=".repeat((4 - (s.length % 4)) % 4);
+  return atob(s);
+}
+function decodeJwtJson(segment) {
+  return JSON.parse(decodeBase64Url(segment));
+}
 async function verifyFirebaseToken(request) {
   const auth = request.headers.get("Authorization") || "";
   if (!auth.startsWith("Bearer ")) return { ok: false, status: 401, error: "Missing token" };
@@ -423,32 +466,37 @@ async function verifyFirebaseToken(request) {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return { ok: false, status: 401, error: "Invalid token" };
-    const header = JSON.parse(atob(parts[0].replace(/-/g, "+").replace(/_/g, "/")));
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    const header = decodeJwtJson(parts[0]);
+    const payload = decodeJwtJson(parts[1]);
+    const now = Math.floor(Date.now() / 1000);
+    if (header.alg !== "RS256") return { ok: false, status: 401, error: "Unsupported token algorithm" };
     if (payload.iss !== ISSUER || payload.aud !== PROJECT_ID) return { ok: false, status: 401, error: "Bad iss/aud" };
-    if (payload.exp * 1000 < Date.now()) return { ok: false, status: 401, error: "Expired" };
-    if (!payload.sub) return { ok: false, status: 401, error: "No sub" };
+    if (!Number.isFinite(payload.exp) || payload.exp <= now) return { ok: false, status: 401, error: "Expired" };
+    if (!Number.isFinite(payload.iat) || payload.iat > now + 60) return { ok: false, status: 401, error: "Invalid issued-at time" };
+    if (!payload.sub || typeof payload.sub !== "string") return { ok: false, status: 401, error: "No sub" };
     if (payload.firebase && payload.firebase.sign_in_provider === "anonymous") return { ok: false, status: 401, error: "Anonymous not allowed" };
-    // Signature verification with Google certs
-    const keys = await getGoogleCerts();
-    const key = keys[header.kid];
-    if (!key) return { ok: false, status: 401, error: "Unknown kid" };
-    const data = new TextEncoder().encode(parts[0] + "." + parts[1]);
-    const sig = Uint8Array.from(atob(parts[2].replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
-    const cryptoKey = await crypto.subtle.importKey("jwk", key, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
-    const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", cryptoKey, sig, data);
+    let keys = await getGoogleCerts();
+    let jwk = keys.find(k => k.kid === header.kid);
+    if (!jwk) { keys = await getGoogleCerts(true); jwk = keys.find(k => k.kid === header.kid); }
+    if (!jwk) return { ok: false, status: 401, error: "Unknown kid" };
+    const signingInput = new TextEncoder().encode(parts[0] + "." + parts[1]);
+    const signature = Uint8Array.from(decodeBase64Url(parts[2]), c => c.charCodeAt(0));
+    const cryptoKey = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+    const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", cryptoKey, signature, signingInput);
     if (!valid) return { ok: false, status: 401, error: "Bad signature" };
-    return { ok: true, uid: payload.sub };
-  } catch (e) {
-    return { ok: false, status: 401, error: "Token verify failed" };
-  }
+    return { ok: true, uid: payload.sub, email: payload.email || "", emailVerified: payload.email_verified === true };
+  } catch (e) { return { ok: false, status: 401, error: "Token verify failed" }; }
 }
-
-async function getGoogleCerts() {
-  if (certsCache.keys && Date.now() < certsCache.expires) return certsCache.keys;
-  const res = await fetch("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com");
-  const keys = await res.json();
-  certsCache = { keys, expires: Date.now() + 3600000 };
+async function getGoogleCerts(force = false) {
+  if (!force && certsCache.keys && Date.now() < certsCache.expires) return certsCache.keys;
+  const res = await fetch("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com");
+  if (!res.ok) throw new Error("Google JWK fetch failed");
+  const json = await res.json();
+  const keys = Array.isArray(json.keys) ? json.keys : [];
+  const cacheControl = res.headers.get("Cache-Control") || "";
+  const maxAgeMatch = cacheControl.match(/max-age=(\\d+)/i);
+  const maxAge = maxAgeMatch ? Number(maxAgeMatch[1]) : 3600;
+  certsCache = { keys, expires: Date.now() + Math.max(60, maxAge) * 1000 };
   return keys;
 }
 
