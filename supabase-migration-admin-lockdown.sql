@@ -15,6 +15,11 @@ create policy "HSHS public posts read"
   on public.posts for select to anon, authenticated
   using (status = 'published' or is_official is false);
 
+drop policy if exists "HSHS posts visibility restriction" on public.posts;
+create policy "HSHS posts visibility restriction"
+  on public.posts as restrictive for select to anon, authenticated
+  using (status = 'published' or is_official is false);
+
 drop policy if exists "HSHS public photos read" on public.photos;
 create policy "HSHS public photos read"
   on public.photos for select to anon, authenticated
@@ -63,10 +68,18 @@ declare
   new_values jsonb := to_jsonb(new);
 begin
   if current_user not in ('service_role', 'postgres', 'supabase_admin') and (
-    new_values -> 'featured' is distinct from old_values -> 'featured'
-    or new_values -> 'featured_at' is distinct from old_values -> 'featured_at'
-    or new_values -> 'is_official' is distinct from old_values -> 'is_official'
-    or new_values -> 'author_role' is distinct from old_values -> 'author_role'
+    (tg_op = 'INSERT' and (
+      new_values -> 'featured' = 'true'::jsonb
+      or new_values -> 'featured_at' is not null
+      or new_values -> 'is_official' = 'true'::jsonb
+      or (new_values -> 'author_role' is not null and new_values -> 'author_role' <> '"user"'::jsonb)
+    ))
+    or (tg_op = 'UPDATE' and (
+      new_values -> 'featured' is distinct from old_values -> 'featured'
+      or new_values -> 'featured_at' is distinct from old_values -> 'featured_at'
+      or new_values -> 'is_official' is distinct from old_values -> 'is_official'
+      or new_values -> 'author_role' is distinct from old_values -> 'author_role'
+    ))
   ) then
     raise exception 'Admin-only content fields cannot be changed by browser roles'
       using errcode = '42501';
@@ -79,15 +92,15 @@ revoke all on function public.hshs_block_browser_admin_column_changes() from pub
 
 drop trigger if exists hshs_protect_admin_fields_posts on public.posts;
 create trigger hshs_protect_admin_fields_posts
-  before update on public.posts
+  before insert or update on public.posts
   for each row execute function public.hshs_block_browser_admin_column_changes();
 
 drop trigger if exists hshs_protect_admin_fields_photos on public.photos;
 create trigger hshs_protect_admin_fields_photos
-  before update on public.photos
+  before insert or update on public.photos
   for each row execute function public.hshs_block_browser_admin_column_changes();
 
 drop trigger if exists hshs_protect_admin_fields_videos on public.videos;
 create trigger hshs_protect_admin_fields_videos
-  before update on public.videos
+  before insert or update on public.videos
   for each row execute function public.hshs_block_browser_admin_column_changes();
